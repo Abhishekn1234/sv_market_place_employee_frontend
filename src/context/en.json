@@ -1,0 +1,260 @@
+{
+  "title": "My Booking History",
+  "subtitle": "View and manage all your service bookings",
+ "profile": "Profile",
+"password": "Password",
+"location": "Location",
+  "recentActivities": {
+    "emptyState": {
+      "title": "No Activities Found",
+      "description": "No activities found for the selected time period and filters."
+    },
+    "periods": {
+      "7days": "Last 7 Days",
+      "15days": "Last 15 Days",
+      "1month": "Last Month",
+      "3months": "Last 3 Months",
+      "6months": "Last 6 Months"
+    },
+    "types": {
+      "booking": "Booking",
+      "payment": "Payment",
+      "transaction": "Transaction",
+      "all": "All"
+    },
+    "status": {
+      "completed": "Completed",
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    },
+    "chart": {
+      "earningsTrend": "Earnings Trend",
+      "activityType": "Activity Type Distribution",
+      "statusDistribution": "Status Distribution",
+      "activityTrend": "Activity Count by Week"
+    }
+  },
+
+  "searchPlaceholder": "Search by client name, booking ID, or service...",
+  "statusPlaceholder": "Filter by status",
+  "servicePlaceholder": "Filter by service",
+  "analytics": "Analytics",
+  "noBookings": "No bookings found",
+
+  "clientInfo": "Client Information",
+  "bookingDetails": "Booking Details",
+  "notes": "Notes",
+
+  "showing": "Showing",
+  "of": "of",
+  "filteredBookings": "filtered bookings",
+ "WorkHistory":"WorkHistory",
+  "workHistory": {
+    "pageTitle": "Work History",
+    "employeeLabel": "Employee",
+    "cards": {
+      "totalWorks": "Total Works",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "upcoming": "Upcoming"
+    },
+    "filters": {
+      "timePeriod": "Time Period",
+      "status": "Status",
+      "itemsPerPage": "Items Per Page",
+      "searchPlaceholder": "Search works..."
+    },
+    "timeOptions": {
+      "week": "This Week",
+      "month": "This Month",
+      "currentWeek": "Current Week"
+    },
+    "statusOptions": {
+      "all": "All",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "pending": "Pending",
+      "upcoming": "Upcoming"
+    },
+    "tableHeaders": {
+      "title": "Title",
+      "description": "Description",
+      "location": "Location",
+      "assignedDate": "Assigned Date",
+      "dueDate": "Due Date",
+      "status": "Status",
+      "duration": "Duration",
+      "extraInfo": "Extra Info"
+    },
+    "pagination": {
+      "pageInfo": "Page {currentPage} of {totalPages}",
+      "first": "First",
+      "previous": "Previous",
+      "next": "Next",
+      "last": "Last",
+      "noRecords": "No records found"
+    },
+    "extraInfo": {
+      "daysToStart": "{days} days to start",
+      "daysUntilDue": "{days} days until due",
+      "completedOn": "Completed on {date}",
+      "completedIn": "Completed in {hours} hrs"
+    }
+  },
+
+  "statusOptions": {
+    "all": "All Status",
+    "completed": "Completed",
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "cancelled": "Cancelled"
+  },
+
+  "serviceOptions": {
+    "all": "All Services"
+  },
+
+  "stats": {
+    "totalBookings": "Total Bookings",
+    "completed": "Completed",
+    "totalEarnings": "Total Earnings",
+    "upcoming": "Upcoming"
+  },
+
+  "tableHeaders": {
+    "id": "ID",
+    "client": "Client",
+    "service": "Service",
+    "date": "Date",
+    "time": "Time",
+    "payment": "Payment",
+    "status": "Status",
+    "actions": "Actions"
+  },
+
+  "bookingDetailsLabels": {
+    "service": "Service:",
+    "duration": "Duration:",
+    "payment": "Payment:",
+    "status": "Status:"
+  },
+
+  "history": "History",
+  "bookingHistory": "Booking History",
+  "transactionHistory": "Transaction History",
+  "workHistoryLabel": "Work History",
+    "totalEarned": "Total Earned",
+  "Pending": "Pending",
+  "activity": "Activity",
+  "activityTimeline": "Activity Timeline",
+  "recentActivity": "Recent Activity",
+  "pastActivity": "Past Activity",
+  "totalBookings": "Total Bookings",
+  "settings": "Settings",
+  "profileSettings": "Profile Settings",
+  "wallet": "Wallet",
+  "notifications": "Notifications",
+ "Wallet": {
+    "title": "Wallet",
+    "manage": "Manage your balance and track transactions",
+    "tier": "Tier",
+    "totalBalance": "Total Balance",
+    "income": "Income",
+    "expenses": "Expenses",
+    "quickActions": "Quick Actions",
+    "addFunds": "Add Funds",
+    "depositMoney": "Deposit money",
+    "withdraw": "Withdraw",
+    "transferFunds": "Transfer funds",
+    "recentTransactions": "Recent Transactions",
+    "viewAll": "View All",
+    "credit": "Credit",
+    "debit": "Debit",
+    "monthlySummary": "December Summary",
+    "totalTransactions": "Total Transactions",
+    "avgTransaction": "Avg. Transaction",
+    "largestIncome": "Largest Income",
+    "largestExpense": "Largest Expense",
+    "paymentMethods": "Payment Methods",
+    "primary": "Primary",
+    "expires": "Expires",
+    "addNewCard": "Add New Card",
+    "walletInsights": "Wallet Insights",
+    "availableBalance": "Available Balance",
+    "monthlyGrowth": "This Month's Growth",
+    "transactionsToday": "Transactions Today"
+  },
+  "HomePage": {
+    "dashboard": "Dashboard",
+    "totalEmployees": "Total Employees",
+    "activeProjects": "Active Projects",
+    "monthlyRevenue": "Monthly Revenue",
+    "notifications": "Notifications",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "Notifications": {
+     "common": {
+    "hoursAgo": "{{count}} hours ago"
+  },
+    "title": "Notifications",
+    "subtitle": "Stay updated with your latest activities",
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all",
+    "total": "Total",
+    "unread": "Unread",
+    "read": "Read",
+    "thisWeek": "This week",
+    "all": "All",
+    "allCategories": "All Categories",
+    "bookings": "Bookings",
+    "payments": "Payments",
+    "system": "System",
+    "alerts": "Alerts",
+    "noNotifications": "No notifications",
+    "caughtUp": "You're all caught up!",
+    "viewDetails": "View details",
+    "highPriority": "High Priority",
+    "emailDigest": "Email digest",
+    "notificationSettings": "Notification settings",
+    "showing": "Showing"
+  },
+  "english": "English",
+  "arabic": "Arabic",
+  "hindi": "Hindi",
+
+  "logout": "Logout",
+  "signOut": "Sign Out",
+
+  "transactionsPage": {
+    "pageTitle": "Payment Transaction History",
+    "pageSubtitle": "View and manage your payment transactions",
+    "export": "Export Report",
+    "totalPaid": "Total Paid",
+    "pendingPayments": "Pending Payments",
+    "totalTransactions": "Total Transactions",
+    "completedTransactions": "completed transactions",
+    "pendingTransactions": "pending transactions",
+    "allTime": "All time transactions",
+    "filterStatus": "Filter by status",
+    "statusOptions": {
+      "all": "All Status",
+      "completed": "Completed",
+      "pending": "Pending",
+      "failed": "Failed"
+    },
+    "table": {
+      "transactionId": "Transaction ID",
+      "date": "Date",
+      "type": "Type",
+      "description": "Description",
+      "paymentMethod": "Payment Method",
+      "status": "Status",
+      "amount": "Amount",
+      "empty": "No transactions found"
+    },
+    "transactions": "transactions"
+  }
+}

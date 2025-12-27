@@ -1,0 +1,272 @@
+{
+  "title": "سجل الحجوزات",
+  "subtitle": "عرض وإدارة جميع حجوزات الخدمات الخاصة بك",
+
+  "searchPlaceholder": "ابحث باسم العميل أو رقم الحجز أو الخدمة...",
+  "statusPlaceholder": "تصفية حسب الحالة",
+  "servicePlaceholder": "تصفية حسب الخدمة",
+
+  "noBookings": "لا توجد حجوزات",
+    "recentActivities": {
+    "emptyState": {
+      "title": "لا توجد أنشطة",
+      "description": "لا توجد أنشطة للفترة الزمنية أو عوامل التصفية المحددة."
+    },
+    "periods": {
+      "7days": "آخر 7 أيام",
+      "15days": "آخر 15 يومًا",
+      "1month": "الشهر الماضي",
+      "3months": "آخر 3 أشهر",
+      "6months": "آخر 6 أشهر"
+    },
+    "types": {
+      "booking": "حجز",
+      "payment": "دفع",
+      "transaction": "معاملة",
+      "all": "الكل"
+    },
+    "status": {
+      "completed": "مكتمل",
+      "confirmed": "مؤكد",
+      "pending": "قيد الانتظار",
+      "cancelled": "ملغى"
+    },
+    "chart": {
+      "earningsTrend": "اتجاه الأرباح",
+      "activityType": "توزيع أنواع الأنشطة",
+      "statusDistribution": "توزيع الحالات",
+      "activityTrend": "عدد الأنشطة حسب الأسبوع"
+    }
+  },
+  "activityTimeline": "الجدول الزمني للنشاط",
+  "totalEarned": "إجمالي الأرباح",
+  "Pending": "قيد الانتظار",
+  "totalBookings": "إجمالي الحجوزات",
+  "clientInfo": "معلومات العميل",
+  "bookingDetails": "تفاصيل الحجز",
+  "notes": "ملاحظات",
+
+  "showing": "عرض",
+  "of": "من",
+  "filteredBookings": "حجوزات مفلترة",
+
+  "statusOptions": {
+    "all": "جميع الحالات",
+    "completed": "مكتمل",
+    "confirmed": "مؤكد",
+    "pending": "قيد الانتظار",
+    "inProgress": "قيد التنفيذ",
+    "cancelled": "ملغى"
+  },
+
+  "serviceOptions": {
+    "all": "جميع الخدمات"
+  },
+  "Notifications": {
+    "title": "الإشعارات",
+    "subtitle": "ابقَ على اطلاع بآخر أنشطتك",
+    "markAllRead": "تحديد الكل كمقروء",
+    "clearAll": "حذف الكل",
+    "total": "الإجمالي",
+    "unread": "غير مقروء",
+    "read": "مقروء",
+    "thisWeek": "هذا الأسبوع",
+    "all": "الكل",
+    "allCategories": "كل الفئات",
+    "bookings": "الحجوزات",
+    "payments": "المدفوعات",
+    "system": "النظام",
+    "alerts": "تنبيهات",
+    "noNotifications": "لا توجد إشعارات",
+    "caughtUp": "أنت محدث بالكامل!",
+    "viewDetails": "عرض التفاصيل",
+    "highPriority": "أولوية عالية",
+    "common": {
+    "hoursAgo": "منذ {{count}} ساعات"
+  },
+ 
+    "emailDigest": "ملخص البريد",
+    "notificationSettings": "إعدادات الإشعارات",
+    "showing": "عرض"
+  },
+   "HomePage": {
+    "dashboard": "لوحة القيادة",
+    "totalEmployees": "إجمالي الموظفين",
+    "activeProjects": "المشاريع النشطة",
+    "monthlyRevenue": "الإيرادات الشهرية",
+    "notifications": "الإشعارات",
+    "online": "متصل",
+    "offline": "غير متصل"
+  },
+  "Wallet": {
+    "title": "المحفظة",
+    "manage": "إدارة رصيدك وتتبع المعاملات",
+    "tier": "المستوى",
+    "totalBalance": "إجمالي الرصيد",
+    "income": "الدخل",
+    "expenses": "المصروفات",
+    "quickActions": "إجراءات سريعة",
+    "addFunds": "إضافة رصيد",
+    "depositMoney": "إيداع الأموال",
+    "withdraw": "سحب",
+    "transferFunds": "تحويل الأموال",
+    "recentTransactions": "أحدث المعاملات",
+    "viewAll": "عرض الكل",
+    "credit": "إيداع",
+    "debit": "سحب",
+    "monthlySummary": "ملخص ديسمبر",
+    "totalTransactions": "إجمالي المعاملات",
+    "avgTransaction": "متوسط المعاملة",
+    "largestIncome": "أكبر دخل",
+    "largestExpense": "أكبر مصروف",
+    "paymentMethods": "طرق الدفع",
+    "primary": "أساسي",
+    "expires": "تنتهي",
+    "addNewCard": "إضافة بطاقة جديدة",
+    "walletInsights": "تحليلات المحفظة",
+    "availableBalance": "الرصيد المتاح",
+    "monthlyGrowth": "نمو هذا الشهر",
+    "transactionsToday": "معاملات اليوم"
+  },
+ "profile": "الملف الشخصي",
+  "password": "كلمة المرور",
+  "stats": {
+    "totalBookings": "إجمالي الحجوزات",
+    "completed": "مكتملة",
+    "totalEarnings": "إجمالي الأرباح",
+    "upcoming": "القادمة"
+  },
+
+  "tableHeaders": {
+    "id": "المعرف",
+    "client": "العميل",
+    "service": "الخدمة",
+    "date": "التاريخ",
+    "time": "الوقت",
+    "payment": "الدفع",
+    "status": "الحالة",
+    "actions": "الإجراءات"
+  },
+
+  "bookingDetailsLabels": {
+    "service": "الخدمة:",
+    "duration": "المدة:",
+    "payment": "الدفع:",
+    "status": "الحالة:"
+  },
+
+  "history": "السجل",
+  "bookingHistory": "سجل الحجوزات",
+  "transactionHistory": "سجل المعاملات",
+  "WorkHistory": "سجل العمل",
+  "Analytics":"التحليلات",
+  "activity": "النشاط",
+  "recentActivity": "النشاط الأخير",
+  "pastActivity": "النشاط السابق",
+
+  "settings": "الإعدادات",
+  "profileSettings": "إعدادات الملف الشخصي",
+  "wallet": "المحفظة",
+ "location": "الموقع",
+  "notifications": "الإشعارات",
+
+  "english": "الإنجليزية",
+  "arabic": "العربية",
+  "hindi": "الهندية",
+
+  "logout": "تسجيل الخروج",
+  "signOut": "تسجيل الخروج",
+  "pageTitle": "سجل معاملات الدفع",
+    "pageSubtitle": "عرض وإدارة معاملات الدفع الخاصة بك",
+    "export": "تصدير التقرير",
+
+    "totalPaid": "إجمالي المدفوع",
+    "pendingPayments": "المدفوعات المعلقة",
+    "totalTransactions": "إجمالي المعاملات",
+    "completedTransactions": "معاملات مكتملة",
+    "pendingTransactions": "معاملات معلقة",
+    "allTime": "جميع المعاملات",
+    "transactionTable":{
+        
+      "transactionId": "معرّف المعاملة",
+      "date": "التاريخ",
+      "type": "النوع",
+      "description": "الوصف",
+      "paymentMethod": "طريقة الدفع",
+      "status": "الحالة",
+      "amount": "المبلغ"
+    },
+
+     "workHistory": {
+      "pageTitle": "سجل العمل",
+      "employeeLabel": "الموظف",
+      "cards": {
+        "totalWorks": "إجمالي الأعمال",
+        "completed": "مكتمل",
+        "inProgress": "قيد التنفيذ",
+        "upcoming": "قادمة"
+      },
+      "filters": {
+        "timePeriod": "الفترة الزمنية",
+        "status": "الحالة",
+        "itemsPerPage": "عدد العناصر في الصفحة",
+        "searchPlaceholder": "بحث عن الأعمال..."
+      },
+      "timeOptions": {
+        "week": "هذا الأسبوع",
+        "month": "هذا الشهر",
+        "currentWeek": "الأسبوع الحالي"
+      },
+      "statusOptions": {
+        "all": "الكل",
+        "completed": "مكتمل",
+        "inProgress": "قيد التنفيذ",
+        "pending": "قيد الانتظار",
+        "upcoming": "قادمة"
+      },
+      "tableHeaders": {
+        "title": "العنوان",
+        "description": "الوصف",
+        "location": "الموقع",
+        "assignedDate": "تاريخ التعيين",
+        "dueDate": "تاريخ الانتهاء",
+        "status": "الحالة",
+        "duration": "المدة",
+        "extraInfo": "معلومات إضافية"
+      },
+      "pagination": {
+        "pageInfo": "الصفحة {currentPage} من {totalPages}",
+        "first": "الأول",
+        "previous": "السابق",
+        "next": "التالي",
+        "last": "الأخير",
+        "noRecords": "لا توجد سجلات"
+      },
+      "extraInfo": {
+        "daysToStart": "{days} يوم للبدء",
+        "daysUntilDue": "{days} يوم حتى الموعد النهائي",
+        "completedOn": "تم الإنجاز في {date}",
+        "completedIn": "تم الإنجاز في {hours} ساعة"
+      }
+    },
+    "filterStatus": "تصفية حسب الحالة",
+    "allStatus": "جميع الحالات",
+    "completed": "مكتمل",
+    "pending": "معلق",
+    "failed": "فشل",
+
+    "table": {
+      "transactionId": "رقم المعاملة",
+      "date": "التاريخ",
+      "type": "النوع",
+      "description": "الوصف",
+      "paymentMethod": "طريقة الدفع",
+      "status": "الحالة",
+      "amount": "المبلغ",
+      "empty": "لا توجد معاملات"
+    },
+
+ 
+    "transactions": "معاملة"
+}
+
