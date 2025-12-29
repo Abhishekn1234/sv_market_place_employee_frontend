@@ -8,20 +8,22 @@ import { useProfile } from "../hooks/useProfile";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 
 import { User, Edit3 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
-function getDocumentCat(key: string) {
-  return {
-    idProof: "ID Proof",
-    addressProof: "Address Proof",
-    photoProof: "Photo",
-  }[key];
-}
+ 
 
 export default function ProfileList() {
+  const {t}=useLanguage();
   const { data: profile } = useProfile();
   const { mutateAsync, isPending } = useUpdateProfile();
   const [isEditing, setIsEditing] = useState(false);
-
+ function getDocumentCat(key: string) {
+  return {
+    idProof: t("ID Proof"),
+    addressProof: t("Address Proof"),
+    photoProof: t("Photo"),
+  }[key];
+}
   const [formData, setFormData] = useState({ fullName: "", address: "" });
   const [files, setFiles] = useState<{
     profileImage: File | null;
@@ -43,11 +45,12 @@ export default function ProfileList() {
   }>({});
 
   const fileFields = [
-    { label: "ID Proof", key: "idProof" },
-    { label: "Address Proof", key: "addressProof" },
-    { label: "Photo Proof", key: "photoProof" },
+    { label: t('ID Proof'), key: "idProof" },
+    { label: t("Address Proof"), key: "addressProof" },
+    { label: t("Photo Proof"), key: "photoProof" },
   ] as const;
 
+  
   useEffect(() => {
     if (profile) {
       setFormData({ fullName: profile.fullName, address: profile.address });
@@ -182,15 +185,15 @@ export default function ProfileList() {
           {isEditing ? (
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={isPending}>
-                {isPending ? "Saving..." : "Save"}
+                {isPending ? t('Saving....') : t('Save')}
               </Button>
               <Button variant="outline" onClick={() => setIsEditing(false)}>
-                Cancel
+                {t('Cancel')}
               </Button>
             </div>
           ) : (
             <Button onClick={() => setIsEditing(true)}>
-              <Edit3 className="h-4 w-4 mr-1" /> Edit
+              <Edit3 className="h-4 w-4 mr-1" /> {t('Edit')}
             </Button>
           )}
         </div>
@@ -199,10 +202,10 @@ export default function ProfileList() {
       {/* Personal & Contact Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="border rounded-lg p-4 space-y-3">
-          <h3 className="font-semibold">Personal Information</h3>
+          <h3 className="font-semibold">{t('Personal Information')}</h3>
 
           <div>
-            <Label>Full Name</Label>
+            <Label>{t('Full Name')}</Label>
             {isEditing ? (
               <Input name="fullName" value={formData.fullName} onChange={handleInputChange} />
             ) : (
@@ -211,19 +214,19 @@ export default function ProfileList() {
           </div>
 
           <div>
-            <Label>Email</Label>
+            <Label>{t('Email')}</Label>
             <div className="mt-1 text-sm">{profile.email}</div>
           </div>
         </div>
 
         <div className="border rounded-lg p-4 space-y-3">
-          <h3 className="font-semibold">Contact Information</h3>
+          <h3 className="font-semibold">{t('Contact Information')}</h3>
           <div>
-            <Label>Phone</Label>
+            <Label>{t('Phone')}</Label>
             <div className="mt-1 text-sm">{profile.phone}</div>
           </div>
           <div>
-            <Label>Location</Label>
+            <Label>{t('Location')}</Label>
             {isEditing ? (
               <Textarea
                 name="address"
@@ -241,7 +244,7 @@ export default function ProfileList() {
       {/* Document Upload (other documents only) */}
       {isEditing && (
         <div className="border rounded-lg p-4">
-          <h3 className="font-semibold mb-3">Document Upload</h3>
+          <h3 className="font-semibold mb-3">{t('Documents')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {fileFields.map((field) => (
               <div key={field.key} className="border-2 border-dashed rounded-lg p-4 text-center">
@@ -298,7 +301,7 @@ export default function ProfileList() {
       {/* Non-editing view of other documents */}
       {!isEditing && (
         <div className="border rounded-lg p-4">
-          <h3 className="font-semibold mb-3">Documents</h3>
+          <h3 className="font-semibold mb-3">{t('Documents')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {fileFields.map((field) => {
               const key = field.key;

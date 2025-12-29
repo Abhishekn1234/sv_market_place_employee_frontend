@@ -271,5 +271,19 @@
     },
 
   
-    "transactions": "लेन-देन"
+    "transactions": "लेन-देन",
+    "Edit":"संपादन करना",
+    "Cancel":"रद्द करना",
+    "Saving":"सहेजा जा रहा है",
+    "Save":"बचाना",
+    "Personal Information":"व्यक्तिगत जानकारी",
+    "Full Name":"पूरा नाम",
+    "Email":"ईमेल",
+    "Contact Information":"संपर्क जानकारी",
+    "Phone":"फ़ोन",
+    "Location":"जगह",
+    "Documents":"दस्तावेज़",
+    "Photo":"तस्वीर",
+    "Address Proof":"निवास प्रमाण पत्र",
+    "ID Proof":"आईडी प्रूफ"
 }

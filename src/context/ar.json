@@ -113,6 +113,7 @@
     "recentTransactions": "أحدث المعاملات",
     "viewAll": "عرض الكل",
     "credit": "إيداع",
+    
     "debit": "سحب",
     "monthlySummary": "ملخص ديسمبر",
     "totalTransactions": "إجمالي المعاملات",
@@ -267,6 +268,20 @@
     },
 
  
-    "transactions": "معاملة"
+    "transactions": "معاملة",
+    "Edit":"يحرر",
+    "Cancel":"يلغي",
+    "Saving":"توفير",
+    "Save":"يحفظ",
+    "Personal Information":"معلومات شخصية",
+    "Full Name":"الاسم الكامل",
+    "Email":"بريد إلكتروني",
+    "Contact Information":"معلومات الاتصال",
+    "Phone":"هاتف",
+    "Location":"موقع",
+    "Documents":"وثائق",
+    "ID Proof":"إثبات الهوية",
+    "Address Proof":"إثبات العنوان",
+    "Photo":"صورة"
 }
 

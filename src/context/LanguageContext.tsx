@@ -205,6 +205,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
     
     document.documentElement.lang =
       language === "AR" ? "ar" : language === "HI" ? "hi" : "en";
+      document.documentElement.setAttribute("translate", "no");
   }, [language]);
 
   const t = (key: TranslationKey): string => {

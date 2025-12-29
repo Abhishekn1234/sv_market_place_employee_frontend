@@ -2,17 +2,17 @@ import * as React from "react";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
 
 interface CurrentLocationFetcherProps {
-  onChange: (point: GeoPoint, placeName: string) => void; // now sends two args
+  onChange: (point: GeoPoint, placeName: string) => void;
 }
-
 
 export function CurrentLocationFetcher({ onChange }: CurrentLocationFetcherProps) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [coords, setCoords] = React.useState<[number, number] | null>(null);
+  const [place, setPlace] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setLoading(true);
+
     if (!navigator.geolocation) {
       setError("Geolocation not supported");
       setLoading(false);
@@ -20,17 +20,42 @@ export function CurrentLocationFetcher({ onChange }: CurrentLocationFetcherProps
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const point: GeoPoint = {
-          type: "Point",
-          coordinates: [position.coords.longitude, position.coords.latitude],
-        };
-        setCoords(point.coordinates);
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
 
-        // ✅ Pass both point and placeName
-        onChange(point, "Current Location");
+      const point: GeoPoint = {
+  type: "Point",
+  coordinates: [position.coords.longitude, position.coords.latitude],
+  accuracy: position.coords.accuracy, // meters
+};
 
-        setLoading(false);
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+          );
+          const data = await res.json();
+
+          const address = data.address || {};
+
+          // ✅ Only place name (NO pincode, NO full address)
+          const placeName =
+            address.city ||
+            address.town ||
+            address.village ||
+            address.suburb ||
+            address.county ||
+            address.state ||
+            "Current Location";
+
+          setPlace(placeName);
+
+          onChange(point, placeName);
+        } catch {
+          setError("Failed to fetch location name");
+        } finally {
+          setLoading(false);
+        }
       },
       (err) => {
         setError(err.message);
@@ -39,15 +64,18 @@ export function CurrentLocationFetcher({ onChange }: CurrentLocationFetcherProps
     );
   }, [onChange]);
 
-  if (loading) return <span className="text-gray-500">Fetching current location...</span>;
-  if (error) return <span className="text-red-500">{error}</span>;
-  if (coords)
+  if (loading)
+    return <span className="text-gray-500">Fetching current location...</span>;
+
+  if (error)
+    return <span className="text-red-500">{error}</span>;
+
+  if (place)
     return (
       <span className="text-green-600 text-sm">
-        Lat: {coords[1].toFixed(5)}, Lng: {coords[0].toFixed(5)}
+        📍 {place}
       </span>
     );
 
   return null;
 }
-

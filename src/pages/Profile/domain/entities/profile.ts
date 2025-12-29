@@ -8,6 +8,7 @@ export interface Worker {
 export interface GeoPoint {
   type: "Point";
   coordinates: [number, number]; // [lng, lat]
+  accuracy?: number; // meters
 }
 
 export interface Profile {

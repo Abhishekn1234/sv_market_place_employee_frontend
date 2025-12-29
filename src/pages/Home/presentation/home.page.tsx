@@ -28,6 +28,8 @@ const handleToggle = (checked: boolean) => {
   setIsOnline(checked);
   updateStatus(checked); // ✅ boolean only
 };
+const canToggle =
+  worker?.status === "ONLINE" || worker?.status === "OFFLINE";
 
 
   const cards = [
@@ -69,18 +71,32 @@ const handleToggle = (checked: boolean) => {
       <div className={`flex items-center justify-between mb-6 ${isRTL ? "flex-row-reverse" : ""}`}>
         <h1 className="text-2xl font-bold">{homeTranslations.dashboard}</h1>
 
-        <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-          <Switch
-  checked={isOnline}
-  onCheckedChange={handleToggle}
-  disabled={loading}
-  className={isOnline ? "bg-green-500" : "bg-gray-300"}
-/>
+    <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+  {canToggle ? (
+    <>
+      <Switch
+        checked={isOnline}
+        onCheckedChange={handleToggle}
+        disabled={loading}
+        className={isOnline ? "bg-green-500" : "bg-gray-300"}
+      />
 
-          <span className={`text-sm font-medium ${isOnline ? "text-green-600" : "text-gray-500"}`}>
-            {isOnline ? homeTranslations.online : homeTranslations.offline}
-          </span>
-        </div>
+      <span
+        className={`text-sm font-medium ${
+          isOnline ? "text-green-600" : "text-gray-500"
+        }`}
+      >
+        {isOnline ? homeTranslations.online : homeTranslations.offline}
+      </span>
+    </>
+  ) : (
+    <span className="text-sm font-semibold text-orange-600">
+      {worker?.status.replace("_", " ")}
+    </span>
+  )}
+</div>
+
+
       </div>
 
       {/* Cards Grid */}

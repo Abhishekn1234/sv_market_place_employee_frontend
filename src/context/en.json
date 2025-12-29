@@ -171,6 +171,7 @@
     "recentTransactions": "Recent Transactions",
     "viewAll": "View All",
     "credit": "Credit",
+    
     "debit": "Debit",
     "monthlySummary": "December Summary",
     "totalTransactions": "Total Transactions",
@@ -256,5 +257,19 @@
       "empty": "No transactions found"
     },
     "transactions": "transactions"
-  }
+  },
+  "Edit":"Edit",
+  "Cancel":"Cancel",
+  "Saving":"Saving",
+  "Save":"Save",
+  "Personal Information":"Personal Information",
+  "Full Name":"Full Name",
+  "Email":"Email",
+  "Contact Information":"Contact Information",
+  "Phone":"Phone",
+  "Location":"Location",
+  "Documents":"Documents",
+  "ID Proof":"ID Proof",
+  "Address Proof":"Address Proof",
+  "Photo":"Photo"
 }

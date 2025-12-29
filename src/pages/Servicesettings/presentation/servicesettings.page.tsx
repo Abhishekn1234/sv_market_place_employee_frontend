@@ -31,9 +31,11 @@ export default function MultiSelectDropdownCard() {
   const [locationMode, setLocationMode] = React.useState<"current" | "manual">("manual");
   const [location, setLocation] = React.useState<GeoPoint | null>(null);
   const [currentPlace, setCurrentPlace] = React.useState<string>("");
+    const [serviceRadius, setServiceRadius] = React.useState<number>(5000); // default 5 km
 
   const { data: services = [], isLoading: servicesLoading } = useServiceCategory();
   const { data: tiers = [], isLoading: tiersLoading } = useServiceTier();
+  
   const mutation = useServiceSettings();
  const navigate = useNavigate();
   const toggleService = (service: ServiceCategory) => {
@@ -53,6 +55,14 @@ export default function MultiSelectDropdownCard() {
   };
 
 
+const sanitizeLocation = (location: GeoPoint): GeoPoint => {
+  return {
+    type: "Point",
+    coordinates: location.coordinates,
+  };
+};
+
+
 
 
 const handleSubmit = (e: React.FormEvent) => {
@@ -67,21 +77,20 @@ const handleSubmit = (e: React.FormEvent) => {
     categoryIds: selectedServices.map((s) => s._id),
     serviceTierIds: selectedTiers.map((t) => t._id),
     status: "OFFLINE",
-    location: location,
-    serviceRadius: 1,
+    location: sanitizeLocation(location), // ✅ accuracy removed
+     serviceRadius: serviceRadius / 1000, // convert meters → km // ✅ derived safely
   };
 
   console.log("Payload sent to API:", workerPayload);
 
   mutation.mutate(workerPayload, {
-    onSuccess: () => {
-      navigate("/services/documents");
-    },
+    onSuccess: () => navigate("/services/documents"),
   });
 };
 
+
   return (
-    <div className="flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-900 dark:to-gray-800 p-6">
+    <div className="flex items-center justify-center p-6">
 
       <Card className="w-full max-w-2xl shadow-2xl border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
 
@@ -239,7 +248,7 @@ const handleSubmit = (e: React.FormEvent) => {
               />
               {location && currentPlace && (
                 <span>
-                  {currentPlace} (Lat: {location.coordinates[1]}, Lng: {location.coordinates[0]})
+                  {currentPlace}
                 </span>
               )}
             </div>
@@ -247,10 +256,25 @@ const handleSubmit = (e: React.FormEvent) => {
 
           {/* Manual Location Map */}
           {locationMode === "manual" && (
-            <div className="h-[800px] w-full rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
-              <LocationPage onChange={setLocation} />
-            </div>
-          )}
+  <div className="h-[500px] w-full rounded-lg overflow-hidden">
+   <LocationPage
+  onChange={(loc) => {
+    if (loc) {
+      setLocation({
+        type: "Point",
+        coordinates: [loc[0], loc[1]], // [lng, lat]
+      });
+    } else {
+      setLocation(null);
+    }
+  }}
+  radius={serviceRadius}
+  onRadiusChange={setServiceRadius}
+/>
+
+  </div>
+)}
+
 
           {/* Buttons */}
           <div className="flex flex-row gap-4 justify-end">
