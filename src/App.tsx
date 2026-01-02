@@ -1,7 +1,7 @@
 // src/App.tsx
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ToastContainer } from "react-toastify";
 
 import { LocationProvider } from './context/LocationContext';
@@ -33,30 +33,25 @@ import { useDynamicLocation } from './utils/useNotification';
 
 
 function AppContent() {
-//  const navigate = useNavigate();
 
-  useDynamicLocation();
+  // Request permission on mount
+const [notificationsGranted, setNotificationsGranted] = useState(false);
 
-// App.tsx or main entry
 useEffect(() => {
-  if (!navigator.serviceWorker) return;
+  if (!("Notification" in window)) return;
 
-  navigator.serviceWorker.addEventListener("message", (event) => {
-    const { type, payload } = event.data || {};
-
-    if (type === "FROM_NOTIFICATION") {
-      const url = payload.url || "/settings/profile";
-      const tab = payload.tab || "location"; // <- get tab from notification
-
-      // Navigate with state
-      window.history.pushState({ fromNotification: true, tab }, "", url);
-
-      // Optionally dispatch event to ProfileSettings to switch tab
-      const navEvent = new CustomEvent("notificationNavigate", { detail: { tab } });
-      window.dispatchEvent(navEvent);
-    }
-  });
+  if (Notification.permission === "granted") {
+    setNotificationsGranted(true);
+  } else if (Notification.permission === "default") {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") setNotificationsGranted(true);
+    });
+  }
 }, []);
+
+// Pass the flag to the hook
+useDynamicLocation(notificationsGranted);
+
 
 
 

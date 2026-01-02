@@ -1,82 +1,143 @@
-// src/hooks/useDynamicLocation.ts
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useLocationContext } from "@/context/LocationContext";
+import { getPlaceFromCoordinates } from "@/pages/Profile/presentation/components/LocationSettings";
 
-type LatLng = { lat: number; lng: number };
-
-// Haversine formula for distance in meters
-const getDistance = (p1: LatLng, p2: LatLng) => {
-  const R = 6371000;
-  const toRad = (x: number) => (x * Math.PI) / 180;
-  const dLat = toRad(p2.lat - p1.lat);
-  const dLng = toRad(p2.lng - p1.lng);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(p1.lat)) * Math.cos(toRad(p2.lat)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
-
-export function useDynamicLocation() {
+export function useDynamicLocation(enabled: boolean = true) {
   const { setCurrentLocation, isTracking } = useLocationContext();
-  const lastLocationRef = useRef<LatLng | null>(null);
 
-  // Notify SW about new location
-  const notifyLocationChange = (loc: LatLng) => {
-    setCurrentLocation(loc);
+  const lastLocationRef = useRef<{ lat: number; lng: number } | null>(
+    JSON.parse(localStorage.getItem("lastLocation") || "null")
+  );
 
-    if (!("serviceWorker" in navigator) || Notification.permission !== "granted") return;
+  const [lastNotifiedLocation, setLastNotifiedLocation] = useState<string | null>(
+    () => localStorage.getItem("lastNotifiedLocation")
+  );
 
-    // Send to service worker
-    navigator.serviceWorker.ready.then((registration) => {
-      registration.active?.postMessage({
-        type: "LOCATION_CHANGED",
-        payload: {
-          lat: loc.lat,
-          lng: loc.lng,
-        },
-      });
-    });
+  // Haversine distance
+  const getDistanceKm = (loc1: { lat: number; lng: number }, loc2: { lat: number; lng: number }) => {
+    const R = 6371;
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
 
-    // Update last saved location
-    localStorage.setItem("lastSavedCurrentLocation", JSON.stringify(loc));
+    const dLat = toRad(loc2.lat - loc1.lat);
+    const dLng = toRad(loc2.lng - loc1.lng);
+
+    const lat1 = toRad(loc1.lat);
+    const lat2 = toRad(loc2.lat);
+
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
   };
 
-  useEffect(() => {
-    if (!navigator.geolocation || !isTracking) return;
+  const getDirection = (loc1: { lat: number; lng: number }, loc2: { lat: number; lng: number }) => {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const toDeg = (rad: number) => (rad * 180) / Math.PI;
 
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
+    const lat1 = toRad(loc1.lat);
+    const lat2 = toRad(loc2.lat);
+    const dLng = toRad(loc2.lng - loc1.lng);
+
+    const y = Math.sin(dLng) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+    let bearing = toDeg(Math.atan2(y, x));
+    if (bearing < 0) bearing += 360;
+
+    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return directions[Math.round(bearing / 45) % 8];
+  };
+
+  // Function to notify a location change (manual or geolocation)
+  const notifyLocationChange = useCallback(async (loc: { lat: number; lng: number }) => {
+    if (!enabled) return;
+
+    setCurrentLocation(loc);
+
+    const lastLoc = lastLocationRef.current;
+
+    // Get place name
+    let placeName = "Unknown location";
+    try {
+      const { shortName } = await getPlaceFromCoordinates(loc.lat, loc.lng);
+      placeName = shortName;
+    } catch {}
+
+    let distanceText = "";
+    if (lastLoc) {
+      const distanceKm = getDistanceKm(lastLoc, loc);
+      const direction = getDirection(lastLoc, loc);
+      distanceText = `${distanceKm.toFixed(2)} km ${direction}`;
     }
+
+    const fullBody = distanceText
+      ? `${placeName} (${distanceText} from last location)`
+      : placeName;
+
+    // Notify SW or native
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: "LOCATION_NOTIFICATION",
+        payload: { title: "Location Changed", body: fullBody, placeName },
+      });
+    } else if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Location Changed", { body: fullBody });
+    }
+
+    // Save to state & localStorage
+    setLastNotifiedLocation(placeName);
+    localStorage.setItem("lastNotifiedLocation", placeName);
+
+    lastLocationRef.current = loc;
+    localStorage.setItem("lastLocation", JSON.stringify(loc));
+  }, [enabled, setCurrentLocation]);
+
+  // Expose manual updater
+  const updateLocationManually = useCallback(
+    (lat: number, lng: number) => {
+      notifyLocationChange({ lat, lng });
+    },
+    [notifyLocationChange]
+  );
+
+  // Listen for SW messages
+  useEffect(() => {
+    if (!enabled || !navigator.serviceWorker) return;
+
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === "UPDATE_LAST_NOTIFIED_LOCATION") {
+        const { placeName } = event.data.payload;
+        if (placeName) {
+          localStorage.setItem("lastNotifiedLocation", placeName);
+          setLastNotifiedLocation(placeName);
+        }
+      }
+    };
+
+    navigator.serviceWorker.addEventListener("message", onMessage);
+    return () => {
+      navigator.serviceWorker.removeEventListener("message", onMessage);
+    };
+  }, [enabled]);
+
+  // Geolocation watcher
+  useEffect(() => {
+    if (!enabled || !navigator.geolocation || !isTracking) return;
 
     const handlePosition = (pos: GeolocationPosition) => {
       const current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      const lastLoc = lastLocationRef.current;
 
-      if (!lastLocationRef.current || getDistance(lastLocationRef.current, current) >= 5) {
-        lastLocationRef.current = current;
+      if (!lastLoc || getDistanceKm(lastLoc, current) >= 0.005) {
         notifyLocationChange(current);
       }
     };
 
-    navigator.geolocation.getCurrentPosition(handlePosition, console.error, {
-      enableHighAccuracy: true,
-      maximumAge: 0,
-    });
-
     const watchId = navigator.geolocation.watchPosition(handlePosition, console.error, {
       enableHighAccuracy: true,
-      maximumAge: 0,
     });
 
-    const interval = setInterval(() => {
-      navigator.geolocation.getCurrentPosition(handlePosition, console.error, {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-      });
-    }, 1000);
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [enabled, isTracking, notifyLocationChange]);
 
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-      clearInterval(interval);
-    };
-  }, [isTracking, setCurrentLocation]);
+  return { lastNotifiedLocation, updateLocationManually };
 }

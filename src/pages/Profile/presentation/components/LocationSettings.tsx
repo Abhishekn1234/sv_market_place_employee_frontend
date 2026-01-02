@@ -11,7 +11,46 @@ import { useServiceTier } from "@/pages/Servicesettings/presentation/hooks/useSe
 import { useServiceSettings } from "@/pages/Servicesettings/presentation/hooks/useServicesettings";
 import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/servicesettings";
 import { useLocationContext } from "@/context/LocationContext";
-import { useDynamicLocation } from "@/utils/useNotification"; // your debounced hook
+
+
+export const getPlaceFromCoordinates = async (
+  lat?: number,
+  lng?: number
+): Promise<{ shortName: string }> => {
+  try {
+    if (lat === undefined || lng === undefined) {
+      const position: GeolocationPosition = await new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject("Geolocation not supported");
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+        });
+      });
+      lat = position.coords.latitude;
+      lng = position.coords.longitude;
+    }
+
+    const res = await fetch(
+      `/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
+    );
+    if (!res.ok) throw new Error("Failed to fetch location");
+    const data = await res.json();
+    const addr = data.address || {};
+    const shortName =
+      addr.village ||
+      addr.town ||
+      addr.city ||
+      addr.hamlet ||
+      addr.road ||
+      addr.county ||
+      addr.state ||
+      "Unknown location";
+    return { shortName };
+  } catch (err) {
+    console.error("getPlaceFromCoordinates error:", err);
+    return { shortName: "Unknown location" };
+  }
+};
 
 /* ---------------- Leaflet marker fix ---------------- */
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -27,84 +66,14 @@ L.Icon.Default.mergeOptions({
 const MAX_RADIUS = 12000;
 const EDGE_TOLERANCE = 25;
 
-/* ---------------- Helpers ---------------- */
-const destinationPoint = (
-  lat: number,
-  lng: number,
-  distance: number,
-  bearing: number
-): [number, number] => {
-  const R = 6371000;
-  const br = (bearing * Math.PI) / 180;
-  const latRad = (lat * Math.PI) / 180;
-  const lngRad = (lng * Math.PI) / 180;
+/* ---------------- Props ---------------- */
+interface LocationSettingsProps {
+  setActiveTab?: (tab: "profile" | "password" | "location") => void;
+}
 
-  const newLat = Math.asin(
-    Math.sin(latRad) * Math.cos(distance / R) +
-      Math.cos(latRad) * Math.sin(distance / R) * Math.cos(br)
-  );
-
-  const newLng =
-    lngRad +
-    Math.atan2(
-      Math.sin(br) * Math.sin(distance / R) * Math.cos(latRad),
-      Math.cos(distance / R) - Math.sin(latRad) * Math.sin(newLat)
-    );
-
-  return [(newLat * 180) / Math.PI, (newLng * 180) / Math.PI];
-};
-
-/* ---------------- Reverse geocoding ---------------- */
-export const getPlaceFromCoordinates = async (
-  lat?: number,
-  lng?: number
-): Promise<{ shortName: string }> => {
-  try {
-    if (lat === undefined || lng === undefined) {
-      const position: GeolocationPosition = await new Promise((resolve, reject) => {
-        if (!navigator.geolocation) return reject("Geolocation not supported");
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          maximumAge: 0,
-        });
-      });
-
-      lat = position.coords.latitude;
-      lng = position.coords.longitude;
-    }
-
-    const res = await fetch(
-      `/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
-    );
-    if (!res.ok) throw new Error("Failed to fetch location");
-
-    const data = await res.json();
-    const addr = data.address || {};
-
-    const shortName =
-      addr.village ||
-      addr.town ||
-      addr.city ||
-      addr.hamlet ||
-      addr.road ||
-      addr.county ||
-      addr.state ||
-      "Unknown location";
-
-    return { shortName };
-  } catch (err) {
-    console.error("getPlaceFromCoordinates error:", err);
-    return { shortName: "Unknown location" };
-  }
-};
-
-
-
-
-/* ---------------- Map recenter ---------------- */
+/* ---------------- RecenterMap ---------------- */
 const RecenterMap = ({ location }: { location: [number, number] | null }) => {
   const map = useMap();
-
   useEffect(() => {
     if (!location) return;
     const center = map.getCenter();
@@ -112,32 +81,40 @@ const RecenterMap = ({ location }: { location: [number, number] | null }) => {
       map.setView(location, map.getZoom(), { animate: true });
     }
   }, [location, map]);
-
   return null;
 };
 
-/* ---------------- Location picker ---------------- */
+/* ---------------- LocationPicker ---------------- */
 function LocationPicker({
   location,
   setLocation,
   radius,
   setRadius,
   isManual,
-}: any) {
+  onLocationChange,
+}: {
+  location: [number, number];
+  setLocation: (loc: [number, number]) => void;
+  radius: number;
+  setRadius: (r: number) => void;
+  isManual: boolean;
+  onLocationChange?: (lat: number, lng: number) => void;
+}) {
   const draggingRef = useRef(false);
 
   const MapEventsWrapper = () => {
     const map = useMap();
-
     useEffect(() => {
       if (!isManual) return;
 
-      const onClick = (e: any) => setLocation([e.latlng.lat, e.latlng.lng]);
+      const onClick = (e: any) => {
+        const newLoc: [number, number] = [e.latlng.lat, e.latlng.lng];
+        setLocation(newLoc);
+        onLocationChange?.(newLoc[0], newLoc[1]);
+      };
 
       const onMouseDown = (e: any) => {
-        if (
-          Math.abs(L.latLng(location).distanceTo(e.latlng) - radius) <= EDGE_TOLERANCE
-        ) {
+        if (Math.abs(L.latLng(location).distanceTo(e.latlng) - radius) <= EDGE_TOLERANCE) {
           draggingRef.current = true;
         }
       };
@@ -165,25 +142,29 @@ function LocationPicker({
     return null;
   };
 
-  if (!location) return null;
-
   return (
     <>
       <Marker
         position={location}
         draggable={isManual}
         eventHandlers={{
-          dragend: (e) =>
-            setLocation([e.target.getLatLng().lat, e.target.getLatLng().lng]),
+          dragend: (e) => {
+            const newLoc: [number, number] = [
+              e.target.getLatLng().lat,
+              e.target.getLatLng().lng,
+            ];
+            setLocation(newLoc);
+            onLocationChange?.(newLoc[0], newLoc[1]);
+          },
         }}
       />
       <Circle center={location} radius={radius} />
       <Marker
-        position={destinationPoint(location[0], location[1], radius, 90)}
+        position={[location[0], location[1] + radius / 111000]}
         icon={L.divIcon({
-          html: `<div style="background:white;padding:2px 6px;border-radius:4px;font-size:12px;font-weight:600">${(
-            radius / 1000
-          ).toFixed(2)} km</div>`,
+          html: `<div style="background:white;padding:2px 6px;border-radius:4px;font-size:12px;font-weight:600">${
+            (radius / 1000).toFixed(2)
+          } km</div>`,
         })}
       />
       <MapEventsWrapper />
@@ -192,16 +173,16 @@ function LocationPicker({
 }
 
 /* ---------------- MAIN COMPONENT ---------------- */
-export default function LocationSettings() {
+export default function LocationSettings({ setActiveTab }: LocationSettingsProps) {
   const { currentLocation } = useLocationContext();
-  useDynamicLocation(); // start tracking
   const [userData, setUserData] = useState<any>(null);
-  const [locationName, setLocationName] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [tempLocation, setTempLocation] = useState<[number, number] | null>(null);
   const [locationMode, setLocationMode] = useState<"current" | "manual">("manual");
   const [radius, setRadius] = useState(500);
-
+  const [lastNotifiedLocation, setLastNotifiedLocation] = useState<string>(
+    localStorage.getItem("lastNotifiedLocation") || "-"
+  );
   const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
@@ -215,70 +196,48 @@ export default function LocationSettings() {
     if (!stored) return;
     const parsed = JSON.parse(stored).user;
     setUserData(parsed);
-
     setSelectedTiers(parsed.serviceTierIds || []);
     setSelectedCategories(parsed.categoryIds || []);
-
     if (parsed.location?.coordinates?.length === 2) {
       const [lng, lat] = parsed.location.coordinates;
       setTempLocation([lat, lng]);
     }
   }, []);
 
-  
-useEffect(() => {
-  if (!tempLocation) return;
+  /* ---------------- Sync with currentLocation ---------------- */
+  useEffect(() => {
+    if (locationMode === "current" && currentLocation) {
+      setTempLocation([currentLocation.lat, currentLocation.lng]);
+      updateLocation(currentLocation.lat, currentLocation.lng);
+    }
+  }, [currentLocation, locationMode]);
 
-  const [lat, lng] = tempLocation;
-  const key = `loc_${lat.toFixed(6)}_${lng.toFixed(6)}`;
-  const cached = localStorage.getItem(key);
-  if (cached) {
-    setLocationName(cached);
-    return;
-  }
+  /* ---------------- Update location name + localStorage ---------------- */
+  const updateLocation = async (lat: number, lng: number) => {
+    try {
+      const { shortName } = await getPlaceFromCoordinates(lat, lng);
+      setLastNotifiedLocation(shortName);
+      localStorage.setItem("lastNotifiedLocation", shortName);
 
-  const timer = setTimeout(async () => {
-    const { shortName } = await getPlaceFromCoordinates(lat, lng);
-    setLocationName(shortName);
-    localStorage.setItem(key, shortName);
-  }, 500); // debounce to avoid too many requests
-
-  return () => clearTimeout(timer);
-}, [tempLocation]);
-
-
-useEffect(() => {
-  if (locationMode !== "current" || !currentLocation) return;
-  setTempLocation([currentLocation.lat, currentLocation.lng]);
-}, [currentLocation, locationMode]);
-
- useEffect(() => {
-    if (!currentLocation) return;
-
-    const { lat, lng } = currentLocation;
-    const key = "last_location"; // always use this key
-
-    const timer = setTimeout(async () => {
-      try {
-        const { shortName } = await getPlaceFromCoordinates(lat, lng);
-        setLocationName(shortName);
-
-        // always overwrite last_location with current coords
-        localStorage.setItem(
-          key,
-          JSON.stringify({ lat, lng, shortName })
-        );
-      } catch (err) {
-        console.error("Failed to fetch location name:", err);
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: "LOCATION_NOTIFICATION",
+          payload: {
+            title: "Location Changed",
+            body: shortName,
+            placeName: shortName,
+          },
+        });
       }
-    }, 300); // debounce
+    } catch (err) {
+      console.error("Failed to update location name", err);
+    }
+  };
 
-    return () => clearTimeout(timer);
-  }, [currentLocation]);
-
-  /* ---------------- Save ---------------- */
+  /* ---------------- Save changes ---------------- */
   const saveChanges = () => {
     if (!userData || !tempLocation) return;
+
     const payload: WorkerPayload = {
       status: userData.status,
       serviceTierIds: selectedTiers,
@@ -291,10 +250,7 @@ useEffect(() => {
       onSuccess: () => {
         toast.success("Updated successfully");
         setModalOpen(false);
-        localStorage.setItem(
-          "lastSavedCurrentLocation",
-          JSON.stringify({ lat: tempLocation[0], lng: tempLocation[1] })
-        );
+        setActiveTab?.("profile");
       },
       onError: () => toast.error("Update failed"),
     });
@@ -311,6 +267,7 @@ useEffect(() => {
         </Button>
       </div>
 
+      {/* -------- Employee info -------- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <p className="text-sm text-gray-500">Status</p>
@@ -318,7 +275,7 @@ useEffect(() => {
         </div>
         <div>
           <p className="text-sm text-gray-500">Location</p>
-          <p className="font-medium">{locationName || "-"}</p>
+          <p className="font-medium">{lastNotifiedLocation || "-"}</p>
         </div>
         <div>
           <p className="text-sm text-gray-500">Service Tiers</p>
@@ -340,7 +297,8 @@ useEffect(() => {
         </div>
       </div>
 
-      {modalOpen && (
+      {/* -------- Edit modal -------- */}
+      {modalOpen && tempLocation && (
         <div className="mt-4 border rounded p-4 space-y-4">
           {/* Location Mode */}
           <div className="flex gap-4">
@@ -357,18 +315,17 @@ useEffect(() => {
           </div>
 
           {/* Map */}
-          <MapContainer center={tempLocation || [20, 78]} zoom={13} className="h-64">
+          <MapContainer center={tempLocation} zoom={13} className="h-64">
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <RecenterMap location={tempLocation} />
-            {tempLocation && (
-              <LocationPicker
-                location={tempLocation}
-                setLocation={setTempLocation}
-                radius={radius}
-                setRadius={setRadius}
-                isManual={locationMode === "manual"}
-              />
-            )}
+            <LocationPicker
+              location={tempLocation}
+              setLocation={setTempLocation}
+              radius={radius}
+              setRadius={setRadius}
+              isManual={locationMode === "manual"}
+              onLocationChange={updateLocation} // <-- manual updates
+            />
           </MapContainer>
 
           {/* Service Tiers */}
@@ -380,9 +337,7 @@ useEffect(() => {
                   key={tier._id}
                   onClick={() =>
                     setSelectedTiers((p) =>
-                      p.includes(tier._id)
-                        ? p.filter((i) => i !== tier._id)
-                        : [...p, tier._id]
+                      p.includes(tier._id) ? p.filter((i) => i !== tier._id) : [...p, tier._id]
                     )
                   }
                   className={`px-3 py-1 rounded-full border ${
@@ -406,9 +361,7 @@ useEffect(() => {
                   key={cat._id}
                   onClick={() =>
                     setSelectedCategories((p) =>
-                      p.includes(cat._id)
-                        ? p.filter((i) => i !== cat._id)
-                        : [...p, cat._id]
+                      p.includes(cat._id) ? p.filter((i) => i !== cat._id) : [...p, cat._id]
                     )
                   }
                   className={`px-3 py-1 rounded-full border ${
@@ -428,7 +381,7 @@ useEffect(() => {
             <Button variant="outline" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={saveChanges}>Save</Button>
+            <Button onClick={saveChanges}>Update</Button>
           </div>
         </div>
       )}
