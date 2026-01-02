@@ -14,24 +14,14 @@ export default function ProfileSettings() {
   const location = useLocation();
  const navigate=useNavigate();
 useEffect(() => {
-  const handleNav = (e: CustomEvent) => {
-    const tab = e.detail.tab as TabType;
-    if (tab) setActiveTab(tab);
-  };
-
-  window.addEventListener("notificationNavigate", handleNav as any);
-
-  // Also handle URL state fallback (from push)
   if (location.state?.fromNotification) {
-    setActiveTab(location.state.tab || "location");
+    // Activate Location tab
+    setActiveTab("location");
+
+    // Clear state so it doesn't trigger again on re-render
     navigate(location.pathname, { replace: true, state: {} });
   }
-
-  return () => {
-    window.removeEventListener("notificationNavigate", handleNav as any);
-  };
 }, [location.state, location.pathname, navigate]);
-
 
   const { language, t } = useLanguage();
   const isRTL = language === "AR";

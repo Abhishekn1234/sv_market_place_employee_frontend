@@ -45,19 +45,19 @@ useEffect(() => {
     const { type, payload } = event.data || {};
 
     if (type === "FROM_NOTIFICATION") {
-      // Navigate to Profile page
       const url = payload.url || "/settings/profile";
-      const tab = payload.tab; // "location"
+      const tab = payload.tab || "location"; // <- get tab from notification
 
-      // Use state navigation or URL state
+      // Navigate with state
       window.history.pushState({ fromNotification: true, tab }, "", url);
 
-      // Optionally, send event to ProfileSettings
+      // Optionally dispatch event to ProfileSettings to switch tab
       const navEvent = new CustomEvent("notificationNavigate", { detail: { tab } });
       window.dispatchEvent(navEvent);
     }
   });
 }, []);
+
 
 
 

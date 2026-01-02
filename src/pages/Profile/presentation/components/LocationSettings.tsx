@@ -26,7 +26,6 @@ L.Icon.Default.mergeOptions({
 
 const MAX_RADIUS = 12000;
 const EDGE_TOLERANCE = 25;
-const STORAGE_KEY = "currentLocationName"; // single key for updating location name
 
 /* ---------------- Helpers ---------------- */
 const destinationPoint = (
@@ -98,6 +97,9 @@ export const getPlaceFromCoordinates = async (
     return { shortName: "Unknown location" };
   }
 };
+
+
+
 
 /* ---------------- Map recenter ---------------- */
 const RecenterMap = ({ location }: { location: [number, number] | null }) => {
@@ -193,7 +195,6 @@ function LocationPicker({
 export default function LocationSettings() {
   const { currentLocation } = useLocationContext();
   useDynamicLocation(); // start tracking
-
   const [userData, setUserData] = useState<any>(null);
   const [locationName, setLocationName] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -224,37 +225,53 @@ export default function LocationSettings() {
     }
   }, []);
 
-  /* ---------------- Update location name ---------------- */
-  useEffect(() => {
-    if (!tempLocation) return;
+  
+useEffect(() => {
+  if (!tempLocation) return;
 
-    const [lat, lng] = tempLocation;
-    const cached = localStorage.getItem(STORAGE_KEY);
-    if (cached) setLocationName(cached);
+  const [lat, lng] = tempLocation;
+  const key = `loc_${lat.toFixed(6)}_${lng.toFixed(6)}`;
+  const cached = localStorage.getItem(key);
+  if (cached) {
+    setLocationName(cached);
+    return;
+  }
 
-    const timer = setTimeout(async () => {
-      const { shortName } = await getPlaceFromCoordinates(lat, lng);
-      setLocationName(shortName);
-      localStorage.setItem(STORAGE_KEY, shortName); // update existing key
-    }, 500);
+  const timer = setTimeout(async () => {
+    const { shortName } = await getPlaceFromCoordinates(lat, lng);
+    setLocationName(shortName);
+    localStorage.setItem(key, shortName);
+  }, 500); // debounce to avoid too many requests
 
-    return () => clearTimeout(timer);
-  }, [tempLocation]);
+  return () => clearTimeout(timer);
+}, [tempLocation]);
 
-  useEffect(() => {
-    if (locationMode !== "current" || !currentLocation) return;
-    setTempLocation([currentLocation.lat, currentLocation.lng]);
-  }, [currentLocation, locationMode]);
 
-  useEffect(() => {
+useEffect(() => {
+  if (locationMode !== "current" || !currentLocation) return;
+  setTempLocation([currentLocation.lat, currentLocation.lng]);
+}, [currentLocation, locationMode]);
+
+ useEffect(() => {
     if (!currentLocation) return;
 
     const { lat, lng } = currentLocation;
+    const key = "last_location"; // always use this key
+
     const timer = setTimeout(async () => {
-      const { shortName } = await getPlaceFromCoordinates(lat, lng);
-      setLocationName(shortName);
-      localStorage.setItem(STORAGE_KEY, shortName); // update existing key
-    }, 300);
+      try {
+        const { shortName } = await getPlaceFromCoordinates(lat, lng);
+        setLocationName(shortName);
+
+        // always overwrite last_location with current coords
+        localStorage.setItem(
+          key,
+          JSON.stringify({ lat, lng, shortName })
+        );
+      } catch (err) {
+        console.error("Failed to fetch location name:", err);
+      }
+    }, 300); // debounce
 
     return () => clearTimeout(timer);
   }, [currentLocation]);
