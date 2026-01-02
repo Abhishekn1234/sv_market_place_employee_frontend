@@ -1,15 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Lock, MapPin } from "lucide-react";
 import ProfileList from "./components/ProfileList";
 import PasswordChanging from "./components/PasswordChanging";
 import LocationSettings from "./components/LocationSettings"; // new component
 import { useLanguage } from "@/context/LanguageContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type TabType = "profile" | "password" | "location";
 
 export default function ProfileSettings() {
-  const [activeTab, setActiveTab] = useState<TabType>("profile");
+   const [activeTab, setActiveTab] = useState<TabType>("profile");
+  const location = useLocation();
+ const navigate=useNavigate();
+useEffect(() => {
+  const handleNav = (e: CustomEvent) => {
+    const tab = e.detail.tab as TabType;
+    if (tab) setActiveTab(tab);
+  };
+
+  window.addEventListener("notificationNavigate", handleNav as any);
+
+  // Also handle URL state fallback (from push)
+  if (location.state?.fromNotification) {
+    setActiveTab(location.state.tab || "location");
+    navigate(location.pathname, { replace: true, state: {} });
+  }
+
+  return () => {
+    window.removeEventListener("notificationNavigate", handleNav as any);
+  };
+}, [location.state, location.pathname, navigate]);
+
+
   const { language, t } = useLanguage();
   const isRTL = language === "AR";
 

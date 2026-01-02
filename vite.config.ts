@@ -11,4 +11,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/nominatim': {
+        target: 'https://nominatim.openstreetmap.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/nominatim/, ''),
+        headers: {
+          // This identifies YOU to OpenStreetMap
+          'User-Agent': 'AbhishekWeatherApp/1.0 (abhishekpes123@gmail.com)'
+        }
+      }
+    }
+  }
 })

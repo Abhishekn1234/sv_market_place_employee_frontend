@@ -1,17 +1,19 @@
-import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
-import { useServiceTier } from "@/pages/Servicesettings/presentation/hooks/useServiceTier";
 import { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents, Circle } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, Marker, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PencilIcon } from "lucide-react";
 import { toast } from "react-toastify";
+import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
+import { useServiceTier } from "@/pages/Servicesettings/presentation/hooks/useServiceTier";
 import { useServiceSettings } from "@/pages/Servicesettings/presentation/hooks/useServicesettings";
 import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/servicesettings";
+import { useLocationContext } from "@/context/LocationContext";
+import { useDynamicLocation } from "@/utils/useNotification"; // your debounced hook
 
-// Fix default marker icon for Leaflet
+/* ---------------- Leaflet marker fix ---------------- */
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -22,100 +24,144 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
+const MAX_RADIUS = 12000;
+const EDGE_TOLERANCE = 25;
+const STORAGE_KEY = "currentLocationName"; // single key for updating location name
 
-async function getPlaceFromCoordinates(lat: number, lng: number) {
-  try {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch location data");
-
-    const data = await res.json();
-
-    // Extract display_name (full address)
-    const fullName: string = data.display_name || "Unknown location";
-
-    // Extract a short name (prefer city, village, hamlet, road, etc.)
-    const addr = data.address;
-    const shortName =
-      addr?.city ||
-      addr?.town ||
-      addr?.village ||
-      addr?.hamlet ||
-      addr?.road ||
-      "Unknown location";
-
-    return { fullName, shortName };
-  } catch (err) {
-    console.error("Error fetching location:", err);
-    return { fullName: "Unknown location", shortName: "Unknown location" };
-  }
-}
-
-
-
-
-function destinationPoint(
+/* ---------------- Helpers ---------------- */
+const destinationPoint = (
   lat: number,
   lng: number,
-  distance: number, // in meters
-  bearing: number // in degrees
-): [number, number] {
-  const R = 6371000; // Earth radius in meters
-  const bearingRad = (bearing * Math.PI) / 180;
+  distance: number,
+  bearing: number
+): [number, number] => {
+  const R = 6371000;
+  const br = (bearing * Math.PI) / 180;
   const latRad = (lat * Math.PI) / 180;
   const lngRad = (lng * Math.PI) / 180;
 
   const newLat = Math.asin(
     Math.sin(latRad) * Math.cos(distance / R) +
-      Math.cos(latRad) * Math.sin(distance / R) * Math.cos(bearingRad)
+      Math.cos(latRad) * Math.sin(distance / R) * Math.cos(br)
   );
+
   const newLng =
     lngRad +
     Math.atan2(
-      Math.sin(bearingRad) * Math.sin(distance / R) * Math.cos(latRad),
+      Math.sin(br) * Math.sin(distance / R) * Math.cos(latRad),
       Math.cos(distance / R) - Math.sin(latRad) * Math.sin(newLat)
     );
 
   return [(newLat * 180) / Math.PI, (newLng * 180) / Math.PI];
-}
+};
 
-// Map picker component
+/* ---------------- Reverse geocoding ---------------- */
+export const getPlaceFromCoordinates = async (
+  lat?: number,
+  lng?: number
+): Promise<{ shortName: string }> => {
+  try {
+    if (lat === undefined || lng === undefined) {
+      const position: GeolocationPosition = await new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject("Geolocation not supported");
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+        });
+      });
+
+      lat = position.coords.latitude;
+      lng = position.coords.longitude;
+    }
+
+    const res = await fetch(
+      `/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
+    );
+    if (!res.ok) throw new Error("Failed to fetch location");
+
+    const data = await res.json();
+    const addr = data.address || {};
+
+    const shortName =
+      addr.village ||
+      addr.town ||
+      addr.city ||
+      addr.hamlet ||
+      addr.road ||
+      addr.county ||
+      addr.state ||
+      "Unknown location";
+
+    return { shortName };
+  } catch (err) {
+    console.error("getPlaceFromCoordinates error:", err);
+    return { shortName: "Unknown location" };
+  }
+};
+
+/* ---------------- Map recenter ---------------- */
+const RecenterMap = ({ location }: { location: [number, number] | null }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!location) return;
+    const center = map.getCenter();
+    if (center.lat !== location[0] || center.lng !== location[1]) {
+      map.setView(location, map.getZoom(), { animate: true });
+    }
+  }, [location, map]);
+
+  return null;
+};
+
+/* ---------------- Location picker ---------------- */
 function LocationPicker({
   location,
   setLocation,
   radius,
   setRadius,
-  isManual = true,
-}: {
-  location: [number, number] | null;
-  setLocation: (loc: [number, number]) => void;
-  radius?: number;
-  setRadius?: (r: number) => void;
-  isManual?: boolean;
-}) {
+  isManual,
+}: any) {
   const draggingRef = useRef(false);
-  const MAX_RADIUS = 12000; // 12 km in meters
 
-  useMapEvents({
-    click(e) {
-      if (isManual) setLocation([e.latlng.lat, e.latlng.lng]);
-    },
-    mousedown(e) {
-      if (!radius || !setRadius || !location) return;
-      const dist = L.latLng(location).distanceTo(e.latlng);
-      if (Math.abs(dist - radius) < 20) draggingRef.current = true; // 20m tolerance
-    },
-    mouseup() {
-      draggingRef.current = false;
-    },
-    mousemove(e) {
-      if (draggingRef.current && radius && setRadius && location) {
-        let newRadius = L.latLng(location).distanceTo(e.latlng);
-        if (newRadius > MAX_RADIUS) newRadius = MAX_RADIUS;
-        setRadius(newRadius);
-      }
-    },
-  });
+  const MapEventsWrapper = () => {
+    const map = useMap();
+
+    useEffect(() => {
+      if (!isManual) return;
+
+      const onClick = (e: any) => setLocation([e.latlng.lat, e.latlng.lng]);
+
+      const onMouseDown = (e: any) => {
+        if (
+          Math.abs(L.latLng(location).distanceTo(e.latlng) - radius) <= EDGE_TOLERANCE
+        ) {
+          draggingRef.current = true;
+        }
+      };
+
+      const onMouseMove = (e: any) => {
+        if (!draggingRef.current) return;
+        setRadius(Math.min(L.latLng(location).distanceTo(e.latlng), MAX_RADIUS));
+      };
+
+      const onMouseUp = () => (draggingRef.current = false);
+
+      map.on("click", onClick);
+      map.on("mousedown", onMouseDown);
+      map.on("mousemove", onMouseMove);
+      map.on("mouseup", onMouseUp);
+
+      return () => {
+        map.off("click", onClick);
+        map.off("mousedown", onMouseDown);
+        map.off("mousemove", onMouseMove);
+        map.off("mouseup", onMouseUp);
+      };
+    }, [map, location, radius, isManual]);
+
+    return null;
+  };
 
   if (!location) return null;
 
@@ -125,377 +171,250 @@ function LocationPicker({
         position={location}
         draggable={isManual}
         eventHandlers={{
-          dragend: (e) => {
-            const latlng = e.target.getLatLng();
-            setLocation([latlng.lat, latlng.lng]);
-          },
+          dragend: (e) =>
+            setLocation([e.target.getLatLng().lat, e.target.getLatLng().lng]),
         }}
       />
-
-     {radius && (
-  <>
-    <Circle
-      center={location}
-      radius={radius}
-      pathOptions={{ color: "blue", fillOpacity: 0.2 }}
-    />
-    <Marker
-      position={destinationPoint(location[0], location[1], radius, 90)} // east side
-      icon={L.divIcon({
-        className: "text-blue-800 font-bold bg-white p-1 rounded",
-        html: `${(radius / 1000).toFixed(2)} km`,
-      })}
-      interactive={false}
-    />
-  </>
-)}
-
+      <Circle center={location} radius={radius} />
+      <Marker
+        position={destinationPoint(location[0], location[1], radius, 90)}
+        icon={L.divIcon({
+          html: `<div style="background:white;padding:2px 6px;border-radius:4px;font-size:12px;font-weight:600">${(
+            radius / 1000
+          ).toFixed(2)} km</div>`,
+        })}
+      />
+      <MapEventsWrapper />
     </>
   );
 }
 
+/* ---------------- MAIN COMPONENT ---------------- */
 export default function LocationSettings() {
+  const { currentLocation } = useLocationContext();
+  useDynamicLocation(); // start tracking
+
   const [userData, setUserData] = useState<any>(null);
-  const [locationName, setLocationName] = useState<string>("");
+  const [locationName, setLocationName] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [tempLocation, setTempLocation] = useState<[number, number] | null>(null);
+  const [locationMode, setLocationMode] = useState<"current" | "manual">("manual");
+  const [radius, setRadius] = useState(500);
+
   const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [locationMode, setLocationMode] = useState<"current" | "manual">("manual");
 
   const { data: serviceTiers } = useServiceTier();
   const { data: serviceCategories } = useServiceCategory();
-// const setCurrentLocation = () => {
-//   if (navigator.geolocation) {
-//     navigator.geolocation.getCurrentPosition(
-//       (position) => {
-//         const { latitude, longitude } = position.coords;
-//         setTempLocation([latitude, longitude]);
-//         getPlaceFromCoordinates(latitude, longitude).then(({ shortName }) => setLocationName(shortName));
-//       },
-//       (err) => {
-//         console.error(err);
-//         alert("Unable to get current location.");
-//       }
-//     );
-//   } else {
-//     alert("Geolocation is not supported by your browser.");
-//   }
-// };
+  const serviceSettingsMutation = useServiceSettings();
 
-  const getTierNames = (ids: string[]) => {
-    if (!serviceTiers) return [];
-    return serviceTiers.filter((tier: any) => ids.includes(tier._id)).map((tier: any) => tier.displayName);
-  };
-
-  const getCategoryNames = (ids: string[]) => {
-    if (!serviceCategories) return [];
-    return serviceCategories.filter((cat: any) => ids.includes(cat._id)).map((cat: any) => cat.name);
-  };
-
+  /* ---------------- Load user data ---------------- */
   useEffect(() => {
-    const employeeData = localStorage.getItem("employeeData");
-    if (employeeData) {
-      const parsedData = JSON.parse(employeeData);
-      const user = parsedData.user;
-      if (user) {
-        setUserData(user);
-        setSelectedTiers(user.serviceTierIds || []);
-        setSelectedCategories(user.categoryIds || []);
+    const stored = localStorage.getItem("employeeData");
+    if (!stored) return;
+    const parsed = JSON.parse(stored).user;
+    setUserData(parsed);
 
-        if (user.location?.coordinates?.length === 2) {
-          const [lng, lat] = user.location.coordinates;
-          setTempLocation([lat, lng]);
-          getPlaceFromCoordinates(lat, lng).then(({ shortName }) => setLocationName(shortName));
-        }
-      }
+    setSelectedTiers(parsed.serviceTierIds || []);
+    setSelectedCategories(parsed.categoryIds || []);
+
+    if (parsed.location?.coordinates?.length === 2) {
+      const [lng, lat] = parsed.location.coordinates;
+      setTempLocation([lat, lng]);
     }
   }, []);
-const [radius, setRadius] = useState<number>(500); 
-  const openEditModal = () => {
-    setModalOpen(true);
+
+  /* ---------------- Update location name ---------------- */
+  useEffect(() => {
+    if (!tempLocation) return;
+
+    const [lat, lng] = tempLocation;
+    const cached = localStorage.getItem(STORAGE_KEY);
+    if (cached) setLocationName(cached);
+
+    const timer = setTimeout(async () => {
+      const { shortName } = await getPlaceFromCoordinates(lat, lng);
+      setLocationName(shortName);
+      localStorage.setItem(STORAGE_KEY, shortName); // update existing key
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [tempLocation]);
+
+  useEffect(() => {
+    if (locationMode !== "current" || !currentLocation) return;
+    setTempLocation([currentLocation.lat, currentLocation.lng]);
+  }, [currentLocation, locationMode]);
+
+  useEffect(() => {
+    if (!currentLocation) return;
+
+    const { lat, lng } = currentLocation;
+    const timer = setTimeout(async () => {
+      const { shortName } = await getPlaceFromCoordinates(lat, lng);
+      setLocationName(shortName);
+      localStorage.setItem(STORAGE_KEY, shortName); // update existing key
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [currentLocation]);
+
+  /* ---------------- Save ---------------- */
+  const saveChanges = () => {
+    if (!userData || !tempLocation) return;
+    const payload: WorkerPayload = {
+      status: userData.status,
+      serviceTierIds: selectedTiers,
+      categoryIds: selectedCategories,
+      location: { type: "Point", coordinates: [tempLocation[1], tempLocation[0]] },
+      serviceRadius: radius,
+    };
+
+    serviceSettingsMutation.mutate(payload, {
+      onSuccess: () => {
+        toast.success("Updated successfully");
+        setModalOpen(false);
+        localStorage.setItem(
+          "lastSavedCurrentLocation",
+          JSON.stringify({ lat: tempLocation[0], lng: tempLocation[1] })
+        );
+      },
+      onError: () => toast.error("Update failed"),
+    });
   };
-const serviceSettingsMutation=useServiceSettings();
-const saveChanges = () => {
-  if (!userData) return;
-
- const payload: WorkerPayload = {
-  categoryIds: selectedCategories,
-  serviceTierIds: selectedTiers,
-  status: userData.status,
-  location: tempLocation
-    ? {
-        type: "Point",
-        coordinates: [tempLocation[1], tempLocation[0]], // lng, lat
-      }
-    : undefined,
-  serviceRadius: radius /100, // save radius in meters
-};
-console.log(payload);
-
-
-  serviceSettingsMutation.mutate(payload, {
-    onSuccess: () => {
-      // update UI state
-      setUserData((prev: any) => ({
-        ...prev,
-        ...payload,
-      }));
-
-      if (tempLocation) {
-        getPlaceFromCoordinates(
-          tempLocation[0],
-          tempLocation[1]
-        ).then(({ shortName }) => setLocationName(shortName));
-      }
-
-      setModalOpen(false);
-    },
-  });
-};
-const handleCurrentLocation = () => {
-  if (!navigator.geolocation) {
-    toast.error("Geolocation is not supported by your browser.");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(async (position) => {
-    const { latitude, longitude } = position.coords;
-    const newLocation: [number, number] = [latitude, longitude];
-
-    // Previous location from user data
-    const prevCoordinates = userData.location?.coordinates;
-    const prevLocation: [number, number] | null = prevCoordinates
-      ? [prevCoordinates[1], prevCoordinates[0]] // stored as [lng, lat]
-      : null;
-
-    if (
-      prevLocation &&
-      (prevLocation[0] !== newLocation[0] || prevLocation[1] !== newLocation[1])
-    ) {
-      // Show toast notification with action
-      toast.info(
-        <div>
-          Your previous location is different.{" "}
-          <button
-            onClick={async () => {
-              setTempLocation(prevLocation);
-              const { shortName } = await getPlaceFromCoordinates(
-                prevLocation[0],
-                prevLocation[1]
-              );
-              setLocationName(shortName);
-              toast.dismiss(); // close the toast
-            }}
-            className="underline ml-2 text-blue-600 hover:text-blue-800"
-          >
-            Revert
-          </button>
-        </div>,
-        {
-          autoClose: false, // keep the notification until user clicks
-          closeOnClick: false,
-        }
-      );
-    }
-
-    // Set current location anyway
-    setTempLocation(newLocation);
-    const { shortName } = await getPlaceFromCoordinates(latitude, longitude);
-    setLocationName(shortName);
-  });
-};
-
-
 
   if (!userData) return <p>Loading...</p>;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
-    {/* Header */}
-    <div className="flex items-center justify-between border-b pb-4 mb-6">
-      <h2 className="text-2xl font-semibold text-gray-900">
-        Employee Details
-      </h2>
-
-      <Button
-        onClick={openEditModal}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700"
-      >
-        <PencilIcon className="w-4 h-4" />
-        Edit
-      </Button>
-    </div>
-
-    {/* Details Grid */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
-      <div>
-        <p className="text-sm text-gray-500">Status</p>
-        <p className="text-base font-medium text-gray-900">
-          {userData.status}
-        </p>
+      <div className="flex justify-between mb-6">
+        <h2 className="text-xl font-semibold">Employee Details</h2>
+        <Button onClick={() => setModalOpen(true)}>
+          <PencilIcon className="w-4 h-4 mr-2" /> Edit
+        </Button>
       </div>
 
-      <div>
-        <p className="text-sm text-gray-500">Location</p>
-        <p className="text-base font-medium text-gray-900">
-          {locationName || "No location available"}
-        </p>
-      </div>
-
-      <div>
-        <p className="text-sm text-gray-500">Service Tiers</p>
-        <p className="text-base font-medium text-gray-900">
-          {getTierNames(userData.serviceTierIds).join(", ") || "-"}
-        </p>
-      </div>
-
-      <div>
-        <p className="text-sm text-gray-500">Service Categories</p>
-        <p className="text-base font-medium text-gray-900">
-          {getCategoryNames(userData.categoryIds).join(", ") || "-"}
-        </p>
-      </div>
-    </div>
-
-      {/* Modal */}
-    {/* Modal */}
-{modalOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center">
-    <div className="bg-white w-full max-w-lg p-6 rounded-lg shadow-lg relative border border-gray-200">
-      <h3 className="text-xl font-bold mb-4">Edit Employee Details</h3>
-           <div className="mb-4 flex gap-4 items-center">
-  <label className="flex items-center gap-2">
-   <input
-  type="radio"
-  name="locationMode"
-  value="current"
-  checked={locationMode === "current"}
-  onChange={() => {
-    setLocationMode("current");
-    handleCurrentLocation();
-  }}
-/>
-
-    Use Current Location
-  </label>
-
-  <label className="flex items-center gap-2">
-    <input
-      type="radio"
-      name="locationMode"
-      value="manual"
-      checked={locationMode === "manual"}
-      onChange={() => setLocationMode("manual")}
-    />
-    Pick Location on Map
-  </label>
-</div>
-      {/* Location Map */}
-      <div className="mb-6 h-64 rounded overflow-hidden border">
-       
-
-      <MapContainer
-          center={tempLocation || [20, 78]}
-          zoom={13}
-          className="w-full h-full"
-        >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            attribution="© OpenStreetMap contributors © CARTO"
-          />
-       <LocationPicker
-            location={tempLocation}
-            setLocation={setTempLocation}
-            radius={radius}
-            setRadius={setRadius}
-            isManual={locationMode === "manual"}
-          />
-
-
-
-        </MapContainer>
-      </div>
-
-      {/* Radius Input */}
-    
-
-
-      {/* Service Tiers */}
-      <div className="mb-4">
-        <Label className="block font-semibold mb-2">Service Tiers</Label>
-        <div className="flex flex-wrap gap-2">
-          {serviceTiers?.map((tier: any) => (
-            <label
-              key={tier._id}
-              className={`flex items-center gap-2 px-3 py-1 border rounded-full cursor-pointer
-                ${selectedTiers.includes(tier._id) ? "bg-blue-600 text-white border-blue-600" : "bg-gray-100 text-gray-800 border-gray-300"}`}
-            >
-              <input
-                type="checkbox"
-                className="hidden"
-                checked={selectedTiers.includes(tier._id)}
-                onChange={() => {
-                  setSelectedTiers((prev) =>
-                    prev.includes(tier._id)
-                      ? prev.filter((id) => id !== tier._id)
-                      : [...prev, tier._id]
-                  );
-                }}
-              />
-              {tier.displayName}
-            </label>
-          ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <p className="text-sm text-gray-500">Status</p>
+          <p className="font-medium capitalize">{userData.status || "-"}</p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">Location</p>
+          <p className="font-medium">{locationName || "-"}</p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">Service Tiers</p>
+          <p className="font-medium">
+            {serviceTiers
+              ?.filter((t: any) => selectedTiers.includes(t._id))
+              .map((t: any) => t.displayName)
+              .join(", ") || "-"}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">Service Categories</p>
+          <p className="font-medium">
+            {serviceCategories
+              ?.filter((c: any) => selectedCategories.includes(c._id))
+              .map((c: any) => c.name)
+              .join(", ") || "-"}
+          </p>
         </div>
       </div>
 
-      {/* Service Categories */}
-      <div className="mb-6">
-        <Label className="block font-semibold mb-2">Service Categories</Label>
-        <div className="flex flex-wrap gap-2">
-          {serviceCategories?.map((cat: any) => (
-            <label
-              key={cat._id}
-              className={`flex items-center gap-2 px-3 py-1 border rounded-full cursor-pointer
-                ${selectedCategories.includes(cat._id) ? "bg-green-600 text-white border-green-600" : "bg-gray-100 text-gray-800 border-gray-300"}`}
-            >
-              <input
-                type="checkbox"
-                className="hidden"
-                checked={selectedCategories.includes(cat._id)}
-                onChange={() => {
-                  setSelectedCategories((prev) =>
-                    prev.includes(cat._id)
-                      ? prev.filter((id) => id !== cat._id)
-                      : [...prev, cat._id]
-                  );
-                }}
+      {modalOpen && (
+        <div className="mt-4 border rounded p-4 space-y-4">
+          {/* Location Mode */}
+          <div className="flex gap-4">
+            {["current", "manual"].map((m) => (
+              <label key={m} className="flex gap-2 items-center">
+                <input
+                  type="radio"
+                  checked={locationMode === m}
+                  onChange={() => setLocationMode(m as any)}
+                />
+                {m}
+              </label>
+            ))}
+          </div>
+
+          {/* Map */}
+          <MapContainer center={tempLocation || [20, 78]} zoom={13} className="h-64">
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <RecenterMap location={tempLocation} />
+            {tempLocation && (
+              <LocationPicker
+                location={tempLocation}
+                setLocation={setTempLocation}
+                radius={radius}
+                setRadius={setRadius}
+                isManual={locationMode === "manual"}
               />
-              {cat.name}
-            </label>
-          ))}
+            )}
+          </MapContainer>
+
+          {/* Service Tiers */}
+          <div>
+            <Label className="font-semibold">Service Tiers</Label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {serviceTiers?.map((tier: any) => (
+                <button
+                  key={tier._id}
+                  onClick={() =>
+                    setSelectedTiers((p) =>
+                      p.includes(tier._id)
+                        ? p.filter((i) => i !== tier._id)
+                        : [...p, tier._id]
+                    )
+                  }
+                  className={`px-3 py-1 rounded-full border ${
+                    selectedTiers.includes(tier._id)
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-gray-100 border-gray-300"
+                  }`}
+                >
+                  {tier.displayName}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Service Categories */}
+          <div>
+            <Label className="font-semibold">Service Categories</Label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {serviceCategories?.map((cat: any) => (
+                <button
+                  key={cat._id}
+                  onClick={() =>
+                    setSelectedCategories((p) =>
+                      p.includes(cat._id)
+                        ? p.filter((i) => i !== cat._id)
+                        : [...p, cat._id]
+                    )
+                  }
+                  className={`px-3 py-1 rounded-full border ${
+                    selectedCategories.includes(cat._id)
+                      ? "bg-green-600 text-white border-green-600"
+                      : "bg-gray-100 border-gray-300"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveChanges}>Save</Button>
+          </div>
         </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex justify-end gap-2">
-        <Button
-          onClick={() => setModalOpen(false)}
-          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={saveChanges}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Save
-        </Button>
-      </div>
-    </div>
-  </div>
-)}
-
+      )}
     </div>
   );
 }
