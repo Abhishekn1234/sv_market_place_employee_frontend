@@ -2,6 +2,7 @@ self.addEventListener("message", (event) => {
   if (event.data?.type === "LOCATION_NOTIFICATION") {
     const { title, body, placeName } = event.data.payload;
 
+    // Show notification instantly
     self.registration.showNotification(title, {
       body,
       tag: "location-change",
@@ -10,10 +11,10 @@ self.addEventListener("message", (event) => {
         { action: "update", title: "Update" },
         { action: "close", title: "Close" },
       ],
-      data: { placeName }, // store placeName in notification data
+      data: { placeName },
     });
 
-    // Send placeName to all clients to update localStorage
+    // Update all clients immediately
     if (placeName) {
       self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsList) => {
         clientsList.forEach((client) => {
@@ -29,10 +30,8 @@ self.addEventListener("message", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-
   const placeName = event.notification.data?.placeName;
 
-  // Update all clients again on click
   if (placeName) {
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsList) => {
       clientsList.forEach((client) => {
@@ -44,10 +43,8 @@ self.addEventListener("notificationclick", (event) => {
     });
   }
 
-  // Open Profile page directly on Location tab
   if (event.action === "update" || !event.action) {
-    event.waitUntil(
-      clients.openWindow("/settings/profile?tab=location")
-    );
+    event.waitUntil(clients.openWindow("/settings/profile?tab=location"));
   }
 });
+

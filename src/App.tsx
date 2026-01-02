@@ -30,33 +30,24 @@ import NotificationsPage from './pages/Notifications/presentation/notification.p
 import { ThemeProvider } from './context/ThemeContext';
 import { useDynamicLocation } from './utils/useNotification';
 
-
-
 function AppContent() {
+  // Request notification permission on mount
+  const [notificationsGranted, setNotificationsGranted] = useState(false);
 
-  // Request permission on mount
-const [notificationsGranted, setNotificationsGranted] = useState(false);
+  useEffect(() => {
+    if (!("Notification" in window)) return;
 
-useEffect(() => {
-  if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      setNotificationsGranted(true);
+    } else if (Notification.permission === "default") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") setNotificationsGranted(true);
+      });
+    }
+  }, []);
 
-  if (Notification.permission === "granted") {
-    setNotificationsGranted(true);
-  } else if (Notification.permission === "default") {
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") setNotificationsGranted(true);
-    });
-  }
-}, []);
-
-// Pass the flag to the hook
-useDynamicLocation(notificationsGranted);
-
-
-
-
-
-
+  // Initialize dynamic location tracking when notifications are granted
+  useDynamicLocation(notificationsGranted);
 
   return (
     <>
@@ -72,7 +63,7 @@ useDynamicLocation(notificationsGranted);
           <Route path="/services/employee" element={<ServiceSettings />} />
           <Route path="/services/documents" element={<DocumentOnboarding />} />
 
-          {/* Protected Routes (inside app) */}
+          {/* Protected Routes */}
           <Route
             path="/"
             element={
@@ -115,7 +106,7 @@ function App() {
   return (
     <ThemeProvider>
       <LocationProvider>
-        {/* LocationTracker now uses debounced pure web tracking */}
+        {/* LocationTracker runs continuously in background */}
         <LocationTracker />
         <AppContent />
       </LocationProvider>

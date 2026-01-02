@@ -10,11 +10,11 @@ export function useDynamicLocation(enabled: boolean = true) {
   );
 
   const [lastNotifiedLocation, setLastNotifiedLocation] = useState<string | null>(
-    () => localStorage.getItem("lastNotifiedLocation")
+    localStorage.getItem("lastNotifiedLocation")
   );
 
-  // Haversine distance
-  const getDistanceKm = (loc1: { lat: number; lng: number }, loc2: { lat: number; lng: number }) => {
+  /** ---------- Haversine & Direction Helpers ---------- */
+  const getDistanceKm = useCallback((loc1: { lat: number; lng: number }, loc2: { lat: number; lng: number }) => {
     const R = 6371;
     const toRad = (deg: number) => (deg * Math.PI) / 180;
 
@@ -28,9 +28,9 @@ export function useDynamicLocation(enabled: boolean = true) {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
-  };
+  }, []);
 
-  const getDirection = (loc1: { lat: number; lng: number }, loc2: { lat: number; lng: number }) => {
+  const getDirection = useCallback((loc1: { lat: number; lng: number }, loc2: { lat: number; lng: number }) => {
     const toRad = (deg: number) => (deg * Math.PI) / 180;
     const toDeg = (rad: number) => (rad * 180) / Math.PI;
 
@@ -45,9 +45,9 @@ export function useDynamicLocation(enabled: boolean = true) {
 
     const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
     return directions[Math.round(bearing / 45) % 8];
-  };
+  }, []);
 
-  // Function to notify a location change (manual or geolocation)
+  /** ---------- Notify Location Change ---------- */
   const notifyLocationChange = useCallback(async (loc: { lat: number; lng: number }) => {
     if (!enabled) return;
 
@@ -62,6 +62,7 @@ export function useDynamicLocation(enabled: boolean = true) {
       placeName = shortName;
     } catch {}
 
+    // Distance & direction text
     let distanceText = "";
     if (lastLoc) {
       const distanceKm = getDistanceKm(lastLoc, loc);
@@ -69,11 +70,9 @@ export function useDynamicLocation(enabled: boolean = true) {
       distanceText = `${distanceKm.toFixed(2)} km ${direction}`;
     }
 
-    const fullBody = distanceText
-      ? `${placeName} (${distanceText} from last location)`
-      : placeName;
+    const fullBody = distanceText ? `${placeName} (${distanceText} from last location)` : placeName;
 
-    // Notify SW or native
+    /** --- Notify Service Worker --- */
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
         type: "LOCATION_NOTIFICATION",
@@ -83,15 +82,14 @@ export function useDynamicLocation(enabled: boolean = true) {
       new Notification("Location Changed", { body: fullBody });
     }
 
-    // Save to state & localStorage
+    /** --- Update React state & localStorage immediately --- */
     setLastNotifiedLocation(placeName);
     localStorage.setItem("lastNotifiedLocation", placeName);
-
     lastLocationRef.current = loc;
     localStorage.setItem("lastLocation", JSON.stringify(loc));
-  }, [enabled, setCurrentLocation]);
+  }, [enabled, setCurrentLocation, getDistanceKm, getDirection]);
 
-  // Expose manual updater
+  /** ---------- Manual location updater ---------- */
   const updateLocationManually = useCallback(
     (lat: number, lng: number) => {
       notifyLocationChange({ lat, lng });
@@ -99,7 +97,7 @@ export function useDynamicLocation(enabled: boolean = true) {
     [notifyLocationChange]
   );
 
-  // Listen for SW messages
+  /** ---------- Listen for SW updates (immediate UI/localStorage sync) ---------- */
   useEffect(() => {
     if (!enabled || !navigator.serviceWorker) return;
 
@@ -107,19 +105,17 @@ export function useDynamicLocation(enabled: boolean = true) {
       if (event.data?.type === "UPDATE_LAST_NOTIFIED_LOCATION") {
         const { placeName } = event.data.payload;
         if (placeName) {
-          localStorage.setItem("lastNotifiedLocation", placeName);
           setLastNotifiedLocation(placeName);
+          localStorage.setItem("lastNotifiedLocation", placeName);
         }
       }
     };
 
     navigator.serviceWorker.addEventListener("message", onMessage);
-    return () => {
-      navigator.serviceWorker.removeEventListener("message", onMessage);
-    };
+    return () => navigator.serviceWorker.removeEventListener("message", onMessage);
   }, [enabled]);
 
-  // Geolocation watcher
+  /** ---------- Geolocation watcher (immediate updates) ---------- */
   useEffect(() => {
     if (!enabled || !navigator.geolocation || !isTracking) return;
 
@@ -127,6 +123,7 @@ export function useDynamicLocation(enabled: boolean = true) {
       const current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       const lastLoc = lastLocationRef.current;
 
+      // Minimum movement threshold: 5 meters
       if (!lastLoc || getDistanceKm(lastLoc, current) >= 0.005) {
         notifyLocationChange(current);
       }
@@ -137,7 +134,7 @@ export function useDynamicLocation(enabled: boolean = true) {
     });
 
     return () => navigator.geolocation.clearWatch(watchId);
-  }, [enabled, isTracking, notifyLocationChange]);
+  }, [enabled, isTracking, notifyLocationChange, getDistanceKm]);
 
   return { lastNotifiedLocation, updateLocationManually };
 }
