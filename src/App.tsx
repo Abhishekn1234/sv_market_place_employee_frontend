@@ -1,7 +1,7 @@
 // src/App.tsx
 import './App.css';
-import { Route, Routes } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Route, Routes, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { ToastContainer } from "react-toastify";
 
 import { LocationProvider } from './context/LocationContext';
@@ -30,24 +30,34 @@ import NotificationsPage from './pages/Notifications/presentation/notification.p
 import { ThemeProvider } from './context/ThemeContext';
 import { useDynamicLocation } from './utils/useNotification';
 
+
+
 function AppContent() {
-  // Request notification permission on mount
-  const [notificationsGranted, setNotificationsGranted] = useState(false);
+useDynamicLocation();
+useEffect(() => {
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission().then((perm) => {
+      console.log("Notification permission:", perm);
+    });
+  }
+}, []);
 
-  useEffect(() => {
-    if (!("Notification" in window)) return;
 
-    if (Notification.permission === "granted") {
-      setNotificationsGranted(true);
-    } else if (Notification.permission === "default") {
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") setNotificationsGranted(true);
-      });
+useEffect(() => {
+  if (!navigator.serviceWorker) return;
+
+  navigator.serviceWorker.addEventListener("message", event => {
+    if (event.data?.type === "UPDATE_LOCATION") {
+      const { loc, placeName } = event.data.payload;
+      localStorage.setItem("lastNotifiedLocation", JSON.stringify({ lat: loc.lat, lng: loc.lng, placeName }));
+      // Optionally update your state/UI here
+      console.log("Location updated from notification:", loc, placeName);
     }
-  }, []);
+  });
+}, []);
 
-  // Initialize dynamic location tracking when notifications are granted
-  useDynamicLocation(notificationsGranted);
+
+
 
   return (
     <>
@@ -63,7 +73,7 @@ function AppContent() {
           <Route path="/services/employee" element={<ServiceSettings />} />
           <Route path="/services/documents" element={<DocumentOnboarding />} />
 
-          {/* Protected Routes */}
+          {/* Protected Routes (inside app) */}
           <Route
             path="/"
             element={
@@ -106,7 +116,7 @@ function App() {
   return (
     <ThemeProvider>
       <LocationProvider>
-        {/* LocationTracker runs continuously in background */}
+        {/* LocationTracker now uses debounced pure web tracking */}
         <LocationTracker />
         <AppContent />
       </LocationProvider>

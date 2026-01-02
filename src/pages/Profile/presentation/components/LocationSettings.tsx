@@ -180,9 +180,18 @@ export default function LocationSettings({ setActiveTab }: LocationSettingsProps
   const [tempLocation, setTempLocation] = useState<[number, number] | null>(null);
   const [locationMode, setLocationMode] = useState<"current" | "manual">("manual");
   const [radius, setRadius] = useState(500);
-  const [lastNotifiedLocation, setLastNotifiedLocation] = useState<string>(
-    localStorage.getItem("lastNotifiedLocation") || "-"
-  );
+ const [lastNotifiedLocation, setLastNotifiedLocation] = useState<string>(() => {
+  try {
+    const stored = localStorage.getItem("lastNotifiedLocation");
+    if (!stored) return "-";
+
+    const parsed = JSON.parse(stored); // parse JSON
+    return parsed.placeName || "-";    // extract placeName only
+  } catch {
+    return "-";
+  }
+});
+
   const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
