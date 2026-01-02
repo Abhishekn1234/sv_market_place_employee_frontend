@@ -1,28 +1,38 @@
+// Service Worker: handle notification clicks with actions
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
+  const data = event.notification.data;
 
   if (event.action === "update") {
-    // handle update click
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
-      for (const client of clientsArr) {
-        client.postMessage({ type: "UPDATE_LOCATION", payload: { loc: null, placeName: null } });
-        client.focus();
-        return;
-      }
-      clients.openWindow("/settings/profile");
-    });
-  } else if (event.action === "close") {
-    // just close notification
-  } else {
-    // click outside buttons
-    const url = event.notification.data?.url || "/";
+    // Send message to app to switch tab
     event.waitUntil(
       clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
-        for (const client of clientsArr) {
-          if (client.url.includes(url)) return client.focus();
+        if (clientsArr.length > 0) {
+          const client = clientsArr[0];
+          client.postMessage({
+            type: "NAVIGATE",
+            payload: { url: data.url, tab: data.tab },
+          });
+          client.focus();
+        } else {
+          clients.openWindow(data.url);
         }
-        return clients.openWindow(url);
+      })
+    );
+  } else if (event.action === "close") {
+    // Just close the notification
+  } else {
+    // Clicked on body
+    event.waitUntil(
+      clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
+        if (clientsArr.length > 0) {
+          clientsArr[0].focus();
+        } else {
+          clients.openWindow(data.url);
+        }
       })
     );
   }
 });
+
+

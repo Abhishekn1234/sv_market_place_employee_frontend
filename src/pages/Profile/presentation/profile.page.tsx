@@ -23,11 +23,19 @@ export default function ProfileSettings() {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
   // Clear tab query param after initial load
-  useEffect(() => {
-    if (params.get("tab")) {
-      navigate(location.pathname, { replace: true });
+useEffect(() => {
+  const onMessage = (event: MessageEvent) => {
+    const { type, payload } = event.data || {};
+    if (type === "NAVIGATE" && payload?.url) {
+      navigate(payload.url, { replace: true });
+      if (payload.tab) setActiveTab(payload.tab); // switches to "location"
     }
-  }, [location.pathname, navigate, params]);
+  };
+
+  navigator.serviceWorker?.addEventListener("message", onMessage);
+  return () =>
+    navigator.serviceWorker?.removeEventListener("message", onMessage);
+}, [navigate]);
 
   // -----------------------------
   // Handle SW messages for navigation
