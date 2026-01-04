@@ -25,13 +25,12 @@ const getDistance = (p1: Location, p2: Location) => {
   return R * c;
 };
 
-
 export function useDynamicLocation() {
   const { setCurrentLocation, isTracking } = useLocationContext();
   const lastLocationRef = useRef<Location | null>(null);
   const notifCountRef = useRef<Record<string, number>>({});
 
-  // Fetch place name from Nominatim (English)
+  // Fetch place name from Nominatim
   const getPlaceName = async (lat: number, lng: number): Promise<string> => {
     try {
       const res = await fetch(
@@ -58,28 +57,9 @@ export function useDynamicLocation() {
     }
   };
 
-  // Notify user via Service Worker
-  const notifyLocationChange = async (loc: Location, placeName: string) => {
+  const notifyLocationChange = async (loc: Location, placeName: string, distanceMeters: number) => {
+    if (distanceMeters < 5) return; // ignore tiny movements
     setCurrentLocation(loc);
-
-    // Last notified location
-    const last = localStorage.getItem("lastNotifiedLocation");
-    let lastLoc: Location | null = null;
-    if (last) {
-      try {
-        const parsed = JSON.parse(last) as LocationData;
-        lastLoc = { lat: parsed.lat, lng: parsed.lng };
-      } catch {}
-    }
-
-    // Distance in km
-    const distance = lastLoc ? getDistance(lastLoc, loc) / 1000 : 0;
-
-    // Save current location
-    localStorage.setItem(
-      "lastNotifiedLocation",
-      JSON.stringify({ lat: loc.lat, lng: loc.lng, placeName })
-    );
 
     // Limit max 2 notifications per coordinate
     const key = `${loc.lat.toFixed(6)}_${loc.lng.toFixed(6)}`;
@@ -87,12 +67,17 @@ export function useDynamicLocation() {
     if (count >= 2) return;
     notifCountRef.current[key] = count + 1;
 
+    // Save last location
+    lastLocationRef.current = loc;
+    localStorage.setItem(
+      "lastNotifiedLocation",
+      JSON.stringify({ lat: loc.lat, lng: loc.lng, placeName })
+    );
+
     if ("serviceWorker" in navigator && Notification.permission === "granted") {
       const sw = await navigator.serviceWorker.ready;
       sw.showNotification("Location Changed", {
-        body: `Lat: ${loc.lat.toFixed(4)}, Lng: ${loc.lng.toFixed(4)}
-Place: ${placeName}
-Distance from last: ${distance.toFixed(2)} km`,
+        body: `Place: ${placeName}\nDistance from last: ${(distanceMeters / 1000).toFixed(2)} km`,
         requireInteraction: true,
         data: { loc, placeName, url: "/settings/profile", tab: "location" },
         actions: [
@@ -106,7 +91,6 @@ Distance from last: ${distance.toFixed(2)} km`,
   useEffect(() => {
     if (!navigator.geolocation || !isTracking) return;
 
-    // Request notification permission if needed
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
@@ -114,27 +98,35 @@ Distance from last: ${distance.toFixed(2)} km`,
     const handlePosition = async (pos: GeolocationPosition) => {
       const current: Location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
 
-      // Notify if distance > 5 meters or first time
-      if (!lastLocationRef.current || getDistance(lastLocationRef.current, current) >= 5) {
-        lastLocationRef.current = current;
-        const placeName = await getPlaceName(current.lat, current.lng);
-        notifyLocationChange(current, placeName);
-      }
+      // Use lastLocationRef first, fallback to localStorage
+      const last: Location | null =
+        lastLocationRef.current ??
+        (() => {
+          const stored = localStorage.getItem("lastNotifiedLocation");
+          if (!stored) return null;
+          try {
+            const parsed = JSON.parse(stored) as LocationData;
+            return { lat: parsed.lat, lng: parsed.lng };
+          } catch {
+            return null;
+          }
+        })();
+
+      const distanceMeters = last ? getDistance(last, current) : Infinity;
+
+      await notifyLocationChange(current, await getPlaceName(current.lat, current.lng), distanceMeters);
     };
 
-    // Initial fetch
     navigator.geolocation.getCurrentPosition(handlePosition, console.error, {
       enableHighAccuracy: true,
       maximumAge: 0,
     });
 
-    // Continuous watch
     const watchId = navigator.geolocation.watchPosition(handlePosition, console.error, {
       enableHighAccuracy: true,
       maximumAge: 0,
     });
 
-    // Poll fallback
     const interval = setInterval(() => {
       navigator.geolocation.getCurrentPosition(handlePosition, console.error, {
         enableHighAccuracy: true,

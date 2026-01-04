@@ -1,58 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Lock, MapPin } from "lucide-react";
 import ProfileList from "./components/ProfileList";
 import PasswordChanging from "./components/PasswordChanging";
 import LocationSettings from "./components/LocationSettings";
 import { useLanguage } from "@/context/LanguageContext";
-import { useLocation, useNavigate } from "react-router-dom";
 
 type TabType = "profile" | "password" | "location";
 
-export default function ProfileSettings() {
-  const navigate = useNavigate();
-  const location = useLocation();
+interface Props {
+  activeTab: TabType;
+  setActiveTab: (tab: TabType) => void;
+}
+
+export default function ProfileSettings({ activeTab, setActiveTab }: Props) {
   const { language, t } = useLanguage();
   const isRTL = language === "AR";
-
-  // -----------------------------
-  // Determine initial tab from URL query param
-  // -----------------------------
-  const params = new URLSearchParams(location.search);
-  const initialTab = (params.get("tab") as TabType) || "profile";
-  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
-
-  // Clear tab query param after initial load
-useEffect(() => {
-  const onMessage = (event: MessageEvent) => {
-    const { type, payload } = event.data || {};
-    if (type === "NAVIGATE" && payload?.url) {
-      navigate(payload.url, { replace: true });
-      if (payload.tab) setActiveTab(payload.tab); // switches to "location"
-    }
-  };
-
-  navigator.serviceWorker?.addEventListener("message", onMessage);
-  return () =>
-    navigator.serviceWorker?.removeEventListener("message", onMessage);
-}, [navigate]);
-
-  // -----------------------------
-  // Handle SW messages for navigation
-  // -----------------------------
-  useEffect(() => {
-    const onMessage = (event: MessageEvent) => {
-      const { type, payload } = event.data || {};
-      if (type === "NAVIGATE" && payload?.url) {
-        navigate(payload.url, { replace: true });
-        if (payload.tab) setActiveTab(payload.tab);
-      }
-    };
-
-    navigator.serviceWorker?.addEventListener("message", onMessage);
-    return () =>
-      navigator.serviceWorker?.removeEventListener("message", onMessage);
-  }, [navigate]);
 
   const tabTriggerClass = `
     relative h-12 px-0 bg-transparent rounded-none
@@ -67,32 +30,32 @@ useEffect(() => {
     hover:text-blue-600
   `;
 
+  // Listen to SW messages for tab changes (in case you want redundancy)
+  useEffect(() => {
+    const handleSWMessage = (event: MessageEvent) => {
+      const { type, payload } = event.data || {};
+      if (type === "NAVIGATE" && payload?.tab) {
+        setActiveTab(payload.tab);
+      }
+    };
+    navigator.serviceWorker?.addEventListener("message", handleSWMessage);
+    return () =>
+      navigator.serviceWorker?.removeEventListener("message", handleSWMessage);
+  }, [setActiveTab]);
+
   return (
     <div className={`w-full h-full overflow-hidden ${isRTL ? "rtl" : "ltr"}`}>
       <div className="w-full max-w-4xl mx-auto">
         <div className="mb-4">
-          <h1
-            className={`text-2xl md:text-3xl font-bold ${
-              isRTL ? "text-right" : "text-left"
-            }`}
-          >
+          <h1 className={`text-2xl md:text-3xl font-bold ${isRTL ? "text-right" : "text-left"}`}>
             {t("profileSettings")}
           </h1>
-          <p
-            className={`text-sm text-gray-600 ${
-              isRTL ? "text-right" : "text-left"
-            }`}
-          >
-            {t("profileSettingsSubtitle") ||
-              "Manage your account settings and preferences"}
+          <p className={`text-sm text-gray-600 ${isRTL ? "text-right" : "text-left"}`}>
+            {t("profileSettingsSubtitle") || "Manage your account settings and preferences"}
           </p>
         </div>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as TabType)}
-          className="w-full"
-        >
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
           <div className="sticky top-0 z-10">
             <TabsList
               className={`h-12 w-full gap-6 bg-transparent p-0 border-none shadow-none ${

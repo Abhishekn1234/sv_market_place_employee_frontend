@@ -1,19 +1,16 @@
-// Service Worker: handle notification clicks with actions
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const data = event.notification.data;
 
   if (event.action === "update") {
-    // Send message to app to switch tab
     event.waitUntil(
       clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
         if (clientsArr.length > 0) {
-          const client = clientsArr[0];
-          client.postMessage({
+          clientsArr[0].postMessage({
             type: "NAVIGATE",
-            payload: { url: data.url, tab: data.tab },
+            payload: { url: data.url, tab: data.tab, skipNotification: true },
           });
-          client.focus();
+          clientsArr[0].focus();
         } else {
           clients.openWindow(data.url);
         }
@@ -34,5 +31,3 @@ self.addEventListener("notificationclick", (event) => {
     );
   }
 });
-
-

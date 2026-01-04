@@ -1,7 +1,6 @@
-// src/App.tsx
 import './App.css';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ToastContainer } from "react-toastify";
 
 import { LocationProvider } from './context/LocationContext';
@@ -30,98 +29,60 @@ import NotificationsPage from './pages/Notifications/presentation/notification.p
 import { ThemeProvider } from './context/ThemeContext';
 import { useDynamicLocation } from './utils/useNotification';
 
-
-
 function AppContent() {
-useDynamicLocation();
-useEffect(() => {
-  if ("Notification" in window && Notification.permission === "default") {
-    Notification.requestPermission().then((perm) => {
-      console.log("Notification permission:", perm);
-    });
-  }
-}, []);
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
 
+  useDynamicLocation();
 
-useEffect(() => {
-  if (!navigator.serviceWorker) return;
-
-  navigator.serviceWorker.addEventListener("message", event => {
-    if (event.data?.type === "UPDATE_LOCATION") {
-      const { loc, placeName } = event.data.payload;
-      localStorage.setItem("lastNotifiedLocation", JSON.stringify({ lat: loc.lat, lng: loc.lng, placeName }));
-      // Optionally update your state/UI here
-      console.log("Location updated from notification:", loc, placeName);
-    }
-  });
-}, []);
-
-
-
+  useEffect(() => {
+    // Handle SW navigation messages
+    const handleSWMessage = (event: MessageEvent) => {
+      const { type, payload } = event.data || {};
+      if (type === "NAVIGATE" && payload?.url) {
+        navigate(payload.url, { replace: true });
+        if (payload.tab) setActiveTab(payload.tab);
+      }
+    };
+    navigator.serviceWorker?.addEventListener("message", handleSWMessage);
+    return () => navigator.serviceWorker?.removeEventListener("message", handleSWMessage);
+  }, [navigate]);
 
   return (
-    <>
-      <LanguageProvider>
-        <ToastContainer position="top-right" autoClose={5000} />
-        <Routes>
-          {/* Auth Routes */}
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/verify-otp" element={<VerifyOtpPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/services/employee" element={<ServiceSettings />} />
-          <Route path="/services/documents" element={<DocumentOnboarding />} />
+    <LanguageProvider>
+      <ToastContainer position="top-right" autoClose={5000} />
+      <Routes>
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/verify-otp" element={<VerifyOtpPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/services/employee" element={<ServiceSettings />} />
+        <Route path="/services/documents" element={<DocumentOnboarding />} />
 
-          {/* Protected Routes (inside app) */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<HomePage />} />
-            <Route path="/settings/profile" element={
-              <ProtectedRoute><ProfileSettings /></ProtectedRoute>
-            }/>
-            <Route path="/history/booking" element={
-              <ProtectedRoute><BookingHistory /></ProtectedRoute>
-            }/>
-            <Route path="/history/transaction" element={
-              <ProtectedRoute><TransactionHistory /></ProtectedRoute>
-            }/>
-            <Route path="/history/work" element={
-              <ProtectedRoute><WorkingHistory /></ProtectedRoute>
-            }/>
-            <Route path="/activity/recent" element={
-              <ProtectedRoute><RecentActivity /></ProtectedRoute>
-            }/>
-            <Route path="/activity/past" element={
-              <ProtectedRoute><PastActivity /></ProtectedRoute>
-            }/>
-            <Route path="/settings/wallet" element={
-              <ProtectedRoute><Wallet /></ProtectedRoute>
-            }/>
-            <Route path="/notifications" element={<NotificationsPage />} />
-          </Route>
-        </Routes>
-      </LanguageProvider>
-    </>
+        <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+          <Route index element={<HomePage />} />
+          <Route path="/settings/profile" element={<ProtectedRoute><ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} /></ProtectedRoute>} />
+          <Route path="/history/booking" element={<ProtectedRoute><BookingHistory /></ProtectedRoute>} />
+          <Route path="/history/transaction" element={<ProtectedRoute><TransactionHistory /></ProtectedRoute>} />
+          <Route path="/history/work" element={<ProtectedRoute><WorkingHistory /></ProtectedRoute>} />
+          <Route path="/activity/recent" element={<ProtectedRoute><RecentActivity /></ProtectedRoute>} />
+          <Route path="/activity/past" element={<ProtectedRoute><PastActivity /></ProtectedRoute>} />
+          <Route path="/settings/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+        </Route>
+      </Routes>
+      <LocationTracker />
+    </LanguageProvider>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <ThemeProvider>
       <LocationProvider>
-        {/* LocationTracker now uses debounced pure web tracking */}
-        <LocationTracker />
         <AppContent />
       </LocationProvider>
     </ThemeProvider>
   );
 }
-
-export default App;
