@@ -1,8 +1,8 @@
-import { Switch } from "@/components/ui/switch";
+
 import { Users, Briefcase, CreditCard, Bell } from "lucide-react";
-import { useState, useEffect } from "react";
+
 import { useLanguage } from "@/context/LanguageContext";
-import { useWorkerStatus } from "./hooks/useWorkerStatus";
+
 
 
 export default function HomePage() {
@@ -11,27 +11,7 @@ export default function HomePage() {
   const isRTL = language === "AR";
 
   // Hook for updating worker status
-  const { worker, updateStatus, loading } = useWorkerStatus();
-
-  // Local switch state
-  const [isOnline, setIsOnline] = useState<boolean>(false);
-
-  // Sync switch with worker status
-  useEffect(() => {
-    if (worker) {
-      setIsOnline(worker.status === "ONLINE");
-    }
-  }, [worker]);
-
-  // Handle toggle
-const handleToggle = (checked: boolean) => {
-  setIsOnline(checked);
-  updateStatus(checked); // ✅ boolean only
-};
-const canToggle =
-  worker?.status === "ONLINE" || worker?.status === "OFFLINE";
-
-
+ 
   const cards = [
     {
       title: homeTranslations.totalEmployees,
@@ -71,30 +51,7 @@ const canToggle =
       <div className={`flex items-center justify-between mb-6 ${isRTL ? "flex-row-reverse" : ""}`}>
         <h1 className="text-2xl font-bold">{homeTranslations.dashboard}</h1>
 
-    <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-  {canToggle ? (
-    <>
-      <Switch
-        checked={isOnline}
-        onCheckedChange={handleToggle}
-        disabled={loading}
-        className={isOnline ? "bg-green-500" : "bg-gray-300"}
-      />
-
-      <span
-        className={`text-sm font-medium ${
-          isOnline ? "text-green-600" : "text-gray-500"
-        }`}
-      >
-        {isOnline ? homeTranslations.online : homeTranslations.offline}
-      </span>
-    </>
-  ) : (
-    <span className="text-sm font-semibold text-orange-600">
-      {worker?.status.replace("_", " ")}
-    </span>
-  )}
-</div>
+   
 
 
       </div>

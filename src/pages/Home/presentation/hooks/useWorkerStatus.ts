@@ -8,56 +8,68 @@ export function useWorkerStatus() {
   const [worker, setWorker] = useState<Worker | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Safely initialize the mutation
   const serviceSettingsMutation = useServiceSettings();
 
-  // 🔹 Init from localStorage
+  // 🔹 Load initial status from localStorage once
   useEffect(() => {
     const stored = localStorage.getItem("employeeData");
-    if (stored) {
+    if (!stored) return;
+
+    try {
       const data = JSON.parse(stored);
       if (data?.user?.status) {
         setWorker({ status: data.user.status } as Worker);
       }
+    } catch (err) {
+      console.error("Failed to parse employeeData from localStorage", err);
     }
   }, []);
 
+  // 🔹 Update worker status
   const updateStatus = useCallback(
-    (isOnline: boolean) => {
-      setLoading(true);
+  (isOnline: boolean) => {
+    setLoading(true);
 
-      const payload: WorkerPayload = {
-        status: isOnline ? "ONLINE" : "OFFLINE",
-      };
+    const payload: WorkerPayload = {
+      status: isOnline ? "ONLINE" : "OFFLINE",
+    };
 
-      serviceSettingsMutation.mutate(payload, {
-        onSuccess: () => {
-         setWorker((prev) => {
-            if (!prev) return prev; // or return null
-            return { ...prev, status: payload.status! };
-            });
+    serviceSettingsMutation.mutate(payload, {
+      onSuccess: () => {
+        // Update local state safely
+       setWorker(prev =>
+  prev
+    ? { ...prev, status: payload.status }
+    : {
+        status: payload.status!,
+        categoryIds: [],
+        serviceTierIds: [],
+      }
+);
 
-
-          // 🔹 Sync localStorage
-          const stored = localStorage.getItem("employeeData");
-          if (stored) {
-            const data = JSON.parse(stored);
-            if (data?.user) {
-              data.user.status = payload.status;
-              localStorage.setItem("employeeData", JSON.stringify(data));
-            }
+        // Update localStorage
+        const stored = localStorage.getItem("employeeData");
+        if (stored) {
+          const data = JSON.parse(stored);
+          if (data?.user) {
+            data.user.status = payload.status;
+            localStorage.setItem("employeeData", JSON.stringify(data));
           }
+        }
 
-          toast.success(`Status updated to ${payload.status}`);
-          setLoading(false);
-        },
-        onError: (err: any) => {
-          toast.error(err?.message || "Failed to update status");
-          setLoading(false);
-        },
-      });
-    },
-    [serviceSettingsMutation]
-  );
+        toast.success(`Status updated to ${payload.status}`);
+        setLoading(false);
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to update status");
+        setLoading(false);
+      },
+    });
+  },
+  [serviceSettingsMutation]
+);
+
 
   return { worker, loading, updateStatus };
 }

@@ -1,58 +1,27 @@
-import { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Circle, useMap } from "react-leaflet";
+import { useEffect, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Circle,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PencilIcon } from "lucide-react";
 import { toast } from "react-toastify";
-import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
-import { useServiceTier } from "@/pages/Servicesettings/presentation/hooks/useServiceTier";
-import { useServiceSettings } from "@/pages/Servicesettings/presentation/hooks/useServicesettings";
-import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/servicesettings";
+
 import { useLocationContext } from "@/context/LocationContext";
+import { useDynamicLocation } from "@/utils/useNotification";
+import { useServiceTier } from "@/pages/Servicesettings/presentation/hooks/useServiceTier";
+import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
+import { useServiceSettings } from "@/pages/Servicesettings/presentation/hooks/useServicesettings";
 
+import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/servicesettings";
 
-export const getPlaceFromCoordinates = async (
-  lat?: number,
-  lng?: number
-): Promise<{ shortName: string }> => {
-  try {
-    if (lat === undefined || lng === undefined) {
-      const position: GeolocationPosition = await new Promise((resolve, reject) => {
-        if (!navigator.geolocation) return reject("Geolocation not supported");
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          maximumAge: 0,
-        });
-      });
-      lat = position.coords.latitude;
-      lng = position.coords.longitude;
-    }
-
-    const res = await fetch(
-      `/nominatim/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
-    );
-    if (!res.ok) throw new Error("Failed to fetch location");
-    const data = await res.json();
-    const addr = data.address || {};
-    const shortName =
-      addr.village ||
-      addr.town ||
-      addr.city ||
-      addr.hamlet ||
-      addr.road ||
-      addr.county ||
-      addr.state ||
-      "Unknown location";
-    return { shortName };
-  } catch (err) {
-    console.error("getPlaceFromCoordinates error:", err);
-    return { shortName: "Unknown location" };
-  }
-};
-
-/* ---------------- Leaflet marker fix ---------------- */
+/* ---------------- Leaflet Fix ---------------- */
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -63,327 +32,340 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-const MAX_RADIUS = 12000;
-const EDGE_TOLERANCE = 25;
+const normalize = (n: number) => Number(n.toFixed(6));
 
-/* ---------------- Props ---------------- */
-interface LocationSettingsProps {
-  setActiveTab?: (tab: "profile" | "password" | "location") => void;
-}
+/* ---------- Reverse Geocode ---------- */
+const reverseGeocode = async (lat: number, lng: number) => {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
+    );
+    const data = await res.json();
+    return data.display_name ?? `${lat}, ${lng}`;
+  } catch {
+    return `${lat}, ${lng}`;
+  }
+};
 
-/* ---------------- RecenterMap ---------------- */
-const RecenterMap = ({ location }: { location: [number, number] | null }) => {
+/* ---------- Last Saved Location ---------- */
+const getLastNotifiedLocation = async () => {
+  const stored = localStorage.getItem("lastNotifiedLocation");
+  if (!stored) return null;
+
+  try {
+    const { lat, lng } = JSON.parse(stored);
+    const placeName = await reverseGeocode(lat, lng);
+    return { lat, lng, placeName };
+  } catch {
+    return null;
+  }
+};
+
+/* ---------- Map Helpers ---------- */
+const RecenterMap = ({ location }: { location: [number, number] }) => {
   const map = useMap();
   useEffect(() => {
-    if (!location) return;
-    const center = map.getCenter();
-    if (center.lat !== location[0] || center.lng !== location[1]) {
-      map.setView(location, map.getZoom(), { animate: true });
-    }
-  }, [location, map]);
+    map.setView(location, map.getZoom(), { animate: true });
+  }, [location]);
   return null;
 };
 
-/* ---------------- LocationPicker ---------------- */
-function LocationPicker({
-  location,
-  setLocation,
-  radius,
-  setRadius,
-  isManual,
-  onLocationChange,
+const ManualLocationPicker = ({
+  enabled,
+  onPick,
 }: {
-  location: [number, number];
-  setLocation: (loc: [number, number]) => void;
-  radius: number;
-  setRadius: (r: number) => void;
-  isManual: boolean;
-  onLocationChange?: (lat: number, lng: number) => void;
-}) {
-  const draggingRef = useRef(false);
+  enabled: boolean;
+  onPick: (lat: number, lng: number) => void;
+}) => {
+  const map = useMap();
 
-  const MapEventsWrapper = () => {
-    const map = useMap();
-    useEffect(() => {
-      if (!isManual) return;
+  useEffect(() => {
+    if (!enabled) return;
 
-      const onClick = (e: any) => {
-        const newLoc: [number, number] = [e.latlng.lat, e.latlng.lng];
-        setLocation(newLoc);
-        onLocationChange?.(newLoc[0], newLoc[1]);
-      };
+    const handler = (e: any) => {
+      onPick(e.latlng.lat, e.latlng.lng);
+    };
 
-      const onMouseDown = (e: any) => {
-        if (Math.abs(L.latLng(location).distanceTo(e.latlng) - radius) <= EDGE_TOLERANCE) {
-          draggingRef.current = true;
-        }
-      };
+    map.on("click", handler);
+    return () => {
+      map.off("click", handler);
+    };
+  }, [enabled]);
 
-      const onMouseMove = (e: any) => {
-        if (!draggingRef.current) return;
-        setRadius(Math.min(L.latLng(location).distanceTo(e.latlng), MAX_RADIUS));
-      };
+  return null;
+};
 
-      const onMouseUp = () => (draggingRef.current = false);
+type TabType = "location" | "profile" | "password";
 
-      map.on("click", onClick);
-      map.on("mousedown", onMouseDown);
-      map.on("mousemove", onMouseMove);
-      map.on("mouseup", onMouseUp);
-
-      return () => {
-        map.off("click", onClick);
-        map.off("mousedown", onMouseDown);
-        map.off("mousemove", onMouseMove);
-        map.off("mouseup", onMouseUp);
-      };
-    }, [map, location, radius, isManual]);
-
-    return null;
-  };
-
-  return (
-    <>
-      <Marker
-        position={location}
-        draggable={isManual}
-        eventHandlers={{
-          dragend: (e) => {
-            const newLoc: [number, number] = [
-              e.target.getLatLng().lat,
-              e.target.getLatLng().lng,
-            ];
-            setLocation(newLoc);
-            onLocationChange?.(newLoc[0], newLoc[1]);
-          },
-        }}
-      />
-      <Circle center={location} radius={radius} />
-      <Marker
-        position={[location[0], location[1] + radius / 111000]}
-        icon={L.divIcon({
-          html: `<div style="background:white;padding:2px 6px;border-radius:4px;font-size:12px;font-weight:600">${
-            (radius / 1000).toFixed(2)
-          } km</div>`,
-        })}
-      />
-      <MapEventsWrapper />
-    </>
-  );
+interface Props {
+  setActiveTab: (tab: TabType) => void;
 }
 
-/* ---------------- MAIN COMPONENT ---------------- */
-export default function LocationSettings({ setActiveTab }: LocationSettingsProps) {
+export default function LocationSettings({ setActiveTab }: Props) {
+  useDynamicLocation();
   const { currentLocation } = useLocationContext();
-  const [userData, setUserData] = useState<any>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [tempLocation, setTempLocation] = useState<[number, number] | null>(null);
-  const [locationMode, setLocationMode] = useState<"current" | "manual">("manual");
-  const [radius, setRadius] = useState(500);
- const [lastNotifiedLocation, setLastNotifiedLocation] = useState<string>(() => {
-  try {
-    const stored = localStorage.getItem("lastNotifiedLocation");
-    if (!stored) return "-";
-
-    const parsed = JSON.parse(stored); // parse JSON
-    return parsed.placeName || "-";    // extract placeName only
-  } catch {
-    return "-";
-  }
-});
-
-  const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const { data: serviceTiers } = useServiceTier();
   const { data: serviceCategories } = useServiceCategory();
   const serviceSettingsMutation = useServiceSettings();
 
-  /* ---------------- Load user data ---------------- */
+  const [status, setStatus] = useState("ONLINE");
+  const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [tempLocation, setTempLocation] =
+    useState<[number, number] | null>(null);
+  const [locationName, setLocationName] = useState("");
+  const [radius, setRadius] = useState(1000);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [locationMode, setLocationMode] =
+    useState<"CURRENT" | "MANUAL">("CURRENT");
+
+  /* ---------- INIT ---------- */
   useEffect(() => {
-    const stored = localStorage.getItem("employeeData");
-    if (!stored) return;
-    const parsed = JSON.parse(stored).user;
-    setUserData(parsed);
-    setSelectedTiers(parsed.serviceTierIds || []);
-    setSelectedCategories(parsed.categoryIds || []);
-    if (parsed.location?.coordinates?.length === 2) {
-      const [lng, lat] = parsed.location.coordinates;
-      setTempLocation([lat, lng]);
-    }
+    const init = async () => {
+      const last = await getLastNotifiedLocation();
+      if (last) {
+        setTempLocation([normalize(last.lat), normalize(last.lng)]);
+        setLocationName(last.placeName);
+      }
+
+      const emp = localStorage.getItem("employeeData");
+      if (!emp) return;
+
+      const user = JSON.parse(emp).user;
+      setStatus(user.status);
+      setRadius(user.serviceRadius || 500);
+      setSelectedTiers(user.serviceTierIds || []);
+      setSelectedCategories(user.categoryIds || []);
+    };
+
+    init();
   }, []);
 
-  /* ---------------- Sync with currentLocation ---------------- */
+  /* ---------- GPS Sync ---------- */
   useEffect(() => {
-    if (locationMode === "current" && currentLocation) {
-      setTempLocation([currentLocation.lat, currentLocation.lng]);
-      updateLocation(currentLocation.lat, currentLocation.lng);
-    }
+    if (!currentLocation || locationMode !== "CURRENT") return;
+
+    const lat = normalize(currentLocation.lat);
+    const lng = normalize(currentLocation.lng);
+
+    setTempLocation([lat, lng]);
+    reverseGeocode(lat, lng).then(setLocationName);
   }, [currentLocation, locationMode]);
 
-  /* ---------------- Update location name + localStorage ---------------- */
-  const updateLocation = async (lat: number, lng: number) => {
-    try {
-      const { shortName } = await getPlaceFromCoordinates(lat, lng);
-      setLastNotifiedLocation(shortName);
-      localStorage.setItem("lastNotifiedLocation", shortName);
-
-      if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-          type: "LOCATION_NOTIFICATION",
-          payload: {
-            title: "Location Changed",
-            body: shortName,
-            placeName: shortName,
-          },
-        });
-      }
-    } catch (err) {
-      console.error("Failed to update location name", err);
-    }
-  };
-
-  /* ---------------- Save changes ---------------- */
+  /* ---------- Save ---------- */
   const saveChanges = () => {
-    if (!userData || !tempLocation) return;
+    if (!tempLocation) return;
+
+    const [lat, lng] = tempLocation;
 
     const payload: WorkerPayload = {
-      status: userData.status,
+      status: "ONLINE",
       serviceTierIds: selectedTiers,
       categoryIds: selectedCategories,
-      location: { type: "Point", coordinates: [tempLocation[1], tempLocation[0]] },
       serviceRadius: radius,
+      location: { type: "Point", coordinates: [lng, lat] },
     };
 
     serviceSettingsMutation.mutate(payload, {
       onSuccess: () => {
+        localStorage.setItem(
+          "lastNotifiedLocation",
+          JSON.stringify({ lat, lng })
+        );
         toast.success("Updated successfully");
         setModalOpen(false);
-        setActiveTab?.("profile");
+        setActiveTab("location");
       },
       onError: () => toast.error("Update failed"),
     });
   };
 
-  if (!userData) return <p>Loading...</p>;
+  if (!tempLocation) return null;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
-      <div className="flex justify-between mb-6">
+    <div className="max-w-3xl mx-auto p-6">
+      {/* Header */}
+      <div className="flex justify-between mb-4">
         <h2 className="text-xl font-semibold">Employee Details</h2>
         <Button onClick={() => setModalOpen(true)}>
           <PencilIcon className="w-4 h-4 mr-2" /> Edit
         </Button>
       </div>
 
-      {/* -------- Employee info -------- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <p className="text-sm text-gray-500">Status</p>
-          <p className="font-medium capitalize">{userData.status || "-"}</p>
+      {/* Display */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="rounded-lg border bg-white p-4">
+          <p className="text-sm text-gray-500 mb-1">Status</p>
+          <span className="font-medium text-blue-600">{status}</span>
         </div>
-        <div>
-          <p className="text-sm text-gray-500">Location</p>
-          <p className="font-medium">{lastNotifiedLocation || "-"}</p>
+
+        <div className="rounded-lg border bg-white p-4">
+          <p className="text-sm text-gray-500 mb-1">Location</p>
+          <span className="font-medium">{locationName}</span>
         </div>
-        <div>
-          <p className="text-sm text-gray-500">Service Tiers</p>
-          <p className="font-medium">
-            {serviceTiers
-              ?.filter((t: any) => selectedTiers.includes(t._id))
-              .map((t: any) => t.displayName)
-              .join(", ") || "-"}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Service Categories</p>
-          <p className="font-medium">
-            {serviceCategories
-              ?.filter((c: any) => selectedCategories.includes(c._id))
-              .map((c: any) => c.name)
-              .join(", ") || "-"}
-          </p>
-        </div>
+        <div className="rounded-lg border bg-white p-4">
+  <Label className="text-sm text-gray-500">Service Tiers</Label>
+  <div className="flex flex-wrap gap-2 mt-2">
+    {serviceTiers
+      ?.filter((t) => selectedTiers.includes(t._id))
+      .map((tier) => (
+        <span
+          key={tier._id}
+          className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs"
+        >
+          {tier.displayName}
+        </span>
+      ))}
+  </div>
+</div>
+
+<div className="rounded-lg border bg-white p-4">
+  <Label className="text-sm text-gray-500">Service Categories</Label>
+  <div className="flex flex-wrap gap-2 mt-2">
+    {serviceCategories
+      ?.filter((c) => selectedCategories.includes(c._id))
+      .map((cat) => (
+        <span
+          key={cat._id}
+          className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs"
+        >
+          {cat.name}
+        </span>
+      ))}
+  </div>
+</div>
+
       </div>
 
-      {/* -------- Edit modal -------- */}
-      {modalOpen && tempLocation && (
-        <div className="mt-4 border rounded p-4 space-y-4">
+      {/* Modal */}
+      {modalOpen && (
+        <div className="border rounded p-4 space-y-5">
           {/* Location Mode */}
-          <div className="flex gap-4">
-            {["current", "manual"].map((m) => (
-              <label key={m} className="flex gap-2 items-center">
+          <div>
+            <Label>Location Mode</Label>
+            <div className="flex gap-4 mt-2">
+              <label className="flex items-center gap-2">
                 <input
                   type="radio"
-                  checked={locationMode === m}
-                  onChange={() => setLocationMode(m as any)}
+                  checked={locationMode === "CURRENT"}
+                  onChange={() => setLocationMode("CURRENT")}
                 />
-                {m}
+                Current Location
               </label>
-            ))}
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  checked={locationMode === "MANUAL"}
+                  onChange={() => setLocationMode("MANUAL")}
+                />
+                Manual Location
+              </label>
+            </div>
           </div>
 
           {/* Map */}
           <MapContainer center={tempLocation} zoom={13} className="h-64">
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
             <RecenterMap location={tempLocation} />
-            <LocationPicker
-              location={tempLocation}
-              setLocation={setTempLocation}
-              radius={radius}
-              setRadius={setRadius}
-              isManual={locationMode === "manual"}
-              onLocationChange={updateLocation} // <-- manual updates
+
+            <ManualLocationPicker
+              enabled={locationMode === "MANUAL"}
+              onPick={async (lat, lng) => {
+                const nLat = normalize(lat);
+                const nLng = normalize(lng);
+                setTempLocation([nLat, nLng]);
+                setLocationName(await reverseGeocode(nLat, nLng));
+              }}
             />
+
+            <Marker
+              position={tempLocation}
+              draggable={locationMode === "MANUAL"}
+              eventHandlers={{
+                dragend: async (e) => {
+                  const pos = e.target.getLatLng();
+                  const nLat = normalize(pos.lat);
+                  const nLng = normalize(pos.lng);
+                  setTempLocation([nLat, nLng]);
+                  setLocationName(await reverseGeocode(nLat, nLng));
+                },
+              }}
+            />
+
+            <Circle center={tempLocation} radius={radius} />
           </MapContainer>
 
-          {/* Service Tiers */}
+          {/* Radius */}
           <div>
-            <Label className="font-semibold">Service Tiers</Label>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {serviceTiers?.map((tier: any) => (
-                <button
-                  key={tier._id}
-                  onClick={() =>
-                    setSelectedTiers((p) =>
-                      p.includes(tier._id) ? p.filter((i) => i !== tier._id) : [...p, tier._id]
-                    )
-                  }
-                  className={`px-3 py-1 rounded-full border ${
-                    selectedTiers.includes(tier._id)
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-gray-100 border-gray-300"
-                  }`}
-                >
-                  {tier.displayName}
-                </button>
-              ))}
-            </div>
+            <Label>Service Radius (km)</Label>
+            <input
+              type="number"
+              value={radius / 1000}
+              onChange={(e) => setRadius(Number(e.target.value) * 1000)}
+              className="w-full border rounded px-3 py-2"
+            />
           </div>
+          <div>
+  <Label>Service Categories</Label>
+  <div className="flex flex-wrap gap-2 mt-2">
+    {serviceCategories?.map((cat) => {
+      const active = selectedCategories.includes(cat._id);
 
-          {/* Service Categories */}
-          <div>
-            <Label className="font-semibold">Service Categories</Label>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {serviceCategories?.map((cat: any) => (
-                <button
-                  key={cat._id}
-                  onClick={() =>
-                    setSelectedCategories((p) =>
-                      p.includes(cat._id) ? p.filter((i) => i !== cat._id) : [...p, cat._id]
-                    )
-                  }
-                  className={`px-3 py-1 rounded-full border ${
-                    selectedCategories.includes(cat._id)
-                      ? "bg-green-600 text-white border-green-600"
-                      : "bg-gray-100 border-gray-300"
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-          </div>
+      return (
+        <button
+          key={cat._id}
+          type="button"
+          onClick={() =>
+            setSelectedCategories((prev) =>
+              active
+                ? prev.filter((id) => id !== cat._id)
+                : [...prev, cat._id]
+            )
+          }
+          className={`px-3 py-1 rounded border text-sm transition ${
+            active
+              ? "bg-green-600 text-white"
+              : "bg-white text-gray-700"
+          }`}
+        >
+          {cat.name}
+        </button>
+      );
+    })}
+  </div>
+  <div>
+  <Label>Service Tiers</Label>
+  <div className="flex flex-wrap gap-2 mt-2">
+    {serviceTiers?.map((tier) => {
+      const active = selectedTiers.includes(tier._id);
+
+      return (
+        <button
+          key={tier._id}
+          type="button"
+          onClick={() =>
+            setSelectedTiers((prev) =>
+              active
+                ? prev.filter((id) => id !== tier._id)
+                : [...prev, tier._id]
+            )
+          }
+          className={`px-3 py-1 rounded border text-sm transition ${
+            active
+              ? "bg-blue-600 text-white"
+              : "bg-white text-gray-700"
+          }`}
+        >
+          {tier.displayName}
+        </button>
+      );
+    })}
+  </div>
+</div>
+
+</div>
+
 
           {/* Actions */}
           <div className="flex justify-end gap-2">

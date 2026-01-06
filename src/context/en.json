@@ -228,7 +228,12 @@
 
   "logout": "Logout",
   "signOut": "Sign Out",
-
+"export": "Export Report",
+"totalTransactions":"Total Transactions",
+"completedTransactions":"completed transactions",
+"pendingPayments":"Pending Payments",
+"pendingTransactions":"pending transactions",
+"allTime":"All time transactions",
   "transactionsPage": {
     "pageTitle": "Payment Transaction History",
     "pageSubtitle": "View and manage your payment transactions",

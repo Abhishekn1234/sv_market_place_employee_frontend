@@ -4,7 +4,7 @@ import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
 export interface WorkerPayload {
   categoryIds?: string[];
   serviceTierIds?: string[];
-  status?: "ONLINE" | "OFFLINE" | "BLOCKED" | "IN_SERVICE" | "WAITING_DOCUMENTS" | "PENDING_APPROVAL" | "REJECTED";
+  status: "ONLINE" | "OFFLINE" | "BLOCKED" | "IN_SERVICE" | "WAITING_DOCUMENTS" | "PENDING_APPROVAL" | "REJECTED";
   location?: GeoPoint;  // ✅ location goes here
  serviceRadius?:number;
 }

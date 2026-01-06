@@ -10,6 +10,7 @@ export class LoginImplementation implements LoginRepo {
             accessToken: response.data.accessToken,
             refreshToken: response.data.refreshToken,
             user: response.data.user,
+            status:"OFFLINE"
         };
 
         localStorage.setItem("employeeData", JSON.stringify(loginData));

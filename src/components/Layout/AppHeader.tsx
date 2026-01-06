@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   Menu,
   Sun,
@@ -10,15 +12,18 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { Button } from "@/components/ui/button";
-
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
+import { Switch } from "../ui/switch"; // your Radix switch
+import { useWorkerStatus } from "@/pages/Home/presentation/hooks/useWorkerStatus";
+
 const languages = [
-  { code: "EN", label: "English", icon: <LanguagesIcon/> },
+  { code: "EN", label: "English", icon: <LanguagesIcon /> },
   { code: "AR", label: "Arabic", icon: "🇸🇦" },
   { code: "HI", label: "Hindi", icon: "🇮🇳" },
 ];
+
 interface AppHeaderProps {
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
@@ -35,24 +40,51 @@ export default function AppHeader({
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
- const { language, setLanguage, translations } = useLanguage();
-  const [isOpen, setIsOpen] = useState(false);
-  // const sidebarWidth = mini ? 64 : 288;
+  const { language, setLanguage, translations } = useLanguage();
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
-  // ✅ Read employee data safely
+  // Read employee data safely
   const employeeData = localStorage.getItem("employeeData");
   const data = employeeData ? JSON.parse(employeeData) : null;
 
-  const fullName =
-    data?.user?.fullName || data?.fullName || "User";
-
+  const fullName = data?.user?.fullName || data?.fullName || "User";
   const profileImage = data?.user?.profilePictureUrl;
 
+  const homeTranslations = translations.HomePage;
+  const isRTL = language === "AR";
 
-  // ✅ Logout logic
+  // Worker status hook
+  const { worker, updateStatus, loading } = useWorkerStatus();
+
+  // Online/Offline switch state
+  const [isOnline, setIsOnline] = useState<boolean>(false);
+
+  // Sync initial switch state once
+  useEffect(() => {
+    if (worker?.status) {
+      setIsOnline(worker.status.toUpperCase() === "ONLINE");
+    }
+  }, [worker?.status]);
+
+  // Handle toggle switch
+  const handleToggle = (checked: boolean) => {
+    setIsOnline(checked);
+
+    // Optimistically update worker status locally
+    if (worker) {
+      worker.status = checked ? "ONLINE" : "OFFLINE";
+    }
+
+    updateStatus(checked);
+  };
+
+  const canToggle =
+    worker?.status &&
+    ["ONLINE", "OFFLINE"].includes(worker.status.toUpperCase());
+
+  // Logout logic
   const handleLogout = () => {
     toast.success("Logged out successfully");
-
     localStorage.removeItem("employeeid");
     localStorage.removeItem("employeetoken");
     localStorage.removeItem("employeeData");
@@ -61,34 +93,57 @@ export default function AppHeader({
 
     setDropdownOpen(false);
     setMobileOpen(false);
-
     navigate("/login", { replace: true });
   };
 
   return (
- <header
-  className={`flex items-center px-4 py-3 border-b transition-all ${
-    theme === "dark"
-      ? "border-gray-800 bg-gray-900 text-white"
-      : "border-gray-200 bg-gray-50 text-gray-900"
-  }`}
->
-
+    <header
+      className={`flex items-center px-4 py-3 border-b transition-all ${
+        theme === "dark"
+          ? "border-gray-800 bg-gray-900 text-white"
+          : "border-gray-200 bg-gray-50 text-gray-900"
+      }`}
+    >
       {/* Sidebar toggle */}
       <Button
         variant="ghost"
         onClick={() =>
-          window.innerWidth >= 1024
-            ? setMini(!mini)
-            : setMobileOpen(!mobileOpen)
+          window.innerWidth >= 1024 ? setMini(!mini) : setMobileOpen(!mobileOpen)
         }
         className="p-2"
       >
         <Menu className="h-5 w-5" />
       </Button>
 
-      {/* Right side controls */}
-      <div className="flex items-center ml-auto gap-2">
+      <div className="flex-1" />
+
+      <div className="flex items-center gap-4">
+        {/* Online/Offline Switch */}
+        {worker && (
+          <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+            {canToggle ? (
+              <>
+                <Switch
+                  checked={isOnline}
+                  onCheckedChange={handleToggle}
+                  disabled={loading}
+                />
+                <span
+                  className={`text-sm font-medium ${
+                    isOnline ? "text-green-600" : "text-gray-500"
+                  }`}
+                >
+                  {isOnline ? homeTranslations.online : homeTranslations.offline}
+                </span>
+              </>
+            ) : (
+              <span className="text-sm font-semibold text-orange-600">
+                {worker?.status.replace("_", " ")}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Theme toggle */}
         <Button variant="ghost" onClick={toggleTheme} className="p-2">
           {theme === "light" ? (
@@ -99,62 +154,45 @@ export default function AppHeader({
         </Button>
 
         {/* Language dropdown */}
-   {/* Language select */}
-    <div className="relative inline-block">
-  {/* Trigger button */}
-  <Button
-    onClick={() => setIsOpen(!isOpen)}
-    className={`flex items-center gap-2 p-2 rounded border font-medium
-      transition-none
-      hover:bg-transparent
-      active:bg-transparent
-      focus:bg-transparent
-      focus:ring-0
-      ${
-        theme === "dark"
-          ? "bg-gray-800 border-gray-700 text-white cursor-pointer"
-          : "bg-white border-gray-300 text-gray-900 cursor-pointer"
-      }
-    `}
-  >
-    <Globe className="h-5 w-5" />
-    <span>{language}</span>
-  </Button>
+        <div className="relative inline-block">
+          <Button
+            onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+            className={`flex items-center gap-2 p-2 rounded border font-medium ${
+              theme === "dark"
+                ? "bg-gray-800 border-gray-700 text-white"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
+          >
+            <Globe className="h-5 w-5" />
+            <span>{language}</span>
+          </Button>
 
-  {/* Dropdown */}
-  {isOpen && (
-    <div className="absolute right-0 mt-2 w-36 rounded-md border shadow-lg overflow-hidden z-50">
-      {languages.map((lang) => (
-        <button
-          key={lang.code}
-          onClick={() => {
-            setLanguage(lang.code as "EN" | "AR" | "HI");
-            setIsOpen(false);
-          }}
-          className={`flex items-center gap-2 w-full px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 ${
-            theme === "dark" ? "hover:bg-gray-700" : ""
-          }`}
-        >
-          <span>{lang.icon}</span>
-     <span>
-  {String(
-    lang.code === "EN"
-      ? translations.english
-      : lang.code === "AR"
-      ? translations.arabic
-      : translations.hindi
-  )}
-</span>
-
-        </button>
-      ))}
-    </div>
-  )}
-</div>
-
-
-
-
+          {langDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-36 rounded-md border shadow-lg overflow-hidden z-50">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => {
+                    setLanguage(lang.code as "EN" | "AR" | "HI");
+                    setLangDropdownOpen(false);
+                  }}
+                  className={`flex items-center gap-2 w-full px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 ${
+                    theme === "dark" ? "hover:bg-gray-700" : ""
+                  }`}
+                >
+                  <span>{lang.icon}</span>
+                  <span>
+                    {String(lang.code === "EN"
+                      ? translations.english
+                      : lang.code === "AR"
+                      ? translations.arabic
+                      : translations.hindi)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Profile dropdown */}
         <div className="relative">
@@ -168,9 +206,7 @@ export default function AppHeader({
                 src={profileImage}
                 alt={fullName}
                 className={`h-8 w-8 rounded-full object-cover border ${
-                  theme === "dark"
-                    ? "border-gray-700"
-                    : "border-gray-300"
+                  theme === "dark" ? "border-gray-700" : "border-gray-300"
                 }`}
               />
             ) : (
@@ -208,7 +244,8 @@ export default function AppHeader({
                   <Button
                     variant="ghost"
                     className="w-full justify-start px-4 py-2 gap-2"
-                 onClick={()=>navigate('/settings/profile')} >
+                    onClick={() => navigate("/settings/profile")}
+                  >
                     <Settings className="h-4 w-4" /> Profile Settings
                   </Button>
                 </li>
@@ -229,4 +266,3 @@ export default function AppHeader({
     </header>
   );
 }
-
