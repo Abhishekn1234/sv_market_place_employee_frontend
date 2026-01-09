@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Lock, MapPin } from "lucide-react";
 import ProfileList from "./components/ProfileList";
@@ -30,18 +30,7 @@ export default function ProfileSettings({ activeTab, setActiveTab }: Props) {
     hover:text-blue-600
   `;
 
-  // Listen to SW messages for tab changes (in case you want redundancy)
-  useEffect(() => {
-    const handleSWMessage = (event: MessageEvent) => {
-      const { type, payload } = event.data || {};
-      if (type === "NAVIGATE" && payload?.tab) {
-        setActiveTab(payload.tab);
-      }
-    };
-    navigator.serviceWorker?.addEventListener("message", handleSWMessage);
-    return () =>
-      navigator.serviceWorker?.removeEventListener("message", handleSWMessage);
-  }, [setActiveTab]);
+  
 
   return (
     <div className={`w-full h-full overflow-hidden ${isRTL ? "rtl" : "ltr"}`}>

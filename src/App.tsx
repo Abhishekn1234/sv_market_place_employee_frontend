@@ -34,19 +34,26 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
 
   useDynamicLocation();
+useEffect(() => {
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+}, []);
 
   useEffect(() => {
-    // Handle SW navigation messages
-    const handleSWMessage = (event: MessageEvent) => {
-      const { type, payload } = event.data || {};
-      if (type === "NAVIGATE" && payload?.url) {
-        navigate(payload.url, { replace: true });
-        if (payload.tab) setActiveTab(payload.tab);
-      }
-    };
-    navigator.serviceWorker?.addEventListener("message", handleSWMessage);
-    return () => navigator.serviceWorker?.removeEventListener("message", handleSWMessage);
-  }, [navigate]);
+  const handler = (event: MessageEvent) => {
+    const { type, payload } = event.data || {};
+    if (type === "NAVIGATE" && payload?.url) {
+      navigate(payload.url);
+      if (payload.tab) setActiveTab(payload.tab);
+    }
+  };
+
+  navigator.serviceWorker?.addEventListener("message", handler);
+  return () =>
+    navigator.serviceWorker?.removeEventListener("message", handler);
+}, [navigate]);
+
 
   return (
     <LanguageProvider>
