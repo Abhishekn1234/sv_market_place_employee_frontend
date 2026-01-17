@@ -1,12 +1,13 @@
 import api from "@/api/api";
-import type { DocumentsOnboarding } from "../../domain/entities/documentsonboarding";
+import type { DocumentsOnboarding, DocumentsOnboardingResponse } from "../../domain/entities/documentsonboarding";
 import type { DocumentsRepo } from "../../domain/repositories/documentsonboardingrepo";
 import { baseURL } from "@/api/apiConfig";
+
 
 export class DocumentsOnboardingImpl implements DocumentsRepo {
   async updateDocuments(
     data: DocumentsOnboarding
-  ): Promise<DocumentsOnboarding> {
+  ): Promise<DocumentsOnboardingResponse> {
     const formData = new FormData();
 
     // ✅ append ONLY selected document types
@@ -22,7 +23,7 @@ export class DocumentsOnboardingImpl implements DocumentsRepo {
     });
 
     const response = await api.put(
-      `${baseURL}user/update-profile`,
+      `${baseURL}/user/update-profile`,
       formData,
       {
         headers: {

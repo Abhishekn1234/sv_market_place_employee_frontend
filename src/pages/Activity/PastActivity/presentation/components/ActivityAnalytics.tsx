@@ -14,10 +14,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import { Card } from "@/components/ui/card";
 import { ActivityIcon, BarChart3, DollarSign, TrendingUp } from "lucide-react";
 import type { Activity } from "../../domain/entities/activity";
 import { useLanguage } from "@/context/LanguageContext";
+import { CommonCard } from "@/components/common/CommonCard";
 
 type Props = {
   earningsTrendData: {
@@ -88,7 +88,7 @@ export default function ActivityAnalytics({
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Earnings Trend */}
-        <Card className="p-6">
+        <CommonCard className="p-6">
           <h3 className="text-gray-900 mb-4">
             {translations.recentActivities.chart.earningsTrend}
           </h3>
@@ -101,10 +101,10 @@ export default function ActivityAnalytics({
               <Line type="monotone" dataKey="earnings" stroke="#10b981" />
             </LineChart>
           </ResponsiveContainer>
-        </Card>
+        </CommonCard>
 
         {/* Activity Type */}
-        <Card className="p-6">
+        <CommonCard className="p-6">
           <h3 className="text-gray-900 mb-4">
             {translations.recentActivities.chart.activityType}
           </h3>
@@ -118,10 +118,10 @@ export default function ActivityAnalytics({
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-        </Card>
+        </CommonCard>
 
         {/* Activity Trend */}
-        <Card className="p-6">
+        <CommonCard className="p-6">
           <h3 className="text-gray-900 mb-4">
             {translations.recentActivities.chart.activityTrend}
           </h3>
@@ -137,10 +137,10 @@ export default function ActivityAnalytics({
               <Bar dataKey="transactions" fill="#8b5cf6" />
             </BarChart>
           </ResponsiveContainer>
-        </Card>
+        </CommonCard>
 
         {/* Status Distribution */}
-        <Card className="p-6">
+        <CommonCard className="p-6">
           <h3 className="text-gray-900 mb-4">
             {translations.recentActivities.chart.statusDistribution}
           </h3>
@@ -154,11 +154,11 @@ export default function ActivityAnalytics({
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-        </Card>
+        </CommonCard>
       </div>
 
       {/* Key Insights */}
-      <Card className="p-6">
+      <CommonCard className="p-6">
         <h3 className="text-gray-900 mb-4">{t("analytics")}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Insight
@@ -177,7 +177,7 @@ export default function ActivityAnalytics({
             icon={ActivityIcon}
           />
         </div>
-      </Card>
+      </CommonCard>
     </div>
   );
 }

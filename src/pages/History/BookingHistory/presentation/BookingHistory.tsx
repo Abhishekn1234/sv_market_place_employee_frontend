@@ -1,15 +1,6 @@
 import { useState, useMemo } from "react";
 import { Search, Filter, ChevronDown, ChevronUp, User, MapPin } from "lucide-react";
 
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -20,17 +11,13 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+
 
 import { useLanguage } from "@/context/LanguageContext";
 import { mockBookings } from "./data/bookingdata";
+import { CommonTable, type TableColumn } from "@/components/common/CommonTable";
+import type { Booking } from "../domain/entities/booking";
+import { CommonCard } from "@/components/common/CommonCard";
 
 /* ------------------ TYPES ------------------ */
 
@@ -208,6 +195,58 @@ const formatTime = (time: string) => {
 
   return time;
 };
+const columns: TableColumn<Booking>[] = [
+  {
+    key: "id",
+    header: tableHeaders.id,
+  },
+  {
+    key: "clientName",
+    header: tableHeaders.client,
+    render: (b) => <span dir="ltr">{b.clientName}</span>,
+  },
+  {
+    key: "serviceType",
+    header: tableHeaders.service,
+  },
+  {
+    key: "date",
+    header: tableHeaders.date,
+    render: (b) => <span dir="ltr">{b.date}</span>,
+  },
+  {
+    key: "time",
+    header: tableHeaders.time,
+    render: (b) => <span dir="ltr">{formatTime(b.time)}</span>,
+  },
+  {
+    key: "payment",
+    header: tableHeaders.payment,
+    render: (b) => <span dir="ltr">${b.payment}</span>,
+  },
+  {
+    key: "status",
+    header: tableHeaders.status,
+    render: (b) => (
+      <Badge className={statusConfig[b.status].color}>
+        {statusConfig[b.status].label}
+      </Badge>
+    ),
+  },
+  {
+    key: "actions",
+    header: tableHeaders.actions,
+    render: (b) => (
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => toggleExpanded(b.id)}
+      >
+        {expandedBooking === b.id ? <ChevronUp /> : <ChevronDown />}
+      </Button>
+    ),
+  },
+];
 
 
 
@@ -227,258 +266,115 @@ const formatTime = (time: string) => {
       </div>
 
       {/* Filters */}
-      <Card className="mb-6">
-  <CardContent
-    className={`pt-6 flex flex-col md:flex-row gap-4 ${
-      isRTL ? "md:flex-row-reverse" : ""
-    }`}
+     {/* Filters */}
+<CommonCard
+  title="Filters" // optional, can use translations if needed
+  contentClassName={`flex flex-col md:flex-row gap-4 mb-4 ${
+    isRTL ? "md:flex-row-reverse" : ""
+  }`}
+>
+  {/* Search */}
+  <div className="flex-1 relative mb-4 md:mb-0">
+    <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+    <Input
+      value={searchTerm}
+      onChange={(e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
+      }}
+      placeholder={t("searchPlaceholder")}
+    />
+  </div>
+
+  {/* Status Filter */}
+  <Select
+    value={statusFilter}
+    onValueChange={(v) => {
+      setStatusFilter(v as NormalizedBookingStatus | "all");
+      setCurrentPage(1);
+    }}
   >
-    {/* Search */}
-    <div className="flex-1 relative">
-      <Search
-        className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400
-        
-        `}
-      />
-      <Input
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setCurrentPage(1);
-        }}
-        // className={isRTL ? "pr-10 text-right" : "pl-10"}
-        placeholder={t("searchPlaceholder")}
-        
-      />
-    </div>
+    <SelectTrigger className="w-full md:w-[180px] flex items-center">
+      <Filter className="h-4 w-4 mr-2" />
+      <SelectValue />
+    </SelectTrigger>
 
-    {/* Status */}
-    <Select
-      value={statusFilter}
-      onValueChange={(v) => {
-        setStatusFilter(v as NormalizedBookingStatus | "all");
-        setCurrentPage(1);
-      }}
-    >
-      <SelectTrigger
-        className={`w-full md:w-[180px] flex items-center ${
-          isRTL ? "" : ""
-        }`}
-      >
-        <Filter className={`h-4 w-4 ${isRTL ? "" : "mr-2"}`} />
-        <SelectValue />
-      </SelectTrigger>
-
-      <SelectContent align={isRTL ? "center" : "end"}>
-        <SelectItem value="all">{statusOptions.all}</SelectItem>
-        {Object.entries(statusConfig).map(([key, val]) => (
-          <SelectItem key={key} value={key}>
-            {val.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-
-    {/* Service */}
-    <Select
-      value={serviceFilter}
-      onValueChange={(v) => {
-        setServiceFilter(v);
-        setCurrentPage(1);
-      }}
-    >
-      <SelectTrigger
-        className={`w-full md:w-[180px] ${
-          isRTL ? "text-right flex-row-reverse" : ""
-        }`}
-      >
-        <SelectValue />
-      </SelectTrigger>
-
-      <SelectContent align={isRTL ? "center" : "start"}>
-        <SelectItem value="all">
-          {(translations.serviceOptions as { all: string }).all}
+    <SelectContent align={isRTL ? "center" : "end"}>
+      <SelectItem value="all">{statusOptions.all}</SelectItem>
+      {Object.entries(statusConfig).map(([key, val]) => (
+        <SelectItem key={key} value={key}>
+          {val.label}
         </SelectItem>
-        {serviceTypes.map((s) => (
-          <SelectItem key={s} value={s}>
-            {s}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </CardContent>
-</Card>
+      ))}
+    </SelectContent>
+  </Select>
+
+  {/* Service Filter */}
+  <Select
+    value={serviceFilter}
+    onValueChange={(v) => {
+      setServiceFilter(v);
+      setCurrentPage(1);
+    }}
+  >
+    <SelectTrigger className="w-full md:w-[180px]">
+      <SelectValue />
+    </SelectTrigger>
+
+    <SelectContent align={isRTL ? "center" : "start"}>
+      <SelectItem value="all">
+        {(translations.serviceOptions as { all: string }).all}
+      </SelectItem>
+      {serviceTypes.map((s) => (
+        <SelectItem key={s} value={s}>
+          {s}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</CommonCard>
+
+
 
 
       {/* Table */}
-      <Table dir={isRTL ? "rtl" : "ltr"}>
-  <TableHeader>
-    <TableRow>
-      {Object.values(tableHeaders).map((h) => (
-        <TableHead key={h} className="text-right">
-          {h}
-        </TableHead>
-      ))}
-    </TableRow>
-  </TableHeader>
+  <CommonTable<Booking>
+  columns={columns}
+  data={paginatedBookings}
+  keyExtractor={(b) => b.id}
+  dir={isRTL ? "rtl" : "ltr"}
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onPageChange={setCurrentPage}
+  expandedRowKey={expandedBooking}
+  renderExpandedRow={(b) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+      <div>
+        <h4 className="text-gray-600 mb-2">
+          {bookingTranslations.clientInfo}
+        </h4>
 
-  <TableBody>
-  {paginatedBookings.map((b) => (
-    <>
-      {/* Main Row */}
-      <TableRow key={b.id}>
-        <TableCell>{b.id}</TableCell>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-gray-400" />
+            <span>{b.clientName}</span>
+          </div>
 
-        <TableCell>
-          <span dir="ltr">{b.clientName}</span>
-        </TableCell>
+          <div className="flex items-center gap-2">
+            <span>📧</span>
+            <span>{b.clientEmail}</span>
+          </div>
 
-        <TableCell>{b.serviceType}</TableCell>
-
-        <TableCell>
-          <span dir="ltr">{b.date}</span>
-        </TableCell>
-
-        <TableCell>
-          <span dir="ltr">{b.time}</span>
-        </TableCell>
-
-        <TableCell>
-          <span dir="ltr">${b.payment}</span>
-        </TableCell>
-
-        <TableCell>
-          <Badge className={statusConfig[b.status].color}>
-            {language === "AR"
-              ? statusConfig[b.status].label
-              : statusConfig[b.status].label}
-          </Badge>
-        </TableCell>
-
-        <TableCell>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => toggleExpanded(b.id)}
-          >
-            {expandedBooking === b.id ? <ChevronUp /> : <ChevronDown />}
-          </Button>
-        </TableCell>
-      </TableRow>
-
-      {/* Expanded Row */}
-     {expandedBooking === b.id && (
-  <TableRow key={`${b.id}-details`}>
-    <TableCell colSpan={8} className="bg-gray-50 p-4" dir="ltr">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-
-        {/* Client Info */}
-        <div>
-          <h4 className="text-gray-600 mb-2">
-            {bookingTranslations.clientInfo}
-          </h4>
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-gray-400" />
-              <span>{b.clientName}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span>📧</span>
-              <span>{b.clientEmail}</span>
-            </div>
-
-            <div className="flex items-start gap-2">
-              <MapPin className="h-4 w-4 text-gray-400 mt-1" />
-              <span>{b.location}</span>
-            </div>
+          <div className="flex items-start gap-2">
+            <MapPin className="h-4 w-4 text-gray-400 mt-1" />
+            <span>{b.location}</span>
           </div>
         </div>
-
-        {/* Booking Details */}
-        <div>
-          <h4 className="text-gray-600 mb-2">
-            {bookingTranslations.bookingDetails}
-          </h4>
-
-          <div className="space-y-1">
-            <div className="flex justify-between">
-              <span>{bookingTranslations.bookingDetailsLabels.service}</span>
-              <span>{b.serviceType}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span>{bookingTranslations.bookingDetailsLabels.duration}</span>
-              <span>
-                {b.duration} دقيقة
-              </span>
-            </div>
-
-            <div className="flex justify-between text-green-600">
-              <span>{bookingTranslations.bookingDetailsLabels.payment}</span>
-              <span>${b.payment}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span>{bookingTranslations.bookingDetailsLabels.status}</span>
-              <Badge className={statusConfig[b.status].color}>
-                {statusConfig[b.status].label}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
-        {/* Notes */}
-        {b.notes && (
-          <div className="md:col-span-2">
-            <h4 className="text-gray-600 mb-1">
-              {bookingTranslations.notes}
-            </h4>
-            <p className="bg-gray-100 p-2 rounded">
-              {b.notes}
-            </p>
-          </div>
-        )}
       </div>
-    </TableCell>
-  </TableRow>
-)}
+    </div>
+  )}
+/>
 
-    </>
-  ))}
-</TableBody>
-
-</Table>
-
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <Pagination className={`${isRTL?"justify-start mt-6":"justify-end mt-6"}`} dir="ltr">
-          <PaginationPrevious
-            onClick={() =>
-              setCurrentPage((p) => Math.max(p - 1, 1))
-            }
-          />
-          <PaginationContent>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  isActive={currentPage === i + 1}
-                  onClick={() => setCurrentPage(i + 1)}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-          </PaginationContent>
-          <PaginationNext
-            onClick={() =>
-              setCurrentPage((p) => Math.min(p + 1, totalPages))
-            }
-          />
-        </Pagination>
-      )}
     </div>
   );
 }

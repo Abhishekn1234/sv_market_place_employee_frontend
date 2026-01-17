@@ -1,0 +1,125 @@
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { useProfile } from "../../hooks/useProfile";
+import { useUpdateProfile } from "../../hooks/useUpdateProfile";
+import { ProfileDocuments } from "./ProfileDocuments";
+import { ProfileHeader } from "./ProfileHeader";
+import { ProfileInfo } from "./ProfileInfo";
+
+export default function ProfileList() {
+  const { data: profile } = useProfile();
+  const { mutateAsync, isPending } = useUpdateProfile();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ fullName: "", address: "" });
+  const [files, setFiles] = useState<Record<string, File | undefined>>({});
+  const [fileUrls, setFileUrls] = useState<Record<string, string | undefined>>(
+    {}
+  );
+
+  const fileFields = [
+    { label: "ID Proof", key: "idProof" },
+    { label: "Address Proof", key: "addressProof" },
+    { label: "Photo Proof", key: "photoProof" },
+  ] as const;
+
+  /* ---------------- INIT PROFILE ---------------- */
+  useEffect(() => {
+    if (!profile) return;
+
+    setFormData({
+      fullName: profile.fullName,
+      address: profile.address,
+    });
+
+    // Convert documents array → lookup object
+    const docs: Record<string, string> = {};
+    profile.documents?.forEach((doc: any) => {
+      if (doc.documentType && doc.filePath) {
+        docs[doc.documentType] = doc.filePath;
+      }
+    });
+
+    setFileUrls({
+      profileImage: profile.profilePictureUrl,
+      ...docs,
+    });
+  }, [profile]);
+
+  if (!profile) return null;
+
+  /* ---------------- DOCUMENT CHECK ---------------- */
+  const REQUIRED_DOCS = ["idProof", "addressProof", "photoProof"];
+
+  const canEdit =
+    profile.documents &&
+    REQUIRED_DOCS.every((type) =>
+      profile.documents.some(
+        (doc: any) => doc.documentType === type && doc.filePath
+      )
+    );
+
+  /* ---------------- SAVE ---------------- */
+  const handleSave = async () => {
+    const data = new FormData();
+    data.append("fullName", formData.fullName);
+    data.append("address", formData.address);
+
+    Object.entries(files).forEach(([k, v]) => {
+      if (v) data.append(k, v);
+    });
+
+    await mutateAsync(data);
+    toast.success("Profile updated");
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="space-y-6">
+      <ProfileHeader
+        profile={profile}
+        isEditing={isEditing}
+        isPending={isPending}
+        fileUrl={fileUrls.profileImage}
+        canEdit={canEdit}
+        onEdit={() => {
+          if (!canEdit) {
+            toast.error(
+              "Please upload ID Proof, Address Proof and Photo Proof before editing profile"
+            );
+            return;
+          }
+          setIsEditing(true);
+        }}
+        onCancel={() => setIsEditing(false)}
+        onSave={handleSave}
+        onImageChange={(file) => {
+          setFiles((p) => ({ ...p, profileImage: file }));
+          setFileUrls((p) => ({
+            ...p,
+            profileImage: URL.createObjectURL(file),
+          }));
+        }}
+      />
+
+      <ProfileInfo
+        profile={profile}
+        isEditing={isEditing}
+        formData={formData}
+        onChange={(e) =>
+          setFormData((p) => ({ ...p, [e.target.name]: e.target.value }))
+        }
+      />
+
+      <ProfileDocuments
+        isEditing={isEditing}
+        fileFields={fileFields}
+        files={files}
+        fileUrls={fileUrls}
+        onFileChange={(file, key) =>
+          setFiles((p) => ({ ...p, [key]: file }))
+        }
+      />
+    </div>
+  );
+}

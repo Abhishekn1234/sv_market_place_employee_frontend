@@ -2,156 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import en from "./en.json";
 import ar from "./ar.json";
 import hi from "./hi.json";
-export type NotificationsTranslations = {
-  title: string;
-  subtitle: string;
-  markAllRead: string;
-  clearAll: string;
-  total: string;
-  unread: string;
-  read: string;
-  thisWeek: string;
-  all: string;
-  allCategories: string;
-  bookings: string;
-  payments: string;
-  system: string;
-  alerts: string;
-  noNotifications: string;
-  caughtUp: string;
-  viewDetails: string;
-  highPriority: string;
-  emailDigest: string;
-  notificationSettings: string;
-  showing: string;
-};
-export type HomePageTranslations = {
-  dashboard: string;
-  totalEmployees: string;
-  activeProjects: string;
-  monthlyRevenue: string;
-  notifications: string;
-  online: string;
-  offline: string;
-};
-
-export type RecentActivitiesTranslations = {
-  emptyState: {
-    title: string;
-    description: string;
-  };
-  periods: {
-    "7days": string;
-    "15days": string;
-    "1month": string;
-    "3months": string;
-    "6months": string;
-  };
-  types: {
-    booking: string;
-    payment: string;
-    transaction: string;
-    all: string;
-  };
-  status: {
-    completed: string;
-    confirmed: string;
-    pending: string;
-    cancelled: string;
-  };
-  chart: {
-    earningsTrend: string;
-    activityType: string;
-    statusDistribution: string;
-    activityTrend: string;
-  };
-};
-export type WalletTranslations = {
-  title: string;
-  manage: string;
-  tier: string;
-  totalBalance: string;
-  income: string;
-  expenses: string;
-  quickActions: string;
-  addFunds: string;
-  depositMoney: string;
-  withdraw: string;
-  transferFunds: string;
-  recentTransactions: string;
-  viewAll: string;
-  credit: string;
-  debit: string;
-  monthlySummary: string;
-  totalTransactions: string;
-  avgTransaction: string;
-  largestIncome: string;
-  largestExpense: string;
-  paymentMethods: string;
-  primary: string;
-  expires: string;
-  addNewCard: string;
-  walletInsights: string;
-  availableBalance: string;
-  monthlyGrowth: string;
-  transactionsToday: string;
-};
-
-
-export type WorkHistoryTranslations = {
-  pageTitle: string;
-  employeeLabel: string;
-  cards: {
-    totalWorks: string;
-    completed: string;
-    inProgress: string;
-    upcoming: string;
-  };
-  filters: {
-    timePeriod: string;
-    status: string;
-    itemsPerPage: string;
-    searchPlaceholder: string;
-  };
-  timeOptions: {
-    week: string;
-    month: string;
-    currentWeek: string;
-  };
-  statusOptions: {
-    all: string;
-    completed: string;
-    inProgress: string;
-    pending: string;
-    upcoming: string;
-  };
-  tableHeaders: {
-    title: string;
-    description: string;
-    location: string;
-    assignedDate: string;
-    dueDate: string;
-    status: string;
-    duration: string;
-    extraInfo: string;
-  };
-  pagination: {
-    pageInfo: string;
-    first: string;
-    previous: string;
-    next: string;
-    last: string;
-    noRecords: string;
-  };
-  extraInfo: {
-    daysToStart: string;
-    daysUntilDue: string;
-    completedOn: string;
-    completedIn: string;
-  };
-};
-
-
+import { useAuthStore } from "@/core/store/auth";
 
 /* ------------------ TYPES ------------------ */
 
@@ -161,11 +12,11 @@ export type TranslationValue = string | { [key: string]: TranslationValue };
 
 export type TranslationSchema = {
   [key: string]: TranslationValue;
-  workHistory: WorkHistoryTranslations;
-   recentActivities: RecentActivitiesTranslations;
-     Wallet: WalletTranslations;   
-      Notifications: NotificationsTranslations;
-      HomePage: HomePageTranslations; 
+  workHistory: any;
+  recentActivities: any;
+  Wallet: any;
+  Notifications: any;
+  HomePage: any;
 };
 
 export type TranslationKey = keyof TranslationSchema;
@@ -173,7 +24,7 @@ export type TranslationKey = keyof TranslationSchema;
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey | string) => string;
   translations: TranslationSchema;
 }
 
@@ -196,22 +47,41 @@ const allTranslations: Record<Language, TranslationSchema> = {
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [language, setLanguage] = useState<Language>(
-    (localStorage.getItem("lang") as Language) || "EN"
-  );
+  // Get the user's preferred language from auth store
+  const userLang = useAuthStore((s) => s.employeeData?.user?.preferredLanguage);
+
+  const [language, setLanguage] = useState<Language>(userLang || "EN");
+
+  // Sync language with auth store whenever it changes
+  useEffect(() => {
+    if (userLang && userLang !== language) {
+      setLanguage(userLang);
+    }
+  }, [userLang]);
 
   useEffect(() => {
-    localStorage.setItem("lang", language);
-    
+    // Set document language attribute
     document.documentElement.lang =
       language === "AR" ? "ar" : language === "HI" ? "hi" : "en";
-      document.documentElement.setAttribute("translate", "no");
+    document.documentElement.setAttribute("translate", "no");
+
+    // Persist preferred language in auth store
+    useAuthStore.getState().setPreferredLanguage(language);
   }, [language]);
 
-  const t = (key: TranslationKey): string => {
-    const value = allTranslations[language][key];
-    return typeof value === "string" ? value : "";
-  };
+  // Translation function
+const t = (key: TranslationKey | string): string => {
+  const keyStr = key.toString(); // ensure it's a string
+  const keys = keyStr.split(".");
+  let value: any = allTranslations[language];
+
+  for (const k of keys) {
+    value = value?.[k];
+    if (value === undefined) return "";
+  }
+  return typeof value === "string" ? value : "";
+};
+
 
   return (
     <LanguageContext.Provider

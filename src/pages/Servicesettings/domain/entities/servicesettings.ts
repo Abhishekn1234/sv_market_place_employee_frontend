@@ -1,10 +1,18 @@
 import type { ApiDocument } from "@/pages/Profile/domain/entities/documents";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
+export type WorkerStatus =
+  | "ONLINE"
+  | "OFFLINE"
+  | "BLOCKED"
+  | "IN_SERVICE"
+  | "WAITING_DOCUMENTS"
+  | "PENDING_APPROVAL"
+  | "REJECTED"  | string;
 
 export interface WorkerPayload {
   categoryIds?: string[];
   serviceTierIds?: string[];
-  status: "ONLINE" | "OFFLINE" | "BLOCKED" | "IN_SERVICE" | "WAITING_DOCUMENTS" | "PENDING_APPROVAL" | "REJECTED";
+  status: WorkerStatus | string;
   location?: GeoPoint;  // ✅ location goes here
  serviceRadius?:number;
 }

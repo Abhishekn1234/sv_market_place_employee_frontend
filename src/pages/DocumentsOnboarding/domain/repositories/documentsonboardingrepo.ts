@@ -1,5 +1,6 @@
-import type { DocumentsOnboarding } from "../entities/documentsonboarding";
+
+import type { DocumentsOnboarding, DocumentsOnboardingResponse } from "../entities/documentsonboarding";
 
 export interface DocumentsRepo{
-    updateDocuments(data:DocumentsOnboarding):Promise<DocumentsOnboarding>
+    updateDocuments(data:DocumentsOnboarding):Promise<DocumentsOnboardingResponse>
 }

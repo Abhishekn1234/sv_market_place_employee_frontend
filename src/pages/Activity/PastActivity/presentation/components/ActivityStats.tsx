@@ -1,4 +1,5 @@
-import { Card } from "@/components/ui/card";
+import { CommonCard } from "@/components/common/CommonCard";
+
 import { useLanguage } from "@/context/LanguageContext";
 import { BarChart3, CheckCircle2, Clock, DollarSign } from "lucide-react";
 
@@ -24,7 +25,7 @@ export function ActivityStats({
   }`}
 >
 
-      <Card className="p-4">
+      <CommonCard className="p-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-100 rounded-lg">
             <BarChart3 className="size-5 text-blue-600" />
@@ -34,9 +35,9 @@ export function ActivityStats({
             <p className="text-2xl text-gray-900">{totalActivities}</p>
           </div>
         </div>
-      </Card>
+      </CommonCard>
 
-      <Card className="p-4">
+      <CommonCard className="p-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-green-100 rounded-lg">
             <CheckCircle2 className="size-5 text-green-600" />
@@ -46,9 +47,9 @@ export function ActivityStats({
             <p className="text-2xl text-gray-900">{completedCount}</p>
           </div>
         </div>
-      </Card>
+      </CommonCard>
 
-      <Card className="p-4">
+      <CommonCard className="p-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-emerald-100 rounded-lg">
             <DollarSign className="size-5 text-emerald-600" />
@@ -60,9 +61,9 @@ export function ActivityStats({
             </p>
           </div>
         </div>
-      </Card>
+      </CommonCard>
 
-      <Card className="p-4">
+      <CommonCard className="p-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-amber-100 rounded-lg">
             <Clock className="size-5 text-amber-600" />
@@ -72,7 +73,7 @@ export function ActivityStats({
             <p className="text-2xl text-gray-900">{pendingCount}</p>
           </div>
         </div>
-      </Card>
+      </CommonCard>
     </div>
   );
 }

@@ -263,6 +263,11 @@
     },
     "transactions": "transactions"
   },
+   "allStatus": "AllStatus",
+    "completed": "Completed",
+    "pending": "Pending",
+    "failed": "Failed",
+
   "Edit":"Edit",
   "Cancel":"Cancel",
   "Saving":"Saving",

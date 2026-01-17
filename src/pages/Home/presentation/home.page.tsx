@@ -5,6 +5,8 @@ import { useLanguage } from "@/context/LanguageContext";
 
 
 
+
+
 export default function HomePage() {
   const { translations, language } = useLanguage();
   const homeTranslations = translations.HomePage;
@@ -45,8 +47,8 @@ export default function HomePage() {
 
   return (
     <div className="p-4">
-    
 
+    
       {/* Page Title + Online Switch */}
       <div className={`flex items-center justify-between mb-6 ${isRTL ? "flex-row-reverse" : ""}`}>
         <h1 className="text-2xl font-bold">{homeTranslations.dashboard}</h1>

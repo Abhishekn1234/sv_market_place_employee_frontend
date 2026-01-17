@@ -5,7 +5,9 @@ import { baseURL } from "@/api/apiConfig";
 
 export class ServiceTierImpl implements ServiceTierRepo{
    async getServiceTier(): Promise<ServiceTier[]> {
-        const response=await api.get(`${baseURL}services/service-tiers`);
+        const response=await api.get(`${baseURL}/services/service-tiers`);
+        console.log(response);
+        console.log(response.data);
         return response.data
     }
 }

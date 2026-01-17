@@ -2,14 +2,9 @@ import { useState } from "react";
 import { Marker, useMapEvents } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
-import L from "leaflet";
 
-// Marker icon
-const markerIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
-});
+
+import { defaultIcon } from "@/components/common/CommonMap";
 
 export function LocationPicker({ onChange }: { onChange: (point: GeoPoint) => void }) {
   const [position, setPosition] = useState<LatLngExpression | null>(null);
@@ -22,5 +17,5 @@ export function LocationPicker({ onChange }: { onChange: (point: GeoPoint) => vo
     },
   });
 
-  return position ? <Marker position={position} icon={markerIcon} /> : null;
+  return position ? <Marker position={position} icon={defaultIcon} /> : null;
 }

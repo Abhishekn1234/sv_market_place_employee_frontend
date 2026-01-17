@@ -1,0 +1,47 @@
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CancelImpl } from "../../data/repositories/CancelImpl";
+import { CancelWorkUsecase } from "../../domain/usecase/CancelWorkUsecase";
+import type { GetBooking } from "@/core/Websocket/domain/entities/getrepo";
+import { toast } from "react-toastify";
+
+export function useCancel(addBooking?: (booking: GetBooking) => void) {
+  const queryClient = useQueryClient();
+
+  const repo = new CancelImpl();
+  const usecase = new CancelWorkUsecase(repo);
+
+  return useMutation({
+    mutationFn: (bookingId: string) => usecase.execute(bookingId),
+
+    onSuccess: (cancelledBooking) => {
+      // ✅ Update assignedWorks cache
+      queryClient.setQueryData<GetBooking[] | GetBooking>(
+        ["assignedWorks"],
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          if (Array.isArray(oldData)) {
+            return oldData.map((booking) =>
+              booking._id === cancelledBooking._id ? cancelledBooking : booking
+            );
+          }
+
+          if (oldData._id === cancelledBooking._id) return cancelledBooking;
+
+          return oldData;
+        }
+      );
+
+      // ✅ Add to live bookings automatically if function provided
+      if (addBooking) addBooking(cancelledBooking);
+
+      // ✅ Toast
+      toast.success("Booking cancelled successfully");
+    },
+
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to cancel booking");
+    },
+  });
+}

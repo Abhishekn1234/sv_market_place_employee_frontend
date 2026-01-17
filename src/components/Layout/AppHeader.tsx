@@ -15,8 +15,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
-import { Switch } from "../ui/switch"; // your Radix switch
+import { Switch } from "../ui/switch";
+
 import { useWorkerStatus } from "@/pages/Home/presentation/hooks/useWorkerStatus";
+import { useAuthStore } from "@/core/store/auth";
+import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/servicesettings";
 
 const languages = [
   { code: "EN", label: "English", icon: <LanguagesIcon /> },
@@ -43,56 +46,55 @@ export default function AppHeader({
   const { language, setLanguage, translations } = useLanguage();
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
-  // Read employee data safely
-  const employeeData = localStorage.getItem("employeeData");
-  const data = employeeData ? JSON.parse(employeeData) : null;
+  // ✅ AUTH STORE
+  const { employeeData, logout, updateUserStatus } = useAuthStore();
 
-  const fullName = data?.user?.fullName || data?.fullName || "User";
-  const profileImage = data?.user?.profilePictureUrl;
+  const fullName = employeeData?.user?.fullName || "User";
+  const profileImage = employeeData?.user?.profilePictureUrl;
 
   const homeTranslations = translations.HomePage;
   const isRTL = language === "AR";
 
-  // Worker status hook
-  const { worker, updateStatus, loading } = useWorkerStatus();
+  // Worker status API hook
+  const { updateStatus, loading } = useWorkerStatus();
 
-  // Online/Offline switch state
-  const [isOnline, setIsOnline] = useState<boolean>(false);
+  // Online/Offline switch
+  const [isOnline, setIsOnline] = useState(false);
 
-  // Sync initial switch state once
+  // Sync switch with global auth state
   useEffect(() => {
-    if (worker?.status) {
-      setIsOnline(worker.status.toUpperCase() === "ONLINE");
+    const status = employeeData?.user?.status;
+    if (status) {
+      setIsOnline(status === "ONLINE");
     }
-  }, [worker?.status]);
+  }, [employeeData?.user?.status]);
 
-  // Handle toggle switch
+  // Toggle handler
   const handleToggle = (checked: boolean) => {
+    const newStatus: WorkerStatus = checked ? "ONLINE" : "OFFLINE";
+
     setIsOnline(checked);
 
-    // Optimistically update worker status locally
-    if (worker) {
-      worker.status = checked ? "ONLINE" : "OFFLINE";
-    }
+    // ✅ Optimistic update (Zustand)
+    updateUserStatus(newStatus);
 
+    // ✅ Backend update
     updateStatus(checked);
   };
 
   const canToggle =
-    worker?.status &&
-    ["ONLINE", "OFFLINE"].includes(worker.status.toUpperCase());
+    employeeData?.user?.status === "ONLINE" ||
+    employeeData?.user?.status === "OFFLINE";
 
-  // Logout logic
+  // Logout
   const handleLogout = () => {
     toast.success("Logged out successfully");
-    localStorage.removeItem("employeeid");
-    localStorage.removeItem("employeetoken");
-    localStorage.removeItem("employeeData");
-    localStorage.removeItem("employee");
-    localStorage.removeItem("employeeemail");
+
+    logout(); // ✅ Zustand clears + persist clears
 
     setDropdownOpen(false);
     setMobileOpen(false);
+
     navigate("/login", { replace: true });
   };
 
@@ -118,8 +120,8 @@ export default function AppHeader({
       <div className="flex-1" />
 
       <div className="flex items-center gap-4">
-        {/* Online/Offline Switch */}
-        {worker && (
+        {/* Online / Offline */}
+        {employeeData?.user?.status && (
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
             {canToggle ? (
               <>
@@ -133,12 +135,14 @@ export default function AppHeader({
                     isOnline ? "text-green-600" : "text-gray-500"
                   }`}
                 >
-                  {isOnline ? homeTranslations.online : homeTranslations.offline}
+                  {isOnline
+                    ? homeTranslations.online
+                    : homeTranslations.offline}
                 </span>
               </>
             ) : (
               <span className="text-sm font-semibold text-orange-600">
-                {worker?.status.replace("_", " ")}
+                {employeeData.user.status.replace("_", " ")}
               </span>
             )}
           </div>
@@ -153,14 +157,14 @@ export default function AppHeader({
           )}
         </Button>
 
-        {/* Language dropdown */}
-        <div className="relative inline-block">
+        {/* Language */}
+        <div className="relative">
           <Button
             onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-            className={`flex items-center gap-2 p-2 rounded border font-medium ${
+            className={`flex items-center gap-2 p-2 rounded border ${
               theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-white"
-                : "bg-white border-gray-300 text-gray-900"
+                ? ""
+                : ""
             }`}
           >
             <Globe className="h-5 w-5" />
@@ -168,7 +172,7 @@ export default function AppHeader({
           </Button>
 
           {langDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-36 rounded-md border shadow-lg overflow-hidden z-50">
+            <div className="absolute right-0 mt-2 w-36 rounded-md border shadow-lg z-50">
               {languages.map((lang) => (
                 <button
                   key={lang.code}
@@ -176,69 +180,46 @@ export default function AppHeader({
                     setLanguage(lang.code as "EN" | "AR" | "HI");
                     setLangDropdownOpen(false);
                   }}
-                  className={`flex items-center gap-2 w-full px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 ${
-                    theme === "dark" ? "hover:bg-gray-700" : ""
-                  }`}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-gray-100"
                 >
                   <span>{lang.icon}</span>
-                  <span>
-                    {String(lang.code === "EN"
-                      ? translations.english
-                      : lang.code === "AR"
-                      ? translations.arabic
-                      : translations.hindi)}
-                  </span>
+                  <span>{lang.label}</span>
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Profile dropdown */}
+        {/* Profile */}
         <div className="relative">
           <Button
             variant="ghost"
             className="flex items-center gap-2 p-1"
-            onClick={() => setDropdownOpen((prev) => !prev)}
+            onClick={() => setDropdownOpen((p) => !p)}
           >
             {profileImage ? (
               <img
                 src={profileImage}
                 alt={fullName}
-                className={`h-8 w-8 rounded-full object-cover border ${
-                  theme === "dark" ? "border-gray-700" : "border-gray-300"
-                }`}
+                className="h-8 w-8 rounded-full object-cover border"
               />
             ) : (
-              <div
-                className={`h-8 w-8 rounded-full flex items-center justify-center font-semibold border ${
-                  theme === "dark"
-                    ? "bg-gray-800 text-white border-gray-700"
-                    : "bg-gray-200 text-gray-800 border-gray-300"
-                }`}
-              >
+              <div className="h-8 w-8 rounded-full flex items-center justify-center font-semibold bg-gray-300">
                 {fullName
                   .split(" ")
-                  .map((n: string) => n[0])
+                  .map((n) => n[0])
                   .join("")
                   .slice(0, 2)
                   .toUpperCase()}
               </div>
             )}
-
             <span className="text-sm font-medium truncate max-w-[120px]">
               {fullName}
             </span>
           </Button>
 
           {dropdownOpen && (
-            <div
-              className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg z-50 ${
-                theme === "dark"
-                  ? "bg-gray-800 border border-gray-700 text-white"
-                  : "bg-white border border-gray-200 text-gray-900"
-              }`}
-            >
+            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white border z-50">
               <ul className="py-1">
                 <li>
                   <Button

@@ -1,8 +1,10 @@
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Calendar, DollarSign, Filter, TrendingUp } from "lucide-react";
-import { Card } from "@/components/ui/card";
+
 import { useLanguage } from "@/context/LanguageContext";
+import { CommonCard } from "@/components/common/CommonCard";
+import CommonTabs from "@/components/common/CommonTabs";
+import type { CommonTab } from "@/components/common/CommonTabs";
 
 type ActivityType = "all" | "booking" | "payment" | "transaction";
 type TimePeriod = "7days" | "15days" | "1month" | "3months" | "6months";
@@ -30,51 +32,42 @@ export function ActivityFilters({
   const isRTL = language === "AR";
 
   const counts: Record<ActivityType, number> = {
-    all:
-      stats.bookingsCount +
-      stats.paymentsCount +
-      stats.transactionsCount,
+    all: stats.bookingsCount + stats.paymentsCount + stats.transactionsCount,
     booking: stats.bookingsCount,
     payment: stats.paymentsCount,
     transaction: stats.transactionsCount,
   };
 
-  return (
-    <Card className="p-6 space-y-4">
-      {/* Header */}
-      <div
-        className={`flex items-center gap-2 ${
-          isRTL ? "flex-row-reverse text-right" : "text-left"
-        }`}
-      >
-        <Filter className="size-5 text-gray-600" />
-        <h2 className="text-gray-900">
-          {translations.workHistory.filters.timePeriod}
-        </h2>
-      </div>
+  // Prepare tabs data for CommonTabs
+  const timePeriodTabs: CommonTab[] = (Object.keys(
+    translations.recentActivities.periods
+  ) as TimePeriod[]).map((p) => ({
+    value: p,
+    label: translations.recentActivities.periods[p],
+    content: null, // content is not needed here; only for selection
+  }));
 
+  return (
+    <CommonCard
+      title={
+        <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+          <Filter className="size-5 text-gray-600" />
+          <span>{translations.workHistory.filters.timePeriod}</span>
+        </div>
+      }
+      headerAlign={isRTL ? "right" : "left"}
+      contentClassName="space-y-4"
+    >
       {/* Time Period Tabs */}
-      <Tabs value={period} onValueChange={(v) => setPeriod(v as TimePeriod)}>
-        <TabsList
-          className={`grid grid-cols-3 md:grid-cols-5 w-full ${
-            isRTL ? "[direction:rtl]" : "[direction:ltr]"
-          }`}
-        >
-          {(Object.keys(translations.recentActivities.periods) as TimePeriod[])
-            .map((p) => (
-              <TabsTrigger key={p} value={p}>
-                {translations.recentActivities.periods[p]}
-              </TabsTrigger>
-            ))}
-        </TabsList>
-      </Tabs>
+      <CommonTabs<TimePeriod>
+        tabs={timePeriodTabs}
+        activeTab={period}
+        setActiveTab={setPeriod}
+        isRTL={isRTL}
+      />
 
       {/* Activity Type Buttons */}
-      <div
-        className={`flex flex-wrap gap-2 ${
-          isRTL ? "flex-row-reverse" : ""
-        }`}
-      >
+      <div className={`flex flex-wrap gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
         <Button
           variant={type === "all" ? "default" : "outline"}
           size="sm"
@@ -113,6 +106,8 @@ export function ActivityFilters({
           {translations.recentActivities.types.transaction} ({counts.transaction})
         </Button>
       </div>
-    </Card>
+    </CommonCard>
   );
 }
+
+

@@ -1,16 +1,17 @@
 import { useEffect, useRef } from "react";
 import { useLocationContext } from "@/context/LocationContext";
+import { useAuthStore } from "@/core/store/auth";
+import { reverseGeocode } from "@/components/common/CommonMap";
+
 
 /* ---------- Types ---------- */
 interface Location {
   lat: number;
   lng: number;
 }
-// types/notification.d.ts (or near your hook)
-interface ExtendedNotificationOptions extends NotificationOptions {
-  renotify?: boolean;
-}
-
+interface NotificationOption extends NotificationOptions {
+    renotify?: boolean;
+  }
 /* ---------- Distance ---------- */
 const getDistance = (a: Location, b: Location) => {
   const R = 6371000;
@@ -27,53 +28,47 @@ const getDistance = (a: Location, b: Location) => {
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 };
 
-/* ================================================= */
-
 export function useDynamicLocation() {
   const { setCurrentLocation, isTracking } = useLocationContext();
-
+   
   const lastLocationRef = useRef<Location | null>(null);
+  const notifyCountRef = useRef(0);
   const lastNotifyRef = useRef(0);
 
   /* ---------- Reverse Geocode ---------- */
-  const getPlaceName = async (lat: number, lng: number) => {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-      );
-      const data = await res.json();
-      return data.display_name || "Unknown location";
-    } catch {
-      return "Location unavailable";
-    }
-  };
+
 
   /* ---------- Notify ---------- */
-  const notify = async (loc: Location, place: string, distance: number) => {
-    setCurrentLocation(loc);
-
-    if (Date.now() - lastNotifyRef.current < 10000) return; // 10s throttle
-    lastNotifyRef.current = Date.now();
+  const notify = async (
+    loc: Location,
+    place: string,
+    distance: number
+  ) => {
+    console.log("Notify location change:", loc, place, distance);
+    if (notifyCountRef.current >= 2) return;
+    if (Date.now() - lastNotifyRef.current < 15000) return;
 
     if (Notification.permission !== "granted") return;
     if (!("serviceWorker" in navigator)) return;
 
+    lastNotifyRef.current = Date.now();
+    notifyCountRef.current++;
+
     const sw = await navigator.serviceWorker.ready;
 
     await sw.showNotification("📍 Location Changed", {
-  body: `${place}\nMoved ${(distance / 1000).toFixed(2)} km`,
-  tag: "location-change",
-  renotify: true,
-  data: {
-    url: "/settings/profile",
-    tab: "location",
-  },
-  actions: [
-    { action: "update", title: "Update" },
-    { action: "close", title: "Dismiss" },
-  ],
-} as ExtendedNotificationOptions);
-
+      body: `${place}\nMoved ${(distance / 1000).toFixed(2)} km`,
+      tag: "location-change",
+      renotify: false, // 🔥 IMPORTANT
+      data: {
+        url: "/settings/profile",
+        tab: "location",
+      },
+      actions: [
+        { action: "update", title: "Update" },
+        { action: "close", title: "Dismiss" },
+      ],
+    } as NotificationOption);
   };
 
   /* ---------- Effect ---------- */
@@ -82,7 +77,7 @@ export function useDynamicLocation() {
 
     let intervalId: number;
 
-    const poll = async () => {
+    const poll = () => {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           const current = {
@@ -90,14 +85,30 @@ export function useDynamicLocation() {
             lng: pos.coords.longitude,
           };
 
-          const last = lastLocationRef.current;
-          const distance = last ? getDistance(last, current) : Infinity;
+          // 🛑 First location → save only
+          if (!lastLocationRef.current) {
+            lastLocationRef.current = current;
+            setCurrentLocation(current);
+            return;
+          }
 
-          if (distance < 25) return; // ignore drift
+          const distance = getDistance(
+            lastLocationRef.current,
+            current
+          );
 
+          // Ignore GPS drift
+          if (distance < 100) return;
+
+          const place = await reverseGeocode(current.lat, current.lng);
+          if (!place) return; // 🛑 no "location unavailable"
+            useAuthStore.getState().setUserLocation({
+              type: "Point",
+              coordinates: [current.lng, current.lat],
+            });
           lastLocationRef.current = current;
+          setCurrentLocation(current);
 
-          const place = await getPlaceName(current.lat, current.lng);
           await notify(current, place, distance);
         },
         console.error,
@@ -105,8 +116,8 @@ export function useDynamicLocation() {
       );
     };
 
-    poll(); // immediate
-    intervalId = window.setInterval(poll, 5000); // every 5 sec
+    poll();
+    intervalId = window.setInterval(poll, 5000);
 
     return () => clearInterval(intervalId);
   }, [isTracking]);

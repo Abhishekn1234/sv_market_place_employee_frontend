@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
+import { reverseGeocode } from "@/components/common/CommonMap";
 
 interface CurrentLocationFetcherProps {
   onChange: (point: GeoPoint, placeName: string) => void;
@@ -24,32 +25,17 @@ export function CurrentLocationFetcher({ onChange }: CurrentLocationFetcherProps
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-      const point: GeoPoint = {
-  type: "Point",
-  coordinates: [position.coords.longitude, position.coords.latitude],
-  accuracy: position.coords.accuracy, // meters
-};
+        const point: GeoPoint = {
+          type: "Point",
+          coordinates: [lng, lat],
+         
+        };
 
         try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-          );
-          const data = await res.json();
-
-          const address = data.address || {};
-
-          // ✅ Only place name (NO pincode, NO full address)
-          const placeName =
-            address.city ||
-            address.town ||
-            address.village ||
-            address.suburb ||
-            address.county ||
-            address.state ||
-            "Current Location";
+          // ✅ reverseGeocode already returns a string
+          const placeName = await reverseGeocode(lat, lng);
 
           setPlace(placeName);
-
           onChange(point, placeName);
         } catch {
           setError("Failed to fetch location name");
@@ -64,18 +50,18 @@ export function CurrentLocationFetcher({ onChange }: CurrentLocationFetcherProps
     );
   }, [onChange]);
 
-  if (loading)
+  if (loading) {
     return <span className="text-gray-500">Fetching current location...</span>;
+  }
 
-  if (error)
+  if (error) {
     return <span className="text-red-500">{error}</span>;
+  }
 
-  if (place)
-    return (
-      <span className="text-green-600 text-sm">
-        📍 {place}
-      </span>
-    );
+  if (place) {
+    return <span className="text-green-600 text-sm">📍 {place}</span>;
+  }
 
   return null;
 }
+

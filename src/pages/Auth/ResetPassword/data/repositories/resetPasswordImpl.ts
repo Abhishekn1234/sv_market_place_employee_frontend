@@ -20,7 +20,7 @@ export class ResetPasswordRepoImpl implements IResetPasswordRepo {
 
     // Make API request with token in headers
     await axios.post(
-      `${this.baseUrl}auth/reset-password`,
+      `${this.baseUrl}/auth/reset-password`,
       {
         password: data.newPassword
       },

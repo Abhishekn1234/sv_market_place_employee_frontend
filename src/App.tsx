@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ToastContainer } from "react-toastify";
 
 import { LocationProvider } from './context/LocationContext';
-import { LocationTracker } from './pages/Profile/presentation/components/LocationTracker';
+import { LocationTracker } from './pages/Profile/presentation/components/Location/LocationTracker';
 import { LanguageProvider } from './context/LanguageContext';
 import ProtectedRoute from './ProtectedRoute';
 import AppLayout from './components/Layout/AppLayout';
@@ -29,36 +29,39 @@ import NotificationsPage from './pages/Notifications/presentation/notification.p
 import { ThemeProvider } from './context/ThemeContext';
 import { useDynamicLocation } from './utils/useNotification';
 
+
+// import SocketInitialize from './core/Websocket/socketio';
+
 function AppContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
-
+ 
   useDynamicLocation();
-useEffect(() => {
-  if ("Notification" in window && Notification.permission === "default") {
-    Notification.requestPermission();
-  }
-}, []);
 
   useEffect(() => {
-  const handler = (event: MessageEvent) => {
-    const { type, payload } = event.data || {};
-    if (type === "NAVIGATE" && payload?.url) {
-      navigate(payload.url);
-      if (payload.tab) setActiveTab(payload.tab);
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
     }
-  };
+  }, []);
 
-  navigator.serviceWorker?.addEventListener("message", handler);
-  return () =>
-    navigator.serviceWorker?.removeEventListener("message", handler);
-}, [navigate]);
-
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      const { type, payload } = event.data || {};
+      if (type === "NAVIGATE" && payload?.url) {
+        navigate(payload.url);
+        if (payload.tab) setActiveTab(payload.tab);
+      }
+    };
+    navigator.serviceWorker?.addEventListener("message", handler);
+    return () => navigator.serviceWorker?.removeEventListener("message", handler);
+  }, [navigate]);
 
   return (
     <LanguageProvider>
       <ToastContainer position="top-right" autoClose={5000} />
+
       <Routes>
+        {/* Public routes */}
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -67,23 +70,27 @@ useEffect(() => {
         <Route path="/services/employee" element={<ServiceSettings />} />
         <Route path="/services/documents" element={<DocumentOnboarding />} />
 
+        {/* Protected routes */}
         <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<HomePage />} />
-          <Route path="/settings/profile" element={<ProtectedRoute><ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} /></ProtectedRoute>} />
-          <Route path="/history/booking" element={<ProtectedRoute><BookingHistory /></ProtectedRoute>} />
-          <Route path="/history/transaction" element={<ProtectedRoute><TransactionHistory /></ProtectedRoute>} />
-          <Route path="/history/work" element={<ProtectedRoute><WorkingHistory /></ProtectedRoute>} />
-          <Route path="/activity/recent" element={<ProtectedRoute><RecentActivity /></ProtectedRoute>} />
-          <Route path="/activity/past" element={<ProtectedRoute><PastActivity /></ProtectedRoute>} />
-          <Route path="/settings/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
-          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="settings/profile" element={<ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} />} />
+          <Route path="history/booking" element={<BookingHistory />} />
+          <Route path="history/transaction" element={<TransactionHistory />} />
+          <Route path="history/work" element={<WorkingHistory />} />
+          <Route path="activity/recent" element={<RecentActivity />} />
+          <Route path="activity/past" element={<PastActivity />} />
+          <Route path="settings/wallet" element={<Wallet />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route>
       </Routes>
+
+      {/* Only show modal if logged in */}
+    
+
       <LocationTracker />
     </LanguageProvider>
   );
 }
-
 export default function App() {
   return (
     <ThemeProvider>

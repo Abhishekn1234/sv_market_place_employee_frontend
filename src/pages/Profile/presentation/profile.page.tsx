@@ -1,11 +1,12 @@
+"use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Lock, MapPin } from "lucide-react";
-import ProfileList from "./components/ProfileList";
-import PasswordChanging from "./components/PasswordChanging";
-import LocationSettings from "./components/LocationSettings";
+import ProfileList from "./components/ProfileList/ProfileList";
+import PasswordChanging from "./components/Password/PasswordChanging";
+import LocationSettings from "./components/Location/LocationSettings";
 import { useLanguage } from "@/context/LanguageContext";
-
+import CommonTabs from "@/components/common/CommonTabs";
+import type { CommonTab } from "@/components/common/CommonTabs";
 type TabType = "profile" | "password" | "location";
 
 interface Props {
@@ -17,20 +18,26 @@ export default function ProfileSettings({ activeTab, setActiveTab }: Props) {
   const { language, t } = useLanguage();
   const isRTL = language === "AR";
 
-  const tabTriggerClass = `
-    relative h-12 px-0 bg-transparent rounded-none
-    text-gray-600 shadow-none
-    focus:outline-none focus-visible:ring-0
-    after:absolute after:left-0 after:bottom-0
-    after:h-[2px] after:w-full after:bg-blue-600
-    after:scale-x-0 after:origin-left
-    after:transition-transform after:duration-200
-    data-[state=active]:text-blue-600
-    data-[state=active]:after:scale-x-100
-    hover:text-blue-600
-  `;
-
-  
+  const tabs: CommonTab[] = [
+    {
+      value: "profile",
+      label: t("profile"),
+      icon: <User />,
+      content: <ProfileList />
+    },
+    {
+      value: "password",
+      label: t("password"),
+      icon: <Lock />,
+      content: <PasswordChanging onSuccess={() => setActiveTab("profile")} />
+    },
+    {
+      value: "location",
+      label: t("location"),
+      icon: <MapPin />,
+      content: <LocationSettings setActiveTab={setActiveTab} />
+    }
+  ];
 
   return (
     <div className={`w-full h-full overflow-hidden ${isRTL ? "rtl" : "ltr"}`}>
@@ -44,40 +51,12 @@ export default function ProfileSettings({ activeTab, setActiveTab }: Props) {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
-          <div className="sticky top-0 z-10">
-            <TabsList
-              className={`h-12 w-full gap-6 bg-transparent p-0 border-none shadow-none ${
-                isRTL ? "justify-end flex-row-reverse" : "justify-start"
-              }`}
-            >
-              <TabsTrigger value="profile" className={tabTriggerClass}>
-                <User className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
-                {t("profile")}
-              </TabsTrigger>
-              <TabsTrigger value="password" className={tabTriggerClass}>
-                <Lock className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
-                {t("password")}
-              </TabsTrigger>
-              <TabsTrigger value="location" className={tabTriggerClass}>
-                <MapPin className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
-                {t("location")}
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <div className="p-3 md:p-4">
-            <TabsContent value="profile" className="m-0">
-              <ProfileList />
-            </TabsContent>
-            <TabsContent value="password" className="m-0">
-              <PasswordChanging onSuccess={() => setActiveTab("profile")} />
-            </TabsContent>
-            <TabsContent value="location" className="m-0">
-              <LocationSettings setActiveTab={setActiveTab} />
-            </TabsContent>
-          </div>
-        </Tabs>
+        <CommonTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isRTL={isRTL}
+        />
       </div>
     </div>
   );

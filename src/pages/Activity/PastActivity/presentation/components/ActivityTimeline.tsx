@@ -1,9 +1,10 @@
-import { Card } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
 import type  { JSX } from "react";
 import { Calendar, User, MapPin } from "lucide-react";
 import type { Activity } from "../../domain/entities/activity";
 import { useLanguage } from "@/context/LanguageContext";
+import { CommonCard } from "@/components/common/CommonCard";
 type ActivityTimelineProps = {
   groupedActivities: Record<string, Activity[]>;
   getActivityIcon: (type: Activity["type"]) => JSX.Element;
@@ -23,7 +24,7 @@ export function ActivityTimeline({
   return (
     <div className={`space-y-6 ${isRTL ? "rtl" : "ltr"}`}>
       {Object.entries(groupedActivities).map(([date, activities]) => (
-        <Card key={date} className="p-6">
+        <CommonCard key={date} className="p-6">
           {/* Date Header */}
           <div className="flex items-center gap-2 mb-4 pb-3 border-b">
             <Calendar className="size-4 text-gray-600" />
@@ -129,7 +130,7 @@ export function ActivityTimeline({
               </div>
             ))}
           </div>
-        </Card>
+        </CommonCard>
       ))}
     </div>
   );
