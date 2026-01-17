@@ -14,6 +14,7 @@ import { useAvailableBookings } from "./presentation/hooks/useGet";
 import { useAccept } from "./presentation/hooks/useAccept";
 
 import { CommonModal } from "@/components/common/CommonModal";
+import { Badge } from "@/components/ui/badge";
 
 type Props = {
   open: boolean;
@@ -68,10 +69,20 @@ export default function SocketBookingsModal({
                     key={booking._id}
                     className="bg-white border rounded-2xl p-6 shadow"
                   >
-                    <h3 className="font-bold text-lg">{booking.service?.name}</h3>
+                   <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-bold text-lg">
+                        {booking.service?.name}
+                      </h3>
+
+                      <Badge className="bg-gray-100 text-gray-700 border border-gray-200">
+                        {booking.status}
+                      </Badge>
+                    </div>
+
                     <p className="text-sm text-gray-500 mb-2">
                       {booking.serviceTier?.displayName}
                     </p>
+                   
 
                     <div className="flex gap-2 text-sm mb-3">
                       <User className="h-4 w-4" />

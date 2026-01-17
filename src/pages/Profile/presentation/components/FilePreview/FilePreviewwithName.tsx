@@ -16,7 +16,7 @@ export function FilePreviewWithName({ file, url }: FilePreviewWithNameProps) {
     return (
       <img
         src={src}
-        className="h-32 w-full rounded-md border object-cover"
+        className="h-52 w-full rounded-md border object-cover"
         alt="preview"
       />
     );
@@ -27,7 +27,7 @@ export function FilePreviewWithName({ file, url }: FilePreviewWithNameProps) {
     return (
       <iframe
         src={src}
-        className="h-40 w-full rounded-md border"
+        className="h-53 w-full rounded-md border"
         title="document preview"
       />
     );

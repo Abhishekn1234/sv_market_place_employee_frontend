@@ -44,13 +44,13 @@ export function ProfileHeader({
           {isEditing && (
             <>
              <Button
-  type="button"
-  className="absolute bottom-1 right-1 p-0"
-  onClick={() => document.getElementById("profileImage")?.click()}
-  variant="ghost"
->
-  <Edit3 className="h-4 w-4 text-black" />
-</Button>
+                  type="button"
+                  className="absolute bottom-1 right-1 p-0"
+                  onClick={() => document.getElementById("profileImage")?.click()}
+                  variant="ghost"
+                >
+                  <Edit3 className="h-4 w-4 text-black" />
+                </Button>
 
 
 

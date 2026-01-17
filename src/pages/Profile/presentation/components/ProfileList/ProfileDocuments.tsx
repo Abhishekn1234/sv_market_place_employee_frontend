@@ -34,7 +34,7 @@ export function ProfileDocuments({
         return (
           <div
             key={key}
-            className="border rounded-lg p-4 flex flex-col items-center justify-center min-h-[250px] bg-white shadow-sm relative"
+            className="border rounded-lg p-4 flex flex-col items-center justify-center min-h-[300px] bg-white shadow-sm relative"
           >
             <p className="text-sm font-medium mb-2">{label}</p>
 

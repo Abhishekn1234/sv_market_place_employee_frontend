@@ -16,20 +16,31 @@ export default function AppLayout() {
   const { language } = useLanguage();
   const isRTL = language === "AR";
 
-  const [liveBookingsOpen, setLiveBookingsOpen] = useState(true);
-  const [assignedOpen, setAssignedOpen] = useState(false); // will update below
+  /** 🔑 START CLOSED — decide after API */
+  const [liveBookingsOpen, setLiveBookingsOpen] = useState(false);
+  const [assignedOpen, setAssignedOpen] = useState(false);
 
-  const { assignedWorks, isLoading } = useAssign(true); // always fetch to check
+  /** Always fetch assigned works on layout load */
+  const { assignedWorks, isLoading } = useAssign(true);
 
-  // Automatically open AssignedWorkModal if there’s already an assigned work
+  /** ✅ Decide which modal to open AFTER data loads */
   useEffect(() => {
-    if (assignedWorks.some((b: GetBooking) => b.status === "ASSIGNED")) {
+    if (isLoading) return;
+
+    const hasAssigned = assignedWorks.some(
+      (b: GetBooking) => b.status === "ASSIGNED"
+    );
+
+    if (hasAssigned) {
       setAssignedOpen(true);
       setLiveBookingsOpen(false);
+    } else {
+      setAssignedOpen(false);
+      setLiveBookingsOpen(true);
     }
-  }, [assignedWorks]);
+  }, [isLoading, assignedWorks]);
 
-  // Handle window resize
+  /** Window resize */
   useEffect(() => {
     const onResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", onResize);
@@ -40,7 +51,7 @@ export default function AppLayout() {
     if (windowWidth < 1024) setMini(false);
   }, [windowWidth]);
 
-  /** Apply offset to WHOLE content (header + main) */
+  /** Sidebar offset */
   const contentOffset =
     windowWidth >= 1024
       ? mini
@@ -52,12 +63,13 @@ export default function AppLayout() {
         : "lg:ml-72"
       : "";
 
-  if (isLoading) return null; // avoid flicker
+  /** Prevent flicker */
+  if (isLoading) return null;
 
-  // Callback when a live booking is accepted
+  /** When live booking is accepted */
   const handleBookingAccepted = () => {
-    setLiveBookingsOpen(false); // close live bookings
-    setAssignedOpen(true); // open assigned works
+    setLiveBookingsOpen(false);
+    setAssignedOpen(true);
   };
 
   return (
@@ -90,15 +102,13 @@ export default function AppLayout() {
         </main>
       </div>
 
-      {/* Modals */}
+     
       {assignedOpen ? (
         <AssignedWorkModal
           open={assignedOpen}
           onClose={() => setAssignedOpen(false)}
           onCancelSuccess={() => {
-            // Close AssignedWorkModal
             setAssignedOpen(false);
-            // Open Live Bookings again
             setLiveBookingsOpen(true);
           }}
         />
@@ -106,9 +116,10 @@ export default function AppLayout() {
         <SocketBookingsModal
           open={liveBookingsOpen}
           onClose={() => setLiveBookingsOpen(false)}
-          onBookingAccepted={handleBookingAccepted} // Open assigned work after accept
+          onBookingAccepted={handleBookingAccepted}
         />
       )}
     </div>
   );
 }
+
