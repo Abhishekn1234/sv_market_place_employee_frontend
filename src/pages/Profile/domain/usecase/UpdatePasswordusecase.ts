@@ -1,4 +1,6 @@
 import type { ProfileRepo } from "../../domain/repositories/profilerepo";
+import type { UpdatePassword } from "../entities/updatepassword";
+import { ValidatePasswordupdate } from "../validations/updatepasswordvalidation";
 
 export class UpdatePasswordUsecase {
   private profileRepo:ProfileRepo;
@@ -7,20 +9,13 @@ export class UpdatePasswordUsecase {
   }
 
   async execute(
-    oldPassword: string,
-    newPassword: string
+    request:UpdatePassword
   ) {
-    if (!oldPassword || !newPassword) {
-      throw new Error("Passwords are required");
-    }
-
-    if (oldPassword=== newPassword) {
-      throw new Error("New password must be different from current password");
-    }
+    
+    ValidatePasswordupdate(request);
 
     return await this.profileRepo.updatePassword(
-      oldPassword,
-      newPassword
+     request
     );
   }
 }

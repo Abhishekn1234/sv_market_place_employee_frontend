@@ -1,4 +1,4 @@
-// src/context/ThemeContext.tsx
+
 import { useAuthStore } from "@/core/store/auth";
 import { createContext, useState, useContext, type ReactNode, useEffect } from "react";
 
@@ -20,19 +20,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(userTheme ?? "light");
 
   const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);          // Update local state
-    setPreferredTheme(newTheme);      // Save to Zustand store
+    setThemeState(newTheme);          
+    setPreferredTheme(newTheme);      
   };
 
   const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
-  // Update document class on theme change
+
   useEffect(() => {
     document.documentElement.classList.remove(theme === "light" ? "dark" : "light");
     document.documentElement.classList.add(theme);
   }, [theme]);
 
-  // Sync with store if userTheme changes (like after login)
+
   useEffect(() => {
     if (userTheme && userTheme !== theme) {
       setThemeState(userTheme);

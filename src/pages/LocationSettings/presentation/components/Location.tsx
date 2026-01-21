@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Marker, useMapEvents } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
-import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
+import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 
 
 import { defaultIcon } from "@/components/common/CommonMap";

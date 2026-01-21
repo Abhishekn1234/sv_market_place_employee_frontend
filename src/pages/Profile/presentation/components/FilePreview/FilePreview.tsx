@@ -1,4 +1,4 @@
-// components/FilePreview.tsx
+
 import {
   FileText,
   
@@ -17,7 +17,7 @@ export function FilePreview({ file, url, label }: FilePreviewProps) {
   const src = file ? URL.createObjectURL(file) : url!;
   const type = file?.type || "";
 
-  /* ---------- IMAGE ---------- */
+
   if (type.startsWith("image/") || /\.(png|jpe?g|gif|webp)$/i.test(src)) {
     return (
       <img
@@ -28,7 +28,6 @@ export function FilePreview({ file, url, label }: FilePreviewProps) {
     );
   }
 
-  /* ---------- PDF ---------- */
   if (type === "application/pdf" || /\.pdf$/i.test(src)) {
     return (
       <iframe
@@ -39,7 +38,7 @@ export function FilePreview({ file, url, label }: FilePreviewProps) {
     );
   }
 
-  /* ---------- OTHER DOCS ---------- */
+
   return (
     <a
       href={src}

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProfileRepoImplementation } from "../../data/repositories/ProfileImpl";
 import { UpdateProfileUsecase } from "../../domain/usecase/UpdateProfileusecase";
-import type {  ProfileUpdate } from "../../domain/entities/profile";
+import type {  ProfileUpdate } from "../../domain/entities/profileupdate";
 import { useAuthStore } from "@/core/store/auth";
 
 const repo = new ProfileRepoImplementation();
@@ -18,39 +18,37 @@ export function useUpdateProfile() {
 
     const { user, worker } = updatedProfile;
 
-queryClient.setQueryData(
-  ["profile"],
-  (old: ProfileUpdate | undefined) => {
-    if (!old) {
-      return {
-        ...user,
-        worker,
-      };
-    }
+        queryClient.setQueryData(
+          ["profile"],
+          (old: ProfileUpdate | undefined) => {
+            if (!old) {
+              return {
+                ...user,
+                worker,
+              };
+            }
 
-    return {
-      ...old,
-      ...user,
+            return {
+              ...old,
+              ...user,
 
-      // ✅ keep old documents if backend didn't send new ones
-      documents: user.documents ?? old.user.documents,
+              documents: user.documents ?? old.user.documents,
 
-      // ✅ merge worker safely
-      worker: {
-        ...old.worker,
-        ...worker,
-      },
-    };
-  }
-);
+              worker: {
+                ...old.worker,
+                ...worker,
+              },
+            };
+          }
+        );
 
-useAuthStore.getState().updateUserProfile({
-        fullName: user.fullName,
-        address: user.address,
-        documents: user.documents,
-        location: user.location,
-       
-      });
+        useAuthStore.getState().updateUserProfile({
+                fullName: user.fullName,
+                address: user.address,
+                documents: user.documents,
+                location: user.location,
+              
+        });
 
     },
   });

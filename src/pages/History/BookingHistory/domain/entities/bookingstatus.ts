@@ -1,4 +1,5 @@
-export type BookingStatus =  | "completed"
+export type BookingStatus =
+  | "completed"
   | "confirmed"
   | "pending"
   | "inProgress"

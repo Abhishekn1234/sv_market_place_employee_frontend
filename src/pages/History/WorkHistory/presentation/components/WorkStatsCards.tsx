@@ -1,17 +1,6 @@
 import { CommonCard } from "@/components/common/CommonCard";
 import { useMemo } from "react";
-
-interface Card {
-  label: string;
-  value: number;
-  color?: string;
-}
-
-interface Card {
-  label: string;
-  value: number;
-  color?: string;
-}
+import type { Card } from "../../domain/entities/card";
 
 export function WorkStatsCards({
   cards,

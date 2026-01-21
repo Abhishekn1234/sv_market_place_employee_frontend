@@ -1,7 +1,7 @@
 // import { reverseGeocode } from "./reverseGeocode";
 
 import { useAuthStore } from "@/core/store/auth";
-import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
+import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 
 
 /* ---------- Last Saved Location ---------- */

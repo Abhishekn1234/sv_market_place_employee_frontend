@@ -9,7 +9,7 @@ export class BookingRepositoryImpl implements BookingRepository {
 
   return {
     data: payload.data,
-    pagination: payload.pagiation, // normalize typo
+    pagination: payload.pagiation, 
   };
 }
 

@@ -4,10 +4,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import EyeToggle from "./EyeToggle";
+import { Loader2,  } from "lucide-react";
 import { usePassword } from "@/pages/Profile/presentation/hooks/usePassword";
 import { toast } from "react-toastify";
-
+import { validatePassword } from "@/pages/Profile/domain/validations/passwordinputvalidation";
+import  {ValidatematchPassword}  from "@/pages/Profile/domain/validations/passwordmatchvalidation";
 interface Props {
   onSuccess: () => void;
 }
@@ -23,39 +25,17 @@ export default function PasswordChanging({ onSuccess }: Props) {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const validatePassword = (password: string) => {
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return false;
-    }
-    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password)) {
-      toast.error("Password must contain uppercase and lowercase letters");
-      return false;
-    }
-    if (!/\d/.test(password)) {
-      toast.error("Password must contain a number");
-      return false;
-    }
-    if (!/[!@#$%^&*]/.test(password)) {
-      toast.error("Password must contain a special character");
-      return false;
-    }
-    return true;
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!validatePassword(newPassword)) return;
+      if (!validatePassword(newPassword)) return;
+       if(!ValidatematchPassword(newPassword,confirmPassword)) return;
+ 
 
-    if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
+      const data = { oldPassword, newPassword };
 
-    mutate(
-      { oldPassword, newPassword },
-      {
+      mutate(data, {
         onSuccess: () => {
           toast.success("Password updated successfully");
           setOldPassword("");
@@ -64,57 +44,55 @@ export default function PasswordChanging({ onSuccess }: Props) {
           onSuccess();
         },
         onError: (err: any) => {
-          toast.error(
-            err?.response?.data?.message || "Failed to update password"
-          );
+          toast.error(err?.response?.data?.message || "Failed to update password");
         },
-      }
-    );
-  };
+      });
+    };
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto mt-10">
-      {/* Current Password */}
+      
       <div>
         <Label>Current Password</Label>
         <div className="relative">
-          <Input
-  type={showOld ? "text" : "password"}
-  value={oldPassword}
-  onChange={(e) => setOldPassword(e.target.value)}
-  required
-  className="pr-10 bg-gray-100 text-gray-900 placeholder-gray-500"
-/>
+                      <Input
+              type={showOld ? "text" : "password"}
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              required
+              className="pr-10 bg-gray-100 text-gray-900 placeholder-gray-500"
+            />
           <EyeToggle show={showOld} setShow={setShowOld} />
         </div>
       </div>
 
-      {/* New Password */}
+    
       <div>
         <Label>New Password</Label>
         <div className="relative">
-          <Input
-  type={showNew ? "text" : "password"}
-  value={newPassword}
-  onChange={(e) => setNewPassword(e.target.value)}
-  required
-  className="pr-10 bg-gray-100 text-gray-900 placeholder-gray-500"
-/>
+                      <Input
+              type={showNew ? "text" : "password"}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              className="pr-10 bg-gray-100 text-gray-900 placeholder-gray-500"
+            />
           <EyeToggle show={showNew} setShow={setShowNew} />
         </div>
       </div>
 
-      {/* Confirm Password */}
+   
       <div>
         <Label>Confirm Password</Label>
         <div className="relative">
-         <Input
-  type={showConfirm ? "text" : "password"}
-  value={confirmPassword}
-  onChange={(e) => setConfirmPassword(e.target.value)}
-  required
-  className="pr-10 bg-gray-100 text-gray-900 placeholder-gray-500"
-/>
+                    <Input
+              type={showConfirm ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="pr-10 bg-gray-100 text-gray-900 placeholder-gray-500"
+            />
           <EyeToggle show={showConfirm} setShow={setShowConfirm} />
         </div>
       </div>
@@ -147,22 +125,4 @@ export default function PasswordChanging({ onSuccess }: Props) {
   );
 }
 
-function EyeToggle({
-  show,
-  setShow,
-}: {
-  show: boolean;
-  setShow: (v: boolean) => void;
-}) {
-  return (
-    <Button
-      type="button"
-      tabIndex={-1}
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={() => setShow(!show)}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-700 hover:text-gray-100 bg-gray-100"
-    >
-      {show ? <Eye size={18} /> : <EyeOff size={18} />}
-    </Button>
-  );
-}
+

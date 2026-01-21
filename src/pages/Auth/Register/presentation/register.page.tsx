@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOffIcon, User, Mail, KeyRound, PhoneCallIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import { COUNTRIES } from "./components/phonenumberformat";
+import { Button } from "@/components/ui/button";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState<Register>({
@@ -123,9 +124,9 @@ const handleCountryChange = (iso: string) => {
             </div>
           </div>
 
-          {/* Form */}
+        
           <div className="space-y-5">
-            {/* Full Name */}
+           
             <div>
               <Label htmlFor="fullName" className="text-sm font-medium">
                 Full Name
@@ -145,7 +146,6 @@ const handleCountryChange = (iso: string) => {
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <Label htmlFor="email" className="text-sm font-medium">
                 Email Address
@@ -173,7 +173,6 @@ const handleCountryChange = (iso: string) => {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <Label htmlFor="password" className="text-sm font-medium">
                 Password
@@ -202,7 +201,7 @@ const handleCountryChange = (iso: string) => {
               </div>
             </div>
 
-            {/* Confirm Password */}
+        
             <div>
               <Label htmlFor="confirmPassword" className="text-sm font-medium">
                 Confirm Password
@@ -231,16 +230,15 @@ const handleCountryChange = (iso: string) => {
               </div>
             </div>
 
-            {/* Button */}
-            <button
+            <Button
               onClick={handleRegister}
               disabled={isLoading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-lg font-medium text-base transition-all disabled:opacity-50 active:scale-[0.98] mt-2"
             >
               {isLoading ? "Creating Account..." : "Create Account"}
-            </button>
+            </Button>
 
-            {/* Login Link */}
+        
             <p className="text-center text-gray-600 pt-4 text-sm">
               Already have an account?{" "}
               <Link to="/login" className="text-blue-600 hover:underline font-medium">
@@ -266,9 +264,8 @@ const handleCountryChange = (iso: string) => {
               </p>
             </div>
 
-            {/* Form */}
             <div className="space-y-6">
-              {/* Full Name */}
+            
               <div>
                 <Label htmlFor="fullName-desktop" className="text-base font-medium">
                   Full Name
@@ -288,7 +285,6 @@ const handleCountryChange = (iso: string) => {
                 </div>
               </div>
 
-              {/* Email */}
               <div>
                 <Label htmlFor="email-desktop" className="text-base font-medium">
                   Email Address
@@ -307,44 +303,44 @@ const handleCountryChange = (iso: string) => {
                   />
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>
-             <div className="mt-4">
-  <Label className="text-sm font-medium block mb-1">
-    Phone
-  </Label>
+                          <div className="mt-4">
+                <Label className="text-sm font-medium block mb-1">
+                  Phone
+                </Label>
 
-  <div className="flex">
-    {/* Country Dropdown */}
-    <select
-      value={country.iso}
-      onChange={(e) => handleCountryChange(e.target.value)}
-      className="h-12 rounded-l-lg border  px-3  text-sm"
-    >
-      {COUNTRIES.map(c => (
-        <option key={c.iso} value={c.iso}>
-          {c.flag} {c.code}
-        </option>
-      ))}
-    </select>
+                <div className="flex">
+                  
+                  <select
+                    value={country.iso}
+                    onChange={(e) => handleCountryChange(e.target.value)}
+                    className="h-12 rounded-l-lg border  px-3  text-sm"
+                  >
+                    {COUNTRIES.map(c => (
+                      <option key={c.iso} value={c.iso}>
+                        {c.flag} {c.code}
+                      </option>
+                    ))}
+                  </select>
 
-    {/* Phone Input */}
-    <div className="relative flex-1">
-      <PhoneCallIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-      <Input
-        type="tel"
-        value={formData.phone}
-        onChange={handlePhoneChange}
-        placeholder={`${country.max} digit number`}
-        className="h-12 w-full pl-10 rounded-l-none"
-        inputMode="numeric"
-      />
-    </div>
-  </div>
-</div>
+              
+                  <div className="relative flex-1">
+                    <PhoneCallIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                    <Input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      placeholder={`${country.max} digit number`}
+                      className="h-12 w-full pl-10 rounded-l-none"
+                      inputMode="numeric"
+                    />
+                  </div>
+                </div>
+              </div>
 
 
               </div>
 
-              {/* Password */}
+           
               <div>
                 <Label htmlFor="password-desktop" className="text-base font-medium">
                   Password
@@ -373,7 +369,7 @@ const handleCountryChange = (iso: string) => {
                 </div>
               </div>
 
-              {/* Confirm Password */}
+              
               <div>
                 <Label htmlFor="confirmPassword-desktop" className="text-base font-medium">
                   Confirm Password
@@ -402,16 +398,16 @@ const handleCountryChange = (iso: string) => {
                 </div>
               </div>
 
-              {/* Button */}
-              <button
+             
+              <Button
                 onClick={handleRegister}
                 disabled={isLoading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 xl:py-4 rounded-lg font-medium text-base transition-all disabled:opacity-50 hover:shadow-md active:scale-[0.98] mt-2"
               >
                 {isLoading ? "Creating Account..." : "Create Account"}
-              </button>
+              </Button>
 
-              {/* Login Link */}
+             
               <p className="text-center text-gray-600 pt-5 text-base">
                 Already have an account?{" "}
                 <Link to="/login" className="text-blue-600 hover:underline font-medium">

@@ -13,7 +13,7 @@ export type CommonTab = {
 interface Props<T extends string> {
   tabs: CommonTab[];
   activeTab: T;
-  setActiveTab: (tab: T) => void; // <- use generic
+  setActiveTab: (tab: T) => void; 
   isRTL?: boolean;
 }
 

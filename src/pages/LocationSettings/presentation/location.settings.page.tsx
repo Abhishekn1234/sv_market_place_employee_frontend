@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { CommonMap } from "@/components/common/CommonMap";
 
 interface LocationPageProps {
-  onChange: (point: [number, number]) => void; // [lat, lng]
+  onChange: (point: [number, number]) => void; 
   radius?: number;
   onRadiusChange?: (r: number) => void;
 }
@@ -14,7 +14,7 @@ export default function LocationPage({
 }: LocationPageProps) {
   const [mapLocation, setMapLocation] = useState<[number, number] | null>(null);
 
-  /* ================== GET CURRENT LOCATION ================== */
+
   useEffect(() => {
     if (!navigator.geolocation) {
       console.warn("Geolocation not supported");
@@ -27,11 +27,11 @@ export default function LocationPage({
         const lng = pos.coords.longitude;
 
         setMapLocation([lat, lng]);
-        onChange([lat, lng]); // ✅ sync with parent
+        onChange([lat, lng]); 
       },
       (err) => {
         console.error("Location error:", err);
-        // fallback location
+        
         setMapLocation([20, 97]);
       },
       { enableHighAccuracy: true }
@@ -46,7 +46,7 @@ export default function LocationPage({
         location={mapLocation}
         setLocation={(coords) => {
           setMapLocation(coords);
-          onChange([coords[0], coords[1]]); // lat, lng
+          onChange([coords[0], coords[1]]); 
         }}
         locationMode="MANUAL"
         radius={radius}

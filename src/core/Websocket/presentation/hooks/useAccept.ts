@@ -13,14 +13,14 @@ export function useAccept() {
   return useMutation({
     mutationFn: (data: AcceptWork) => usecase.execute(data),
 
-    onSuccess(_, variables) {
-  toast.success("Work Accepted Successfully");
- console.log("Accepted work ID:", variables);
-  
-  queryClient.invalidateQueries({
-    queryKey: ["assigned-works"],
-  });
-},
+            onSuccess(_, variables) {
+          toast.success("Work Accepted Successfully");
+        console.log("Accepted work ID:", variables);
+          
+          queryClient.invalidateQueries({
+            queryKey: ["assigned-works"],
+          });
+        },
 
     onError(err: any) {
       toast.error("Failed to accept work");

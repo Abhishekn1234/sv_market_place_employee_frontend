@@ -19,7 +19,7 @@ import { Switch } from "../ui/switch";
 
 import { useWorkerStatus } from "@/pages/Home/presentation/hooks/useWorkerStatus";
 import { useAuthStore } from "@/core/store/auth";
-import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/servicesettings";
+import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
 
 const languages = [
   { code: "EN", label: "English", icon: <LanguagesIcon /> },
@@ -46,7 +46,7 @@ export default function AppHeader({
   const { language, setLanguage, translations } = useLanguage();
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
-  // ✅ AUTH STORE
+
   const { employeeData, logout, updateUserStatus } = useAuthStore();
 
   const fullName = employeeData?.user?.fullName || "User";
@@ -55,13 +55,12 @@ export default function AppHeader({
   const homeTranslations = translations.HomePage;
   const isRTL = language === "AR";
 
-  // Worker status API hook
   const { updateStatus, loading } = useWorkerStatus();
 
-  // Online/Offline switch
+  
   const [isOnline, setIsOnline] = useState(false);
 
-  // Sync switch with global auth state
+
   useEffect(() => {
     const status = employeeData?.user?.status;
     if (status) {
@@ -69,16 +68,15 @@ export default function AppHeader({
     }
   }, [employeeData?.user?.status]);
 
-  // Toggle handler
+
   const handleToggle = (checked: boolean) => {
     const newStatus: WorkerStatus = checked ? "ONLINE" : "OFFLINE";
 
     setIsOnline(checked);
 
-    // ✅ Optimistic update (Zustand)
+   
     updateUserStatus(newStatus);
 
-    // ✅ Backend update
     updateStatus(checked);
   };
 
@@ -86,11 +84,10 @@ export default function AppHeader({
     employeeData?.user?.status === "ONLINE" ||
     employeeData?.user?.status === "OFFLINE";
 
-  // Logout
   const handleLogout = () => {
     toast.success("Logged out successfully");
 
-    logout(); // ✅ Zustand clears + persist clears
+    logout(); 
 
     setDropdownOpen(false);
     setMobileOpen(false);
@@ -106,7 +103,7 @@ export default function AppHeader({
           : "border-gray-200 bg-gray-50 text-gray-900"
       }`}
     >
-      {/* Sidebar toggle */}
+  
       <Button
         variant="ghost"
         onClick={() =>
@@ -120,7 +117,7 @@ export default function AppHeader({
       <div className="flex-1" />
 
       <div className="flex items-center gap-4">
-        {/* Online / Offline */}
+      
         {employeeData?.user?.status && (
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
             {canToggle ? (
@@ -148,7 +145,7 @@ export default function AppHeader({
           </div>
         )}
 
-        {/* Theme toggle */}
+       
         <Button variant="ghost" onClick={toggleTheme} className="p-2">
           {theme === "light" ? (
             <Moon className="h-5 w-5 text-gray-700" />
@@ -157,14 +154,13 @@ export default function AppHeader({
           )}
         </Button>
 
-        {/* Language */}
         <div className="relative">
           <Button
             onClick={() => setLangDropdownOpen(!langDropdownOpen)}
             className={`flex items-center gap-2 p-2 rounded border ${
               theme === "dark"
-                ? ""
-                : ""
+                ? "bg-white cursor-pointer hover:bg-white"
+                : "bg-white border-gray-300 text-black cursor-pointer hover:bg-gray-50"
             }`}
           >
             <Globe className="h-5 w-5" />
@@ -190,7 +186,7 @@ export default function AppHeader({
           )}
         </div>
 
-        {/* Profile */}
+        
         <div className="relative">
           <Button
             variant="ghost"

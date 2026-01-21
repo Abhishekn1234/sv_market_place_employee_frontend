@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { getStatusColor,getStatusIcon } from "@/pages/History/WorkHistory/presentation/utils/workhistory";
+import { formatDateTime } from "./helpers/formatdatetime";
 import {
   X,
   Loader2,
@@ -8,9 +10,7 @@ import {
   Phone,
   DollarSign,
   Package,
-  CheckCircle,
-  Clock,
-  Wrench,
+   Wrench,
   BadgeCheck,
   Mail,
   // SpeakerIcon,
@@ -19,11 +19,12 @@ import { useAssign } from "./hooks/useAssign";
 import { CommonModal } from "@/components/common/CommonModal";
 import { useCancel } from "./hooks/useCancel";
 import { toast } from "react-toastify";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onCancelSuccess?: () => void; // notify parent if cancelled
+  onCancelSuccess?: () => void; 
 };
 
 export default function AssignedWorkModal({ open, onClose, onCancelSuccess }: Props) {
@@ -36,48 +37,6 @@ export default function AssignedWorkModal({ open, onClose, onCancelSuccess }: Pr
     : assignedWorks
     ? [assignedWorks]
     : [];
-
-  const getStatusColor = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case "completed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "in progress":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getStatusIcon = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case "completed":
-        return <CheckCircle className="h-4 w-4" />;
-      case "in progress":
-        return <Loader2 className="h-4 w-4 animate-spin" />;
-      default:
-        return <Clock className="h-4 w-4" />;
-    }
-  };
-  const formatDateTime = (dateString?: string | Date) => {
-  if (!dateString) return "";
-
-  const date = new Date(dateString);
-
-  const day = date.getDate(); // 1-31
-  const month = date.toLocaleString("en-US", { month: "short" }).toUpperCase(); // JAN, FEB
-  const year = date.getFullYear();
-
-  let hours = date.getHours();
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
-
-  hours = hours % 12 || 12; // convert 24h -> 12h
-
-  return `${day} ${month} ${year} ${hours}:${minutes} ${ampm}`;
-};
-
 
   const handleCancel = (bookingId?: string) => {
     if (!bookingId) {
@@ -101,7 +60,7 @@ export default function AssignedWorkModal({ open, onClose, onCancelSuccess }: Pr
   return (
     <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
       <CommonModal.Content className="max-w-3xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50">
-        {/* HEADER */}
+      
         <CommonModal.Header className="sticky top-0 bg-white/90 backdrop-blur-sm border-b px-6 py-4 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -109,12 +68,12 @@ export default function AssignedWorkModal({ open, onClose, onCancelSuccess }: Pr
             </h2>
             <p className="text-sm text-gray-500">Your accepted service bookings</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl">
+          <Button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl bg-gray-100">
             <X className="h-6 w-6 text-gray-500" />
-          </button>
+          </Button>
         </CommonModal.Header>
 
-        {/* BODY */}
+
         <CommonModal.Body className="p-6 space-y-6 overflow-y-auto">
           {isLoading && (
             <div className="flex flex-col items-center py-20">
@@ -211,7 +170,7 @@ export default function AssignedWorkModal({ open, onClose, onCancelSuccess }: Pr
 
                   {work.status?.toLowerCase() !== "completed" && (
                     <div className="flex justify-end">
-                      <button
+                      <Button
                         onClick={() => handleCancel(bookingId)}
                         disabled={isCancelling && cancellingId === bookingId}
                         className="px-5 py-2 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
@@ -220,7 +179,7 @@ export default function AssignedWorkModal({ open, onClose, onCancelSuccess }: Pr
                           <Loader2 className="h-4 w-4 animate-spin" />
                         )}
                         Cancel Booking
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -228,14 +187,14 @@ export default function AssignedWorkModal({ open, onClose, onCancelSuccess }: Pr
             })}
         </CommonModal.Body>
 
-        {/* FOOTER */}
+    
         <CommonModal.Footer className="sticky bottom-0 border-t bg-white/90 px-6 py-4 flex justify-end">
-          <button
+          <Button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium"
+            className="px-6 py-2 bg-gray-400 hover:bg-gray-200 rounded-xl font-medium"
           >
             Close
-          </button>
+          </Button>
         </CommonModal.Footer>
       </CommonModal.Content>
     </CommonModal>

@@ -9,17 +9,17 @@ import {
 import { cn } from "@/lib/utils";
 
 interface CommonCardProps {
-  /** Optional card header */
+ 
   title?: string | ReactNode;
-  /** Align header left or right */
+  
   headerAlign?: "left" | "right";
-  /** Main content inside card */
+ 
   children?: ReactNode;
-  /** Optional value to display above children */
+  
   value?: string | number;
-  /** Optional label above value */
+ 
   label?: string;
-  /** Optional description below title */
+ 
   description?: string;
   className?: string;
   contentClassName?: string;

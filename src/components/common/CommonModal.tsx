@@ -4,7 +4,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
 
-/* ================= ROOT ================= */
+
 function CommonModal({
   open,
   onOpenChange,
@@ -17,14 +17,12 @@ function CommonModal({
   );
 }
 
-/* ================= TRIGGER ================= */
 function CommonModalTrigger(
   props: React.ComponentProps<typeof DialogPrimitive.Trigger>
 ) {
   return <DialogPrimitive.Trigger {...props} />;
 }
 
-/* ================= OVERLAY ================= */
 function CommonModalOverlay({
   className,
   ...props
@@ -42,7 +40,6 @@ function CommonModalOverlay({
   );
 }
 
-/* ================= CONTENT ================= */
 function CommonModalContent({
   className,
   children,
@@ -53,23 +50,23 @@ function CommonModalContent({
       <CommonModalOverlay />
       <DialogPrimitive.Content
         className={cn(
-          /* Position */
+        
           "fixed left-1/2 top-1/2 z-50",
           "-translate-x-1/2 -translate-y-1/2",
 
-          /* Responsive size */
+         
           "w-[95vw] sm:w-full",
           "max-w-lg",
           "max-h-[90dvh]",
 
-          /* Layout */
+          
           "flex flex-col",
 
-          /* Style */
+       
           "rounded-2xl border bg-background shadow-2xl",
           "focus:outline-none",
 
-          /* Animations */
+        
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95",
 
@@ -83,7 +80,6 @@ function CommonModalContent({
   );
 }
 
-/* ================= HEADER ================= */
 function CommonModalHeader({
   className,
   ...props
@@ -99,7 +95,6 @@ function CommonModalHeader({
   );
 }
 
-/* ================= BODY ================= */
 function CommonModalBody({
   className,
   ...props
@@ -115,7 +110,6 @@ function CommonModalBody({
   );
 }
 
-/* ================= FOOTER ================= */
 function CommonModalFooter({
   className,
   ...props
@@ -131,7 +125,6 @@ function CommonModalFooter({
   );
 }
 
-/* ================= EXPORT WITH NAMESPACE ================= */
 CommonModal.Trigger = CommonModalTrigger;
 CommonModal.Content = CommonModalContent;
 CommonModal.Header = CommonModalHeader;

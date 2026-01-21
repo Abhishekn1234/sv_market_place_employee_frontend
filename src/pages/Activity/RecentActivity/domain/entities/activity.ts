@@ -1,5 +1,5 @@
-export type ActivityType = "booking" | "transaction" | "payment";
-export type ActivityStatus = "completed" | "pending" | "cancelled" | "confirmed";
+import type { ActivityType } from "./activitytype.type";
+import type { ActivityStatus } from "./activitystatus.type";
 
 export interface Activity {
   id: string;

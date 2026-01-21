@@ -1,8 +1,6 @@
 import { mockActivities } from "./data/mock";
 import { ActivityHeader } from "./components/ActivityHeader";
-import { ActivityStats
-
- } from "./components/ActivityStats";
+import { ActivityStats} from "./components/ActivityStats";
  import { ActivityTimeline } from "./components/ActivityTimeline";
 export default function RecentActivity() {
   const totalEarnings = mockActivities

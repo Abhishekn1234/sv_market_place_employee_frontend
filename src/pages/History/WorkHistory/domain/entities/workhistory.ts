@@ -7,7 +7,7 @@ export interface Work {
   assignedDate: string;
   dueDate: string;
   status: WorkStatus;
-  duration: number; // in hours
+  duration: number; 
   priority: 'low' | 'medium' | 'high';
   location?: string;
 }

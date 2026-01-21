@@ -1,16 +1,6 @@
 import type { ApiDocument } from "./documents";
-
-export interface Worker {
-    categoryIds: string[];
-    serviceTierIds: string[];
-    status: "active" | "inactive" | "online" | "offline" | string;
-}
-export interface GeoPoint {
-  type: "Point";
-  coordinates: [number, number]; // [lng, lat]
- 
-}
-
+import type { GeoPoint } from "./location";
+import type { Worker } from "./workertype";
 export interface Profile {
     fullName: string;
     email?: string;
@@ -26,28 +16,8 @@ export interface Profile {
     isVerified?: boolean;
     kycStatus?: string;
     documents: ApiDocument[];
-    worker?: Worker; // added worker type here
+    worker?: Worker; 
     location?:GeoPoint;
 }
 
-export interface ProfileUpdate {
-  user: {
-    fullName: string;
-    email?: string;
-    address: string;
-    profileImage?: string;
-    idProof?: string;
-    addressProof?: string;
-    photoProof?: string;
-    phone?: string;
-    profilePictureUrl?: string;
-    profilePicturePublicId?: string;
-    isVerified?: boolean;
-    kycStatus?: string;
-    documents: ApiDocument[];
-     location?: GeoPoint;
-     status?:"online"|"offline" 
-  };
-  worker?: Worker;
-}
 

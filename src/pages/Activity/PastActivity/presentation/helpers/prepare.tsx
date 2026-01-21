@@ -9,7 +9,7 @@ export function useActivityAnalytics(
   type: ActivityType | "all"
 ) {
   return useMemo(() => {
-    /* ---------- Filters ---------- */
+
     const now = new Date();
 
     const cutoffDates: Record<TimePeriod, Date> = {
@@ -24,7 +24,7 @@ export function useActivityAnalytics(
       .filter(a => a.timestamp >= cutoffDates[period])
       .filter(a => (type === "all" ? true : a.type === type));
 
-    /* ---------- Stats ---------- */
+    
     const totalEarnings = filteredActivities
       .filter(a => a.status === "completed" && a.amount)
       .reduce((sum, a) => sum + (a.amount || 0), 0);
@@ -37,7 +37,6 @@ export function useActivityAnalytics(
     const paymentsCount = filteredActivities.filter(a => a.type === "payment").length;
     const transactionsCount = filteredActivities.filter(a => a.type === "transaction").length;
 
-    /* ---------- Grouped by Date ---------- */
     const groupedActivities: Record<string, Activity[]> = {};
     filteredActivities.forEach(activity => {
       const key = activity.timestamp.toLocaleDateString("en-US", {
@@ -48,7 +47,7 @@ export function useActivityAnalytics(
       (groupedActivities[key] ||= []).push(activity);
     });
 
-    /* ---------- Earnings Trend ---------- */
+  
     const earningsByWeek: Record<string, number> = {};
     filteredActivities
       .filter(a => a.status === "completed" && a.amount)
@@ -64,7 +63,7 @@ export function useActivityAnalytics(
       .slice(0, 8)
       .reverse();
 
-    /* ---------- Activity Trend ---------- */
+  
     const activitiesByWeek: Record<string, { bookings: number; payments: number; transactions: number }> = {};
 
     filteredActivities.forEach(a => {
@@ -83,7 +82,7 @@ export function useActivityAnalytics(
       .slice(0, 8)
       .reverse();
 
-    /* ---------- Pie Data ---------- */
+    
     const activityTypeData = [
       { name: "Bookings", value: bookingsCount, color: "#3b82f6" },
       { name: "Payments", value: paymentsCount, color: "#10b981" },

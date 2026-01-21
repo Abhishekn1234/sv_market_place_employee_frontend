@@ -7,7 +7,7 @@ export const mockWorks: Work[] = [
     description: 'Install new HVAC system in Building A, 3rd floor',
     assignedDate: '2024-12-15',
     dueDate: '2024-12-20',
-    status: 'in-progress',
+    status: 'In Progress',
     duration: 16,
     priority: 'high',
     location: 'Building A - Floor 3'
@@ -84,7 +84,7 @@ export const mockWorks: Work[] = [
     description: 'Touch-up paint work in lobby area',
     assignedDate: '2024-12-16',
     dueDate: '2024-12-21',
-    status: 'in-progress',
+    status: 'In Progress',
     duration: 10,
     priority: 'low',
     location: 'Main Lobby'

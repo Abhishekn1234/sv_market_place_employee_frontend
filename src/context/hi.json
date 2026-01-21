@@ -56,6 +56,8 @@
     "confirmed": "पुष्टि की गई",
     "pending": "लंबित",
     "inProgress": "प्रगति में",
+     "in Progress": "प्रगति में",
+      "in-progress": "प्रगति में",
     "cancelled": "रद्द"
   },
 
@@ -224,6 +226,9 @@
         "all": "सभी",
         "completed": "पूर्ण",
         "inProgress": "प्रगति में",
+         "in Progress": "प्रगति में",
+          "in-progress": "प्रगति में",
+           "In Progress": "प्रगति में",
         "pending": "बकाया",
         "upcoming": "आगामी"
       },

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';   
 import { Button } from '@/components/ui/button'; 
 import { useNavigate } from 'react-router';
-import { Eye, EyeOff } from 'lucide-react'; // Eye icons
+import { Eye, EyeOff } from 'lucide-react'; 
 
 export default function ResetPasswordForm() {
   const { resetPassword, loading } = useResetPassword();
@@ -30,7 +30,7 @@ export default function ResetPasswordForm() {
         </h2>
 
         <div className="space-y-4">
-          {/* New Password */}
+         
           <div className="relative">
             <Input
               type={showNewPassword ? 'text' : 'password'}
@@ -49,7 +49,6 @@ export default function ResetPasswordForm() {
             </button>
           </div>
 
-          {/* Confirm Password */}
           <div className="relative">
             <Input
               type={showConfirmPassword ? 'text' : 'password'}

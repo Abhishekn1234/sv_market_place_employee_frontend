@@ -10,14 +10,14 @@ export class DocumentsOnboardingImpl implements DocumentsRepo {
   ): Promise<DocumentsOnboardingResponse> {
     const formData = new FormData();
 
-    // ✅ append ONLY selected document types
+    
     data.documents?.forEach((doc: any) => {
       if (
         doc.documentType === "idProof" ||
         doc.documentType === "addressProof" ||
         doc.documentType === "photoProof"
       ) {
-        // doc.file should be a File or Blob from input
+        
         formData.append(doc.documentType, doc.file);
       }
     });

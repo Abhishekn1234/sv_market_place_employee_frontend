@@ -1,6 +1,7 @@
-// domain/usecase/VerifyOtpUsecase.ts
+
 import type { VerifyOtp, VerifyOtpPayload } from "../entites/verify";
 import type { VerifyOtpRepo } from "../repositories/verifyrepo";
+import { validateVerifyOTP } from "../validations/otp.validation";
 
 export class VerifyOtpUsecase {
   private verifyRepo: VerifyOtpRepo;
@@ -10,6 +11,7 @@ export class VerifyOtpUsecase {
   }
 
   async execute(payload: VerifyOtpPayload): Promise<VerifyOtp> {
+    validateVerifyOTP(payload);
     return await this.verifyRepo.verifyotp(payload);
   }
 }

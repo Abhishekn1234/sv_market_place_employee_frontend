@@ -8,7 +8,7 @@ type Props = {
   isPending: boolean;
   fileUrl?: string;
 
-  canEdit: boolean; // ✅ document check result
+  canEdit: boolean; 
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
@@ -28,9 +28,9 @@ export function ProfileHeader({
 }: Props) {
   return (
     <div className="flex items-center justify-between">
-      {/* LEFT */}
+
       <div className="flex items-center gap-4">
-        {/* Profile Image */}
+
         <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 overflow-hidden">
           {fileUrl || profile.profilePictureUrl ? (
             <img
@@ -69,7 +69,7 @@ export function ProfileHeader({
           )}
         </div>
 
-        {/* Name & Status */}
+    
         <div>
           <h2 className="text-lg font-semibold">{profile.fullName}</h2>
           <span className="px-3 py-1 text-sm rounded-full">
@@ -78,7 +78,6 @@ export function ProfileHeader({
         </div>
       </div>
 
-      {/* RIGHT */}
       {isEditing ? (
         <div className="flex gap-2">
           <Button onClick={onSave} disabled={isPending}>

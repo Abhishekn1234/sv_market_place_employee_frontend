@@ -13,12 +13,10 @@ import { reverseGeocode } from "@/components/common/CommonMap";
 import EmployeeDetails from "./EmployeeDetails";
 import LocationModal from "./LocationModal";
 import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/servicesettings";
+import  type { TabType } from "@/pages/Profile/domain/entities/tabtype";
 
 
-/* Leaflet Fix */
 initLeafletIcons();
-
-type TabType = "location" | "profile" | "password";
 
 interface Props {
   setActiveTab: (tab: TabType) => void;
@@ -59,8 +57,7 @@ export default function LocationSettings({ setActiveTab }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [locationMode, setLocationMode] = useState<"CURRENT" | "MANUAL">("CURRENT");
 
-  /* INIT */
- /* ---------------- INIT ---------------- */
+
 useEffect(() => {
   const init = async () => {
     const { employeeData } = useAuthStore.getState();
@@ -72,12 +69,12 @@ useEffect(() => {
     setSelectedTiers(user.serviceTierIds ?? []);
     setSelectedCategories(user.categoryIds ?? []);
 
-    // Use user.location instead of lastNotifiedLocation
+ 
     if (user.location?.coordinates?.length === 2) {
       const [lng, lat] = user.location.coordinates;
       setTempLocation([normalize(lat), normalize(lng)]);
 
-      // Reverse geocode to get the place name
+
       const placeName = await reverseGeocode(normalize(lat), normalize(lng));
       setLocationName(placeName);
     }
@@ -86,7 +83,7 @@ useEffect(() => {
 }, []);
 
 
-  /* GPS Sync */
+ 
   useEffect(() => {
     if (!currentLocation || locationMode !== "CURRENT") return;
     const lat = normalize(currentLocation.lat);
@@ -131,7 +128,7 @@ useEffect(() => {
 
   serviceSettingsMutation.mutate(payload, {
     onSuccess: () => {
-      // Update the store directly
+      
       useAuthStore.getState().updateUserProfile({
         serviceTierIds: selectedTiers,
         categoryIds: selectedCategories,

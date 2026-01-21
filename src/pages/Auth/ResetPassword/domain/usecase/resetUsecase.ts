@@ -1,5 +1,6 @@
 import type { IResetPasswordRepo } from "../repositories/resetrepo";
 import type { ResetPassword } from "../entities/resetpassword";
+import { validatePassword } from "@/pages/Auth/Register/domain/validations/registervalidation";
 
 export class ResetPasswordUseCase {
   private repo: IResetPasswordRepo;
@@ -10,6 +11,8 @@ export class ResetPasswordUseCase {
 
   async execute(data: ResetPassword) {
     try {
+      validatePassword(data.newPassword);
+      validatePassword(data.confirmPassword);
       await this.repo.resetPassword(data);
       return { success: true, message: 'Password reset successfully' };
     } catch (error: any) {

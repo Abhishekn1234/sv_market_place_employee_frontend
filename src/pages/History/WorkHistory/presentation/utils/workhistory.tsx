@@ -7,6 +7,12 @@ export const getStatusColor = (status: WorkStatus) => {
       return "bg-green-100 text-green-700 border-green-200";
     case "in-progress":
       return "bg-blue-100 text-blue-700 border-blue-200";
+      case "in Progress":
+      return "bg-blue-100 text-blue-700 border-blue-200";
+      case "in-Progress":
+      return "bg-blue-100 text-blue-700 border-blue-200";
+      case "in progress":
+      return "bg-blue-100 text-blue-700 border-blue-200";
     case "pending":
       return "bg-yellow-100 text-yellow-700 border-yellow-200";
     case "upcoming":
@@ -21,6 +27,8 @@ export const getStatusIcon = (status: WorkStatus) => {
     case "completed":
       return <CheckCircle2 className="w-4 h-4" />;
     case "in-progress":
+      return <PlayCircle className="w-4 h-4" />;
+       case "in Progress":
       return <PlayCircle className="w-4 h-4" />;
     case "pending":
       return <AlertCircle className="w-4 h-4" />;

@@ -1,4 +1,6 @@
-import type { Profile, ProfileUpdate } from "../entities/profile";
+import type { Profile } from "../entities/profile";
+import type { ProfileUpdate } from "../entities/profileupdate";
+import type { UpdatePassword } from "../entities/updatepassword";
 
 export interface ProfileRepo {
   list(): Promise<Profile>;
@@ -6,7 +8,6 @@ export interface ProfileRepo {
   update(data: FormData): Promise<ProfileUpdate>;
 
   updatePassword(
-    oldPassword: string,
-    newPassword: string
+   data:UpdatePassword
   ): Promise<Profile>;
 }

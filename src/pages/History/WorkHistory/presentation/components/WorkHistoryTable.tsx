@@ -1,7 +1,8 @@
 "use client";
-import { CommonTable, type TableColumn } from "@/components/common/CommonTable";
-import { getStatusColor,getStatusIcon } from "../utils/workhistory";
+import { CommonTable } from "@/components/common/CommonTable";
+
 import type { Work } from "../../domain/entities/workhistory";
+import { useWorkColumns } from "../hooks/useColumns";
 
 export function WorkHistoryTable({
   data,
@@ -16,33 +17,7 @@ export function WorkHistoryTable({
   onPageChange: (p: number) => void;
   isRTL: boolean;
 }) {
-  const columns: TableColumn<Work>[] = [
-    { key: "title", header: "Title" },
-    { key: "description", header: "Description" },
-    { key: "location", header: "Location" },
-    {
-      key: "assignedDate",
-      header: "Assigned",
-      render: (w) => new Date(w.assignedDate).toLocaleDateString(),
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (w) => (
-        <span
-          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border ${getStatusColor(w.status)}`}
-        >
-          {getStatusIcon(w.status)}
-          {w.status}
-        </span>
-      ),
-    },
-    {
-      key: "duration",
-      header: "Duration",
-      render: (w) => `${w.duration} hrs`,
-    },
-  ];
+  const columns=useWorkColumns();
 
   return (
     <CommonTable

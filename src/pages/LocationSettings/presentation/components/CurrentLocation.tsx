@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
+import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import { reverseGeocode } from "@/components/common/CommonMap";
 
 interface CurrentLocationFetcherProps {

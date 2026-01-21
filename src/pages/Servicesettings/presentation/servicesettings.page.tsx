@@ -8,7 +8,7 @@ import { useServiceSettings } from "./hooks/useServicesettings";
 import { useServiceTier } from "./hooks/useServiceTier";
 import { useServiceCategory } from "./hooks/useServiceCategory";
 
-import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
+import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import type { WorkerPayload } from "../domain/entities/servicesettings";
 import type { ServiceCategory } from "../domain/entities/servicecategory";
 import type { ServiceTier } from "../domain/entities/servicetier";
@@ -59,10 +59,11 @@ export default function MultiSelectDropdownCard() {
     location,
     serviceRadius: serviceRadius / 1000,
   };
-
+    console.log("Payload:", payload);
   mutation.mutate(payload, {
+
     onSuccess: () => {
-      // Update the auth store with the latest profile/location info
+ 
       useAuthStore.getState().updateUserProfile({
         categoryIds: payload.categoryIds,
         serviceTierIds: payload.serviceTierIds,

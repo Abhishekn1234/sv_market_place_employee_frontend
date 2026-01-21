@@ -1,3 +1,4 @@
+import { validateEmail, validatePassword } from "@/pages/Auth/Register/domain/validations/registervalidation";
 import type { Login } from "../entities/login";
 import type { LoginRepo } from "../repositories/Loginrepo";
 
@@ -7,6 +8,8 @@ export class LoginUserusecase{
         this.loginRepo=loginRepo;
      }
      execute(email:string,password:string):Promise<Login>{
+      validateEmail(email);
+      validatePassword(password);
         return this.loginRepo.login(email,password);
      }
 

@@ -15,11 +15,12 @@ import { useAccept } from "./presentation/hooks/useAccept";
 
 import { CommonModal } from "@/components/common/CommonModal";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onBookingAccepted?: () => void; // ✅ callback for parent
+  onBookingAccepted?: () => void; 
 };
 
 export default function SocketBookingsModal({
@@ -35,7 +36,7 @@ export default function SocketBookingsModal({
   return (
     <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
       <CommonModal.Content className="max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50">
-        {/* HEADER */}
+        
         <CommonModal.Header className="border-b px-6 py-5 flex justify-between items-center bg-white/95">
           <div className="flex items-center gap-3">
             {/* {connected ? (
@@ -48,12 +49,11 @@ export default function SocketBookingsModal({
               <p className="text-sm text-gray-500">Real-time service requests</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl">
+          <Button onClick={onClose} className="p-2 rounded-xl bg-white text-black">
             <X />
-          </button>
+          </Button>
         </CommonModal.Header>
 
-        {/* BODY */}
         <CommonModal.Body className="p-6">
           {bookings.length === 0 ? (
             <div className="flex flex-col items-center py-20">
@@ -114,10 +114,10 @@ export default function SocketBookingsModal({
                               onSuccess: () => {
                                 removeBooking(booking._id);
 
-                                // ✅ Close this modal
+                               
                                 onClose();
 
-                                // ✅ Open AssignedWorkModal
+                               
                                 onBookingAccepted?.();
                               },
                             }
@@ -146,7 +146,7 @@ export default function SocketBookingsModal({
           )}
         </CommonModal.Body>
 
-        {/* FOOTER */}
+   
         <CommonModal.Footer className="border-t px-6 py-4 text-sm text-gray-500 flex justify-between">
           {/* <span>{connected ? "Socket connected" : "Socket disconnected"}</span> */}
           <span>Auto refresh</span>

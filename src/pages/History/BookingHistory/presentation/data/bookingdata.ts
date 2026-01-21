@@ -1,6 +1,6 @@
 import type { Booking } from "../../domain/entities/booking";
 
-// Mock booking data for a worker
+
 export const mockBookings:Booking[] = [
   {
     id: 'BK-2024-001',

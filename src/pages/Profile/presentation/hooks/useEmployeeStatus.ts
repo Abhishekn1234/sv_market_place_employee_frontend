@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/core/store/auth";
-
-export type EmployeeStatus = "ONLINE" | "OFFLINE";
+import type { EmployeeStatus } from "../../domain/entities/employeestatus";
 const EVENT_NAME = "employee-status-changed";
 
-const normalizeStatus = (status: string | undefined | null): EmployeeStatus => {
+const normalizeStatus = (status: EmployeeStatus): EmployeeStatus => {
   return status?.toUpperCase() === "ONLINE" ? "ONLINE" : "OFFLINE";
 };
 
@@ -14,26 +13,23 @@ export function useEmployeeStatus() {
   const queryClient = useQueryClient();
 
   const [status, setStatusState] = useState<EmployeeStatus>(
-    () => normalizeStatus(employeeData?.user?.status)
+    () => normalizeStatus(employeeData?.user?.status?.toString() as EmployeeStatus)
   );
 
   const writeStatus = (newStatus: EmployeeStatus) => {
-    // 1️⃣ Update Zustand store (only pass the status)
+    
     updateUserStatus(newStatus);
 
-    // 2️⃣ Update local state
     setStatusState(newStatus);
 
-    // 3️⃣ Update React Query cache
+ 
     queryClient.setQueryData(["employeeStatus"], newStatus);
 
-    // 4️⃣ Notify same-tab listeners
     window.dispatchEvent(
       new CustomEvent(EVENT_NAME, { detail: newStatus })
     );
   };
 
-  // Same-tab updates
   useEffect(() => {
     const handler = (e: Event) => {
       const evt = e as CustomEvent<EmployeeStatus>;
@@ -45,7 +41,7 @@ export function useEmployeeStatus() {
     return () => window.removeEventListener(EVENT_NAME, handler);
   }, [queryClient]);
 
-  // Cross-tab updates
+
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === "auth-store" && e.newValue) {

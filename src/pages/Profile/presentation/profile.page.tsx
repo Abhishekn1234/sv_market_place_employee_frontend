@@ -7,7 +7,7 @@ import LocationSettings from "./components/Location/LocationSettings";
 import { useLanguage } from "@/context/LanguageContext";
 import CommonTabs from "@/components/common/CommonTabs";
 import type { CommonTab } from "@/components/common/CommonTabs";
-type TabType = "profile" | "password" | "location";
+import type { TabType } from "../domain/entities/tabtype";
 
 interface Props {
   activeTab: TabType;

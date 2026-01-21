@@ -3,8 +3,6 @@ import { useLocationContext } from "@/context/LocationContext";
 import { useAuthStore } from "@/core/store/auth";
 import { reverseGeocode } from "@/components/common/CommonMap";
 
-
-/* ---------- Types ---------- */
 interface Location {
   lat: number;
   lng: number;
@@ -12,7 +10,7 @@ interface Location {
 interface NotificationOption extends NotificationOptions {
     renotify?: boolean;
   }
-/* ---------- Distance ---------- */
+
 const getDistance = (a: Location, b: Location) => {
   const R = 6371000;
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -35,10 +33,6 @@ export function useDynamicLocation() {
   const notifyCountRef = useRef(0);
   const lastNotifyRef = useRef(0);
 
-  /* ---------- Reverse Geocode ---------- */
-
-
-  /* ---------- Notify ---------- */
   const notify = async (
     loc: Location,
     place: string,
@@ -59,7 +53,7 @@ export function useDynamicLocation() {
     await sw.showNotification("📍 Location Changed", {
       body: `${place}\nMoved ${(distance / 1000).toFixed(2)} km`,
       tag: "location-change",
-      renotify: false, // 🔥 IMPORTANT
+      renotify: false, 
       data: {
         url: "/settings/profile",
         tab: "location",
@@ -71,7 +65,6 @@ export function useDynamicLocation() {
     } as NotificationOption);
   };
 
-  /* ---------- Effect ---------- */
   useEffect(() => {
     if (!isTracking || !navigator.geolocation) return;
 
@@ -85,7 +78,7 @@ export function useDynamicLocation() {
             lng: pos.coords.longitude,
           };
 
-          // 🛑 First location → save only
+       
           if (!lastLocationRef.current) {
             lastLocationRef.current = current;
             setCurrentLocation(current);
@@ -97,11 +90,11 @@ export function useDynamicLocation() {
             current
           );
 
-          // Ignore GPS drift
+        
           if (distance < 100) return;
 
           const place = await reverseGeocode(current.lat, current.lng);
-          if (!place) return; // 🛑 no "location unavailable"
+          if (!place) return; 
             useAuthStore.getState().setUserLocation({
               type: "Point",
               coordinates: [current.lng, current.lat],

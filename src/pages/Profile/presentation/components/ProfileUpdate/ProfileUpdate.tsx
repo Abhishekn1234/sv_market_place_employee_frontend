@@ -7,8 +7,7 @@ import { toast } from "react-toastify";
 
 import { useUpdateProfile } from "../../hooks/useUpdateProfile";
 import { useProfile } from "../../hooks/useProfile";
-
-type TabType = "profile" | "update" | "password";
+import type { TabType } from "@/pages/Profile/domain/entities/tabtype";
 
 type ProfileUpdateProps = {
   switchTab: (tab: TabType) => void;
@@ -32,7 +31,7 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
 
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
 
-  // Populate form and previews on edit
+
   useEffect(() => {
     if (!profile) return;
 
@@ -43,12 +42,12 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
 
     const urls: Record<string, string> = {};
 
-    // Map existing documents
+   
     profile.documents?.forEach((doc: any) => {
       urls[doc.documentType] = doc.filePath;
     });
 
-    // Map profile picture
+
     if (profile.profilePictureUrl) {
       urls.profileImage = profile.profilePictureUrl;
     }
@@ -66,7 +65,6 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
     const file = e.target.files[0];
     setFiles(prev => ({ ...prev, [key]: file }));
 
-    // Create a local preview
     const reader = new FileReader();
     reader.onload = () => {
       setFileUrls(prev => ({
@@ -83,15 +81,15 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
     try {
       const data = new FormData();
 
-      // Append text fields
+ 
       Object.entries(formData).forEach(([k, v]) => data.append(k, v));
 
-      // Append new files only
+  
       Object.entries(files).forEach(([k, f]) => {
         if (f) data.append(k, f);
       });
 
-      // Append URLs of existing files if user didn't replace
+    
       Object.entries(fileUrls).forEach(([k, url]) => {
         if (!files[k as keyof typeof files]) {
           data.append(`${k}Url`, url);
@@ -116,7 +114,7 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Personal Info */}
+   
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label>Full Name</Label>
@@ -134,16 +132,16 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
         </div>
       </div>
 
-      {/* Documents */}
+
       <div className="border rounded-lg p-4">
         <h3 className="font-semibold mb-3">Documents</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {fileFields.map((field) => {
             const imageSrc =
-              files[field.key] ? fileUrls[field.key] : // newly selected file
-              profile?.documents?.find(d => d.documentType === field.key)?.filePath || // existing doc
-              (field.key === "profileImage" ? profile?.profilePictureUrl : undefined); // profile picture fallback
+              files[field.key] ? fileUrls[field.key] : 
+              profile?.documents?.find(d => d.documentType === field.key)?.filePath || 
+              (field.key === "profileImage" ? profile?.profilePictureUrl : undefined); 
 
             return (
               <div key={field.key} className="border-2 border-dashed rounded-lg p-4 text-center">
@@ -159,7 +157,7 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
                   <p className="text-sm text-gray-400 mt-2">No file selected</p>
                 )}
 
-                {/* Hidden input */}
+               
                 <Input
                   type="file"
                   id={field.key}
@@ -183,7 +181,7 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
         </div>
       </div>
 
-      {/* Submit */}
+  
       <div className="flex justify-end">
         <Button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Save Changes"}

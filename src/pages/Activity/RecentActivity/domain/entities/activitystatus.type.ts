@@ -1,0 +1,1 @@
+export type ActivityStatus = "completed" | "pending" | "cancelled" | "confirmed";

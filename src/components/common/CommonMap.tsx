@@ -14,17 +14,16 @@ import "leaflet/dist/leaflet.css";
 export type LocationMode = "CURRENT" | "MANUAL";
 
 interface CommonMapProps {
-  location: [number, number]; // [lat, lng]
+  location: [number, number]; 
   setLocation: (coords: [number, number]) => void;
   locationMode: LocationMode;
-  radius?: number; // meters
+  radius?: number; 
   setRadius?: (r: number) => void;
   onLocationNameChange?: (name: string) => void;
   draggableMarker?: boolean;
-  height: string | number; // map height is now required
+  height: string | number; 
 }
 
-// ---------- Utils ----------
 export const defaultIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
   iconSize: [30, 30],
@@ -59,7 +58,7 @@ export const reverseGeocode = async (lat: number, lng: number) => {
   }
 };
 
-// ---------- Recenter Hook ----------
+
 const RecenterMap = ({ location }: { location: [number, number] }) => {
   const map = useMap();
   useEffect(() => {
@@ -68,7 +67,7 @@ const RecenterMap = ({ location }: { location: [number, number] }) => {
   return null;
 };
 
-// ---------- Manual Picker Hook ----------
+
 const ManualLocationPicker = ({
   enabled,
   onPick,
@@ -86,7 +85,6 @@ const ManualLocationPicker = ({
   return null;
 };
 
-// ---------- Main Component ----------
 export const CommonMap: React.FC<CommonMapProps> = ({
   location,
   setLocation,
@@ -95,14 +93,14 @@ export const CommonMap: React.FC<CommonMapProps> = ({
   setRadius,
   onLocationNameChange,
   draggableMarker = true,
-  height, // now required, no default
+  height, 
 }) => {
     console.log(setRadius);
   const [currentRadius, setCurrentRadius] = useState(radius);
 
   useEffect(() => setCurrentRadius(radius), [radius]);
 
-  // Update location name automatically
+  
   useEffect(() => {
     if (onLocationNameChange) {
       reverseGeocode(location[0], location[1]).then(onLocationNameChange);

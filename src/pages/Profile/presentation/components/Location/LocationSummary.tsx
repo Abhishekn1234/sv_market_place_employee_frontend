@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { PencilIcon } from "lucide-react";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
-import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/servicesettings";
+import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
 
 interface Props {
   status: WorkerStatus | null;

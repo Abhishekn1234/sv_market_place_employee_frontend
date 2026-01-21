@@ -3,7 +3,6 @@ import { ServiceCategoryImpl } from "../../data/repositories/servicecategoryImpl
 import { ServiceCategoryUsecase } from "../../domain/usecase/servicecategoryusecase";
 import type { ServiceCategory } from "../../domain/entities/servicecategory";
 
-// ✅ Create once (singleton-like)
 const repo = new ServiceCategoryImpl();
 const usecase = new ServiceCategoryUsecase(repo);
 
@@ -12,9 +11,8 @@ export function useServiceCategory() {
     queryKey: ["service-categories"],
     queryFn: () => usecase.getServiceCategories(),
 
-    // ✅ caching controls
-    staleTime: 1000 * 60 * 10,     // 10 minutes
-    gcTime: 1000 * 60 * 30,     // 30 minutes
+    staleTime: 1000 * 60 * 10,    
+    gcTime: 1000 * 60 * 30,     
     retry: 1,
     refetchOnWindowFocus: false,
     refetchOnMount: false,

@@ -9,7 +9,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import ProtectedRoute from './ProtectedRoute';
 import AppLayout from './components/Layout/AppLayout';
 
-// Pages
+
 import HomePage from './pages/Home/presentation/home.page';
 import ProfileSettings from './pages/Profile/presentation/profile.page';
 import RegisterPage from './pages/Auth/Register/presentation/register.page';
@@ -27,10 +27,7 @@ import PastActivity from './pages/Activity/PastActivity/presentation/past.activi
 import Wallet from './pages/Wallet/presentation/wallet.page';
 import NotificationsPage from './pages/Notifications/presentation/notification.page';
 import { ThemeProvider } from './context/ThemeContext';
-import { useDynamicLocation } from './utils/useNotification';
-
-
-// import SocketInitialize from './core/Websocket/socketio';
+import { useDynamicLocation } from '@/utils/useNotification';
 
 function AppContent() {
   const navigate = useNavigate();

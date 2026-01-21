@@ -16,14 +16,13 @@ export default function AppLayout() {
   const { language } = useLanguage();
   const isRTL = language === "AR";
 
-  /** 🔑 START CLOSED — decide after API */
   const [liveBookingsOpen, setLiveBookingsOpen] = useState(false);
   const [assignedOpen, setAssignedOpen] = useState(false);
 
-  /** Always fetch assigned works on layout load */
+
   const { assignedWorks, isLoading } = useAssign(true);
 
-  /** ✅ Decide which modal to open AFTER data loads */
+
   useEffect(() => {
     if (isLoading) return;
 
@@ -40,7 +39,6 @@ export default function AppLayout() {
     }
   }, [isLoading, assignedWorks]);
 
-  /** Window resize */
   useEffect(() => {
     const onResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", onResize);
@@ -51,7 +49,7 @@ export default function AppLayout() {
     if (windowWidth < 1024) setMini(false);
   }, [windowWidth]);
 
-  /** Sidebar offset */
+
   const contentOffset =
     windowWidth >= 1024
       ? mini
@@ -63,10 +61,10 @@ export default function AppLayout() {
         : "lg:ml-72"
       : "";
 
-  /** Prevent flicker */
+ 
   if (isLoading) return null;
 
-  /** When live booking is accepted */
+
   const handleBookingAccepted = () => {
     setLiveBookingsOpen(false);
     setAssignedOpen(true);
@@ -78,7 +76,7 @@ export default function AppLayout() {
         isRTL ? "flex-row-reverse" : "flex-row"
       }`}
     >
-      {/* Sidebar */}
+      
       <AppSidebar
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
@@ -86,7 +84,7 @@ export default function AppLayout() {
         windowWidth={windowWidth}
       />
 
-      {/* Content */}
+      
       <div
         className={`flex flex-1 flex-col min-w-0 transition-all duration-300 ${contentOffset}`}
       >

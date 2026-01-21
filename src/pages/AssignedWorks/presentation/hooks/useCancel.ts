@@ -15,7 +15,7 @@ export function useCancel(addBooking?: (booking: GetBooking) => void) {
     mutationFn: (bookingId: string) => usecase.execute(bookingId),
 
     onSuccess: (cancelledBooking) => {
-      // ✅ Update assignedWorks cache
+     
       queryClient.setQueryData<GetBooking[] | GetBooking>(
         ["assignedWorks"],
         (oldData) => {
@@ -33,10 +33,9 @@ export function useCancel(addBooking?: (booking: GetBooking) => void) {
         }
       );
 
-      // ✅ Add to live bookings automatically if function provided
+      
       if (addBooking) addBooking(cancelledBooking);
 
-      // ✅ Toast
       toast.success("Booking cancelled successfully");
     },
 

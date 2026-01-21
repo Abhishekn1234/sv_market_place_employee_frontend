@@ -23,7 +23,7 @@ export default function ProfileList() {
     { label: "Photo Proof", key: "photoProof" },
   ] as const;
 
-  /* ---------------- INIT PROFILE ---------------- */
+  
   useEffect(() => {
     if (!profile) return;
 
@@ -32,7 +32,7 @@ export default function ProfileList() {
       address: profile.address,
     });
 
-    // Convert documents array → lookup object
+  
     const docs: Record<string, string> = {};
     profile.documents?.forEach((doc: any) => {
       if (doc.documentType && doc.filePath) {
@@ -48,7 +48,6 @@ export default function ProfileList() {
 
   if (!profile) return null;
 
-  /* ---------------- DOCUMENT CHECK ---------------- */
   const REQUIRED_DOCS = ["idProof", "addressProof", "photoProof"];
 
   const canEdit =
@@ -59,7 +58,7 @@ export default function ProfileList() {
       )
     );
 
-  /* ---------------- SAVE ---------------- */
+
   const handleSave = async () => {
     const data = new FormData();
     data.append("fullName", formData.fullName);

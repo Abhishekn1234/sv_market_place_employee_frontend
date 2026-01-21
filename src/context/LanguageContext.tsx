@@ -4,7 +4,7 @@ import ar from "./ar.json";
 import hi from "./hi.json";
 import { useAuthStore } from "@/core/store/auth";
 
-/* ------------------ TYPES ------------------ */
+
 
 export type Language = "EN" | "AR" | "HI";
 
@@ -28,13 +28,13 @@ interface LanguageContextType {
   translations: TranslationSchema;
 }
 
-/* ------------------ CONTEXT ------------------ */
+
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
   undefined
 );
 
-/* ------------------ TRANSLATIONS ------------------ */
+
 
 const allTranslations: Record<Language, TranslationSchema> = {
   EN: en,
@@ -42,17 +42,16 @@ const allTranslations: Record<Language, TranslationSchema> = {
   HI: hi,
 };
 
-/* ------------------ PROVIDER ------------------ */
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  // Get the user's preferred language from auth store
+
   const userLang = useAuthStore((s) => s.employeeData?.user?.preferredLanguage);
 
   const [language, setLanguage] = useState<Language>(userLang || "EN");
 
-  // Sync language with auth store whenever it changes
+
   useEffect(() => {
     if (userLang && userLang !== language) {
       setLanguage(userLang);
@@ -60,18 +59,18 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [userLang]);
 
   useEffect(() => {
-    // Set document language attribute
+    
     document.documentElement.lang =
       language === "AR" ? "ar" : language === "HI" ? "hi" : "en";
     document.documentElement.setAttribute("translate", "no");
 
-    // Persist preferred language in auth store
+  
     useAuthStore.getState().setPreferredLanguage(language);
   }, [language]);
 
-  // Translation function
+  
 const t = (key: TranslationKey | string): string => {
-  const keyStr = key.toString(); // ensure it's a string
+  const keyStr = key.toString(); 
   const keys = keyStr.split(".");
   let value: any = allTranslations[language];
 
@@ -97,7 +96,7 @@ const t = (key: TranslationKey | string): string => {
   );
 };
 
-/* ------------------ HOOK ------------------ */
+
 
 export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);

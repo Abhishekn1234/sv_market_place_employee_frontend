@@ -65,7 +65,7 @@ export function useAvailableBookings() {
   }, [token, workerId]);
   */
 
-  /* ---------- HELPERS ---------- */
+ 
   const removeBooking = (id: string) => {
     idsRef.current.delete(id);
     setBookings(prev => prev.filter(b => b._id !== id));
@@ -75,7 +75,7 @@ export function useAvailableBookings() {
     setBookings(prev => {
       const exists = prev.find(b => b._id === booking._id);
       if (exists) {
-        // update existing booking with new data
+       
         return prev.map(b => (b._id === booking._id ? { ...b, ...booking } : b));
       } else {
         idsRef.current.add(booking._id);

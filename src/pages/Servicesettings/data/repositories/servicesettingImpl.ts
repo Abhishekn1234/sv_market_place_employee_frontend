@@ -2,7 +2,7 @@ import api from "@/api/api";
 import { baseURL } from "@/api/apiConfig";
 import type { WorkerPayload } from "../../domain/entities/servicesettings";
 import type { ServiceSettingRepo } from "../../domain/repositories/servicesettingsrepo";
-import { useAuthStore } from "@/core/store/auth";
+import { useAuthStore, type EmployeeUser } from "@/core/store/auth";
 
 export class ServiceSettingsRepoimpl implements ServiceSettingRepo {
   async updatesettings(data: WorkerPayload): Promise<WorkerPayload> {
@@ -15,15 +15,11 @@ export class ServiceSettingsRepoimpl implements ServiceSettingRepo {
         }
       );
 
-      /**
-       * ✅ Update Zustand Auth Store
-       * ❌ No localStorage
-       * ❌ No UI logic
-       */
+    
       const updateUserProfile =
         useAuthStore.getState().updateUserProfile;
-
-      updateUserProfile(data);
+       const partialuser=response.data as Partial<EmployeeUser>;
+      updateUserProfile(partialuser);
 
       return response.data;
     } catch (error) {

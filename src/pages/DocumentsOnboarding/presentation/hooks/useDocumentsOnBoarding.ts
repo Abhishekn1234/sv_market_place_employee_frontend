@@ -17,9 +17,9 @@ export function useDocumentsOnBoarding() {
   const navigate = useNavigate();
 
   return useMutation<
-    DocumentsOnboardingResponse, // ✅ CORRECT RESPONSE TYPE
+    DocumentsOnboardingResponse, 
     Error,
-    DocumentsOnboarding           // ✅ REQUEST TYPE
+    DocumentsOnboarding           
   >({
     mutationFn: (payload) => usecase.execute(payload),
 
@@ -34,7 +34,7 @@ export function useDocumentsOnBoarding() {
           .updateUserProfile({ documents });
       }
 
-      // Update profile cache safely
+    
       queryClient.setQueryData(["profile"], (old: any) => ({
         ...old,
         documents,

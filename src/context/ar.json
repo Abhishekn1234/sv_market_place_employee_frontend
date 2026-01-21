@@ -222,6 +222,8 @@
         "all": "الكل",
         "completed": "مكتمل",
         "inProgress": "قيد التنفيذ",
+        "in Progress":"قيد التنفيذ",
+        "in-progress":"قيد التنفيذ",
         "pending": "قيد الانتظار",
         "upcoming": "قادمة"
       },

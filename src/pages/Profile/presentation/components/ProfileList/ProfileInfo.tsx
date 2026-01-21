@@ -18,7 +18,7 @@ export function ProfileInfo({
 }: Props) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {/* Personal Information */}
+    
       <CommonCard title="Personal Information" contentClassName="space-y-3">
         <div>
           <Label>Full Name</Label>
@@ -39,7 +39,7 @@ export function ProfileInfo({
         </div>
       </CommonCard>
 
-      {/* Contact Information */}
+    
       <CommonCard title="Contact Information" contentClassName="space-y-3">
         <div>
           <Label>Phone</Label>

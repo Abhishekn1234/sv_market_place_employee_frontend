@@ -80,7 +80,7 @@ export default function DocumentOnboarding() {
     >
       <form onSubmit={handleSubmit} className="space-y-6">
 
-        {/* Upload Cards */}
+      
         <div className="grid gap-4">
           {docTypes.map((doc) => (
             <div
@@ -144,7 +144,7 @@ export default function DocumentOnboarding() {
           ))}
         </div>
 
-        {/* Actions */}
+      
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
           <Button
             type="button"

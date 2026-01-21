@@ -49,7 +49,7 @@ export default function PastActivity({
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* Header */}
+        
         <ActivityHeader
           employeeName={employeeName}
           employeeId={employeeId}
@@ -57,7 +57,7 @@ export default function PastActivity({
           setShowAnalytics={setShowAnalytics}
         />
 
-        {/* Filters */}
+       
         <ActivityFilters
           period={selectedPeriod}
           setPeriod={setSelectedPeriod}
@@ -70,7 +70,7 @@ export default function PastActivity({
           }}
         />
 
-        {/* Summary Stats */}
+        
         <ActivityStats
           totalActivities={filteredActivities.length}
           completedCount={stats.completedCount}
@@ -78,7 +78,7 @@ export default function PastActivity({
           totalEarnings={stats.totalEarnings}
         />
 
-        {/* Analytics */}
+      
         {showAnalytics && (
           <ActivityAnalytics
             earningsTrendData={charts.earningsTrendData}
@@ -92,14 +92,14 @@ export default function PastActivity({
           />
         )}
 
-        {/* Current Period */}
+    
         <ActivityCurrent
           getPeriodLabel={getPeriodLabel}
           selectedPeriod={selectedPeriod}
           filteredActivities={filteredActivities}
         />
 
-        {/* Timeline */}
+  
         {Object.keys(groupedActivities).length > 0 ? (
           <ActivityTimeline
             groupedActivities={groupedActivities}

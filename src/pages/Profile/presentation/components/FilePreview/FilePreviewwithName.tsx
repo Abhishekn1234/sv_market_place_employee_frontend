@@ -11,7 +11,7 @@ export function FilePreviewWithName({ file, url }: FilePreviewWithNameProps) {
   const src = file ? URL.createObjectURL(file) : url!;
   const type = file?.type || "";
 
-  /* ---------- IMAGE ---------- */
+
   if (type.startsWith("image/") || /\.(png|jpe?g|gif|webp)$/i.test(src)) {
     return (
       <img
@@ -22,7 +22,6 @@ export function FilePreviewWithName({ file, url }: FilePreviewWithNameProps) {
     );
   }
 
-  /* ---------- PDF ---------- */
   if (type === "application/pdf" || /\.pdf$/i.test(src)) {
     return (
       <iframe
@@ -33,7 +32,7 @@ export function FilePreviewWithName({ file, url }: FilePreviewWithNameProps) {
     );
   }
 
-  /* ---------- OTHER DOCS ---------- */
+  
   return (
     <a
       href={src}

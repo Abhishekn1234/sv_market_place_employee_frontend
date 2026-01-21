@@ -3,13 +3,13 @@ import { ServiceTierImpl } from "../../data/repositories/servicetierImpl";
 import { ServiceTierUsecase } from "../../domain/usecase/servicetierusecase";
 import type { ServiceTier } from "../../domain/entities/servicetier";
 
-// ✅ Create once
+
 const repo = new ServiceTierImpl();
 const usecase = new ServiceTierUsecase(repo);
 
 export function useServiceTier() {
   return useQuery<ServiceTier[], Error>({
-    queryKey: ["service-tiers"], // 🔴 plural + consistent
+    queryKey: ["service-tiers"], 
     queryFn: () => usecase.execute(),
 
     staleTime: 1000 * 60 * 10,

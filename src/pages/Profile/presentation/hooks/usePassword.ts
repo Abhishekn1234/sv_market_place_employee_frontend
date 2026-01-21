@@ -3,6 +3,8 @@ import { ProfileRepoImplementation } from "../../data/repositories/ProfileImpl";
 import { UpdatePasswordUsecase } from "../../domain/usecase/UpdatePasswordusecase";
 import type { Profile } from "../../domain/entities/profile";
 
+import type { UpdatePassword } from "../../domain/entities/updatepassword";
+
 export function usePassword() {
   const queryClient = useQueryClient();
 
@@ -12,10 +14,10 @@ export function usePassword() {
   return useMutation<
     Profile,
     Error,
-    { oldPassword: string; newPassword: string }
+    UpdatePassword
   >({
-    mutationFn: ({ oldPassword, newPassword }) =>
-      usecase.execute(oldPassword, newPassword),
+    mutationFn: (data:UpdatePassword ) =>
+      usecase.execute(data),
 
     onSuccess: (data) => {
       queryClient.setQueryData(["profile"], data);

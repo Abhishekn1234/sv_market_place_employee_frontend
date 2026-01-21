@@ -6,9 +6,10 @@ import { useLanguage } from "@/context/LanguageContext";
 import { WorkStatsCards } from "./components/WorkStatsCards";
 import { WorkFilters } from "./components/WorkFilters";
 import { WorkHistoryTable } from "./components/WorkHistoryTable";
+import { useWorkStatsCards } from "./hooks/useWorkStatus";
 
 export default function WorkingHistoryPage() {
-  const { language, translations } = useLanguage();
+  const { language,translations} = useLanguage();
   const isRTL = language === "AR";
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,12 +33,7 @@ export default function WorkingHistoryPage() {
     currentPage * itemsPerPage
   );
 
-  const cards = [
-    { label: translations.workHistory.cards.totalWorks, value: filtered.length },
-    { label: translations.workHistory.cards.completed, value: filtered.filter(w => w.status === "completed").length, color: "text-green-600" },
-    { label: translations.workHistory.cards.inProgress, value: filtered.filter(w => w.status === "in-progress").length, color: "text-blue-600" },
-    { label: translations.workHistory.cards.upcoming, value: filtered.filter(w => w.status === "upcoming").length, color: "text-purple-600" },
-  ];
+  const cards =useWorkStatsCards(filtered);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -53,6 +49,8 @@ export default function WorkingHistoryPage() {
         onStatusChange={setStatusFilter}
         onItemsChange={setItemsPerPage}
         isRTL={isRTL}
+        translations={translations}
+      
       />
 
       <WorkHistoryTable

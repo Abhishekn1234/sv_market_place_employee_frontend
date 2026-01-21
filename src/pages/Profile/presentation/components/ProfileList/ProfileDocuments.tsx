@@ -38,14 +38,14 @@ export function ProfileDocuments({
           >
             <p className="text-sm font-medium mb-2">{label}</p>
 
-            {/* File Preview */}
+         
             {(file || fileUrl) && (
               <div className="flex-1 w-full flex items-center justify-center">
                 <FilePreviewWithName file={file} url={fileUrl} />
               </div>
             )}
 
-            {/* Upload Button */}
+        
             {isEditing && (
               <>
                 <Input

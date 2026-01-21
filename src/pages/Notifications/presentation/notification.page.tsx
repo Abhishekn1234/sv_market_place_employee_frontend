@@ -10,7 +10,7 @@ import type { Notification } from "../domain/entities/notification";
 import NotificationsHeader from "./components/NotificationHeader";
 import NotificationItem from "./components/NotificationItem";
 import { data } from "./data/mockdata";
-// ---------- Notifications Page ----------
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
@@ -19,7 +19,7 @@ export default function NotificationsPage() {
   const { translations } = useLanguage();
   const notificationsTranslations = translations.Notifications;
 
-  // Fetch notifications
+
   useEffect(() => {
     const response=data;
     setNotifications(response);
@@ -75,7 +75,7 @@ export default function NotificationsPage() {
           </div>
         )}
 
-        {/* Footer */}
+  
         <CommonCard className="p-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-gray-600 text-sm">
             {notificationsTranslations.showing} {filteredNotifications.length} of {notifications.length} {notificationsTranslations.all}

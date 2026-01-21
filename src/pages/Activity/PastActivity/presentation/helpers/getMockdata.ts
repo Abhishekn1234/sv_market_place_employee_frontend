@@ -1,10 +1,10 @@
 import type { Activity } from "../../domain/entities/activity";
 import type { ActivityStatus } from "../../domain/entities/activitystatus";
 
-// Mock data spanning 6 months
+
 export const generateMockActivities = (): Activity[] => {
   const activities: Activity[] = [];
-  const now = new Date(2025, 11, 22); // December 22, 2025
+  const now = new Date(2025, 11, 22); 
   
   const templates = [
     { type: "booking" as const, title: "Home Cleaning Service", service: "cleaning" },
@@ -21,12 +21,12 @@ export const generateMockActivities = (): Activity[] => {
   const clients = ["Sarah Johnson", "Michael Chen", "Emma Wilson", "David Martinez", "Lisa Anderson", "Robert Taylor", "Jessica Brown", "Tom Harris", "Alice Cooper", "James White"];
   const locations = ["123 Oak Street", "456 Maple Ave", "789 Pine Road", "321 Birch Lane", "654 Cedar Court", "987 Elm Drive"];
   
-  // Generate activities for the past 6 months
+
   for (let i = 0; i < 60; i++) {
-    const daysAgo = Math.floor(i * 3.2); // Spread across ~180 days
+    const daysAgo = Math.floor(i * 3.2); 
     const template = templates[Math.floor(Math.random() * templates.length)];
     const timestamp = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
-    timestamp.setHours(Math.floor(Math.random() * 16) + 8); // 8 AM to 11 PM
+    timestamp.setHours(Math.floor(Math.random() * 16) + 8); 
     timestamp.setMinutes(Math.floor(Math.random() * 60));
     
     const statuses: ActivityStatus[] = ["completed", "completed", "completed", "completed", "pending", "cancelled"];

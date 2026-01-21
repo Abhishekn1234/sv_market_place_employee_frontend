@@ -1,6 +1,8 @@
 import type { ProfileRepo } from "../../domain/repositories/profilerepo";
-import type { Profile, ProfileUpdate } from "../../domain/entities/profile";
+import type { Profile } from "../../domain/entities/profile";
+import type { ProfileUpdate } from "../../domain/entities/profileupdate";
 import api from "@/api/api";
+import type { UpdatePassword } from "../../domain/entities/updatepassword";
 
 export class ProfileRepoImplementation implements ProfileRepo {
   
@@ -20,13 +22,9 @@ export class ProfileRepoImplementation implements ProfileRepo {
   }
 
   async updatePassword(
-    oldPassword: string,
-    newPassword: string
+    request:UpdatePassword
   ): Promise<Profile> {
-    const response = await api.patch("/user/update-password", {
-      oldPassword,
-      newPassword,
-    });
+    const response = await api.patch("/user/update-password",request);
     return response.data;
   }
 }

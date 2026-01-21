@@ -1,4 +1,4 @@
-import type {  ProfileUpdate } from "../entities/profile";
+import type {  ProfileUpdate } from "../entities/profileupdate";
 import type { ProfileRepo } from "../repositories/profilerepo";
 export class UpdateProfileUsecase{
  private updateprofileRepo:ProfileRepo;

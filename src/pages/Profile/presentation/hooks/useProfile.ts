@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ProfileRepoImplementation } from "../../data/repositories/ProfileImpl";
 import { ListProfileUsecase } from "../../domain/usecase/ListProfileusecase";
 
-// ✅ create once
+
 const repo = new ProfileRepoImplementation();
 const usecase = new ListProfileUsecase(repo);
 

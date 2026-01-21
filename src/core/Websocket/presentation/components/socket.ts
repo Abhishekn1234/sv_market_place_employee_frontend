@@ -8,7 +8,7 @@ export const initializeSocket = (token?: string) => {
     socket = io(`${baseURL}/workers`, {
       transports: ["websocket"],
       autoConnect: false,
-       reconnection: false, // disable auto-connect
+       reconnection: false, 
       auth: { token },
     });
   }

@@ -1,13 +1,6 @@
 import type { ApiDocument } from "@/pages/Profile/domain/entities/documents";
-import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
-export type WorkerStatus =
-  | "ONLINE"
-  | "OFFLINE"
-  | "BLOCKED"
-  | "IN_SERVICE"
-  | "WAITING_DOCUMENTS"
-  | "PENDING_APPROVAL"
-  | "REJECTED"  | string;
+import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
+import type { WorkerStatus } from "./workerstatus";
 
 export interface WorkerPayload {
   categoryIds?: string[];

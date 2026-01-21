@@ -31,16 +31,16 @@ interface CommonTableProps<T> {
   data: T[];
   keyExtractor: (row: T) => string;
 
-  /** pagination */
+
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
 
-  /** layout */
+
   dir?: "ltr" | "rtl";
   emptyMessage?: string;
 
-  /** optional row expansion */
+  
   renderExpandedRow?: (row: T) => React.ReactNode;
   expandedRowKey?: string | null;
 }
@@ -107,7 +107,7 @@ export function CommonTable<T>({
         </TableBody>
       </Table>
 
-      {/* Pagination */}
+   
       {totalPages && totalPages > 1 && onPageChange && currentPage && (
         <Pagination
           className={cn(

@@ -1,3 +1,5 @@
+"use client";
+
 import { Search } from "lucide-react";
 import { CommonCard } from "@/components/common/CommonCard";
 import { Input } from "@/components/ui/input";
@@ -9,7 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-
 interface Props {
   searchTerm: string;
   setSearchTerm: (v: string) => void;
@@ -20,6 +21,7 @@ interface Props {
   onStatusChange: (v: string) => void;
   onItemsChange: (v: number) => void;
   isRTL: boolean;
+  translations: any;
 }
 
 export function WorkFilters({
@@ -32,16 +34,19 @@ export function WorkFilters({
   onStatusChange,
   onItemsChange,
   isRTL,
+  translations,
 }: Props) {
+  const { workHistory } = translations;
+
   return (
     <CommonCard
-      title="Filters"
+      title={workHistory.filters.timePeriod}
       headerAlign={isRTL ? "right" : "left"}
       contentClassName={`flex flex-col md:flex-row gap-4 ${
         isRTL ? "md:flex-row-reverse" : ""
       }`}
     >
-      {/* Search */}
+     
       <div className="flex-1 relative">
         <Search
           className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 ${
@@ -51,37 +56,51 @@ export function WorkFilters({
         <Input
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search works..."
+          placeholder={workHistory.filters.searchPlaceholder}
           className={isRTL ? "pr-10" : "pl-10"}
         />
       </div>
 
-      {/* Time Filter */}
+      {/* ⏱ Time Filter */}
       <Select value={timeFilter} onValueChange={onTimeChange}>
         <SelectTrigger className="w-full md:w-[160px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent align={isRTL ? "center" : "start"}>
-          <SelectItem value="week">This Week</SelectItem>
-          <SelectItem value="month">This Month</SelectItem>
+          <SelectItem value="week">
+            {workHistory.timeOptions.week}
+          </SelectItem>
+          <SelectItem value="month">
+            {workHistory.timeOptions.month}
+          </SelectItem>
         </SelectContent>
       </Select>
 
-      {/* Status Filter */}
+      {/* 📌 Status Filter */}
       <Select value={statusFilter} onValueChange={onStatusChange}>
         <SelectTrigger className="w-full md:w-[160px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent align={isRTL ? "center" : "start"}>
-          <SelectItem value="all">All</SelectItem>
-          <SelectItem value="completed">Completed</SelectItem>
-          <SelectItem value="in-progress">In Progress</SelectItem>
-          <SelectItem value="pending">Pending</SelectItem>
-          <SelectItem value="upcoming">Upcoming</SelectItem>
+          <SelectItem value="all">
+            {workHistory.statusOptions.all}
+          </SelectItem>
+          <SelectItem value="completed">
+            {workHistory.statusOptions.completed}
+          </SelectItem>
+          <SelectItem value="In Progress">
+            {workHistory.statusOptions["In Progress"]}
+          </SelectItem>
+          <SelectItem value="pending">
+            {workHistory.statusOptions.pending}
+          </SelectItem>
+          <SelectItem value="upcoming">
+            {workHistory.statusOptions.upcoming}
+          </SelectItem>
         </SelectContent>
       </Select>
 
-      {/* Items Per Page */}
+      {/* 📄 Items Per Page */}
       <Select
         value={String(itemsPerPage)}
         onValueChange={(v) => onItemsChange(Number(v))}
@@ -92,7 +111,7 @@ export function WorkFilters({
         <SelectContent align={isRTL ? "center" : "start"}>
           {[5, 10, 20].map((n) => (
             <SelectItem key={n} value={String(n)}>
-              {n}/page
+              <span dir="ltr">{n}</span>
             </SelectItem>
           ))}
         </SelectContent>
@@ -100,4 +119,3 @@ export function WorkFilters({
     </CommonCard>
   );
 }
-
