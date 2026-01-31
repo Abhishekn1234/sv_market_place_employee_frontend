@@ -1,6 +1,6 @@
 import { CommonCard } from "@/components/common/CommonCard";
-
 import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/ThemeContext";
 import { BarChart3, CheckCircle2, Clock, DollarSign } from "lucide-react";
 
 interface ActivityStatsProps {
@@ -16,64 +16,102 @@ export function ActivityStats({
   pendingCount,
   totalEarnings,
 }: ActivityStatsProps) {
-   const {language,t,translations}=useLanguage();
-     const isRTL=language=="AR"
+  const { language, translations } = useLanguage();
+  const isRTL = language === "AR";
+  const { theme } = useTheme();
+  const pa = translations.pastActivities;
+
   return (
-   <div
-  className={`grid grid-cols-1 md:grid-cols-4 gap-4 ${
-    isRTL ? "md:[direction:rtl]" : "md:[direction:ltr]"
-  }`}
->
+    <div
+      className={`
+        grid gap-4
+        grid-cols-1
+        sm:grid-cols-2
+        lg:grid-cols-3
+        md:grid-cols-4
+        xl:grid-cols-4
+        ${isRTL ? "lg:grid-flow-col-dense" : ""}
+      `}
+    >
+      <StatCard
+        icon={<BarChart3 className="size-5 text-blue-600" />}
+        iconBg="bg-blue-100"
+        label={pa.stats.totalActivities}
+        value={totalActivities}
+        theme={theme}
+      />
 
-      <CommonCard className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <BarChart3 className="size-5 text-blue-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translations.recentActivities.chart.activityType}</p>
-            <p className="text-2xl text-gray-900">{totalActivities}</p>
-          </div>
-        </div>
-      </CommonCard>
+      <StatCard
+        icon={<CheckCircle2 className="size-5 text-green-600" />}
+        iconBg="bg-green-100"
+        label={pa.stats.completed}
+        value={completedCount}
+        theme={theme}
+      />
 
-      <CommonCard className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-green-100 rounded-lg">
-            <CheckCircle2 className="size-5 text-green-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translations.recentActivities.status.completed}</p>
-            <p className="text-2xl text-gray-900">{completedCount}</p>
-          </div>
-        </div>
-      </CommonCard>
+      <StatCard
+        icon={<DollarSign className="size-5 text-emerald-600" />}
+        iconBg="bg-emerald-100"
+        label={pa.stats.totalEarnings}
+        value={`$${totalEarnings.toLocaleString()}`}
+        theme={theme}
+      />
 
-      <CommonCard className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-emerald-100 rounded-lg">
-            <DollarSign className="size-5 text-emerald-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translations.recentActivities.chart.earningsTrend}</p>
-            <p className="text-2xl text-gray-900">
-              ${totalEarnings.toLocaleString()}
-            </p>
-          </div>
-        </div>
-      </CommonCard>
-
-      <CommonCard className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-amber-100 rounded-lg">
-            <Clock className="size-5 text-amber-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{t('Pending')}</p>
-            <p className="text-2xl text-gray-900">{pendingCount}</p>
-          </div>
-        </div>
-      </CommonCard>
+      <StatCard
+        icon={<Clock className="size-5 text-amber-600" />}
+        iconBg="bg-amber-100"
+        label={pa.stats.pending}
+        value={pendingCount}
+        theme={theme}
+      />
     </div>
+  );
+}
+
+
+/* ----------------------- */
+/* Reusable Stat Card     */
+/* ----------------------- */
+
+function StatCard({
+  icon,
+  iconBg,
+  label,
+  value,
+  theme,
+}: {
+  icon: React.ReactNode;
+  iconBg: string;
+  label: string;
+  value: string | number;
+  theme: "light" | "dark";
+}) {
+  return (
+    <CommonCard className="p-4 sm:p-5">
+      <div className="flex items-center gap-3 sm:gap-4">
+        <div
+          className={`shrink-0 p-2 sm:p-2.5 rounded-lg ${iconBg}`}
+        >
+          {icon}
+        </div>
+
+        <div className="min-w-0">
+          <p
+            className={`text-xs sm:text-sm truncate ${
+              theme === "dark" ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            {label}
+          </p>
+          <p
+            className={`text-xl sm:text-2xl font-semibold ${
+              theme === "dark" ? "text-gray-100" : "text-gray-900"
+            }`}
+          >
+            {value}
+          </p>
+        </div>
+      </div>
+    </CommonCard>
   );
 }

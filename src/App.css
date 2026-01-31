@@ -1,3 +1,18 @@
+html,
+body {
+  min-height: 100%;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+
 @keyframes fadeUp {
   from {
     opacity: 0;

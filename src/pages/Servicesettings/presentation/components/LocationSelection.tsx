@@ -1,11 +1,10 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import type { GeoPoint } from "@/pages/Profile/domain/entities/profile";
+import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import LocationPage from "@/pages/LocationSettings/presentation/location.settings.page";
 import { CurrentLocationFetcher } from "@/pages/LocationSettings/presentation/components/CurrentLocation";
 import { reverseGeocode } from "@/components/common/CommonMap";
 
-/* ================== TYPES ================== */
 type Props = {
   locationMode: "current" | "manual";
   setLocationMode: (v: "current" | "manual") => void;
@@ -15,6 +14,7 @@ type Props = {
   setCurrentPlace: (p: string) => void;
   serviceRadius: number; // meters
   setServiceRadius: (r: number) => void;
+  className?: string;
 };
 
 /* ================== HELPERS ================== */
@@ -31,32 +31,35 @@ export function LocationSelection({
   setCurrentPlace,
   serviceRadius,
   setServiceRadius,
+  className = "",
 }: Props) {
   return (
-    <>
+    <div
+      className={`flex flex-col ${className} space-y-3 sm:space-y-4 w-full`}
+    >
       {/* TITLE */}
-      <Label className="text-sm font-medium mb-1 block">
+      <Label className="text-sm sm:text-base font-medium mb-1 block">
         Select Location Mode
       </Label>
 
       {/* RADIO OPTIONS */}
-      <div className="flex items-center gap-6 mb-3">
-        <label className="flex items-center gap-2 cursor-pointer text-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-2">
+        <label className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
           <Input
             type="radio"
             checked={locationMode === "current"}
             onChange={() => setLocationMode("current")}
-            className="h-4 w-4"
+            className="h-4 w-4 sm:h-5 sm:w-5"
           />
           <span>Current Location</span>
         </label>
 
-        <label className="flex items-center gap-2 cursor-pointer text-sm">
+        <label className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
           <Input
             type="radio"
             checked={locationMode === "manual"}
             onChange={() => setLocationMode("manual")}
-            className="h-4 w-4"
+            className="h-4 w-4 sm:h-5 sm:w-5"
           />
           <span>Choose Location</span>
         </label>
@@ -64,17 +67,19 @@ export function LocationSelection({
 
       {/* CURRENT LOCATION */}
       {locationMode === "current" && (
-        <CurrentLocationFetcher
-          onChange={(point, place) => {
-            setLocation(point);
-            setCurrentPlace(place);
-          }}
-        />
+        <div className="w-full">
+          <CurrentLocationFetcher
+            onChange={(point, place) => {
+              setLocation(point);
+              setCurrentPlace(place);
+            }}
+          />
+        </div>
       )}
 
       {/* MANUAL LOCATION */}
       {locationMode === "manual" && (
-        <div className="h-[500px] rounded-md border mt-2">
+        <div className="w-full h-56 sm:h-64 md:h-72 lg:h-80 xl:h-96 rounded-md border overflow-hidden">
           <LocationPage
             onChange={async (loc) => {
               if (!loc) {
@@ -101,23 +106,20 @@ export function LocationSelection({
 
       {/* LOCATION INFO (BOTH MODES) */}
       {location && (
-        <div className="mt-3 text-sm text-muted-foreground space-y-1">
+        <div className="mt-2 text-xs sm:text-sm md:text-base text-muted-foreground space-y-1">
           <p>
-            <strong>Lat:</strong>{" "}
-            {formatCoord(location.coordinates[0])},{" "}
-            <strong>Lng:</strong>{" "}
-            {formatCoord(location.coordinates[1])}
+            <strong>Lat:</strong> {formatCoord(location.coordinates[0])},{" "}
+            <strong>Lng:</strong> {formatCoord(location.coordinates[1])}
           </p>
 
           <p>
             <strong>Radius:</strong> {formatRadius(serviceRadius)} km
           </p>
 
-          {currentPlace && (
-            <p className="italic">📍 {currentPlace}</p>
-          )}
+          {currentPlace && <p className="italic">📍 {currentPlace}</p>}
         </div>
       )}
-    </>
+    </div>
   );
 }
+

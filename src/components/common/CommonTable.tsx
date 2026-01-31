@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import {
   Table,
   TableHeader,
@@ -17,7 +18,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/components/ui/utils";
-import React from "react";
 
 export type TableColumn<T> = {
   key: string;
@@ -31,18 +31,15 @@ interface CommonTableProps<T> {
   data: T[];
   keyExtractor: (row: T) => string;
 
-
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
 
-
-  dir?: "ltr" | "rtl";
   emptyMessage?: string;
-
-  
   renderExpandedRow?: (row: T) => React.ReactNode;
   expandedRowKey?: string | null;
+
+  isRTL?: boolean;
 }
 
 export function CommonTable<T>({
@@ -50,69 +47,106 @@ export function CommonTable<T>({
   data,
   keyExtractor,
   currentPage,
-  totalPages,
+  totalPages = 0,
   onPageChange,
-  dir = "ltr",
   emptyMessage = "No data found",
   renderExpandedRow,
   expandedRowKey,
+  isRTL = false,
 }: CommonTableProps<T>) {
+  const renderedColumns = isRTL ? [...columns].reverse() : columns;
+
   return (
     <>
-      <Table dir={dir}>
-        <TableHeader>
-          <TableRow>
-            {columns.map((col) => (
-              <TableHead key={col.key} className={col.className}>
-                {col.header}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {data.length === 0 && (
+      {/* TABLE WRAPPER */}
+      <div className="w-full overflow-x-auto">
+        <Table className={cn("min-w-full", isRTL && "direction-rtl")}>
+          {/* HEADER (hidden on mobile) */}
+          <TableHeader className="hidden md:table-header-group">
             <TableRow>
-              <TableCell colSpan={columns.length} className="text-center py-6">
-                {emptyMessage}
-              </TableCell>
+              {renderedColumns.map((col) => (
+                <TableHead
+                  key={col.key}
+                  className={cn(
+                    col.className,
+                    isRTL ? "text-right" : "text-left"
+                  )}
+                >
+                  {col.header}
+                </TableHead>
+              ))}
             </TableRow>
-          )}
+          </TableHeader>
 
-          {data.map((row) => {
-            const rowKey = keyExtractor(row);
+          {/* BODY */}
+          <TableBody>
+            {data.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length || 1}
+                  className="text-center py-6"
+                >
+                  {emptyMessage}
+                </TableCell>
+              </TableRow>
+            ) : (
+              data.map((row) => {
+                const rowKey = keyExtractor(row);
 
-            return (
-              <React.Fragment key={rowKey}>
-                <TableRow>
-                  {columns.map((col) => (
-                    <TableCell key={col.key} className={col.className}>
-                      {col.render
-                        ? col.render(row)
-                        : (row as any)[col.key]}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                return (
+                  <React.Fragment key={rowKey}>
+                    {/* ROW */}
+                    <TableRow className="block md:table-row border md:border-0 mb-4 md:mb-0 rounded-lg md:rounded-none">
+                      {renderedColumns.map((col) => {
+                        const value =
+                          col.render !== undefined
+                            ? col.render(row)
+                            : (row as any)[col.key];
 
-                {renderExpandedRow && expandedRowKey === rowKey && (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="bg-gray-50">
-                      {renderExpandedRow(row)}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </TableBody>
-      </Table>
+                        return (
+                          <TableCell
+                            key={col.key}
+                            className={cn(
+                              col.className,
+                              "block md:table-cell px-4 py-2 md:px-3 md:py-3",
+                              isRTL ? "text-right" : "text-left"
+                            )}
+                          >
+                            {/* MOBILE LABEL */}
+                            <span className="md:hidden font-medium text-gray-500">
+                              {col.header}:{" "}
+                            </span>
+                            {value ?? ""}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
 
-   
-      {totalPages && totalPages > 1 && onPageChange && currentPage && (
+                    {/* EXPANDED ROW */}
+                    {renderExpandedRow && expandedRowKey === rowKey && (
+                      <TableRow className="block md:table-row">
+                        <TableCell
+                          colSpan={columns.length || 1}
+                          className="block md:table-cell bg-gray-50 p-4"
+                        >
+                          {renderExpandedRow(row)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* PAGINATION */}
+      {totalPages > 1 && onPageChange && currentPage && (
         <Pagination
           className={cn(
-            "mt-6",
-            dir === "rtl" ? "justify-start" : "justify-end"
+            "mt-6 flex flex-wrap gap-2",
+            isRTL ? "justify-start" : "justify-end"
           )}
           dir="ltr"
         >

@@ -1,5 +1,4 @@
 import { CommonTable, type TableColumn } from "@/components/common/CommonTable";
-import { Badge } from "@/components/ui/badge";
 import type { Transaction } from "../../domain/entities/transaction";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -14,28 +13,25 @@ export default function TransactionTable({
   currentPage,
   onPageChange,
 }: Props) {
-  const { t, language,translations } = useLanguage();
+  const { language, translations } = useLanguage();
   const isRTL = language === "AR";
-  interface TransactionTableTranslations { transactionId: string; date: string; type: string; description: string; paymentMethod: string; status: string; amount: string; }
-const ts: TransactionTableTranslations = (translations.transactionTable as unknown as TransactionTableTranslations) ?? { transactionId: "Transaction ID", date: "Date", type: "Type", description: "Description", paymentMethod: "Payment Method", status: "Status", amount: "Amount", };
+
+  const table = translations.transactionHistory.table;
+
   const itemsPerPage = 5;
   const totalPages = Math.ceil(transactions.length / itemsPerPage);
   const start = (currentPage - 1) * itemsPerPage;
 
   const columns: TableColumn<Transaction>[] = [
-    { key: "id", header: ts.transactionId },
-    { key: "date", header: ts.date},
-    { key: "type", header: ts.type },
-    { key: "description", header: ts.description},
-    { key: "paymentMethod", header: ts.paymentMethod },
-    {
-      key: "status",
-      header: ts.status,
-      render: (row) => <StatusBadge status={row.status} />,
-    },
+    { key: "id", header: table.transactionId },
+    { key: "date", header: table.date },
+    { key: "type", header: table.type },
+    { key: "description", header: table.description },
+    { key: "paymentMethod", header: table.paymentMethod },
+    { key: "status", header: table.status },
     {
       key: "amount",
-      header: ts.amount,
+      header: table.amount,
       render: (row) =>
         new Intl.NumberFormat("en-US", {
           style: "currency",
@@ -49,21 +45,11 @@ const ts: TransactionTableTranslations = (translations.transactionTable as unkno
       columns={columns}
       data={transactions.slice(start, start + itemsPerPage)}
       keyExtractor={(row) => row.id}
-      dir={isRTL ? "rtl" : "ltr"}
+      isRTL={isRTL}
       currentPage={currentPage}
       totalPages={totalPages}
       onPageChange={onPageChange}
-      emptyMessage={t("noTransactionsFound")}
+      emptyMessage={table.empty}
     />
   );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    completed: "bg-green-100 text-green-800",
-    pending: "bg-yellow-100 text-yellow-800",
-    failed: "bg-red-100 text-red-800",
-  };
-
-  return <Badge className={styles[status]}>{status}</Badge>;
 }

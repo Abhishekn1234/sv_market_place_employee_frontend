@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/context/LanguageContext";
 import { PencilIcon } from "lucide-react";
 
 export default function EmployeeDetails({
@@ -11,12 +12,15 @@ export default function EmployeeDetails({
   selectedCategories,
   onEdit,
 }: any) {
+  const {translations}=useLanguage();
+    const edits=translations.profile
+    console.log(edits);
   return (
     <>
       <div className="flex justify-between mb-4">
         <h2 className="text-xl font-semibold">Employee Details</h2>
         <Button onClick={onEdit}>
-          <PencilIcon className="w-4 h-4 mr-2" /> Edit
+          <PencilIcon className="w-4 h-4 mr-2" /> {edits.edit}
         </Button>
       </div>
 
@@ -28,7 +32,7 @@ export default function EmployeeDetails({
 
         <div className="rounded-lg border bg-white p-4">
           <p className="text-sm text-gray-500 mb-1">Location</p>
-          <span className="font-medium">{locationName}</span>
+          <span className="font-medium text-black">{locationName}</span>
         </div>
 
         <div className="rounded-lg border bg-white p-4">

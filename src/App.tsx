@@ -28,12 +28,18 @@ import Wallet from './pages/Wallet/presentation/wallet.page';
 import NotificationsPage from './pages/Notifications/presentation/notification.page';
 import { ThemeProvider } from './context/ThemeContext';
 import { useDynamicLocation } from '@/utils/useNotification';
+import AvailableBookingPage from './pages/Booking/AvailableBooking/presentation/availablebooking.page';
+import CurrentBookingPage from './pages/Booking/CurrentBooking/presentation/currentbooking.page';
+import OngoingServicesPage from './pages/Booking/OngoingServices/presentation/ongoingservices.page';
 
 function AppContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
  
   useDynamicLocation();
+useEffect(() => {
+  console.log("Current URL:", window.location.pathname);
+}, [window.location.pathname]);
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
@@ -41,17 +47,20 @@ function AppContent() {
     }
   }, []);
 
-  useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      const { type, payload } = event.data || {};
-      if (type === "NAVIGATE" && payload?.url) {
-        navigate(payload.url);
-        if (payload.tab) setActiveTab(payload.tab);
-      }
-    };
-    navigator.serviceWorker?.addEventListener("message", handler);
-    return () => navigator.serviceWorker?.removeEventListener("message", handler);
-  }, [navigate]);
+useEffect(() => {
+  const handler = (event: MessageEvent) => {
+    const { type, payload } = event.data || {};
+    console.log(event.data);
+    if (type === "NAVIGATE" && payload?.url) {
+      setActiveTab(payload.tab || "profile"); // update tab
+      navigate(payload.url, { replace: true }); // navigate
+    }
+  };
+
+  navigator.serviceWorker?.addEventListener("message", handler);
+  return () => navigator.serviceWorker?.removeEventListener("message", handler);
+}, [navigate]);
+
 
   return (
     <LanguageProvider>
@@ -72,6 +81,9 @@ function AppContent() {
           <Route index element={<HomePage />} />
           <Route path="settings/profile" element={<ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} />} />
           <Route path="history/booking" element={<BookingHistory />} />
+          <Route path='booking/available' element={<AvailableBookingPage/>}/>
+          <Route path='booking/current' element={<CurrentBookingPage/>}/>
+          <Route path='booking/ongoing-services' element={<OngoingServicesPage/>}/>
           <Route path="history/transaction" element={<TransactionHistory />} />
           <Route path="history/work" element={<WorkingHistory />} />
           <Route path="activity/recent" element={<RecentActivity />} />

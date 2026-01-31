@@ -4,6 +4,7 @@ import { PencilIcon } from "lucide-react";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Props {
   status: WorkerStatus | null;
@@ -24,12 +25,15 @@ export default function LocationSummary({
   serviceCategories,
   onEdit,
 }: Props) {
+  const {translations}=useLanguage();
+  const edits=translations.profile
+  console.log(edits);
   return (
     <>
       <div className="flex justify-between mb-4">
         <h2 className="text-xl font-semibold">Employee Details</h2>
         <Button onClick={onEdit}>
-          <PencilIcon className="w-4 h-4 mr-2" /> Edit
+          <PencilIcon className="w-4 h-4 mr-2" />{edits.edit}
         </Button>
       </div>
 

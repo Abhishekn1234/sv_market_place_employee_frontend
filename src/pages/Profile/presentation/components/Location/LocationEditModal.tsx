@@ -4,6 +4,7 @@ import { CommonMap } from "@/components/common/CommonMap";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Props = {
   tempLocation: [number, number];
@@ -43,6 +44,9 @@ export default function LocationEditModal({
   onSave,
 }: Props) {
   console.log(locationName);
+  const {translations}=useLanguage();
+    const edits=translations.profile
+    console.log(edits);
   return (
     <div className="border rounded p-4 space-y-5">
       {/* Location Mode */}
@@ -68,7 +72,7 @@ export default function LocationEditModal({
         </div>
       </div>
 
-      {/* Map using CommonMap */}
+     
       <CommonMap
         location={tempLocation}
         setLocation={setTempLocation}
@@ -80,7 +84,7 @@ export default function LocationEditModal({
         height={540}
       />
 
-      {/* Radius */}
+  
       <div>
         <Label>Service Radius (km)</Label>
         <Input
@@ -147,12 +151,12 @@ export default function LocationEditModal({
         </div>
       </div>
 
-      {/* Actions */}
+      
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onClose}>
-          Cancel
+          {edits.cancel}
         </Button>
-        <Button onClick={onSave}>Update</Button>
+        <Button onClick={onSave}>{edits.update}</Button>
       </div>
     </div>
   );

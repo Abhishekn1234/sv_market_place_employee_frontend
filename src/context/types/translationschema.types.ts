@@ -1,0 +1,30 @@
+import type { AvailableBookingsLang } from "./availablebooking.types";
+import type { BookingHistoryTranslations } from "./bookinghistorytranslation.types";
+import type { CurrentBookings } from "./currentbooking.types";
+import type { HomePageTranslations } from "./homepagetranslation.types";
+import type { LanguagesTranslations } from "./languagetranslation.types";
+import type { NotificationsTranslations } from "./notificationtranslation.types";
+import type { OngoingServiceLang } from "./ongoingservices.types";
+import type { ProfileTranslations } from "./profiletranslation.types";
+import type { SidebarTranslations } from "./sidebartranslation.types";
+import type { WalletTranslations } from "./wallettranslation.types";
+import type { WorkHistoryTranslations } from "./workhistorytranslation.types";
+
+export type TranslationSchema = {
+  common: Record<string, string>;
+  HomePage: HomePageTranslations;
+  bookingHistory: BookingHistoryTranslations;
+  workHistory: WorkHistoryTranslations;
+  profile: ProfileTranslations;
+  wallet: WalletTranslations;
+  notifications: NotificationsTranslations;
+  sidebar: SidebarTranslations;
+  home: Record<string, string>;
+  languages: LanguagesTranslations;
+  recentActivities?: any;
+  pastActivities?: any;
+  transactionHistory?: any;
+  availableBookings?:AvailableBookingsLang;
+  currentBookings?:CurrentBookings;
+  ongoingservices?:OngoingServiceLang;
+};

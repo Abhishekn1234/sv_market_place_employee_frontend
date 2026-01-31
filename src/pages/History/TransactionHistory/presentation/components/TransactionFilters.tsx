@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -24,39 +23,54 @@ export default function TransactionFilters({
   onSearchChange,
   onStatusChange,
 }: Props) {
-  const { t, language } = useLanguage();
+  const { translations, language } = useLanguage();
   const isRTL = language === "AR";
+
+  const filters = translations.transactionHistory.filters;
 
   return (
     <CommonCard
-  title={t("transactionHistory")}
-  headerAlign={isRTL ? "right" : "left"}
->
-  <div className={`flex gap-4 mb-6 ${isRTL ? "flex-row-reverse" : ""}`}>
-    <div className="relative flex-1">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-      <Input
-        value={searchTerm}
-        onChange={(e) => onSearchChange(e.target.value)}
-        placeholder={t("searchPlaceholder")}
-        className="pl-10"
-      />
-    </div>
+      title={filters.filterStatus}
+      headerAlign={isRTL ? "right" : "left"}
+    >
+      <div
+        className={`
+          flex flex-col gap-4
+          md:flex-row md:items-center
+          ${isRTL ? "md:flex-row-reverse" : ""}
+        `}
+      >
+        {/* SEARCH */}
+        <div className="relative flex-1">
+          <Search
+            className={`
+              absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400
+              ${isRTL ? "right-3" : "left-3"}
+            `}
+          />
+          <Input
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={filters.searchPlaceholder}
+            className={isRTL ? "pr-10" : "pl-10"}
+          />
+        </div>
 
-    <Select value={statusFilter} onValueChange={onStatusChange}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder={t("allStatus")} />
-      </SelectTrigger>
+        {/* STATUS */}
+        <Select value={statusFilter} onValueChange={onStatusChange}>
+          <SelectTrigger className="w-full md:w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
 
-      <SelectContent>
-        <SelectItem value="all">{t("allStatus")}</SelectItem>
-        <SelectItem value="completed">{t("completed")}</SelectItem>
-        <SelectItem value="pending">{t("pending")}</SelectItem>
-        <SelectItem value="failed">{t("failed")}</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>
-</CommonCard>
-
+          <SelectContent align={isRTL ? "center" : "start"}>
+            {Object.entries(filters.statusOptions).map(([key, label]) => (
+              <SelectItem key={key} value={key}>
+                {String(label)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </CommonCard>
   );
 }

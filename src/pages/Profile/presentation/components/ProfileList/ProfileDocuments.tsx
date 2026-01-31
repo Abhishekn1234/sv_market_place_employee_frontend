@@ -25,7 +25,12 @@ export function ProfileDocuments({
   return (
     <CommonCard
       title="Documents"
-      contentClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+      contentClassName="
+        grid grid-cols-1 
+        sm:grid-cols-2 
+        lg:grid-cols-3
+        gap-4 sm:gap-5 md:gap-6 lg:gap-8
+      "
     >
       {fileFields.map(({ label, key }) => {
         const fileUrl = fileUrls[key];
@@ -34,18 +39,32 @@ export function ProfileDocuments({
         return (
           <div
             key={key}
-            className="border rounded-lg p-4 flex flex-col items-center justify-center min-h-[300px] bg-white shadow-sm relative"
+            className="
+              relative
+              border rounded-lg
+              p-3 sm:p-4 md:p-5
+              flex flex-col items-center justify-between
+              bg-white shadow-sm
+              min-h-[220px] sm:min-h-[260px] md:min-h-[300px]
+            "
           >
-            <p className="text-sm font-medium mb-2">{label}</p>
+            {/* Title */}
+            <p className="text-sm sm:text-base font-medium mb-2 text-center">
+              {label}
+            </p>
 
-         
-            {(file || fileUrl) && (
-              <div className="flex-1 w-full flex items-center justify-center">
+            {/* Preview */}
+            {(file || fileUrl) ? (
+              <div className="flex-1 w-full flex items-center justify-center overflow-hidden">
                 <FilePreviewWithName file={file} url={fileUrl} />
+              </div>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-xs sm:text-sm text-gray-400">
+                No file uploaded
               </div>
             )}
 
-        
+            {/* Upload */}
             {isEditing && (
               <>
                 <Input
@@ -53,7 +72,7 @@ export function ProfileDocuments({
                     inputRefs.current[key] = el;
                   }}
                   type="file"
-                  className="absolute opacity-0 w-0 h-0 pointer-events-none"
+                  className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) onFileChange(f, key);
@@ -64,10 +83,10 @@ export function ProfileDocuments({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="mt-4 w-full"
+                  className="mt-3 w-full"
                   onClick={() => inputRefs.current[key]?.click()}
                 >
-                  Upload
+                  {file || fileUrl ? "Change File" : "Upload"}
                 </Button>
               </>
             )}

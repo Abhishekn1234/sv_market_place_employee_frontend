@@ -46,10 +46,24 @@ export default function PastActivity({
   } = useActivityAnalytics(allActivities, selectedPeriod, selectedType);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-
-        
+    <div
+      className="
+        min-h-screen
+        px-3 py-4
+        sm:px-4 sm:py-6
+        lg:px-6
+      "
+    >
+      <div
+        className="
+          mx-auto
+          max-w-7xl
+          space-y-4
+          sm:space-y-6
+          lg:space-y-8
+        "
+      >
+        {/* Header */}
         <ActivityHeader
           employeeName={employeeName}
           employeeId={employeeId}
@@ -57,7 +71,7 @@ export default function PastActivity({
           setShowAnalytics={setShowAnalytics}
         />
 
-       
+        {/* Filters */}
         <ActivityFilters
           period={selectedPeriod}
           setPeriod={setSelectedPeriod}
@@ -70,7 +84,7 @@ export default function PastActivity({
           }}
         />
 
-        
+        {/* Stats */}
         <ActivityStats
           totalActivities={filteredActivities.length}
           completedCount={stats.completedCount}
@@ -78,7 +92,7 @@ export default function PastActivity({
           totalEarnings={stats.totalEarnings}
         />
 
-      
+        {/* Analytics (optional) */}
         {showAnalytics && (
           <ActivityAnalytics
             earningsTrendData={charts.earningsTrendData}
@@ -92,14 +106,14 @@ export default function PastActivity({
           />
         )}
 
-    
+        {/* Current period label */}
         <ActivityCurrent
           getPeriodLabel={getPeriodLabel}
           selectedPeriod={selectedPeriod}
           filteredActivities={filteredActivities}
         />
 
-  
+        {/* Timeline / Empty */}
         {Object.keys(groupedActivities).length > 0 ? (
           <ActivityTimeline
             groupedActivities={groupedActivities}

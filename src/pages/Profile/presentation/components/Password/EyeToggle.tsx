@@ -14,7 +14,15 @@ export default function EyeToggle({
       tabIndex={-1}
       onMouseDown={(e) => e.preventDefault()}
       onClick={() => setShow(!show)}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-700 hover:text-gray-100 bg-gray-100"
+     className="
+  absolute right-3 top-1/2 -translate-y-1/2
+  bg-transparent border-none
+  text-blue-800
+
+  outline-none ring-0
+  hover:opacity-100
+  focus-visible:ring-0
+"
     >
       {show ? <Eye size={18} /> : <EyeOff size={18} />}
     </Button>

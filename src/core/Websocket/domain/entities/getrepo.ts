@@ -1,6 +1,6 @@
 export type GetBooking = {
   _id: string;
-  status: "REQUESTED" | "ACCEPTED" | "REJECTED" |"ASSIGNED";
+  status: "REQUESTED" | "ACCEPTED" | "REJECTED" |"ASSIGNED" | "WORKER_ACCEPTED";
   amount: number;
   currency?: string;
 

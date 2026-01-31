@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Bell,  Mail, Filter 
-} from "lucide-react";
+import { Bell, Mail, Filter } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import type { Notification } from "../domain/entities/notification";
 import NotificationsHeader from "./components/NotificationHeader";
 import NotificationItem from "./components/NotificationItem";
 import { data } from "./data/mockdata";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -17,18 +16,24 @@ export default function NotificationsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const { translations } = useLanguage();
-  const notificationsTranslations = translations.Notifications;
-
+  const notificationsTranslations = translations.notifications;
+  const { theme } = useTheme();
 
   useEffect(() => {
-    const response=data;
-    setNotifications(response);
+    setNotifications(data);
   }, []);
 
   const markAsRead = (id: string) =>
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-  const markAllAsRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  const deleteNotification = (id: string) => setNotifications((prev) => prev.filter((n) => n.id !== id));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+
+  const markAllAsRead = () =>
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+
+  const deleteNotification = (id: string) =>
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+
   const clearAllNotifications = () => setNotifications([]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -36,13 +41,19 @@ export default function NotificationsPage() {
   const filteredNotifications = notifications.filter((notification) => {
     if (filter === "unread") return !notification.read;
     if (filter === "read") return notification.read;
-    if (selectedCategory !== "all") return notification.category === selectedCategory;
+    if (selectedCategory !== "all")
+      return notification.category === selectedCategory;
     return true;
   });
 
+  const pageBg = theme === "dark" ? "text-gray-100" : "";
+  const cardBg =
+    theme === "dark" ? "bg-gray-900 text-gray-100 border-gray-700" : "";
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className={`min-h-screen p-3 sm:p-4 md:p-8 ${pageBg}`}>
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        {/* Header */}
         <NotificationsHeader
           unreadCount={unreadCount}
           filter={filter}
@@ -55,11 +66,18 @@ export default function NotificationsPage() {
           totalCount={notifications.length}
         />
 
+        {/* Empty State */}
         {filteredNotifications.length === 0 ? (
-          <CommonCard className="text-center py-16 border-2 border-dashed border-gray-300">
-            <Bell className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">{notificationsTranslations.noNotifications}</h3>
-            <p className="text-gray-500">{notificationsTranslations.caughtUp}</p>
+          <CommonCard
+            className={`text-center py-12 sm:py-16 border-2 border-dashed ${cardBg}`}
+          >
+            <Bell className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 opacity-70" />
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">
+              {notificationsTranslations.noNotifications}
+            </h3>
+            <p className="text-sm sm:text-base opacity-80">
+              {notificationsTranslations.caughtUp}
+            </p>
           </CommonCard>
         ) : (
           <div className="space-y-3">
@@ -75,17 +93,25 @@ export default function NotificationsPage() {
           </div>
         )}
 
-  
-        <CommonCard className="p-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-gray-600 text-sm">
-            {notificationsTranslations.showing} {filteredNotifications.length} of {notifications.length} {notificationsTranslations.all}
+        {/* Footer Actions */}
+        <CommonCard
+          className={`p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 ${cardBg}`}
+        >
+          <div className="text-sm flex items-center gap-1 whitespace-nowrap">
+            {notificationsTranslations.unread}{" "}
+            {filteredNotifications.length} / {notifications.length}{" "}
+            {notificationsTranslations.total}
           </div>
-          <div className="flex items-center gap-4">
-            <button className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-1">
-              <Mail className="w-4 h-4" /> {notificationsTranslations.emailDigest}
+
+          <div className="flex flex-wrap items-center gap-4">
+            <button className="text-sm flex items-center gap-1 whitespace-nowrap hover:opacity-80">
+              <Mail className="w-4 h-4" />
+              {notificationsTranslations.emailDigest}
             </button>
-            <button className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-1">
-              <Filter className="w-4 h-4" /> {notificationsTranslations.notificationSettings}
+
+            <button className="text-sm flex items-center gap-1 whitespace-nowrap hover:opacity-80">
+              <Filter className="w-4 h-4" />
+              {notificationsTranslations.notificationSettings}
             </button>
           </div>
         </CommonCard>

@@ -1,9 +1,11 @@
+"use client";
+
 import {
   BarChart,
   Bar,
   LineChart,
   Line,
-  PieChart, // ✅ correct
+  PieChart,
   Pie,
   Cell,
   XAxis,
@@ -14,43 +16,32 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import { ActivityIcon, BarChart3, DollarSign, TrendingUp } from "lucide-react";
+import {
+  ActivityIcon,
+  BarChart3,
+  DollarSign,
+  TrendingUp,
+} from "lucide-react";
+
 import type { Activity } from "../../domain/entities/activity";
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 
 type Props = {
-  earningsTrendData: {
-    week: string;
-    earnings: number;
-  }[];
-
-  activityTypeData: {
-    name: string;
-    value: number;
-    color: string;
-  }[];
-
+  earningsTrendData: { week: string; earnings: number }[];
+  activityTypeData: { name: string; value: number; color: string }[];
   activityTrendData: {
     week: string;
     bookings: number;
     payments: number;
     transactions: number;
   }[];
-
-  statusData: {
-    name: string;
-    value: number;
-    color: string;
-  }[];
-
-  // 🔥 Key Insights data
+  statusData: { name: string; value: number; color: string }[];
   totalActivities: number;
   completedCount: number;
   totalEarnings: number;
-   groupedActivities: Record<string, Activity[]>;
+  groupedActivities: Record<string, Activity[]>;
 };
-
 
 export default function ActivityAnalytics({
   earningsTrendData,
@@ -62,8 +53,9 @@ export default function ActivityAnalytics({
   totalEarnings,
   groupedActivities,
 }: Props) {
-  const { language, t, translations } = useLanguage();
+  const { language, translations } = useLanguage();
   const isRTL = language === "AR";
+  const pa = translations.pastActivities;
 
   const completionRate =
     totalActivities > 0
@@ -78,39 +70,58 @@ export default function ActivityAnalytics({
     );
 
   return (
-    <div className={`space-y-6 ${isRTL ? "rtl" : "ltr"}`}>
+    <div dir={isRTL ? "rtl" : "ltr"} className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <BarChart3 className="size-6 text-blue-600" />
-        <h2 className="text-gray-900">{t("analytics")}</h2>
+        <BarChart3 className="size-5 sm:size-6 text-blue-600" />
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900">
+          {pa.pageTitle}
+        </h2>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Earnings Trend */}
-        <CommonCard className="p-6">
-          <h3 className="text-gray-900 mb-4">
-            {translations.recentActivities.chart.earningsTrend}
+      <p className="text-sm text-gray-500">{pa.timeline}</p>
+
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      
+        <CommonCard className="p-4 sm:p-6">
+          <h3 className="mb-3 text-sm sm:text-base">
+            {pa.chart.earningsTrend}
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
+
+          <ResponsiveContainer width="100%" height={240}>
             <LineChart data={earningsTrendData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
+              <XAxis
+                dataKey="week"
+                tick={{ fontSize: 12 }}
+                reversed={isRTL}
+              />
+              <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Line type="monotone" dataKey="earnings" stroke="#10b981" />
+              <Line
+                type="monotone"
+                dataKey="earnings"
+                stroke="#10b981"
+                strokeWidth={2}
+              />
             </LineChart>
           </ResponsiveContainer>
         </CommonCard>
 
         {/* Activity Type */}
-        <CommonCard className="p-6">
-          <h3 className="text-gray-900 mb-4">
-            {translations.recentActivities.chart.activityType}
+        <CommonCard className="p-4 sm:p-6">
+          <h3 className="mb-3 text-sm sm:text-base">
+            {pa.chart.activityType}
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
+
+          <ResponsiveContainer width="100%" height={240}>
             <PieChart>
-              <Pie data={activityTypeData} dataKey="value" outerRadius={80}>
+              <Pie
+                data={activityTypeData}
+                dataKey="value"
+                outerRadius={70}
+              >
                 {activityTypeData.map((e, i) => (
                   <Cell key={i} fill={e.color} />
                 ))}
@@ -121,15 +132,20 @@ export default function ActivityAnalytics({
         </CommonCard>
 
         {/* Activity Trend */}
-        <CommonCard className="p-6">
-          <h3 className="text-gray-900 mb-4">
-            {translations.recentActivities.chart.activityTrend}
+        <CommonCard className="p-4 sm:p-6">
+          <h3 className="mb-3 text-sm sm:text-base">
+            {pa.chart.activityTrend}
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
+
+          <ResponsiveContainer width="100%" height={260}>
             <BarChart data={activityTrendData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
+              <XAxis
+                dataKey="week"
+                tick={{ fontSize: 12 }}
+                reversed={isRTL}
+              />
+              <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
               <Legend />
               <Bar dataKey="bookings" fill="#3b82f6" />
@@ -139,14 +155,19 @@ export default function ActivityAnalytics({
           </ResponsiveContainer>
         </CommonCard>
 
-        {/* Status Distribution */}
-        <CommonCard className="p-6">
-          <h3 className="text-gray-900 mb-4">
-            {translations.recentActivities.chart.statusDistribution}
+        {/* Status */}
+        <CommonCard className="p-4 sm:p-6">
+          <h3 className="mb-3 text-sm sm:text-base">
+            {pa.chart.statusDistribution}
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
+
+          <ResponsiveContainer width="100%" height={240}>
             <PieChart>
-              <Pie data={statusData} dataKey="value" outerRadius={80}>
+              <Pie
+                data={statusData}
+                dataKey="value"
+                outerRadius={70}
+              >
                 {statusData.map((e, i) => (
                   <Cell key={i} fill={e.color} />
                 ))}
@@ -157,22 +178,27 @@ export default function ActivityAnalytics({
         </CommonCard>
       </div>
 
-      {/* Key Insights */}
-      <CommonCard className="p-6">
-        <h3 className="text-gray-900 mb-4">{t("analytics")}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Insights */}
+      <CommonCard className="p-4 sm:p-6">
+        <h3 className="mb-4 text-sm sm:text-base">{pa.analytics}</h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Insight
-            title={t("completed")}
+            title={pa.insights.completionRate}
             value={`${completionRate}%`}
             icon={TrendingUp}
           />
+
           <Insight
-            title={t("totalEarned")}
-            value={`$${completedCount ? (totalEarnings / completedCount).toFixed(2) : 0}`}
+            title={pa.insights.averageEarnings}
+            value={`$${completedCount
+              ? (totalEarnings / completedCount).toFixed(2)
+              : 0}`}
             icon={DollarSign}
           />
+
           <Insight
-            title={t("activity")}
+            title={pa.insights.mostActiveDay}
             value={mostActiveDay.split(",")[0]}
             icon={ActivityIcon}
           />
@@ -182,14 +208,20 @@ export default function ActivityAnalytics({
   );
 }
 
+/* ---------------- Insights ---------------- */
 
-const Insight = ({ title, value, icon: Icon }: any) => (
-  <div className="bg-gray-50 p-4 rounded-lg">
+type InsightProps = {
+  title: string;
+  value: string;
+  icon: React.ElementType;
+};
+
+const Insight = ({ title, value, icon: Icon }: InsightProps) => (
+  <div className="p-4 rounded-lg h-full">
     <div className="flex items-center gap-2 mb-2">
-      <Icon className="size-5 text-gray-600" />
-      <p className="text-sm">{title}</p>
+      <Icon className="size-4 sm:size-5" />
+      <p className="text-sm ">{title}</p>
     </div>
-    <p className="text-2xl">{value}</p>
+    <p className="text-xl sm:text-2xl font-semibold">{value}</p>
   </div>
 );
-

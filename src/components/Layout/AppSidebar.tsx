@@ -1,12 +1,16 @@
+"use client";
+
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import {
   FolderOpen,
   History,
   Settings,
   Bell,
+  // Home,
   ChevronRight,
   ChevronLeft,
+  // CalendarCheck,
 } from "lucide-react";
 
 import { Button } from "../ui/button";
@@ -28,8 +32,7 @@ export default function AppSidebar({
   mini,
   windowWidth,
 }: AppSidebarProps) {
-  const location = useLocation();
-  console.log(location);
+  // const location = useLocation();
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState<string | null>(null);
 
@@ -37,70 +40,91 @@ export default function AppSidebar({
   const { t, language } = useLanguage();
   const isRTL = language === "AR";
 
-  /* ================= AUTH STORE ================= */
-
   const { employeeData, logout } = useAuthStore();
 
   const user = employeeData?.user;
   const fullName = user?.fullName ?? "User";
   const profileImage = user?.profilePictureUrl;
 
-  /* ================= HANDLERS ================= */
-
   const handleLogout = () => {
-    logout(); // ✅ Zustand only
-
-    toast.success("Logged out successfully");
+    logout();
+    toast.success(t("common.logoutSuccess"));
     setMobileOpen(false);
     navigate("/login", { replace: true });
   };
 
-  const toggleMenu = (title: string) =>
-    setExpanded(expanded === title ? null : title);
+  const toggleMenu = (id: string) =>
+    setExpanded(expanded === id ? null : id);
 
   const sidebarWidthClass =
     windowWidth >= 1024 ? (mini ? "w-16" : "w-72") : "w-72";
 
-  /* ================= MENU ================= */
 
   const menuItems = [
+    // {
+    //   id: "home",
+    //   title: t("sidebar.home"),
+    //   icon: Home,
+    //   href: "/",
+    // },
     {
-      titleKey: t("history"),
+      id: "history",
+      title: t("sidebar.history"),
       icon: History,
-      href: "/history",
       subLinks: [
-        { titleKey: t("bookingHistory"), href: "/history/booking" },
-        { titleKey: t("transactionHistory"), href: "/history/transaction" },
-        { titleKey: t("WorkHistory"), href: "/history/work" },
+        { id: "booking", title: t("sidebar.bookingHistory"), href: "/history/booking" },
+        { id: "transaction", title: t("sidebar.transactionHistory"), href: "/history/transaction" },
+        { id: "work", title: t("sidebar.workHistory"), href: "/history/work" },
       ],
     },
     {
-      titleKey: t("activity"),
+      id: "activity",
+      title: t("sidebar.activity"),
       icon: FolderOpen,
-      href: "/activity",
       subLinks: [
-        { titleKey: t("recentActivity"), href: "/activity/recent" },
-        { titleKey: t("pastActivity"), href: "/activity/past" },
+        { id: "recent", title: t("sidebar.recentActivity"), href: "/activity/recent" },
+        { id: "past", title: t("sidebar.pastActivity"), href: "/activity/past" },
       ],
     },
+  //    {
+  //   id: "booking",
+  //   title: t("sidebar.booking"),
+  //   icon: CalendarCheck,
+  //   subLinks: [
+  //     {
+  //       id: "available-booking",
+  //       title: t("sidebar.availableBooking"),
+  //       href: "/booking/available",
+  //     },
+  //     {
+  //       id: "current-booking",
+  //       title: t("sidebar.currentBooking"),
+  //       href: "/booking/current",
+  //     },
+  //     {
+  //       id: "ongoing-services",
+  //       title: t("sidebar.ongoingServices"),
+  //       href: "/booking/ongoing-services",
+  //     },
+  //   ],
+  // },
     {
-      titleKey: t("settings"),
+      id: "settings",
+      title: t("sidebar.settings"),
       icon: Settings,
-      href: "/settings",
       subLinks: [
-        { titleKey: t("profileSettings"), href: "/settings/profile" },
-        { titleKey: t("wallet"), href: "/settings/wallet" },
-        { titleKey: t("logout") }, // no href
+        { id: "profile", title: t("sidebar.profileSettings"), href: "/settings/profile" },
+        { id: "wallet", title: t("sidebar.wallet"), href: "/settings/wallet" },
+        { id: "logout", title: t("sidebar.logout"), action: "logout" },
       ],
     },
     {
-      titleKey: t("notifications"),
+      id: "notifications",
+      title: t("sidebar.notifications"),
       icon: Bell,
       href: "/notifications",
     },
   ];
-
-  /* ================= RENDER ================= */
 
   return (
     <>
@@ -130,7 +154,7 @@ export default function AppSidebar({
         }
       `}
       >
-        {/* ================= HEADER ================= */}
+      
         <div
           className={`flex items-center justify-between px-4 py-4 border-b ${
             theme === "dark" ? "border-gray-800" : "border-gray-300"
@@ -141,20 +165,12 @@ export default function AppSidebar({
               <img
                 src={profileImage}
                 alt={fullName}
-                className={`h-10 w-10 rounded-full object-cover border cursor-pointer ${
-                  theme === "dark"
-                    ? "border-gray-700"
-                    : "border-gray-400"
-                }`}
+                className="h-10 w-10 rounded-full object-cover border cursor-pointer"
                 onClick={() => navigate("/")}
               />
             ) : (
               <div
-                className={`h-10 w-10 rounded-full flex items-center justify-center font-semibold border cursor-pointer ${
-                  theme === "dark"
-                    ? "bg-gray-800 text-white border-gray-700"
-                    : "bg-gray-200 text-gray-800 border-gray-400"
-                }`}
+                className="h-10 w-10 rounded-full flex items-center justify-center font-semibold border cursor-pointer"
               >
                 {fullName
                   .split(" ")
@@ -167,9 +183,7 @@ export default function AppSidebar({
 
             {!mini && (
               <span
-                className={`text-lg font-bold truncate max-w-[140px] cursor-pointer ${
-                  theme === "dark" ? "text-white" : "text-gray-900"
-                }`}
+                className="text-lg font-bold truncate max-w-[140px] cursor-pointer"
                 onClick={() => navigate("/")}
               >
                 {fullName}
@@ -178,36 +192,33 @@ export default function AppSidebar({
           </div>
 
           {windowWidth < 1024 && (
-            <Button
-              onClick={() => setMobileOpen(false)}
-              className="p-2"
-            >
+            <Button onClick={() => setMobileOpen(false)} className="p-2">
               <ChevronLeft className="h-5 w-5" />
             </Button>
           )}
         </div>
 
-        {/* ================= MENU ================= */}
+        
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-1">
             {menuItems.map((item) => (
-              <li key={item.titleKey}>
+              <li key={item.id}>
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    if (item.subLinks) toggleMenu(item.titleKey);
+                    if (item.subLinks) toggleMenu(item.id);
                     else if (item.href) {
                       navigate(item.href);
                       setMobileOpen(false);
                     }
                   }}
-                  className={`flex items-center w-full px-4 py-2 rounded-lg justify-between`}
+                  className="flex items-center w-full px-4 py-2 rounded-lg justify-between cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     <item.icon className="h-5 w-5" />
                     {!mini && (
                       <span className="text-sm font-medium">
-                        {item.titleKey}
+                        {item.title}
                       </span>
                     )}
                   </div>
@@ -215,32 +226,28 @@ export default function AppSidebar({
                   {!mini && item.subLinks && (
                     <ChevronRight
                       className={`h-4 w-4 ${
-                        expanded === item.titleKey ? "rotate-90" : ""
+                        expanded === item.id ? "rotate-90" : ""
                       }`}
                     />
                   )}
                 </Button>
 
-                {item.subLinks && expanded === item.titleKey && !mini && (
+                {item.subLinks && expanded === item.id && !mini && (
                   <ul className="pl-10 mt-1 space-y-1">
                     {item.subLinks.map((sub) => (
-                      <li key={sub.titleKey}>
+                      <li key={sub.id}>
                         <button
                           onClick={() => {
-                            if (
-                              sub.titleKey
-                                .toLowerCase()
-                                .includes("logout")
-                            ) {
+                            if (sub.action === "logout") {
                               handleLogout();
                             } else if (sub.href) {
                               navigate(sub.href);
                               setMobileOpen(false);
                             }
                           }}
-                          className="w-full text-left px-3 py-1 rounded-lg text-sm"
+                          className="w-full text-left px-3 py-1 rounded-lg text-sm cursor-pointer"
                         >
-                          {sub.titleKey}
+                          {sub.title}
                         </button>
                       </li>
                     ))}
@@ -254,4 +261,3 @@ export default function AppSidebar({
     </>
   );
 }
-

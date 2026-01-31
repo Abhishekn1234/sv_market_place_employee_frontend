@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/context/LanguageContext";
 import { User, Edit3 } from "lucide-react";
 
 type Props = {
@@ -8,7 +9,7 @@ type Props = {
   isPending: boolean;
   fileUrl?: string;
 
-  canEdit: boolean; 
+  canEdit: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
@@ -26,12 +27,22 @@ export function ProfileHeader({
   onSave,
   onImageChange,
 }: Props) {
+  const { translations } = useLanguage();
+  const profiles = translations.profile;
+
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 sm:gap-6 md:flex-row md:items-center md:justify-between">
 
-      <div className="flex items-center gap-4">
+      {/* Left section */}
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
 
-        <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 overflow-hidden">
+        {/* Avatar */}
+        <div className="relative flex items-center justify-center 
+          h-16 w-16 
+          sm:h-18 sm:w-18 
+          md:h-20 md:w-20 
+          rounded-full bg-blue-100 overflow-hidden"
+        >
           {fileUrl || profile.profilePictureUrl ? (
             <img
               src={fileUrl || profile.profilePictureUrl}
@@ -43,16 +54,16 @@ export function ProfileHeader({
 
           {isEditing && (
             <>
-             <Button
-                  type="button"
-                  className="absolute bottom-1 right-1 p-0"
-                  onClick={() => document.getElementById("profileImage")?.click()}
-                  variant="ghost"
-                >
-                  <Edit3 className="h-4 w-4 text-black" />
-                </Button>
-
-
+              <Button
+                type="button"
+                variant="ghost"
+                className="absolute bottom-0 right-0 h-8 w-8 p-0 rounded-full bg-white shadow"
+                onClick={() =>
+                  document.getElementById("profileImage")?.click()
+                }
+              >
+                <Edit3 className="h-4 w-4 text-black" />
+              </Button>
 
               <Input
                 id="profileImage"
@@ -69,28 +80,40 @@ export function ProfileHeader({
           )}
         </div>
 
-    
-        <div>
-          <h2 className="text-lg font-semibold">{profile.fullName}</h2>
-          <span className="px-3 py-1 text-sm rounded-full">
+        {/* Name + Status */}
+        <div className="flex flex-col items-center sm:items-start gap-1">
+          <h2 className="text-base sm:text-lg md:text-xl font-semibold">
+            {profile.fullName}
+          </h2>
+          <span className="px-3 py-1 text-xs sm:text-sm rounded-full bg-gray-100">
             {profile.kycStatus}
           </span>
         </div>
       </div>
 
+     
       {isEditing ? (
-        <div className="flex gap-2">
-          <Button onClick={onSave} disabled={isPending}>
-            {isPending ? "Saving..." : "Save"}
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button
+            onClick={onSave}
+            disabled={isPending}
+            className="w-full sm:w-auto"
+          >
+            {isPending ? "Saving..." :profiles.save}
           </Button>
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            className="w-full sm:w-auto"
+          >
+            {profiles.cancel}
           </Button>
         </div>
       ) : (
         <Button
           onClick={onEdit}
           disabled={!canEdit}
+          className="w-full sm:w-auto"
           title={
             !canEdit
               ? "Upload ID Proof, Address Proof and Photo Proof to enable editing"
@@ -98,9 +121,10 @@ export function ProfileHeader({
           }
         >
           <Edit3 className="h-4 w-4 mr-1" />
-          Edit
+          {profiles.edit}
         </Button>
       )}
     </div>
   );
 }
+

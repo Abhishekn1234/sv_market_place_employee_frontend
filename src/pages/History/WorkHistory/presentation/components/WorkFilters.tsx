@@ -10,6 +10,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { useTheme } from "@/context/ThemeContext";
 
 interface Props {
   searchTerm: string;
@@ -37,21 +38,26 @@ export function WorkFilters({
   translations,
 }: Props) {
   const { workHistory } = translations;
+  const { theme } = useTheme();
 
   return (
     <CommonCard
       title={workHistory.filters.timePeriod}
       headerAlign={isRTL ? "right" : "left"}
-      contentClassName={`flex flex-col md:flex-row gap-4 ${
-        isRTL ? "md:flex-row-reverse" : ""
-      }`}
+      contentClassName={`
+        flex flex-col gap-4
+        md:flex-row md:items-center
+        ${isRTL ? "md:flex-row-reverse" : ""}
+      `}
     >
-     
-      <div className="flex-1 relative">
+      {/* SEARCH */}
+      <div className="relative flex-1">
         <Search
-          className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 ${
-            isRTL ? "right-3" : "left-3"
-          }`}
+          className={`
+            absolute top-1/2 -translate-y-1/2 w-4 h-4
+            ${isRTL ? "right-3" : "left-3"}
+            ${theme === "dark" ? "text-gray-400" : "text-gray-500"}
+          `}
         />
         <Input
           value={searchTerm}
@@ -61,7 +67,7 @@ export function WorkFilters({
         />
       </div>
 
-      {/* ⏱ Time Filter */}
+      {/* TIME */}
       <Select value={timeFilter} onValueChange={onTimeChange}>
         <SelectTrigger className="w-full md:w-[160px]">
           <SelectValue />
@@ -76,31 +82,21 @@ export function WorkFilters({
         </SelectContent>
       </Select>
 
-      {/* 📌 Status Filter */}
+      {/* STATUS */}
       <Select value={statusFilter} onValueChange={onStatusChange}>
         <SelectTrigger className="w-full md:w-[160px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent align={isRTL ? "center" : "start"}>
-          <SelectItem value="all">
-            {workHistory.statusOptions.all}
-          </SelectItem>
-          <SelectItem value="completed">
-            {workHistory.statusOptions.completed}
-          </SelectItem>
-          <SelectItem value="In Progress">
-            {workHistory.statusOptions["In Progress"]}
-          </SelectItem>
-          <SelectItem value="pending">
-            {workHistory.statusOptions.pending}
-          </SelectItem>
-          <SelectItem value="upcoming">
-            {workHistory.statusOptions.upcoming}
-          </SelectItem>
+          {Object.entries(workHistory.statusOptions).map(([key, label]: [string, any]) => (
+            <SelectItem key={key} value={key}>
+              {label as React.ReactNode}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
-      {/* 📄 Items Per Page */}
+      {/* PER PAGE */}
       <Select
         value={String(itemsPerPage)}
         onValueChange={(v) => onItemsChange(Number(v))}

@@ -5,6 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import CommonTabs from "@/components/common/CommonTabs";
 import type { CommonTab } from "@/components/common/CommonTabs";
+import { useTheme } from "@/context/ThemeContext";
 
 type ActivityType = "all" | "booking" | "payment" | "transaction";
 type TimePeriod = "7days" | "15days" | "1month" | "3months" | "6months";
@@ -30,6 +31,9 @@ export function ActivityFilters({
 }: ActivityFiltersProps) {
   const { language, translations } = useLanguage();
   const isRTL = language === "AR";
+  const { theme } = useTheme();
+
+  const pa = translations.pastActivities;
 
   const counts: Record<ActivityType, number> = {
     all: stats.bookingsCount + stats.paymentsCount + stats.transactionsCount,
@@ -38,21 +42,28 @@ export function ActivityFilters({
     transaction: stats.transactionsCount,
   };
 
-  // Prepare tabs data for CommonTabs
-  const timePeriodTabs: CommonTab[] = (Object.keys(
-    translations.recentActivities.periods
-  ) as TimePeriod[]).map((p) => ({
+  const timePeriodTabs: CommonTab[] = (
+    Object.keys(pa.periods) as TimePeriod[]
+  ).map((p) => ({
     value: p,
-    label: translations.recentActivities.periods[p],
-    content: null, // content is not needed here; only for selection
+    label: pa.periods[p],
+    content: null,
   }));
 
   return (
     <CommonCard
       title={
-        <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
-          <Filter className="size-5 text-gray-600" />
-          <span>{translations.workHistory.filters.timePeriod}</span>
+        <div
+          className={`flex items-center gap-2 text-sm md:text-base ${
+            isRTL ? "flex-row-reverse" : ""
+          }`}
+        >
+          <Filter
+            className={`size-4 md:size-5 ${
+              theme === "dark" ? "text-gray-100" : "text-gray-600"
+            }`}
+          />
+          <span>{pa.filters.timePeriod}</span>
         </div>
       }
       headerAlign={isRTL ? "right" : "left"}
@@ -66,48 +77,52 @@ export function ActivityFilters({
         isRTL={isRTL}
       />
 
-      {/* Activity Type Buttons */}
-      <div className={`flex flex-wrap gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+      {/* Type Filters */}
+      <div
+        className={`
+          flex flex-wrap gap-2
+          ${isRTL ? "flex-row-reverse" : ""}
+        `}
+      >
         <Button
           variant={type === "all" ? "default" : "outline"}
           size="sm"
           onClick={() => setType("all")}
+          className="text-xs md:text-sm"
         >
-          {translations.recentActivities.types.all} ({counts.all})
+          {pa.types.all} ({counts.all})
         </Button>
 
         <Button
           variant={type === "booking" ? "default" : "outline"}
           size="sm"
           onClick={() => setType("booking")}
-          className="gap-2"
+          className="gap-1 md:gap-2 text-xs md:text-sm"
         >
-          <Calendar className="size-4" />
-          {translations.recentActivities.types.booking} ({counts.booking})
+          <Calendar className="size-3 md:size-4 hidden sm:inline" />
+          {pa.types.booking} ({counts.booking})
         </Button>
 
         <Button
           variant={type === "payment" ? "default" : "outline"}
           size="sm"
           onClick={() => setType("payment")}
-          className="gap-2"
+          className="gap-1 md:gap-2 text-xs md:text-sm"
         >
-          <DollarSign className="size-4" />
-          {translations.recentActivities.types.payment} ({counts.payment})
+          <DollarSign className="size-3 md:size-4 hidden sm:inline" />
+          {pa.types.payment} ({counts.payment})
         </Button>
 
         <Button
           variant={type === "transaction" ? "default" : "outline"}
           size="sm"
           onClick={() => setType("transaction")}
-          className="gap-2"
+          className="gap-1 md:gap-2 text-xs md:text-sm"
         >
-          <TrendingUp className="size-4" />
-          {translations.recentActivities.types.transaction} ({counts.transaction})
+          <TrendingUp className="size-3 md:size-4 hidden sm:inline" />
+          {pa.types.transaction} ({counts.transaction})
         </Button>
       </div>
     </CommonCard>
   );
 }
-
-

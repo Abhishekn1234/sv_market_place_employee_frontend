@@ -5,6 +5,7 @@ import { CommonMap } from "@/components/common/CommonMap";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Props = {
   tempLocation: [number, number];
@@ -43,9 +44,11 @@ export default function LocationEditContent({
   onClose,
   onSave,
 }: Props) {
+  const {translations}=useLanguage();
+  const edits=translations.profile;
   return (
     <div className="space-y-5">
-      {/* Location Mode */}
+     
       <div>
         <Label>Location Mode</Label>
         <div className="flex gap-4 mt-2">
@@ -140,15 +143,15 @@ export default function LocationEditContent({
 
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onClose}>
-          Cancel
+          {edits.cancel}
         </Button>
         <Button
           onClick={() => {
             onSave();
-            onClose(); // auto-close after save
+            onClose(); 
           }}
         >
-          Update
+          {edits.update}
         </Button>
       </div>
     </div>

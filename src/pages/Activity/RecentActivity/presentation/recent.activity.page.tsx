@@ -8,7 +8,7 @@ export default function RecentActivity() {
     .reduce((s, a) => s + (a.amount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-2">
+    <div className="min-h-screen  p-2">
       <div className="max-w-7xl mx-auto space-y-6">
         <ActivityHeader
           employeeName="John Doe"

@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import type { ServiceTier } from "../../domain/entities/servicetier";
-import type { ServiceCategory } from "../../domain/entities/servicecategory";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import type { ServiceTier } from "../../domain/entities/servicetier";
+import type { ServiceCategory } from "../../domain/entities/servicecategory";
 
 type Props = {
   services: ServiceCategory[];
@@ -31,10 +31,10 @@ export function ServiceSelection({
   toggleTier,
 }: Props) {
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 sm:grid-cols-2  gap-6">
       {/* SERVICE CATEGORY */}
       <div>
-        <Label className="text-sm font-medium mb-1 block">
+        <Label className="text-sm sm:text-base font-medium mb-2 block">
           Service Category
         </Label>
 
@@ -49,45 +49,44 @@ export function ServiceSelection({
             />
           </SelectTrigger>
 
-          <SelectContent>
+          <SelectContent className="max-h-60 sm:max-h-72">
             <SelectScrollUpButton />
 
-            {services.map((service) => (
-              <label
-                key={service._id}
-                className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm hover:bg-muted rounded-sm"
-              >
-                <Input
-                  type="checkbox"
-                  checked={selectedServices.some(
-                    (s) => s._id === service._id
-                  )}
-                  onChange={() => toggleService(service)}
-                  className="h-4 w-4" // ✅ small checkbox
-                />
-                <span>{service.name}</span>
-              </label>
-            ))}
+            <div className="flex flex-col space-y-1">
+              {services.map((service) => (
+                <label
+                  key={service._id}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm sm:text-base hover:bg-gray-100 rounded-md"
+                >
+                  <Input
+                    type="checkbox"
+                    checked={selectedServices.some((s) => s._id === service._id)}
+                    onChange={() => toggleService(service)}
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                  />
+                  <span className="truncate">{service.name}</span>
+                </label>
+              ))}
+            </div>
 
             <SelectScrollDownButton />
           </SelectContent>
         </Select>
 
-        {/* SELECTED SERVICES */}
         {selectedServices.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {selectedServices.map((service) => (
               <Badge
                 key={service._id}
                 variant="secondary"
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 text-sm sm:text-base"
               >
-                {service.name}
+                <span className="truncate max-w-[100px] sm:max-w-[140px]">{service.name}</span>
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => toggleService(service)}
-                   className="h-4 w-4 p-0 text-xs hover:text-destructive"
+                  className="h-4 w-4 sm:h-5 sm:w-5 p-0 text-xs sm:text-sm hover:text-destructive"
                 >
                   ×
                 </Button>
@@ -99,7 +98,7 @@ export function ServiceSelection({
 
       {/* SERVICE TIER */}
       <div>
-        <Label className="text-sm font-medium mb-1 block">
+        <Label className="text-sm sm:text-base font-medium mb-2 block">
           Service Tier
         </Label>
 
@@ -114,43 +113,44 @@ export function ServiceSelection({
             />
           </SelectTrigger>
 
-          <SelectContent>
+          <SelectContent className="max-h-60 sm:max-h-72">
             <SelectScrollUpButton />
 
-            {tiers.map((tier) => (
-              <label
-                key={tier._id}
-                className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm hover:bg-muted rounded-sm"
-              >
-                <Input
-                  type="checkbox"
-                  checked={selectedTiers.some((t) => t._id === tier._id)}
-                  onChange={() => toggleTier(tier)}
-                  className="h-4 w-4" // ✅ small checkbox
-                />
-                <span>{tier.displayName}</span>
-              </label>
-            ))}
+            <div className="flex flex-col space-y-1">
+              {tiers.map((tier) => (
+                <label
+                  key={tier._id}
+                  className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm sm:text-base hover:bg-gray-100 rounded-md"
+                >
+                  <Input
+                    type="checkbox"
+                    checked={selectedTiers.some((t) => t._id === tier._id)}
+                    onChange={() => toggleTier(tier)}
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                  />
+                  <span className="truncate">{tier.displayName}</span>
+                </label>
+              ))}
+            </div>
 
             <SelectScrollDownButton />
           </SelectContent>
         </Select>
 
-        {/* SELECTED TIERS */}
         {selectedTiers.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {selectedTiers.map((tier) => (
               <Badge
                 key={tier._id}
                 variant="secondary"
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 text-sm sm:text-base"
               >
-                {tier.displayName}
+                <span className="truncate max-w-[100px] sm:max-w-[140px]">{tier.displayName}</span>
                 <Button
-                variant="ghost"
+                  variant="ghost"
                   type="button"
                   onClick={() => toggleTier(tier)}
-                   className="h-4 w-4 p-0 text-xs hover:text-destructive"
+                  className="h-4 w-4 sm:h-5 sm:w-5 p-0 text-xs sm:text-sm hover:text-destructive"
                 >
                   ×
                 </Button>

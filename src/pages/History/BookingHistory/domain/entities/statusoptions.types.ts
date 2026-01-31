@@ -5,4 +5,6 @@ export type StatusOptions = {
   pending: string;
   inProgress: string;
   cancelled: string;
+  requested:string;
+  ongoing:string;
 };

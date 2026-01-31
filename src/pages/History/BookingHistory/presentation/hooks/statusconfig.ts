@@ -7,8 +7,8 @@ export function useStatusConfig(): Record<
   { label: string; color: string }
 > {
   const { translations } = useLanguage();
-  const statusOptions = translations.statusOptions as StatusOptions;
-
+  const statusOptions = translations.bookingHistory.statusOptions as unknown as StatusOptions;
+   console.log(statusOptions);
   return {
     completed: {
       label: statusOptions.completed,
@@ -28,6 +28,14 @@ export function useStatusConfig(): Record<
     },
     cancelled: {
       label: statusOptions.cancelled,
+      color: "bg-red-100 text-red-700",
+    },
+    requested: {
+      label: statusOptions.requested,
+      color: "bg-red-100 text-red-700",
+    },
+    ongoing: {
+      label: statusOptions.ongoing,
       color: "bg-red-100 text-red-700",
     },
   };

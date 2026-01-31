@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import type { Register } from "../domain/entities/register";
 import { Label } from "@/components/ui/label";
@@ -14,29 +16,18 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const { mutate: registerMutate, isPending: isLoading } = useRegister();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    setTouched({
-      ...touched,
-      [e.target.name]: true,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setTouched({ ...touched, [e.target.name]: true });
   };
 
-  const handleBlur = (field: string) => {
-    setTouched({
-      ...touched,
-      [field]: true,
-    });
-  };
+  const handleBlur = (field: string) => setTouched({ ...touched, [field]: true });
 
   const handleRegister = () => {
     if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
@@ -51,23 +42,37 @@ export default function RegisterPage() {
       toast.error("Password must be at least 6 characters long!");
       return;
     }
-     const {confirmPassword,...registerPayload}=formData
-    
-    registerMutate(registerPayload, {
+
+    const { confirmPassword, ...payload } = formData;
+
+    registerMutate(payload, {
       onSuccess: () => toast.success("Registration successful!"),
       onError: (err: any) => toast.error("Registration failed: " + err.message),
     });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleRegister();
-    }
+    if (e.key === "Enter") handleRegister();
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-3 sm:p-4 md:p-6">
-      <div className="bg-white shadow-lg sm:shadow-xl md:shadow-2xl rounded-xl sm:rounded-2xl w-full max-w-xs sm:max-w-sm md:max-w-md p-4 sm:p-6 md:p-8 border border-gray-200/80">
+    <div className="
+      min-h-[100dvh] 
+      flex flex-col 
+      items-center justify-start 
+      lg:justify-center 
+      overflow-y-auto 
+      bg-gradient-to-br from-blue-50 to-blue-100 
+      px-4 py-6 lg:py-10
+    ">
+      <div className="
+        w-full max-w-[360px] sm:max-w-sm md:max-w-md 
+        mb-6 
+        bg-white shadow-lg sm:shadow-xl md:shadow-2xl 
+        rounded-xl sm:rounded-2xl 
+        p-4 sm:p-6 md:p-8 
+        border border-gray-200/80
+      ">
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6">
           <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg sm:rounded-xl shadow-sm sm:shadow-md mb-3 sm:mb-4">
@@ -85,9 +90,7 @@ export default function RegisterPage() {
         <div className="space-y-3 sm:space-y-4">
           {/* Full Name */}
           <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="fullName" className="text-gray-700 font-medium text-xs sm:text-sm">
-              Full Name
-            </Label>
+            <Label htmlFor="fullName" className="text-gray-700 font-medium text-xs sm:text-sm">Full Name</Label>
             <div className="relative">
               <Input
                 type="text"
@@ -98,20 +101,17 @@ export default function RegisterPage() {
                 onBlur={() => handleBlur("fullName")}
                 onKeyPress={handleKeyPress}
                 value={formData.fullName}
-                className={`pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base ${touched.fullName && !formData.fullName ? 'border-red-300 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
+                className={`pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base 
+                  ${touched.fullName && !formData.fullName ? 'border-red-300 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
               />
               <User className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
-            {touched.fullName && !formData.fullName && (
-              <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">Full name is required</p>
-            )}
+            {touched.fullName && !formData.fullName && <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">Full name is required</p>}
           </div>
 
           {/* Email */}
           <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="email" className="text-gray-700 font-medium text-xs sm:text-sm">
-              Email Address
-            </Label>
+            <Label htmlFor="email" className="text-gray-700 font-medium text-xs sm:text-sm">Email Address</Label>
             <div className="relative">
               <Input
                 type="email"
@@ -122,20 +122,17 @@ export default function RegisterPage() {
                 onBlur={() => handleBlur("email")}
                 onKeyPress={handleKeyPress}
                 value={formData.email}
-                className={`pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base ${touched.email && !formData.email ? 'border-red-300 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
+                className={`pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base 
+                  ${touched.email && !formData.email ? 'border-red-300 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
               />
               <Mail className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
-            {touched.email && !formData.email && (
-              <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">Email is required</p>
-            )}
+            {touched.email && !formData.email && <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">Email is required</p>}
           </div>
 
           {/* Password */}
           <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="password" className="text-gray-700 font-medium text-xs sm:text-sm">
-              Password
-            </Label>
+            <Label htmlFor="password" className="text-gray-700 font-medium text-xs sm:text-sm">Password</Label>
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -146,32 +143,20 @@ export default function RegisterPage() {
                 onBlur={() => handleBlur("password")}
                 onKeyPress={handleKeyPress}
                 value={formData.password}
-                className={`pl-9 sm:pl-10 pr-10 sm:pr-12 py-2.5 sm:py-3 text-sm sm:text-base ${touched.password && formData.password.length < 6 ? 'border-red-300 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
+                className={`pl-9 sm:pl-10 pr-10 sm:pr-12 py-2.5 sm:py-3 text-sm sm:text-base 
+                  ${touched.password && formData.password.length < 6 ? 'border-red-300 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
               />
               <KeyRound className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? (
-                  <EyeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                ) : (
-                  <EyeOffIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                )}
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
+                {showPassword ? <EyeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <EyeOffIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               </button>
             </div>
-            {touched.password && formData.password.length < 6 && (
-              <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">Password must be at least 6 characters</p>
-            )}
+            {touched.password && formData.password.length < 6 && <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">Password must be at least 6 characters</p>}
           </div>
 
           {/* Confirm Password */}
           <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="confirmPassword" className="text-gray-700 font-medium text-xs sm:text-sm">
-              Confirm Password
-            </Label>
+            <Label htmlFor="confirmPassword" className="text-gray-700 font-medium text-xs sm:text-sm">Confirm Password</Label>
             <div className="relative">
               <Input
                 type={showConfirmPassword ? "text" : "password"}
@@ -182,25 +167,15 @@ export default function RegisterPage() {
                 onBlur={() => handleBlur("confirmPassword")}
                 onKeyPress={handleKeyPress}
                 value={formData.confirmPassword}
-                className={`pl-9 sm:pl-10 pr-10 sm:pr-12 py-2.5 sm:py-3 text-sm sm:text-base ${touched.confirmPassword && formData.password !== formData.confirmPassword ? 'border-red-300 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
+                className={`pl-9 sm:pl-10 pr-10 sm:pr-12 py-2.5 sm:py-3 text-sm sm:text-base 
+                  ${touched.confirmPassword && formData.password !== formData.confirmPassword ? 'border-red-300 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
               />
               <KeyRound className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-              >
-                {showConfirmPassword ? (
-                  <EyeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                ) : (
-                  <EyeOffIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                )}
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
+                {showConfirmPassword ? <EyeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <EyeOffIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               </button>
             </div>
-            {touched.confirmPassword && formData.password !== formData.confirmPassword && (
-              <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">Passwords do not match</p>
-            )}
+            {touched.confirmPassword && formData.password !== formData.confirmPassword && <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">Passwords do not match</p>}
           </div>
         </div>
 
@@ -223,10 +198,7 @@ export default function RegisterPage() {
         {/* Login Link */}
         <p className="mt-4 sm:mt-5 text-center text-gray-600 text-xs sm:text-sm">
           Already have an employee account?{" "}
-          <Link 
-            to="/login" 
-            className="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
-          >
+          <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors">
             Sign in here
           </Link>
         </p>

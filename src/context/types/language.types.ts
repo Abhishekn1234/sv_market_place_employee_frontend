@@ -1,0 +1,1 @@
+export type Language = "EN" | "AR" | "HI";

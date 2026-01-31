@@ -1,8 +1,8 @@
 export interface ServiceTier {
   _id: string;
-  code: string;
+  code?: string;
   displayName: string;
-  description: string;
+  description?: string;
   isActive?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

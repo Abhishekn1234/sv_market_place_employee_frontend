@@ -1,0 +1,1 @@
+export type LanguagesTranslations = Record<string, string>;

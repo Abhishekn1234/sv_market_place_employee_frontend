@@ -22,24 +22,40 @@ export default function Wallet() {
     .reduce((a, t) => a + t.amount, 0);
 
   return (
-    <div dir={isRTL ? "rtl" : "ltr"} className="min-h-screen p-2 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        <WalletHeader employeeName="John Doe" employeeTier="Gold" />
+    <div
+      dir={isRTL ? "rtl" : "ltr"}
+      className="min-h-screen bg-gray-50 px-3 py-4 sm:px-4 md:px-6"
+    >
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* Header */}
+        <WalletHeader
+          employeeName="John Doe"
+          employeeTier="Gold"
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <WalletMain
-            transactions={transactions}
-            totalBalance={totalBalance}
-            totalCredit={totalCredit}
-            totalDebit={totalDebit}
-          />
+        {/* Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          
+          {/* Main content */}
+          <div className="lg:col-span-2 order-2 lg:order-1">
+            <WalletMain
+              transactions={transactions}
+              totalBalance={totalBalance}
+              totalCredit={totalCredit}
+              totalDebit={totalDebit}
+            />
+          </div>
 
-          <WalletSidebar
-            transactions={transactions}
-            totalBalance={totalBalance}
-            totalCredit={totalCredit}
-            totalDebit={totalDebit}
-          />
+          {/* Sidebar */}
+          <div className="order-1 lg:order-2">
+            <WalletSidebar
+              transactions={transactions}
+              totalBalance={totalBalance}
+              totalCredit={totalCredit}
+              totalDebit={totalDebit}
+            />
+          </div>
         </div>
       </div>
     </div>

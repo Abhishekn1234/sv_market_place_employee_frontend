@@ -1,86 +1,51 @@
+"use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import en from "./en.json";
-import ar from "./ar.json";
-import hi from "./hi.json";
+import en from "./languagejson/en.json";
+import ar from "./languagejson/ar.json";
+import hi from "./languagejson/hi.json";
 import { useAuthStore } from "@/core/store/auth";
+import type { Language } from "./types/language.types";
+import type { TranslationSchema } from "./types/translationschema.types";
+import type { LanguageContextType } from "./types/languagecontexttype.types";
 
-
-
-export type Language = "EN" | "AR" | "HI";
-
-export type TranslationValue = string | { [key: string]: TranslationValue };
-
-export type TranslationSchema = {
-  [key: string]: TranslationValue;
-  workHistory: any;
-  recentActivities: any;
-  Wallet: any;
-  Notifications: any;
-  HomePage: any;
-};
-
-export type TranslationKey = keyof TranslationSchema;
-
-interface LanguageContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (key: TranslationKey | string) => string;
-  translations: TranslationSchema;
-}
-
-
-
-const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined
-);
-
-
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 const allTranslations: Record<Language, TranslationSchema> = {
-  EN: en,
-  AR: ar,
-  HI: hi,
+  EN: en as unknown as TranslationSchema,
+  AR: ar as unknown as TranslationSchema,
+  HI: hi as unknown as TranslationSchema,
 };
 
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-
   const userLang = useAuthStore((s) => s.employeeData?.user?.preferredLanguage);
 
   const [language, setLanguage] = useState<Language>(userLang || "EN");
 
-
   useEffect(() => {
-    if (userLang && userLang !== language) {
-      setLanguage(userLang);
-    }
+    if (userLang && userLang !== language) setLanguage(userLang);
   }, [userLang]);
 
   useEffect(() => {
-    
     document.documentElement.lang =
       language === "AR" ? "ar" : language === "HI" ? "hi" : "en";
     document.documentElement.setAttribute("translate", "no");
-
-  
     useAuthStore.getState().setPreferredLanguage(language);
   }, [language]);
 
   
-const t = (key: TranslationKey | string): string => {
-  const keyStr = key.toString(); 
-  const keys = keyStr.split(".");
-  let value: any = allTranslations[language];
+  const t = (key: string): string => {
+    const keys = key.split(".");
+    let value: any = allTranslations[language];
 
-  for (const k of keys) {
-    value = value?.[k];
-    if (value === undefined) return "";
-  }
-  return typeof value === "string" ? value : "";
-};
-
+    for (const k of keys) {
+      value = value?.[k];
+      if (value === undefined) return key;
+    }
+    return typeof value === "string" ? value : key;
+  };
 
   return (
     <LanguageContext.Provider
@@ -97,11 +62,8 @@ const t = (key: TranslationKey | string): string => {
 };
 
 
-
 export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
-  }
+  if (!context) throw new Error("useLanguage must be used within a LanguageProvider");
   return context;
 };

@@ -16,6 +16,7 @@ import { useAccept } from "./presentation/hooks/useAccept";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/context/ThemeContext";
 
 type Props = {
   open: boolean;
@@ -32,12 +33,20 @@ export default function SocketBookingsModal({
   // connected,
   const { mutate: acceptBooking, isPending } = useAccept();
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
+ const { theme } = useTheme();
+  const dark = theme === "dark";
 
   return (
     <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
-      <CommonModal.Content className="max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50">
+      <CommonModal.Content className={`max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl ${
+          dark
+            ? "bg-gray-900 text-gray-100"
+            : "bg-gradient-to-br from-white to-gray-50 text-gray-900"
+        }`}>
         
-        <CommonModal.Header className="border-b px-6 py-5 flex justify-between items-center bg-white/95">
+        <CommonModal.Header className={`border-b px-6 py-5 flex justify-between items-center ${
+            dark ? "border-gray-700" : "border-gray-200"
+          }`}>
           <div className="flex items-center gap-3">
             {/* {connected ? (
               <Wifi className="text-green-600" />
@@ -46,10 +55,14 @@ export default function SocketBookingsModal({
             )} */}
             <div>
               <h2 className="text-2xl font-bold">Live Bookings</h2>
-              <p className="text-sm text-gray-500">Real-time service requests</p>
+              <p className={dark ? "text-gray-400" : "text-gray-500"}>Real-time service requests</p>
             </div>
           </div>
-          <Button onClick={onClose} className="p-2 rounded-xl bg-white text-black">
+          <Button onClick={onClose} className={`p-2 rounded-xl ${
+              dark
+                ? "bg-gray-800 text-gray-300"
+                : "bg-white text-black"
+            }`}>
             <X />
           </Button>
         </CommonModal.Header>
@@ -67,19 +80,29 @@ export default function SocketBookingsModal({
                 return (
                   <div
                     key={booking._id}
-                    className="bg-white border rounded-2xl p-6 shadow"
+                    className={`border rounded-2xl p-6 shadow ${
+                      dark
+                        ? "bg-gray-800 border-gray-700"
+                        : "bg-white border-gray-200"
+                    }`}
                   >
                    <div className="flex items-center justify-between mb-1">
                       <h3 className="font-bold text-lg">
                         {booking.service?.name}
                       </h3>
 
-                      <Badge className="bg-gray-100 text-gray-700 border border-gray-200">
+                      <Badge className={`border ${
+                          dark
+                            ? "bg-gray-700 text-gray-300 border-gray-600"
+                            : "bg-gray-100 text-gray-700 border-gray-200"
+                        }`}>
                         {booking.status}
                       </Badge>
                     </div>
 
-                    <p className="text-sm text-gray-500 mb-2">
+                    <p className={`text-sm mb-3 ${
+                        dark ? "text-gray-400" : "text-gray-500"
+                      }`}>
                       {booking.serviceTier?.displayName}
                     </p>
                    
@@ -123,7 +146,7 @@ export default function SocketBookingsModal({
                             }
                           );
                         }}
-                        className="flex-1 bg-green-500 text-white py-2 rounded-xl disabled:opacity-60"
+                       className="flex-1 bg-green-500 text-white py-2 rounded-xl disabled:opacity-60"
                       >
                         {accepting ? (
                           <Loader2 className="animate-spin mx-auto" />
@@ -134,7 +157,12 @@ export default function SocketBookingsModal({
 
                       <button
                         onClick={() => removeBooking(booking._id)}
-                        className="px-4 border rounded-xl"
+                        className={`px-4 rounded-xl border ${
+                          dark
+                            ? "border-gray-600 text-gray-300"
+                            : "border-gray-300 text-gray-700"
+                        }`}
+                      
                       >
                         Ignore
                       </button>

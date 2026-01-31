@@ -2,10 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import type { ApiDocument } from "@/pages/Profile/domain/entities/documents";
-import type { GeoPoint, Worker } from "@/pages/Profile/domain/entities/profile";
-import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/servicesettings";
+import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
+import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
 
-/* ===================== TYPES ===================== */
 
 export interface EmployeeUser {
   _id?:string
@@ -49,14 +48,14 @@ interface AuthState {
   employeeData: EmployeeData | null;
   isAuthenticated: boolean;
 
-  /* ---------- AUTH ---------- */
+  
   login: (data: EmployeeData) => void;
   logout: () => void;
 
-  /* ---------- TOKENS ---------- */
+  
   updateTokens: (accessToken: string, refreshToken: string) => void;
 
-  /* ---------- USER ---------- */
+
   updateUserStatus: (status: WorkerStatus) => void;
   updateUserProfile: (payload: Partial<EmployeeUser>) => void;
   setPreferredLanguage: (lang: "EN" | "AR" | "HI") => void;
@@ -64,7 +63,7 @@ interface AuthState {
      setUserLocation: (location: GeoPoint) => void;
 }
 
-/* ===================== STORE ===================== */
+
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -72,14 +71,14 @@ export const useAuthStore = create<AuthState>()(
       employeeData: null,
       isAuthenticated: false,
 
-      /* ---------- LOGIN ---------- */
+    
       login: (data) =>
         set({
           employeeData: data,
           isAuthenticated: true,
         }),
 
-      /* ---------- LOGOUT ---------- */
+      
       logout: () => {
         useAuthStore.persist.clearStorage();
         set({
@@ -88,7 +87,6 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      /* ---------- TOKENS ---------- */
       updateTokens: (accessToken, refreshToken) => {
         const state = get();
         if (!state.employeeData) return;
@@ -102,7 +100,6 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      /* ---------- STATUS ---------- */
       updateUserStatus: (status) => {
         const state = get();
         if (!state.employeeData?.user) return;
@@ -118,7 +115,7 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      /* ---------- PROFILE / SETTINGS ---------- */
+  
       updateUserProfile: (payload) => {
         const state = get();
         if (!state.employeeData?.user) return;
@@ -185,7 +182,7 @@ setUserLocation: (location) => {
   )
 );
 
-/* ===================== SELECTORS ===================== */
+
 
 export const useEmployeeUser = () =>
   useAuthStore((s) => s.employeeData?.user);

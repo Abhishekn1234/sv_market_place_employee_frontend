@@ -53,6 +53,7 @@ export default function AppHeader({
   const profileImage = employeeData?.user?.profilePictureUrl;
 
   const homeTranslations = translations.HomePage;
+  console.log(translations)
   const isRTL = language === "AR";
 
   const { updateStatus, loading } = useWorkerStatus();
@@ -99,8 +100,8 @@ export default function AppHeader({
     <header
       className={`flex items-center px-4 py-3 border-b transition-all ${
         theme === "dark"
-          ? "border-gray-800 bg-gray-900 text-white"
-          : "border-gray-200 bg-gray-50 text-gray-900"
+          ? "border-gray-800 bg-gray-900 text-gray-950 cursor-pointer"
+          : "border-gray-200 bg-gray-50 text-gray-900 cusror-pointer"
       }`}
     >
   
@@ -111,7 +112,7 @@ export default function AppHeader({
         }
         className="p-2"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className={`${theme==="dark"?"h-5 w-5 text-gray-100":"h-5 w-5"}`} />
       </Button>
 
       <div className="flex-1" />
@@ -126,9 +127,10 @@ export default function AppHeader({
                   checked={isOnline}
                   onCheckedChange={handleToggle}
                   disabled={loading}
+                  className="cursor-pointer"
                 />
                 <span
-                  className={`text-sm font-medium ${
+                  className={`text-sm font-medium cursor-pointer ${
                     isOnline ? "text-green-600" : "text-gray-500"
                   }`}
                 >
@@ -146,7 +148,7 @@ export default function AppHeader({
         )}
 
        
-        <Button variant="ghost" onClick={toggleTheme} className="p-2">
+        <Button variant="ghost" onClick={toggleTheme} className="p-2 cursor-pointer">
           {theme === "light" ? (
             <Moon className="h-5 w-5 text-gray-700" />
           ) : (
@@ -159,7 +161,7 @@ export default function AppHeader({
             onClick={() => setLangDropdownOpen(!langDropdownOpen)}
             className={`flex items-center gap-2 p-2 rounded border ${
               theme === "dark"
-                ? "bg-white cursor-pointer hover:bg-white"
+                ? "cursor-pointer"
                 : "bg-white border-gray-300 text-black cursor-pointer hover:bg-gray-50"
             }`}
           >
@@ -168,7 +170,7 @@ export default function AppHeader({
           </Button>
 
           {langDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-36 rounded-md border shadow-lg z-50">
+            <div className={`${theme==="dark"?"absolute right-0 mt-2 w-36 rounded-md border shadow-lg z-50 text-gray-100 cursor-pointer":"absolute right-0 mt-2 w-36 rounded-md border shadow-lg z-50 text-gray-900 cursor-pointer"}`}>
               {languages.map((lang) => (
                 <button
                   key={lang.code}
@@ -176,7 +178,7 @@ export default function AppHeader({
                     setLanguage(lang.code as "EN" | "AR" | "HI");
                     setLangDropdownOpen(false);
                   }}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-gray-100"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-sm cursor-pointer"
                 >
                   <span>{lang.icon}</span>
                   <span>{lang.label}</span>
@@ -190,7 +192,7 @@ export default function AppHeader({
         <div className="relative">
           <Button
             variant="ghost"
-            className="flex items-center gap-2 p-1"
+            className="flex items-center gap-2 p-1 cursor-pointer"
             onClick={() => setDropdownOpen((p) => !p)}
           >
             {profileImage ? (
@@ -209,18 +211,18 @@ export default function AppHeader({
                   .toUpperCase()}
               </div>
             )}
-            <span className="text-sm font-medium truncate max-w-[120px]">
+            <span className={`${theme==="dark"?"text-sm font-medium truncate max-w-[120px] text-gray-100 cursor-pointer":"text-sm font-medium truncate max-w-[120px] text-gray-900 cursor-pointer"}`}>
               {fullName}
             </span>
           </Button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white border z-50">
+            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white border z-50 cursor-pointer">
               <ul className="py-1">
                 <li>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start px-4 py-2 gap-2"
+                    className="w-full justify-start px-4 py-2 gap-2 cursor-pointer"
                     onClick={() => navigate("/settings/profile")}
                   >
                     <Settings className="h-4 w-4" /> Profile Settings
@@ -230,7 +232,7 @@ export default function AppHeader({
                   <Button
                     variant="ghost"
                     onClick={handleLogout}
-                    className="w-full justify-start px-4 py-2 gap-2 text-red-600"
+                    className="w-full justify-start px-4 py-2 gap-2 text-red-600 cursor-pointer"
                   >
                     <LogOut className="h-4 w-4" /> Sign Out
                   </Button>

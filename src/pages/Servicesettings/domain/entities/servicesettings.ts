@@ -17,7 +17,7 @@ export interface ServiceSettings {
   _id?: string;
   accessToken?: string;
   documents?: ApiDocument[];
-  worker?: WorkerPayload;  // ✅ object, not string[]
+  worker?: WorkerPayload;  
   location?:GeoPoint;
   serviceRadius?:number;
 }

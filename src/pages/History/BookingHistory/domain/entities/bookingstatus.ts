@@ -3,4 +3,4 @@ export type BookingStatus =
   | "confirmed"
   | "pending"
   | "inProgress"
-  | "cancelled";
+  | "cancelled" | "requested" | "ongoing";

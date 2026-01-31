@@ -14,14 +14,14 @@ import "leaflet/dist/leaflet.css";
 export type LocationMode = "CURRENT" | "MANUAL";
 
 interface CommonMapProps {
-  location: [number, number]; 
+  location: [number, number];
   setLocation: (coords: [number, number]) => void;
   locationMode: LocationMode;
-  radius?: number; 
+  radius?: number;
   setRadius?: (r: number) => void;
   onLocationNameChange?: (name: string) => void;
   draggableMarker?: boolean;
-  height: string | number; 
+  height?: string | number; // optional, defaults to responsive
 }
 
 export const defaultIcon = new L.Icon({
@@ -29,8 +29,6 @@ export const defaultIcon = new L.Icon({
   iconSize: [30, 30],
   iconAnchor: [15, 30],
 });
-
-
 export function initLeafletIcons() {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
 
@@ -58,7 +56,6 @@ export const reverseGeocode = async (lat: number, lng: number) => {
   }
 };
 
-
 const RecenterMap = ({ location }: { location: [number, number] }) => {
   const map = useMap();
   useEffect(() => {
@@ -66,7 +63,6 @@ const RecenterMap = ({ location }: { location: [number, number] }) => {
   }, [map, location]);
   return null;
 };
-
 
 const ManualLocationPicker = ({
   enabled,
@@ -93,14 +89,12 @@ export const CommonMap: React.FC<CommonMapProps> = ({
   setRadius,
   onLocationNameChange,
   draggableMarker = true,
-  height, 
+  height,
 }) => {
-    console.log(setRadius);
   const [currentRadius, setCurrentRadius] = useState(radius);
 
   useEffect(() => setCurrentRadius(radius), [radius]);
 
-  
   useEffect(() => {
     if (onLocationNameChange) {
       reverseGeocode(location[0], location[1]).then(onLocationNameChange);
@@ -126,38 +120,51 @@ export const CommonMap: React.FC<CommonMapProps> = ({
   };
 
   return (
-    <MapContainer
-      center={location}
-      zoom={13}
-      style={{ width: "100%", height: height }}
+    <div
+      className="w-full rounded-md overflow-hidden border"
+      style={{
+        height: height ?? undefined,
+      }}
     >
-      <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-
-      <RecenterMap location={location} />
-
-      <ManualLocationPicker
-        enabled={locationMode === "MANUAL"}
-        onPick={handleMapClick}
-      />
-
-      <Marker
-        position={location}
-        icon={defaultIcon}
-        draggable={draggableMarker && locationMode === "MANUAL"}
-        eventHandlers={{ dragend: handleMarkerDrag }}
-      >
-        <Popup>
-          Lat: {location[0].toFixed(5)}, Lng: {location[1].toFixed(5)}
-          <br />
-          Radius: {(currentRadius / 1000).toFixed(2)} km
-        </Popup>
-      </Marker>
-
-      <Circle
+      <MapContainer
         center={location}
-        radius={currentRadius}
-        pathOptions={{ color: "blue", fillColor: "blue", fillOpacity: 0.2 }}
-      />
-    </MapContainer>
+        zoom={13}
+        style={{
+          width: "100%",
+          height: height
+            ? height
+            : "14rem", // default mobile
+        }}
+        className="sm:h-64 md:h-72 lg:h-80 xl:h-96 2xl:h-[600px]"
+      >
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+
+        <RecenterMap location={location} />
+
+        <ManualLocationPicker
+          enabled={locationMode === "MANUAL"}
+          onPick={handleMapClick}
+        />
+
+        <Marker
+          position={location}
+          icon={defaultIcon}
+          draggable={draggableMarker && locationMode === "MANUAL"}
+          eventHandlers={{ dragend: handleMarkerDrag }}
+        >
+          <Popup>
+            Lat: {location[0].toFixed(5)}, Lng: {location[1].toFixed(5)}
+            <br />
+            Radius: {(currentRadius / 1000).toFixed(2)} km
+          </Popup>
+        </Marker>
+
+        <Circle
+          center={location}
+          radius={currentRadius}
+          pathOptions={{ color: "blue", fillColor: "blue", fillOpacity: 0.2 }}
+        />
+      </MapContainer>
+    </div>
   );
 };

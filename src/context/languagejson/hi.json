@@ -1,0 +1,487 @@
+{
+  "common": {
+    "showing": "दिखा रहा है",
+    "of": "में से",
+    "all": "सभी",
+    "location": "स्थान",
+    "edit": "संपादन करना",
+    "cancel": "रद्द करना",
+    "save": "बचाना",
+    "saving": "सहेजा जा रहा है",
+    "completed": "पूर्ण",
+    "pending": "लंबित",
+    "failed": "विफल",
+    "hoursAgo": "{{count}} घंटे पहले"
+  },
+  "HomePage": {
+  "dashboard": "डैशबोर्ड",
+  "welcome": "वापसी पर स्वागत है",
+  "overview": "सारांश",
+   "totalBookings": "कुल बुकिंग",
+  "assignedWorks": "निर्दिष्ट कार्य",
+  "activeEmployees": "सक्रिय कर्मचारी",
+  "inactiveEmployees": "निष्क्रिय कर्मचारी",
+  "activeProjects": "सक्रिय प्रोजेक्ट्स",
+  "completedProjects": "पूर्ण किए गए प्रोजेक्ट्स",
+  "pendingProjects": "लंबित प्रोजेक्ट्स",
+  "monthlyRevenue": "मासिक आय",
+  "totalRevenue": "कुल आय",
+  "earnings": "कमाई",
+  "expenses": "खर्च",
+  "profit": "लाभ",
+  "notifications": "सूचनाएं",
+  "recentActivities": "हाल की गतिविधियाँ",
+  "viewAll": "सभी देखें",
+  "online": "ऑनलाइन",
+  "offline": "ऑफलाइन",
+  "quickActions": "त्वरित क्रियाएँ",
+  "addEmployee": "कर्मचारी जोड़ें",
+  "createProject": "प्रोजेक्ट बनाएँ",
+  "viewReports": "रिपोर्ट देखें",
+  "analytics": "विश्लेषण",
+  "performance": "प्रदर्शन",
+  "noData": "कोई डेटा उपलब्ध नहीं है"
+},
+
+  "bookingHistory": {
+    "title": "मेरी बुकिंग इतिहास",
+    "subtitle": "अपनी सभी सेवा बुकिंग देखें और प्रबंधित करें",
+    "searchPlaceholder": "क्लाइंट नाम, बुकिंग आईडी या सेवा से खोजें...",
+    "statusPlaceholder": "स्थिति के अनुसार फ़िल्टर करें",
+    "servicePlaceholder": "सेवा के अनुसार फ़िल्टर करें",
+    "noBookings": "कोई बुकिंग नहीं मिली",
+    "filteredBookings": "फ़िल्टर की गई बुकिंग्स",
+    "clientInfo": "क्लाइंट जानकारी",
+    "bookingDetails": "बुकिंग विवरण",
+    "notes": "नोट्स",
+     "filters":"फिल्टर",
+     "actions":{
+      "View Details":"विवरण देखें",
+      "Accept":"स्वीकार करें",
+      "Ignore":"अनदेखा करें"
+     },
+     "serviceOptions": {
+    "all": "सभी सेवाएँ",
+    "allServices": "सभी सेवाएँ"
+  },
+    "statusOptions": {
+      "all": "सभी स्थिति",
+      "completed": "पूर्ण",
+      "confirmed": "पुष्टि की गई",
+      "pending": "लंबित",
+      "inProgress": "प्रगति में",
+      "cancelled": "रद्द",
+      "requested":"अनुरोध किया",
+      "ongoing":"चल रही"
+    },
+
+    "tableHeaders": {
+      "id": "आईडी",
+      "client": "क्लाइंट",
+      "service": "सेवा",
+      "date": "तारीख",
+      "time": "समय",
+      "payment": "भुगतान",
+      "status": "स्थिति",
+      "actions": "क्रियाएँ"
+    }
+  },
+
+  "recentActivities": {
+    "pageTitle":"हाल की गतिविधियाँ",
+    "emptyState": {
+      "title": "कोई गतिविधि नहीं मिली",
+      "description": "चयनित समय अवधि और फ़िल्टर के लिए कोई गतिविधि उपलब्ध नहीं है।"
+    },
+
+    "periods": {
+      "7days": "पिछले 7 दिन",
+      "15days": "पिछले 15 दिन",
+      "1month": "पिछला महीना",
+      "3months": "पिछले 3 महीने",
+      "6months": "पिछले 6 महीने"
+    },
+
+    "types": {
+      "all": "सभी",
+      "booking": "बुकिंग",
+      "payment": "भुगतान",
+      "transaction": "लेन-देन"
+    },
+
+    "status": {
+      "completed": "पूर्ण",
+      "confirmed": "पुष्टि की गई",
+      "pending": "लंबित",
+      "cancelled": "रद्द"
+    },
+
+    "charts": {
+      "earningsTrend": "कमाई का रुझान",
+      "activityType": "गतिविधि प्रकार वितरण",
+      "statusDistribution": "स्थिति वितरण",
+      "activityTrend": "साप्ताहिक गतिविधि संख्या"
+    }
+  },
+
+ "pastActivities": {
+  "pageTitle": "पिछली गतिविधियाँ",
+  "timeline": "गतिविधि समयरेखा",
+  "export": "निर्यात करें",
+  "analytics": "विश्लेषण",
+
+  "header": {
+    "employee": "कर्मचारी",
+    "employeeId": "कर्मचारी आईडी"
+  },
+
+  "current": {
+    "showing": "दिखा रहे हैं",
+    "activity": "गतिविधि",
+    "activities": "गतिविधियाँ"
+  },
+
+  "emptyState": {
+    "title": "कोई गतिविधि नहीं मिली",
+    "description": "चयनित अवधि के लिए कोई गतिविधि उपलब्ध नहीं है।"
+  },
+
+  "filters": {
+    "timePeriod": "समय अवधि"
+  },
+
+  "periods": {
+    "7days": "पिछले 7 दिन",
+    "15days": "पिछले 15 दिन",
+    "1month": "पिछला 1 महीना",
+    "3months": "पिछले 3 महीने",
+    "6months": "पिछले 6 महीने"
+  },
+
+  "types": {
+    "all": "सभी",
+    "booking": "बुकिंग",
+    "payment": "भुगतान",
+    "transaction": "लेन-देन"
+  },
+
+  "stats": {
+    "totalActivities": "कुल गतिविधियाँ",
+    "completed": "पूर्ण",
+    "pending": "लंबित",
+    "totalEarnings": "कुल कमाई"
+  },
+
+  "status": {
+    "completed": "पूर्ण",
+    "pending": "लंबित",
+    "failed": "असफल"
+  },
+
+  "chart": {
+    "earningsTrend": "कमाई का रुझान",
+    "activityType": "गतिविधि प्रकार वितरण",
+    "activityTrend": "गतिविधि रुझान",
+    "statusDistribution": "स्थिति वितरण"
+  },
+
+  "insights": {
+    "completionRate": "पूर्णता दर",
+    "averageEarnings": "औसत कमाई",
+    "mostActiveDay": "सबसे सक्रिय दिन"
+  },
+
+  "timelineMeta": {
+    "activityCount": "गतिविधियाँ",
+    "time": "समय",
+    "amount": "राशि",
+    "location": "स्थान",
+    "client": "ग्राहक"
+  }
+},
+
+  "transactionHistory": {
+  "pageTitle": "भुगतान लेन-देन इतिहास",
+  "pageSubtitle": "अपने भुगतान लेन-देन देखें और प्रबंधित करें",
+  "export": "रिपोर्ट निर्यात करें",
+
+  "stats": {
+    "totalPaid": "कुल भुगतान",
+    "pendingPayments": "लंबित भुगतान",
+    "totalTransactions": "कुल लेन-देन",
+    "completedTransactions": "पूर्ण लेन-देन",
+    "pendingTransactions": "लंबित लेन-देन",
+    "allTime": "सभी समय के लेन-देन"
+  },
+
+  "filters": {
+    "filterStatus": "स्थिति के अनुसार फ़िल्टर करें",
+    "statusOptions": {
+      "all": "सभी स्थितियाँ",
+      "completed": "पूर्ण",
+      "pending": "लंबित",
+      "failed": "विफल"
+    }
+  },
+
+  "table": {
+    "transactionId": "लेन-देन आईडी",
+    "date": "तारीख",
+    "type": "प्रकार",
+    "description": "विवरण",
+    "paymentMethod": "भुगतान विधि",
+    "status": "स्थिति",
+    "amount": "राशि",
+    "empty": "कोई लेन-देन नहीं मिला"
+  }
+},
+
+"workHistory": {
+  "pageTitle": "कार्य इतिहास",
+  "cards": {
+    "totalWorks": "कुल कार्य",
+    "completed": "पूर्ण",
+    "inProgress": "प्रगति में",
+    "upcoming": "आगामी",
+    "assigned": "असाइन किया गया",
+    "workAccepted": "काम स्वीकार किया गया",
+    "workCancelled": "काम रद्द किया गया"
+  },
+  "filters": {
+    "timePeriod": "समय अवधि",
+    "status": "स्थिति",
+    "itemsPerPage": "प्रति पृष्ठ आइटम",
+    "searchPlaceholder": "कार्य खोजें..."
+  },
+  "tableHeaders": {
+    "title": "शीर्षक",
+    "description": "विवरण",
+    "location": "स्थान",
+    "assignedDate": "निर्धारित दिनांक",
+    "dueDate": "समाप्ति दिनांक",
+    "status": "स्थिति",
+    "duration": "अवधि",
+    "customerName": "ग्राहक का नाम",
+    "service": "सेवा",
+    "serviceTier": "सेवा स्तर",
+    "actions": "कार्रवाई"
+  },
+  "statusOptions": {
+    "all": "सभी",
+    "completed": "पूर्ण",
+    "inProgress": "प्रगति में",
+    "pending": "लंबित",
+    "upcoming": "आगामी",
+    "assigned": "असाइन किया गया",
+    "workAccepted": "काम स्वीकार किया गया",
+    "workCancelled": "काम रद्द किया गया"
+  },
+  "actions": {
+      "cancel": "रद्द करें"
+    },
+  "timeOptions": {
+    "week": "इस सप्ताह",
+    "month": "इस महीने",
+    "currentWeek": "वर्तमान सप्ताह"
+  },
+  "pagination": {
+    "pageInfo": "पृष्ठ {currentPage} का {totalPages}",
+    "first": "पहला",
+    "previous": "पिछला",
+    "next": "अगला",
+    "last": "अंतिम",
+    "noRecords": "कोई रिकॉर्ड नहीं"
+  },
+  "extraInfo": {
+    "daysToStart": "{days} दिन शेष",
+    "daysUntilDue": "{days} दिन शेष अंतिम तिथि तक",
+    "completedOn": "{date} को पूर्ण",
+    "completedIn": "{hours} घंटे में पूर्ण"
+  }
+},
+
+  "notifications": {
+  "title": "सूचनाएँ",
+  "subtitle": "अपनी नवीनतम गतिविधियों से अपडेट रहें",
+  "markAllRead": "सभी को पढ़ा हुआ चिह्नित करें",
+  "clearAll": "सभी हटाएँ",
+  "total": "कुल",
+  "unread": "अपठित",
+  "read": "पढ़े गए",
+  "thisWeek": "इस सप्ताह",
+  "noNotifications": "कोई सूचना नहीं",
+  "caughtUp": "आप पूरी तरह अपडेट हैं!",
+  "viewDetails": "विवरण देखें",
+  "highPriority": "उच्च प्राथमिकता",
+  "emailDigest": "ईमेल सारांश",
+  "notificationSettings": "सूचना सेटिंग्स",
+
+  "categories": {
+    "all": "सभी",
+    "bookings": "बुकिंग",
+    "payments": "भुगतान",
+    "system": "सिस्टम",
+    "alerts": "अलर्ट"
+  }
+},
+
+  "wallet": {
+  "title": "वॉलेट",
+  "manage": "अपने बैलेंस को प्रबंधित करें और लेन-देन ट्रैक करें",
+  "tier": "स्तर",
+  "totalBalance": "कुल बैलेंस",
+  "income": "आय",
+  "expenses": "खर्च",
+  "quickActions": "त्वरित क्रियाएँ",
+  "addFunds": "फंड जोड़ें",
+  "depositMoney": "पैसे जमा करें",
+  "withdraw": "निकासी",
+  "transferFunds": "फंड ट्रांसफर करें",
+  "recentTransactions": "हाल के लेन-देन",
+  "viewAll": "सभी देखें",
+  "credit": "जमा",
+  "debit": "निकासी",
+  "monthlySummary": "दिसंबर सारांश",
+  "totalTransactions": "कुल लेन-देन",
+  "avgTransaction": "औसत लेन-देन",
+  "largestIncome": "सबसे बड़ी आय",
+  "largestExpense": "सबसे बड़ा खर्च",
+  "paymentMethods": "भुगतान विधियाँ",
+  "primary": "प्राथमिक",
+  "expires": "समाप्ति",
+  "addNewCard": "नया कार्ड जोड़ें",
+  "walletInsights": "वॉलेट विश्लेषण",
+  "availableBalance": "उपलब्ध बैलेंस",
+  "monthlyGrowth": "इस महीने की वृद्धि",
+  "transactionsToday": "आज के लेन-देन"
+},
+
+ "profile": {
+  "profile": "प्रोफ़ाइल",
+  "address": "पता",
+  "browse": "ब्राउज़ करें",
+  "password": "पासवर्ड",
+  "location": "स्थान",
+   "currentPassword": "वर्तमान पासवर्ड",
+  "newPassword": "नया पासवर्ड",
+  "confirmPassword": "पासवर्ड की पुष्टि करें",
+  "personalInformation": "व्यक्तिगत जानकारी",
+  "fullName": "पूरा नाम",
+  "email": "ईमेल",
+
+  "contactInformation": "संपर्क जानकारी",
+  "phone": "फ़ोन",
+
+  "documents": "दस्तावेज़",
+  "idProof": "आईडी प्रूफ",
+  "addressProof": "निवास प्रमाण पत्र",
+  "photo": "तस्वीर",
+
+  "settings": "सेटिंग्स",
+  "profileSettings": "प्रोफ़ाइल सेटिंग्स",
+
+  "edit": "संपादित करें",
+  "save": "सहेजें",
+  "cancel": "रद्द करें",
+  "clear": "साफ़ करें",
+  "update": "अपडेट करें",
+  "updatePassword": "पासवर्ड अपडेट करें",
+
+  "logout": "लॉगआउट",
+  "signOut": "लॉग आउट"
+},
+"sidebar": {
+    "home": "होम",
+  "history": "इतिहास",
+  "bookingHistory": "बुकिंग इतिहास",
+  "transactionHistory": "लेन-देन इतिहास",
+  "workHistory": "कार्य इतिहास",
+
+  "activity": "गतिविधि",
+  "recentActivity": "हाल की गतिविधि",
+  "pastActivity": "पिछली गतिविधि",
+     "booking": "बुकिंग",
+    "availableBooking": "उपलब्ध बुकिंग",
+    "currentBooking": "वर्तमान बुकिंग",
+    "ongoingServices": "चल रही सेवाएँ",
+  "settings": "सेटिंग्स",
+  "profileSettings": "प्रोफ़ाइल सेटिंग्स",
+  "wallet": "वॉलेट",
+  "logout": "लॉग आउट",
+
+  "notifications": "सूचनाएँ"
+},
+ "availableBookings": {
+    "title": "उपलब्ध बुकिंग्स",
+    "searchService": "सेवा खोजें",
+    "serviceTier": "सेवा स्तर",
+    "status": "स्थिति",
+    "all": "सभी",
+    "basic": "बेसिक",
+    "premium": "प्रीमियम",
+    "pending": "लंबित",
+    "confirmed": "पुष्ट",
+    "completed": "पूर्ण",
+    "cancelled": "रद्द",
+    "customer": "ग्राहक",
+    "service": "सेवा",
+    "tier": "स्तर",
+    "date": "तारीख",
+      "standard": "स्टैंडर्ड",
+
+  "enterprise": "एंटरप्राइज़",
+    "rowsPerPage": "प्रति पृष्ठ पंक्तियाँ",
+    "noBookings": "कोई बुकिंग उपलब्ध नहीं है"
+  },
+  "currentBookings": {
+    "title": "वर्तमान बुकिंग",
+    "subtitle": "आपको सौंपे गए कार्य देखें और प्रबंधित करें",
+    "filterStatus": "स्थिति के अनुसार फ़िल्टर करें",
+    "noBookings": "कोई वर्तमान बुकिंग उपलब्ध नहीं है",
+    "status": {
+      "all": "सभी",
+      "pending": "लंबित",
+      "ongoing": "चल रही",
+      "completed": "पूर्ण",
+       "cancelled": "रद्द",
+      "confirmed": "पुष्टि की गई",
+      "inProgress": "प्रगति में",
+      "requested": "अनुरोधित"
+    },
+      "table": {
+      "service": "सेवा",
+      "customer": "ग्राहक",
+      "time": "समय",
+      "status": "स्थिति",
+      "actions": "क्रियाएँ"
+    },
+      "pagination": {
+      "previous": "पिछला",
+      "next": "अगला",
+      "page": "पृष्ठ",
+      "of": "का"
+    }
+  },
+  "ongoingservices": {
+    "title": "चल रही सेवाएं",
+    "serviceId": "सेवा आईडी",
+    "customer": "ग्राहक",
+    "location": "स्थान",
+    "startDate": "आरंभ तिथि",
+    "status": "स्थिति",
+    "action": "क्रिया",
+    "view": "देखें",
+    "noData": "कोई चल रही सेवाएं नहीं मिलीं",
+    "filters": {
+      "all": "सभी",
+      "status": "स्थिति",
+      "location": "स्थान",
+      "inProgress": "प्रगति में",
+      "assigned": "निर्धारित",
+      "paused": "रोक दिया गया",
+      "completed": "पूर्ण",
+      "rowsPerPage": "प्रति पृष्ठ पंक्तियाँ"
+    }
+  
+  }
+}

@@ -2,14 +2,8 @@ import { Calendar, DollarSign, Clock } from "lucide-react";
 import type { Activity } from "../../domain/entities/activity";
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
+import { useTheme } from "@/context/ThemeContext";
 
-export function ActivityStats({ activities }: { activities: Activity[] }) {
-  const { t, language } = useLanguage();
-  const isRTL = language === "AR";
-
-  const totalEarnings = activities
-    .filter(a => a.status === "completed" && a.amount)
-    .reduce((sum, a) => sum + (a.amount || 0), 0);
 function Stat({
   icon,
   label,
@@ -19,44 +13,86 @@ function Stat({
   label: string;
   value: React.ReactNode;
 }) {
+  const { theme } = useTheme();
+
   return (
-    <div className="flex items-center gap-3">
-      <div className="p-2 rounded-lg bg-gray-100">
+    <div className="flex items-center gap-3 sm:gap-4">
+      <div
+        className={`p-2 rounded-lg ${
+          theme === "dark" ? "bg-gray-700" : "bg-gray-100"
+        }`}
+      >
         {icon}
       </div>
-      <div>
-        <p className="text-sm text-gray-600">{label}</p>
-        <p className="text-2xl text-gray-900">{value}</p>
+
+      <div className="leading-tight">
+        <p
+          className={`text-sm ${
+            theme === "dark" ? "text-gray-300" : "text-gray-400"
+          }`}
+        >
+          {label}
+        </p>
+        <p
+          className={`font-medium ${
+            theme === "dark" ? "text-gray-100" : "text-gray-900"
+          }`}
+        >
+          {value}
+        </p>
       </div>
     </div>
   );
 }
 
+
+export function ActivityStats({ activities }: { activities: Activity[] }) {
+  const { language, translations } = useLanguage();
+  const ra = translations.recentActivities;
+  const isRTL = language === "AR";
+
+  const totalEarnings = activities
+    .filter((a) => a.status === "completed" && a.amount)
+    .reduce((sum, a) => sum + (a.amount || 0), 0);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <CommonCard className={`p-4 ${isRTL ? "md:order-3" : ""}`}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Bookings */}
+      <CommonCard
+        className={`p-4 flex justify-center sm:justify-start ${
+          isRTL ? "lg:order-3" : ""
+        }`}
+      >
         <Stat
           icon={<Calendar className="size-5 text-blue-600" />}
-          label={t("totalBookings")}
-          value={activities.filter(a => a.type === "booking").length}
+          label={ra.types.booking}
+          value={activities.filter((a) => a.type === "booking").length}
         />
       </CommonCard>
 
-      <CommonCard className="p-4">
+      {/* Earnings */}
+      <CommonCard className="p-4 flex justify-center sm:justify-start">
         <Stat
           icon={<DollarSign className="size-5 text-green-600" />}
-          label={t("totalEarned")}
+          label={ra.charts.earningsTrend}
           value={`$${totalEarnings}`}
         />
       </CommonCard>
 
-      <CommonCard className={`p-4 ${isRTL ? "md:order-1" : ""}`}>
+      {/* Pending */}
+      <CommonCard
+        className={`p-4 flex justify-center sm:justify-start ${
+          isRTL ? "lg:order-1" : ""
+        }`}
+      >
         <Stat
           icon={<Clock className="size-5 text-amber-600" />}
-          label={t("Pending")}
-          value={activities.filter(a => a.status === "pending").length}
+          label={ra.status.pending}
+          value={activities.filter((a) => a.status === "pending").length}
         />
       </CommonCard>
     </div>
   );
 }
+
+

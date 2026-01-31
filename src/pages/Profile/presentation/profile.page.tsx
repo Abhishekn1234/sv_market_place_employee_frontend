@@ -15,48 +15,58 @@ interface Props {
 }
 
 export default function ProfileSettings({ activeTab, setActiveTab }: Props) {
-  const { language, t } = useLanguage();
+  const { language, translations } = useLanguage();
   const isRTL = language === "AR";
 
   const tabs: CommonTab[] = [
     {
       value: "profile",
-      label: t("profile"),
-      icon: <User />,
+      label: translations.profile.profile,
+      icon: <User className="w-4 h-4 md:w-5 md:h-5" />,
       content: <ProfileList />
     },
     {
       value: "password",
-      label: t("password"),
-      icon: <Lock />,
+      label: translations.profile.password,
+      icon: <Lock className="w-4 h-4 md:w-5 md:h-5" />,
       content: <PasswordChanging onSuccess={() => setActiveTab("profile")} />
     },
     {
       value: "location",
-      label: t("location"),
-      icon: <MapPin />,
+      label: translations.profile.location,
+      icon: <MapPin className="w-4 h-4 md:w-5 md:h-5" />,
       content: <LocationSettings setActiveTab={setActiveTab} />
     }
   ];
 
   return (
-    <div className={`w-full h-full overflow-hidden ${isRTL ? "rtl" : "ltr"}`}>
-      <div className="w-full max-w-4xl mx-auto">
-        <div className="mb-4">
-          <h1 className={`text-2xl md:text-3xl font-bold ${isRTL ? "text-right" : "text-left"}`}>
-            {t("profileSettings")}
+    <div
+      className={`w-full min-h-screen overflow-x-hidden ${
+        isRTL ? "rtl" : "ltr"
+      }`}
+    >
+      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        
+        {/* Header */}
+        <div className="mb-4 sm:mb-6">
+          <h1
+            className={`text-xl sm:text-2xl md:text-3xl font-bold ${
+              isRTL ? "text-right" : "text-left"
+            }`}
+          >
+            {translations.profile.profileSettings}
           </h1>
-          <p className={`text-sm text-gray-600 ${isRTL ? "text-right" : "text-left"}`}>
-            {t("profileSettingsSubtitle") || "Manage your account settings and preferences"}
-          </p>
         </div>
 
-        <CommonTabs
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          isRTL={isRTL}
-        />
+        {/* Tabs */}
+        <div className="w-full overflow-x-auto">
+          <CommonTabs
+            tabs={tabs}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            isRTL={isRTL}
+          />
+        </div>
       </div>
     </div>
   );

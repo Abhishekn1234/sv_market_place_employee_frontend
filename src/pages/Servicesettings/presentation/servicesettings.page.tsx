@@ -47,46 +47,58 @@ export default function MultiSelectDropdownCard() {
     );
 
   const handleSubmit = () => {
-  if (!location) {
-    toast.error("Please select a location");
-    return;
-  }
+    if (!location) {
+      toast.error("Please select a location");
+      return;
+    }
 
-  const payload: WorkerPayload = {
-    categoryIds: selectedServices.map((s) => s._id),
-    serviceTierIds: selectedTiers.map((t) => t._id),
-    status: "OFFLINE",
-    location,
-    serviceRadius: serviceRadius / 1000,
+    const payload: WorkerPayload = {
+      categoryIds: selectedServices.map((s) => s._id),
+      serviceTierIds: selectedTiers.map((t) => t._id),
+      status: "OFFLINE",
+      location,
+      serviceRadius: serviceRadius / 1000,
+    };
+
+    mutation.mutate(payload, {
+      onSuccess: () => {
+        useAuthStore.getState().updateUserProfile({
+          categoryIds: payload.categoryIds,
+          serviceTierIds: payload.serviceTierIds,
+          status: payload.status,
+          serviceRadius: payload.serviceRadius,
+          location: payload.location,
+        });
+
+        navigate("/services/documents");
+      },
+      onError: () => toast.error("Update failed"),
+    });
   };
-    console.log("Payload:", payload);
-  mutation.mutate(payload, {
-
-    onSuccess: () => {
- 
-      useAuthStore.getState().updateUserProfile({
-        categoryIds: payload.categoryIds,
-        serviceTierIds: payload.serviceTierIds,
-        status: payload.status,
-        serviceRadius: payload.serviceRadius,
-        location: payload.location,
-      });
-
-      navigate("/services/documents");
-    },
-    onError: () => toast.error("Update failed"),
-  });
-};
-
 
   return (
-    <div className="flex justify-center p-6">
+    <div className="flex justify-center p-4 sm:p-6 lg:p-8">
       <CommonCard
         title="Employee Onboarding"
         description="Choose your services, tiers, and operating location"
-        className="w-full max-w-2xl"
+        className="
+          w-full 
+          max-w-[16rem] 3xs:max-w-[16rem]
+          2xs:max-w-[18rem]
+          xs:max-w-[20rem]
+          sm:max-w-[24rem]
+          md:max-w-[28rem]
+          lg:max-w-[32rem]
+          xl:max-w-[36rem]
+          2xl:max-w-[42rem]
+          3xl:max-w-[48rem]
+          4xl:max-w-[56rem]
+          5xl:max-w-[64rem]
+          6xl:max-w-[72rem]
+          7xl:max-w-[80rem]
+        "
       >
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-6 lg:space-y-8">
           <ServiceSelection
             services={services}
             tiers={tiers}
@@ -105,6 +117,7 @@ export default function MultiSelectDropdownCard() {
             setCurrentPlace={setCurrentPlace}
             serviceRadius={serviceRadius}
             setServiceRadius={setServiceRadius}
+            className=""
           />
 
           <OnboardingActions

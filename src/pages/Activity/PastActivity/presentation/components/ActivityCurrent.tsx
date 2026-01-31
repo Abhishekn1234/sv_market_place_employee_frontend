@@ -1,6 +1,7 @@
 import { useLanguage } from "@/context/LanguageContext";
 import type { Activity } from "../../domain/entities/activity";
 import type { TimePeriod } from "../../domain/entities/timeperiod";
+import { useTheme } from "@/context/ThemeContext";
 
 type Props = {
   getPeriodLabel: (period: TimePeriod) => string;
@@ -13,27 +14,47 @@ export default function ActivityCurrent({
   selectedPeriod,
   filteredActivities,
 }: Props) {
-  const { language, t } = useLanguage();
+  const { language, translations } = useLanguage();
   const isRTL = language === "AR";
+  const { theme } = useTheme();
+  const pa = translations.pastActivities;
+  const count = filteredActivities.length;
 
   return (
     <div
-      className={`flex items-center justify-between ${
-        isRTL ? "text-right" : "text-left"
-      }`}
+      dir={isRTL ? "rtl" : "ltr"}
+      className="
+        flex flex-col sm:flex-row
+        items-start sm:items-center
+        justify-between
+        gap-1 sm:gap-2
+      "
     >
-      <div>
-        <h2 className="text-gray-900">
+      <div className={isRTL ? "text-right" : "text-left"}>
+        {/* Period title */}
+        <h2
+          className={`
+            text-base sm:text-lg font-semibold
+            ${theme === "dark" ? "text-gray-100" : "text-gray-900"}
+          `}
+        >
           {getPeriodLabel(selectedPeriod)}
         </h2>
 
-        <p className="text-sm text-gray-600">
-          {t("showing")} {filteredActivities.length}{" "}
-          {filteredActivities.length === 1
-            ? t("activity")
-            : `${t("activity")}s`}
+        {/* Count */}
+        <p
+          className={`
+            text-xs sm:text-sm
+            ${theme === "dark" ? "text-gray-400" : "text-gray-600"}
+          `}
+        >
+          {pa.current.showing} {count}{" "}
+          {count === 1
+            ? pa.current.activity
+            : pa.current.activities}
         </p>
       </div>
     </div>
   );
 }
+

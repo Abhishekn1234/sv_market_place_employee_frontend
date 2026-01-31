@@ -23,7 +23,7 @@ export default function MapPicker({
         locationMode={locationMode}
         radius={radius}
         onLocationNameChange={setLocationName}
-        draggableMarker={true} // allow dragging in manual mode
+        draggableMarker={true} 
         height={240}
       />
     </div>

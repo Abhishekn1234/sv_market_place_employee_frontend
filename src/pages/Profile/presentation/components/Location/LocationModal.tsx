@@ -2,6 +2,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import MapPicker from "./LocationPicker";
 import ServiceSelector from "./ServiceSelector";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function LocationModal({
   tempLocation,
@@ -21,6 +22,9 @@ export default function LocationModal({
   saveChanges,
   onClose,
 }: any) {
+  const {translations}=useLanguage();
+    const edits=translations.profile
+    console.log(edits);
   return (
     <div className="border rounded p-4 space-y-5">
       <div>
@@ -76,8 +80,8 @@ export default function LocationModal({
       />
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={onClose}>Cancel</Button>
-        <Button onClick={saveChanges}>Update</Button>
+        <Button variant="outline" onClick={onClose}>{edits.cancel}</Button>
+        <Button onClick={saveChanges}>{edits.update}</Button>
       </div>
     </div>
   );

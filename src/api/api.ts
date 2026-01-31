@@ -3,13 +3,15 @@ import { baseURL } from "./apiConfig";
 import { useAuthStore } from "@/core/store/auth";
 
 
+let accessTokenCache: string | null = useAuthStore.getState().employeeData?.accessToken ?? null;
+let refreshTokenCache: string | null = useAuthStore.getState().employeeData?.refreshToken ?? null;
+
 const api = axios.create({
   baseURL,
   headers: {
     "Content-Type": "application/json",
   },
 });
-
 
 let isRefreshing = false;
 let failedQueue: {
@@ -18,23 +20,19 @@ let failedQueue: {
 }[] = [];
 
 const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach((promise) => {
-    if (error) promise.reject(error);
-    else promise.resolve(token!);
-  });
-  failedQueue = [];
+  while (failedQueue.length) {
+    const { resolve, reject } = failedQueue.shift()!;
+    if (error) reject(error);
+    else resolve(token!);
+  }
 };
-
 
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const { employeeData } = useAuthStore.getState();
-
-    if (employeeData?.accessToken) {
-      config.headers.Authorization = `Bearer ${employeeData.accessToken}`;
+    if (accessTokenCache) {
+      config.headers.Authorization = `Bearer ${accessTokenCache}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
@@ -52,15 +50,14 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const { employeeData, updateTokens, logout } =
-      useAuthStore.getState();
+    const { updateTokens, logout } = useAuthStore.getState();
 
-    if (!employeeData?.refreshToken) {
+    if (!refreshTokenCache) {
       logout();
       return Promise.reject(error);
     }
 
-
+   
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({
@@ -73,22 +70,25 @@ api.interceptors.response.use(
       });
     }
 
-
     originalRequest._retry = true;
     isRefreshing = true;
 
     try {
       const refreshResponse = await axios.post(
         `${baseURL}/auth/refresh-token`,
-        { refreshToken: employeeData.refreshToken },
+        { refreshToken: refreshTokenCache },
         { headers: { "Content-Type": "application/json" } }
       );
 
       const { accessToken, refreshToken } = refreshResponse.data;
 
+    
       updateTokens(accessToken, refreshToken);
+      accessTokenCache = accessToken;
+      refreshTokenCache = refreshToken;
 
       api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+
       processQueue(null, accessToken);
 
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -104,4 +104,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-

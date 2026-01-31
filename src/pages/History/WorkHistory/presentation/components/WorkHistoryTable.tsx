@@ -1,6 +1,6 @@
 "use client";
-import { CommonTable } from "@/components/common/CommonTable";
 
+import { CommonTable } from "@/components/common/CommonTable";
 import type { Work } from "../../domain/entities/workhistory";
 import { useWorkColumns } from "../hooks/useColumns";
 
@@ -17,7 +17,7 @@ export function WorkHistoryTable({
   onPageChange: (p: number) => void;
   isRTL: boolean;
 }) {
-  const columns=useWorkColumns();
+  const columns = useWorkColumns();
 
   return (
     <CommonTable
@@ -27,8 +27,9 @@ export function WorkHistoryTable({
       currentPage={currentPage}
       totalPages={totalPages}
       onPageChange={onPageChange}
-      dir={isRTL ? "rtl" : "ltr"}
+      isRTL={isRTL}
       emptyMessage="No work history found"
     />
   );
 }
+

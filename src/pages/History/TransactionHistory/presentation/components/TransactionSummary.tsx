@@ -1,4 +1,3 @@
-
 import { DollarSign, Calendar, Filter } from "lucide-react";
 import { mockTransactions } from "../data/transactiondata";
 import { useLanguage } from "@/context/LanguageContext";
@@ -6,8 +5,11 @@ import { useTheme } from "@/context/ThemeContext";
 import { CommonCard } from "@/components/common/CommonCard";
 
 export default function TransactionSummary() {
-  const { t } = useLanguage();
+  const { translations, language } = useLanguage();
   const { theme } = useTheme();
+  const isRTL = language === "AR";
+
+  const stats = translations.transactionHistory.stats;
 
   const totalPaid = mockTransactions
     .filter((t) => t.status === "completed")
@@ -24,27 +26,33 @@ export default function TransactionSummary() {
     }).format(amount);
 
   return (
-    <div className="flex gap-6 flex-wrap">
+    <div
+      className={`
+        grid gap-4
+        sm:grid-cols-2 lg:grid-cols-3
+        ${isRTL ? "direction-rtl" : ""}
+      `}
+    >
       <SummaryCard
-        title={t("totalTransactions")}
+        title={stats.totalPaid}
         value={formatCurrency(totalPaid)}
-        subtitle={`${mockTransactions.filter(t => t.status === "completed").length} ${t("completedTransactions")}`}
+        subtitle={stats.completedTransactions}
         icon={<DollarSign className="w-4 h-4 text-green-600" />}
         theme={theme}
       />
 
       <SummaryCard
-        title={t("pendingPayments")}
+        title={stats.pendingPayments}
         value={formatCurrency(pendingAmount)}
-        subtitle={`${mockTransactions.filter(t => t.status === "pending").length} ${t("pendingTransactions")}`}
+        subtitle={stats.pendingTransactions}
         icon={<Calendar className="w-4 h-4 text-yellow-600" />}
         theme={theme}
       />
 
       <SummaryCard
-        title={t("allTime")}
+        title={stats.allTime}
         value={mockTransactions.length}
-        subtitle={t("allTime")}
+        subtitle={stats.totalTransactions}
         icon={<Filter className="w-4 h-4 text-blue-600" />}
         theme={theme}
       />
@@ -65,32 +73,22 @@ function SummaryCard({
   icon: React.ReactNode;
   theme: "light" | "dark";
 }) {
+  const { language } = useLanguage();
+  const isRTL = language === "AR";
+  console.log(theme);
   return (
-    <CommonCard
-      className="flex-1 min-w-[250px]"
-      contentClassName="pt-4"
-    >
-      <div className="flex items-center justify-between mb-2">
-        <h3
-          className={`text-sm font-medium ${
-            theme === "dark" ? "text-gray-100" : "text-gray-900"
-          }`}
-        >
-          {title}
-        </h3>
+    <CommonCard>
+      <div
+        className={`flex items-center justify-between mb-2 ${
+          isRTL ? "flex-row-reverse text-right" : ""
+        }`}
+      >
+        <h3 className="text-sm font-medium">{title}</h3>
         {icon}
       </div>
 
-      <div
-        className={`text-2xl font-semibold ${
-          theme === "dark" ? "text-gray-100" : "text-gray-900"
-        }`}
-      >
-        {value}
-      </div>
-
+      <div className="text-2xl font-semibold">{value}</div>
       <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
     </CommonCard>
   );
 }
-

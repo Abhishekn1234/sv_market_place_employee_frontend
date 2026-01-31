@@ -19,13 +19,28 @@ export function useWorkStatsCards(works: Work[]): WorkStatsCard[] {
       },
       {
         label: translations.workHistory.cards.inProgress,
-        value: works.filter((w) => w.status === "in Progress").length,
+        value: works.filter((w) => w.status === "in-progress" || w.status === "in Progress").length,
         color: "text-blue-600",
       },
       {
         label: translations.workHistory.cards.upcoming,
         value: works.filter((w) => w.status === "upcoming").length,
         color: "text-purple-600",
+      },
+      {
+        label: translations.workHistory.cards.assigned,
+        value: works.filter((w) => w.status === "assigned").length,
+        color: "text-yellow-600",
+      },
+      {
+        label: translations.workHistory.cards.workAccepted,
+        value: works.filter((w) => w.status === "work-accepted").length,
+        color: "text-teal-600",
+      },
+      {
+        label: translations.workHistory.cards.workCancelled,
+        value: works.filter((w) => w.status === "work-cancelled").length,
+        color: "text-red-600",
       },
     ];
   }, [works, translations]);

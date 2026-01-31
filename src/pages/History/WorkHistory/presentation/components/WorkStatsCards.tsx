@@ -1,6 +1,7 @@
 import { CommonCard } from "@/components/common/CommonCard";
 import { useMemo } from "react";
 import type { Card } from "../../domain/entities/card";
+import { useTheme } from "@/context/ThemeContext";
 
 export function WorkStatsCards({
   cards,
@@ -14,22 +15,32 @@ export function WorkStatsCards({
     [cards, isRTL]
   );
 
+  const { theme } = useTheme();
+
   return (
-    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 mb-6">
+    <div
+      className="
+        grid gap-4
+        grid-cols-1
+        sm:grid-cols-2
+        lg:grid-cols-4
+        xl:grid-cols-7
+      "
+    >
       {displayCards.map((card, idx) => (
-        <CommonCard
-          key={idx}
-          className="mb-0"
-          contentClassName="pt-4"
-        >
-          <div className="text-sm text-gray-500 mb-1">
+        <CommonCard key={idx} contentClassName="pt-4">
+          <div
+            className={`text-sm ${
+              theme === "dark" ? "text-gray-300" : "text-gray-500"
+            }`}
+          >
             {card.label}
           </div>
 
           <div
-            className={`text-2xl font-semibold text-gray-900 ${
-              card.color ?? ""
-            }`}
+            className={`text-2xl font-semibold ${
+              theme === "dark" ? "text-gray-100" : "text-gray-900"
+            } ${card.color ?? ""}`}
           >
             {card.value}
           </div>

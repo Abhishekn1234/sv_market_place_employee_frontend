@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BarChart3, Download } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/ThemeContext";
 
 interface ActivityHeaderProps {
   employeeName: string;
@@ -16,42 +17,81 @@ export default function ActivityHeader({
   showAnalytics,
   setShowAnalytics,
 }: ActivityHeaderProps) {
-  const{language,t}=useLanguage();
-  const isRTL=language==="AR"
+  const { language, translations } = useLanguage();
+  const pa = translations.pastActivities;
+  const isRTL = language === "AR";
+  const { theme } = useTheme();
+
   return (
-    <div className={` ${isRTL?"md:flex-row-reverse flex   md:items-start md:justify-between gap-4":"flex  md:flex-row md:items-start md:justify-between gap-4"}`}>
-      {/* Left */}
-      <div>
-            <h1 className={`text-gray-900 mb-2`}>{t('pastActivity')}</h1>
-            <div className="flex items-center gap-3">
-              <Avatar className="size-10">
-                <AvatarFallback className="bg-blue-600 text-white">
-                  {employeeName.split(' ').map(n => n[0]).join('')}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-gray-900">{employeeName}</p>
-                <p className="text-sm text-gray-500">{employeeId}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" className="gap-2">
-              <Download className="size-4" />
-            {t('export')}
-            </Button>
-            <Button 
-              variant="outline" 
-              className="gap-2"
-              onClick={() => setShowAnalytics(!showAnalytics)}
+    <div
+      className={`
+        flex flex-col gap-4
+        md:flex-row md:items-start md:justify-between
+        ${isRTL ? "md:flex-row-reverse" : ""}
+      `}
+    >
+      {/* Left section */}
+      <div className="flex flex-col gap-3 text-center md:text-left">
+        <h1 className={`${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>
+          {pa.pageTitle}
+        </h1>
+
+        <div
+          className={`
+            flex items-center gap-3
+            justify-center md:justify-start
+            ${isRTL ? "md:flex-row-reverse" : ""}
+          `}
+        >
+          <Avatar className="size-10">
+            <AvatarFallback className="bg-blue-600 text-white">
+              {employeeName
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className={isRTL ? "text-right" : "text-left"}>
+            <p className={`${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>
+              {employeeName}
+            </p>
+            <p
+              className={`text-sm ${
+                theme === "dark" ? "text-gray-400" : "text-gray-500"
+              }`}
             >
-              <BarChart3 className="size-4" />
-              {t('Analytics')}
-            </Button>
+              {employeeId}
+            </p>
           </div>
         </div>
-      
-    
+      </div>
+
+      {/* Right section (Buttons) */}
+      <div
+        className={`
+          flex flex-col gap-2 w-full
+          sm:flex-row sm:w-auto
+          ${isRTL ? "sm:flex-row-reverse" : ""}
+        `}
+      >
+        <Button
+          variant="outline"
+          className="gap-2 w-full sm:w-auto"
+        >
+          <Download className="size-4" />
+          {pa.export}
+        </Button>
+
+        <Button
+          variant="outline"
+          className="gap-2 w-full sm:w-auto"
+          onClick={() => setShowAnalytics(!showAnalytics)}
+        >
+          <BarChart3 className="size-4" />
+          {pa.analytics}
+        </Button>
+      </div>
+    </div>
   );
 }

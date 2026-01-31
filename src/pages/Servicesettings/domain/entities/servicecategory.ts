@@ -1,9 +1,10 @@
 export interface ServiceCategory{
     _id:string;
     name:string;
-    slug:string;
-    iconUrl:string| File;
+    slug?:string;
+    iconUrl?:string| File;
     icon?:string|File;
-    createdAt:Date;
-    updatedAt:Date;
+    createdAt?:Date;
+    updatedAt?:Date;
+    category?:string;
 }

@@ -23,7 +23,6 @@ export default function ProfileList() {
     { label: "Photo Proof", key: "photoProof" },
   ] as const;
 
-  
   useEffect(() => {
     if (!profile) return;
 
@@ -32,7 +31,6 @@ export default function ProfileList() {
       address: profile.address,
     });
 
-  
     const docs: Record<string, string> = {};
     profile.documents?.forEach((doc: any) => {
       if (doc.documentType && doc.filePath) {
@@ -58,7 +56,6 @@ export default function ProfileList() {
       )
     );
 
-
   const handleSave = async () => {
     const data = new FormData();
     data.append("fullName", formData.fullName);
@@ -74,7 +71,15 @@ export default function ProfileList() {
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="
+        w-full 
+        max-w-7xl 
+        mx-auto
+        px-3 sm:px-4 md:px-6 lg:px-8
+        space-y-4 sm:space-y-6 md:space-y-8
+      "
+    >
       <ProfileHeader
         profile={profile}
         isEditing={isEditing}

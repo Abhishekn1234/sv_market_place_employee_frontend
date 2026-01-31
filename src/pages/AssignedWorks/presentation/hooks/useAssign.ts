@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AssignedWorkImpl } from "../../data/repositories/AssignedImpl";
 import { GetAssignedWorkUsecase } from "../../domain/usecase/GetAssignedWorkUsecase";
 
-export function useAssign(open: boolean) {  
+export function useAssign(open?: boolean) {  
   const repo = new AssignedWorkImpl();
   const usecase = new GetAssignedWorkUsecase(repo);
 
