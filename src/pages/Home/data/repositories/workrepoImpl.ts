@@ -1,4 +1,4 @@
-import type { Worker } from "@/pages/Profile/domain/entities/profile";
+import type { Worker } from "@/pages/Profile/domain/entities/workertype";
 import type { WorkerRepo } from "../../domain/repositories/wokerrepo";
 import api from "@/api/api";
 

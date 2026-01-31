@@ -1,6 +1,6 @@
 import { useState, useCallback,  } from "react";
 import { toast } from "react-toastify";
-import type { Worker } from "@/pages/Profile/domain/entities/profile";
+import type { Worker } from "@/pages/Profile/domain/entities/workertype";
 import { useServiceSettings } from "@/pages/Servicesettings/presentation/hooks/useServicesettings";
 import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/servicesettings";
 import { useAuthStore } from "@/core/store/auth";
