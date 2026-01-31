@@ -91,6 +91,7 @@ export const CommonMap: React.FC<CommonMapProps> = ({
   draggableMarker = true,
   height,
 }) => {
+  console.log(setRadius);
   const [currentRadius, setCurrentRadius] = useState(radius);
 
   useEffect(() => setCurrentRadius(radius), [radius]);
@@ -133,7 +134,7 @@ export const CommonMap: React.FC<CommonMapProps> = ({
           width: "100%",
           height: height
             ? height
-            : "14rem", // default mobile
+            : "14rem", 
         }}
         className="sm:h-64 md:h-72 lg:h-80 xl:h-96 2xl:h-[600px]"
       >
