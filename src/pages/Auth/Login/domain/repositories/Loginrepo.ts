@@ -1,5 +1,6 @@
-import type { Login } from "../entities/login";
+
+import type { LoginResponse } from "../entities/loginresponse";
 
 export interface LoginRepo{
-    login(email:string,password:string):Promise<Login>;
+    login(email:string,password:string):Promise<LoginResponse>;
 }

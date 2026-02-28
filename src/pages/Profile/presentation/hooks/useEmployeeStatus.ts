@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/core/store/auth";
 import type { EmployeeStatus } from "../../domain/entities/employeestatus";
+import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
 const EVENT_NAME = "employee-status-changed";
 
 const normalizeStatus = (status: EmployeeStatus): EmployeeStatus => {
@@ -9,17 +10,18 @@ const normalizeStatus = (status: EmployeeStatus): EmployeeStatus => {
 };
 
 export function useEmployeeStatus() {
-  const { employeeData, updateUserStatus } = useAuthStore();
+  const { user, updateUserStatus } = useAuthStore();
   const queryClient = useQueryClient();
 
   const [status, setStatusState] = useState<EmployeeStatus>(
-    () => normalizeStatus(employeeData?.user?.status?.toString() as EmployeeStatus)
+    () => normalizeStatus(user?.worker?.status?.toString() as EmployeeStatus)
   );
 
   const writeStatus = (newStatus: EmployeeStatus) => {
     
-    updateUserStatus(newStatus);
-
+   if (user?.worker?.status) {
+  updateUserStatus(user.worker.status as WorkerStatus);
+}
     setStatusState(newStatus);
 
  

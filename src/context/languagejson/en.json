@@ -306,7 +306,12 @@
       "actions":"Actions"
     },
      "actions": {
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "start":"Start",
+      "viewDetails": "View Details",
+      "stopwork": "Stop Work",
+      "resumeWork": "Resume Work",
+      "completeWork": "Complete Work"
     },
 
     "pagination": {

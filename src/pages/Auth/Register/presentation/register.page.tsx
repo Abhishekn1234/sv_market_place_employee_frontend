@@ -8,8 +8,11 @@ import { EyeIcon, EyeOffIcon, User, Mail, KeyRound, PhoneCallIcon } from "lucide
 import { toast } from "react-toastify";
 import { COUNTRIES } from "./components/phonenumberformat";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/core/store/auth";
+
 
 export default function RegisterPage() {
+  const {setAuth,setTokens}=useAuthStore();
   const [formData, setFormData] = useState<Register>({
     fullName: "",
     email: "",
@@ -66,26 +69,35 @@ const handleCountryChange = (iso: string) => {
   };
 
   const handleRegister = () => {
-    if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone) {
-      toast.error("Please fill in all fields!");
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
-    }
-    if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters long!");
-      return;
-    }
-    const { confirmPassword, ...registerPayload } = formData;
+  if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone) {
+    toast.error("Please fill in all fields!");
+    return;
+  }
+  if (formData.password !== formData.confirmPassword) {
+    toast.error("Passwords do not match!");
+    return;
+  }
+  if (formData.password.length < 6) {
+    toast.error("Password must be at least 6 characters long!");
+    return;
+  }
 
-    registerMutate(registerPayload, {
-      onSuccess: () => {toast.success("Registration successful!"),navigate("/login");},
-      onError: (err: any) => toast.error("Registration failed: " + err.message),
-    });
-  };
+  const { confirmPassword, ...registerPayload } = formData;
 
+  registerMutate(registerPayload, {
+    onSuccess: (res: any) => {
+      // ✅ Set auth state immediately
+       setTokens(res.accessToken, res.refreshToken);
+    setAuth(res.user)
+
+      toast.success("Registration successful! You are now logged in.");
+      navigate("/login"); // navigate directly to dashboard/home
+    },
+    onError: (err: any) => {
+      toast.error("Registration failed: " + err.message);
+    },
+  });
+};
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleRegister();

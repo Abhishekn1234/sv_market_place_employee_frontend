@@ -277,7 +277,12 @@
     "workCancelled": "काम रद्द किया गया"
   },
   "actions": {
-      "cancel": "रद्द करें"
+      "cancel": "रद्द करें",
+      "start":"शुरू करें",
+      "viewDetails": "विवरण देखें",
+      "stopwork": "काम रोकें",
+      "resumeWork": "काम फिर से शुरू करें",
+      "completeWork": "काम पूरा करें"
     },
   "timeOptions": {
     "week": "इस सप्ताह",

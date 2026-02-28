@@ -24,6 +24,7 @@ export class BookingHistoryRepoImpl implements BookingHistoryRepo {
           clientPhoto: item.customer?.profilePictureUrl,
           serviceType: item.service?.name ?? "-",
           serviceTier:item.serviceTier?.displayName,
+          startDate:item.startDate,
           service: item.service
             ? {
                 _id: item.service._id,
@@ -43,7 +44,7 @@ export class BookingHistoryRepoImpl implements BookingHistoryRepo {
           payment: item.amount ?? 0,
           currency: item.currency,
           status: mapBookingStatus(item.status),
-          location: `${((item.distance ?? 0) / 1000).toFixed(1)} km away`,
+          location: item.location,
         };
       }),
       pagination: res.data.pagination,

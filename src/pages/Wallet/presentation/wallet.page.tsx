@@ -24,7 +24,7 @@ export default function Wallet() {
   return (
     <div
       dir={isRTL ? "rtl" : "ltr"}
-      className="min-h-screen bg-gray-50 px-3 py-4 sm:px-4 md:px-6"
+      className="min-h-screen  px-3 py-4 sm:px-4 md:px-6"
     >
       <div className="max-w-7xl mx-auto space-y-6">
         

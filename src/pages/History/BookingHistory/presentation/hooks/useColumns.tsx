@@ -94,21 +94,25 @@ export function useBookingColumns({
       ),
     },
     {
-      key: "actions",
-      header: tableHeaders.actions,
-      className: cellClass,
-      render: (b) => (
-        <div className="flex items-center gap-2 whitespace-nowrap">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => toggleExpanded(b.id)}
-            className="flex items-center gap-1 cursor-pointer"
-          >
-            {bookinghistorycancel.actions["View Details"]}
-            {expandedBooking === b.id ? <ChevronUp /> : <ChevronDown />}
-          </Button>
+  key: "actions",
+  header: tableHeaders.actions,
+  className: cellClass,
+  render: (b) => (
+    <div className="flex items-center gap-2 whitespace-nowrap">
+      {/* View Details is always visible */}
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => toggleExpanded(b.id)}
+        className="flex items-center gap-1 cursor-pointer"
+      >
+        {bookinghistorycancel.actions["View Details"]}
+        {expandedBooking === b.id ? <ChevronUp /> : <ChevronDown />}
+      </Button>
 
+     
+      {b.status === "requested" && (
+        <>
           <Button
             size="sm"
             variant="default"
@@ -130,13 +134,15 @@ export function useBookingColumns({
           <Button
             size="sm"
             variant="default"
-            onClick={() => onIgnore(b.id)}   
+            onClick={() => onIgnore(b.id)}
             className="bg-red-500 text-white hover:bg-red-600 cursor-pointer"
           >
             {bookinghistorycancel.actions.Ignore}
           </Button>
-        </div>
-      ),
-    },
+        </>
+      )}
+    </div>
+  ),
+},
   ];
 }

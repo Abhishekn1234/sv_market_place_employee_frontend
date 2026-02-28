@@ -40,9 +40,9 @@ export default function AppSidebar({
   const { t, language } = useLanguage();
   const isRTL = language === "AR";
 
-  const { employeeData, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
 
-  const user = employeeData?.user;
+ 
   const fullName = user?.fullName ?? "User";
   const profileImage = user?.profilePictureUrl;
 

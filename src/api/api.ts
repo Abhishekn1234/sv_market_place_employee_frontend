@@ -2,9 +2,15 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { baseURL } from "./apiConfig";
 import { useAuthStore } from "@/core/store/auth";
 
+/* ---------------- Initial Token Cache ---------------- */
 
-let accessTokenCache: string | null = useAuthStore.getState().employeeData?.accessToken ?? null;
-let refreshTokenCache: string | null = useAuthStore.getState().employeeData?.refreshToken ?? null;
+let accessTokenCache: string | null =
+  useAuthStore.getState().accessToken ?? null;
+
+let refreshTokenCache: string | null =
+  useAuthStore.getState().refreshToken ?? null;
+
+/* ---------------- Axios Instance ---------------- */
 
 const api = axios.create({
   baseURL,
@@ -13,7 +19,10 @@ const api = axios.create({
   },
 });
 
+/* ---------------- Refresh Handling ---------------- */
+
 let isRefreshing = false;
+
 let failedQueue: {
   resolve: (token: string) => void;
   reject: (err: any) => void;
@@ -27,17 +36,22 @@ const processQueue = (error: any, token: string | null = null) => {
   }
 };
 
+/* ---------------- Request Interceptor ---------------- */
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (accessTokenCache) {
-      config.headers.Authorization = `Bearer ${accessTokenCache}`;
+    const token = useAuthStore.getState().accessToken;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
+/* ---------------- Response Interceptor ---------------- */
 
 api.interceptors.response.use(
   (response) => response,
@@ -50,14 +64,16 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const { updateTokens, logout } = useAuthStore.getState();
+    const { setTokens, logout } = useAuthStore.getState();
+    const currentRefreshToken = useAuthStore.getState().refreshToken;
 
-    if (!refreshTokenCache) {
+    if (!currentRefreshToken) {
       logout();
       return Promise.reject(error);
     }
 
-   
+    /* ---------------- If Already Refreshing ---------------- */
+
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({
@@ -76,18 +92,18 @@ api.interceptors.response.use(
     try {
       const refreshResponse = await axios.post(
         `${baseURL}/auth/refresh-token`,
-        { refreshToken: refreshTokenCache },
+        { refreshToken: currentRefreshToken },
         { headers: { "Content-Type": "application/json" } }
       );
+      console.log(refreshResponse);
 
       const { accessToken, refreshToken } = refreshResponse.data;
 
-    
-      updateTokens(accessToken, refreshToken);
+      /* ✅ Update Zustand */
+      setTokens(accessToken, refreshToken);
+
       accessTokenCache = accessToken;
       refreshTokenCache = refreshToken;
-
-      api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
       processQueue(null, accessToken);
 

@@ -18,6 +18,7 @@ import { LocationSelection } from "./components/LocationSelection";
 import { OnboardingActions } from "./components/OnboardingActions";
 import { CommonCard } from "@/components/common/CommonCard";
 import { useAuthStore } from "@/core/store/auth";
+import type { WorkerStatus } from "../domain/entities/workerstatus";
 
 export default function MultiSelectDropdownCard() {
   const [selectedServices, setSelectedServices] = React.useState<ServiceCategory[]>([]);
@@ -62,14 +63,13 @@ export default function MultiSelectDropdownCard() {
 
     mutation.mutate(payload, {
       onSuccess: () => {
-        useAuthStore.getState().updateUserProfile({
+     useAuthStore.getState().updateWorker({
           categoryIds: payload.categoryIds,
           serviceTierIds: payload.serviceTierIds,
-          status: payload.status,
+          status: payload.status as WorkerStatus,
           serviceRadius: payload.serviceRadius,
           location: payload.location,
         });
-
         navigate("/services/documents");
       },
       onError: () => toast.error("Update failed"),

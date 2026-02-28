@@ -32,10 +32,13 @@ import AvailableBookingPage from './pages/Booking/AvailableBooking/presentation/
 import CurrentBookingPage from './pages/Booking/CurrentBooking/presentation/currentbooking.page';
 import OngoingServicesPage from './pages/Booking/OngoingServices/presentation/ongoingservices.page';
 
+
 function AppContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
- 
+
+
+
   useDynamicLocation();
 useEffect(() => {
   console.log("Current URL:", window.location.pathname);

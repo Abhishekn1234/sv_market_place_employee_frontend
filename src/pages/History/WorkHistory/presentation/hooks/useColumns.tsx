@@ -10,15 +10,17 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useCancel } from "@/pages/AssignedWorks/presentation/hooks/useCancel";
 import { useTheme } from "@/context/ThemeContext";
+type Props = {
+  onStartWork: (work: Work) => void; // callback when Start is clicked
+};
 
-export function useWorkColumns(): TableColumn<Work>[] {
+export function useWorkColumns({ onStartWork }: Props): TableColumn<Work>[] {
   const { translations, t } = useLanguage();
   const [locations, setLocations] = useState<Record<string, string>>({});
   const { mutate: cancelWorkMutation } = useCancel();
   const { theme } = useTheme();
   const WorkHistory = translations.workHistory.tableHeaders;
 
-  
   const baseClass = "px-4 break-words whitespace-normal";
   const headerClass = theme === "dark"
     ? `${baseClass} bg-gray-900 text-gray-50`
@@ -125,36 +127,49 @@ export function useWorkColumns(): TableColumn<Work>[] {
             : "hourly"
         ),
     },
-    {
-      key: "actions",
-      header: WorkHistory.actions || "Actions",
-      className: headerClass,
-      render: (w) => {
-        if (w.status.toLowerCase() === "cancelled") {
-          return (
-            <span className="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-700 font-medium">
-              {t("workHistory.actions.cancelled") || "Cancelled"}
-            </span>
-          );
-        }
+   {
+  key: "actions",
+  header: WorkHistory.actions || "Actions",
+  className: headerClass,
+  render: (w) => {
+    if (w.status.toLowerCase() === "cancelled") {
+      return (
+        <span className="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-700 font-medium">
+          {t("workHistory.actions.cancelled") || "Cancelled"}
+        </span>
+      );
+    }
 
-        return (
-          <Button
-            size="sm"
-            className="cursor-pointer"
-            variant="destructive"
-            onClick={() => {
-              if (!w.booking?.id) {
-                toast.error("Booking not found for this work");
-                return;
-              }
-              cancelWorkMutation(w.booking.id);
-            }}
-          >
-            {t("workHistory.actions.cancel")}
-          </Button>
-        );
-      },
-    },
+    return (
+      <div className="flex gap-2">
+        {/* Start Button */}
+         <Button
+        size="sm"
+        variant="outline"
+        onClick={() => onStartWork(w)}
+      >
+        {t("workHistory.actions.start") || "Start"}
+      </Button>
+        {/* Cancel Button */}
+        <Button
+          size="sm"
+          className="cursor-pointer"
+          variant="destructive"
+          onClick={() => {
+            if (!w.booking?.id) {
+              toast.error("Booking not found for this work");
+              return;
+            }
+            cancelWorkMutation(w.booking.id);
+          }}
+        >
+          {t("workHistory.actions.cancel") || "Cancel"}
+        </Button>
+      </div>
+    );
+  },
+},
+
+
   ];
 }

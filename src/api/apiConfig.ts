@@ -1,4 +1,4 @@
-export const baseURL = "https://sv-marketplace-worker-api.vercel.app";
+export const baseURL = "http://localhost:3000";
 // http://192.168.29.138:3000
-
+// https://sv-marketplace-worker-api.vercel.app
 // https://sv-marketplace-worker-api.vercel.app

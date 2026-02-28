@@ -1,3 +1,4 @@
+import { useState, useEffect, useMemo } from "react";
 import {
   User,
   PhoneCall,
@@ -9,61 +10,60 @@ import {
   TypeIcon,
   LucideDiameter,
   TimerIcon,
+  Calendar,
 } from "lucide-react";
-
-import { useMemo } from "react";
-import { useStringUtils } from "../hooks/useStringutils";
+import { reverseGeocode } from "@/components/common/CommonMap";
 import type { Booking } from "../../domain/entities/booking";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
+import { useStringUtils } from "../hooks/useStringutils";
 
 type Props = {
   booking: Booking;
   bookingCategories: ServiceCategory[];
 };
 
-export function BookingExpandedRow({
-  booking,
-  bookingCategories,
-}: Props) {
-  const { formatTime, formatSmartDate, formatDuration } =
-    useStringUtils();
+export function BookingExpandedRow({ booking, bookingCategories }: Props) {
+  const { formatTime, formatSmartDate, formatDuration } = useStringUtils();
 
- 
-  const category = useMemo<ServiceCategory | undefined>(() => {
+  const [locationName, setLocationName] = useState<string>("—");
+
+  // Reverse geocode coordinates to get human-readable address
+  useEffect(() => {
     if (
-      typeof booking.service === "object" &&
-      booking.service?.category
+      booking.location &&
+      typeof booking.location !== "string" &&
+      booking.location.type === "Point" &&
+      Array.isArray(booking.location.coordinates)
     ) {
+      const [lng, lat] = booking.location.coordinates;
+      reverseGeocode(lat, lng)
+        .then((name) => setLocationName(name))
+        .catch(() => setLocationName("—"));
+    }
+  }, [booking.location]);
+
+  const category = useMemo<ServiceCategory | undefined>(() => {
+    if (typeof booking.service === "object" && booking.service?.category) {
       return bookingCategories.find(
-        (c) => c._id === (booking.service as Exclude<typeof booking.service, string>)?.category
+        (c) =>
+          c._id ===
+          (booking.service as Exclude<typeof booking.service, string>)?.category
       );
     }
     return undefined;
   }, [booking.service, bookingCategories]);
 
-  
   const serviceName =
-    typeof booking.service === "string"
-      ? booking.service
-      : booking.service?.name ?? "—";
+    typeof booking.service === "string" ? booking.service : booking.service?.name ?? "—";
 
- 
   const serviceTierName =
     typeof booking.serviceTier === "string"
       ? booking.serviceTier
       : booking.serviceTier?.displayName ?? "—";
 
- 
-  const locationText =
-    typeof booking.location === "string"
-      ? booking.location
-      : booking.location
-      ? `${booking.location.coordinates[1]}, ${booking.location.coordinates[0]}`
-      : "—";
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
-     
+      {/* Customer Details */}
       <div className="space-y-3">
         <div className="font-medium">Customer Details</div>
 
@@ -77,28 +77,27 @@ export function BookingExpandedRow({
           <span>{booking.clientEmail}</span>
         </div>
 
-        <div className="flex gap-2">
-          <MapPin className="h-4 w-4" />
-          <span>{locationText}</span>
-        </div>
+      <div className="flex items-start gap-2">
+  <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
+  <span className="break-words whitespace-normal">
+    {locationName}
+  </span>
+</div>
       </div>
 
-    
+      {/* Service Details */}
       <div className="space-y-3">
         <div className="font-medium">Service Details</div>
 
-     
         <div className="flex gap-2">
           <Layers2 className="h-4 w-4" />
           <span>Service Category : {category?.name ?? "—"}</span>
         </div>
 
-       
         <div className="flex gap-2">
           <Layers3Icon className="h-4 w-4" />
           <span>Service Item : {serviceName}</span>
         </div>
-
 
         <div className="flex gap-2">
           <Layers className="h-4 w-4" />
@@ -106,7 +105,7 @@ export function BookingExpandedRow({
         </div>
       </div>
 
-      
+      {/* Work Details */}
       <div className="space-y-3">
         <div className="font-medium">Work Details</div>
 
@@ -126,14 +125,17 @@ export function BookingExpandedRow({
         </div>
 
         <div className="flex gap-2">
+          <Calendar className="h-4 w-4" />
+          <span>
+            Start Date:{" "}
+            {booking.startDate ? formatSmartDate(new Date(booking.startDate)) : "—"}
+          </span>
+        </div>
+
+        <div className="flex gap-2">
           <TimerIcon className="h-4 w-4" />
           <span>
-            {booking.pricingMode
-              ? formatDuration(
-                  booking.duration,
-                  booking.pricingMode
-                )
-              : "—"}
+            {booking.pricingMode ? formatDuration(booking.duration, booking.pricingMode) : "—"}
           </span>
         </div>
       </div>

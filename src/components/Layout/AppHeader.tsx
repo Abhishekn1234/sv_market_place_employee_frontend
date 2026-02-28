@@ -46,53 +46,42 @@ export default function AppHeader({
   const { language, setLanguage, translations } = useLanguage();
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
+  // ✅ Updated to use new store
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const updateUserStatus = useAuthStore((s) => s.updateUserStatus);
 
-  const { employeeData, logout, updateUserStatus } = useAuthStore();
-
-  const fullName = employeeData?.user?.fullName || "User";
-  const profileImage = employeeData?.user?.profilePictureUrl;
+  const fullName = user?.fullName || "User";
+  const profileImage = user?.profilePictureUrl;
 
   const homeTranslations = translations.HomePage;
-  console.log(translations)
   const isRTL = language === "AR";
 
   const { updateStatus, loading } = useWorkerStatus();
-
-  
   const [isOnline, setIsOnline] = useState(false);
 
-
   useEffect(() => {
-    const status = employeeData?.user?.status;
+    const status = user?.worker?.status;
     if (status) {
       setIsOnline(status === "ONLINE");
     }
-  }, [employeeData?.user?.status]);
-
+  }, [user?.worker?.status]);
 
   const handleToggle = (checked: boolean) => {
     const newStatus: WorkerStatus = checked ? "ONLINE" : "OFFLINE";
 
     setIsOnline(checked);
-
-   
-    updateUserStatus(newStatus);
-
-    updateStatus(checked);
+    updateUserStatus(newStatus); // update in store
+    updateStatus(checked); // update server
   };
 
-  const canToggle =
-    employeeData?.user?.status === "ONLINE" ||
-    employeeData?.user?.status === "OFFLINE";
+  const canToggle = user?.worker?.status === "ONLINE" || user?.worker?.status === "OFFLINE";
 
   const handleLogout = () => {
     toast.success("Logged out successfully");
-
-    logout(); 
-
+    logout(); // clear store
     setDropdownOpen(false);
     setMobileOpen(false);
-
     navigate("/login", { replace: true });
   };
 
@@ -101,10 +90,9 @@ export default function AppHeader({
       className={`flex items-center px-4 py-3 border-b transition-all ${
         theme === "dark"
           ? "border-gray-800 bg-gray-900 text-gray-950 cursor-pointer"
-          : "border-gray-200 bg-gray-50 text-gray-900 cusror-pointer"
+          : "border-gray-200 bg-gray-50 text-gray-900 cursor-pointer"
       }`}
     >
-  
       <Button
         variant="ghost"
         onClick={() =>
@@ -112,14 +100,13 @@ export default function AppHeader({
         }
         className="p-2"
       >
-        <Menu className={`${theme==="dark"?"h-5 w-5 text-gray-100":"h-5 w-5"}`} />
+        <Menu className={`${theme === "dark" ? "h-5 w-5 text-gray-100" : "h-5 w-5"}`} />
       </Button>
 
       <div className="flex-1" />
 
       <div className="flex items-center gap-4">
-      
-        {employeeData?.user?.status && (
+        {user?.worker?.status && (
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
             {canToggle ? (
               <>
@@ -134,20 +121,17 @@ export default function AppHeader({
                     isOnline ? "text-green-600" : "text-gray-500"
                   }`}
                 >
-                  {isOnline
-                    ? homeTranslations.online
-                    : homeTranslations.offline}
+                  {isOnline ? homeTranslations.online : homeTranslations.offline}
                 </span>
               </>
             ) : (
               <span className="text-sm font-semibold text-orange-600">
-                {employeeData.user.status.replace("_", " ")}
+                {user.worker.status.replace("_", " ")}
               </span>
             )}
           </div>
         )}
 
-       
         <Button variant="ghost" onClick={toggleTheme} className="p-2 cursor-pointer">
           {theme === "light" ? (
             <Moon className="h-5 w-5 text-gray-700" />
@@ -170,7 +154,13 @@ export default function AppHeader({
           </Button>
 
           {langDropdownOpen && (
-            <div className={`${theme==="dark"?"absolute right-0 mt-2 w-36 rounded-md border shadow-lg z-50 text-gray-100 cursor-pointer":"absolute right-0 mt-2 w-36 rounded-md border shadow-lg z-50 text-gray-900 cursor-pointer"}`}>
+            <div
+              className={`${
+                theme === "dark"
+                  ? "absolute right-0 mt-2 w-36 rounded-md border shadow-lg z-50 text-gray-100 cursor-pointer"
+                  : "absolute right-0 mt-2 w-36 rounded-md border shadow-lg z-50 text-gray-900 cursor-pointer"
+              }`}
+            >
               {languages.map((lang) => (
                 <button
                   key={lang.code}
@@ -188,7 +178,6 @@ export default function AppHeader({
           )}
         </div>
 
-        
         <div className="relative">
           <Button
             variant="ghost"
@@ -211,7 +200,13 @@ export default function AppHeader({
                   .toUpperCase()}
               </div>
             )}
-            <span className={`${theme==="dark"?"text-sm font-medium truncate max-w-[120px] text-gray-100 cursor-pointer":"text-sm font-medium truncate max-w-[120px] text-gray-900 cursor-pointer"}`}>
+            <span
+              className={`${
+                theme === "dark"
+                  ? "text-sm font-medium truncate max-w-[120px] text-gray-100 cursor-pointer"
+                  : "text-sm font-medium truncate max-w-[120px] text-gray-900 cursor-pointer"
+              }`}
+            >
               {fullName}
             </span>
           </Button>

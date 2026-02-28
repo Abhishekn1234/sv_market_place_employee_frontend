@@ -17,7 +17,8 @@ import {
   Shield,
   Briefcase,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/core/store/auth";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<Login>({
@@ -25,10 +26,12 @@ export default function LoginPage() {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
- const navigate = useNavigate();
-  const { mutate: LoginMutate, isPending: isLoading } = useLogin();
 
+  const { mutate: loginMutate, isPending: isLoading } = useLogin();
 
+const setAuth = useAuthStore((s) => s.setAuth);
+const setTokens = useAuthStore((s) => s.setTokens);
+const navigate = useNavigate();
 
 const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault();
@@ -38,13 +41,24 @@ const handleSubmit = (e: React.FormEvent) => {
     return;
   }
 
-  LoginMutate(formData, {
-    onSuccess: () => {
-      toast.success("Login successful");
+  loginMutate(formData, {
+    onSuccess: (data) => {
+      console.log("Login success:", data);
+
+   
+      setTokens(data.accessToken, data.refreshToken);
+
+      
+      if (data.user) {
+        setAuth(data.user);
+      }
+
+      toast.success("Login successfully");
       navigate("/services/employee");
     },
-    onError: (err: any) => {
-      toast.error("Login failed: " + (err?.message || "Something went wrong"));
+
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 };

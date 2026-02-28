@@ -43,13 +43,13 @@ export function useStringUtils() {
 
   return time;
 };
-const formatSmartDate = (dateStr: string): string => {
-  if (!dateStr) return "";
+const formatSmartDate = (dateInput: string | Date): string => {
+  if (!dateInput) return "";
 
-  
-  const [month, day, year] = dateStr.split("/").map(Number);
-  const inputDate = new Date(year, month - 1, day);
+  // Ensure we have a Date object
+  const inputDate = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
 
+  // Reset hours to midnight for comparison
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -71,6 +71,7 @@ const formatSmartDate = (dateStr: string): string => {
 
   return formattedDate;
 };
+
 
  const formatDuration = (
     duration: number,

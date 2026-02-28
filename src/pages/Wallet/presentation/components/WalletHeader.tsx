@@ -30,7 +30,7 @@ export function WalletHeader({ employeeName, employeeTier }: Props) {
       }`}
     >
       {/* Name */}
-      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 break-words">
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-400 break-words">
         {employeeName}
       </h1>
 

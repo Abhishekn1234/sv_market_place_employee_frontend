@@ -7,6 +7,7 @@ import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 export interface Booking {
   id: string;
   clientName: string;
+  startDate?:Date;
   clientEmail: string;
   clientPhone?:string;
   clientPhoto?:string;

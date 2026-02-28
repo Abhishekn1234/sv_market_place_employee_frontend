@@ -17,5 +17,10 @@ export type WorkHistoryTranslations = {
   extraInfo: Record<string, string>;
   actions?:{
     cancel:string;
+    start:string;
+    viewDetails:string;
+    stopwork:string;
+    resumeWork:string;
+    completeWork:string;
   };
 };

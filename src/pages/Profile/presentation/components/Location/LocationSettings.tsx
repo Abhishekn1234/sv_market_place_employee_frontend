@@ -30,13 +30,13 @@ export default function LocationSettings({ setActiveTab }: Props) {
   const serviceSettingsMutation = useServiceSettings();
 
   const getEmployeeStatus = () => {
-    const { employeeData } = useAuthStore.getState();
-    const status = employeeData?.user?.status;
+    const { user } = useAuthStore.getState();
+    const status = user?.worker?.status;
     return status === "ONLINE" ? "ONLINE" : "OFFLINE";
   };
     const hasAllRequiredDocuments = () => {
-    const { employeeData } = useAuthStore.getState();
-    const documents = employeeData?.user?.documents;
+    const { user} = useAuthStore.getState();
+    const documents = user?.documents;
 
     if (!Array.isArray(documents)) return false;
 
@@ -60,14 +60,14 @@ export default function LocationSettings({ setActiveTab }: Props) {
 
 useEffect(() => {
   const init = async () => {
-    const { employeeData } = useAuthStore.getState();
-    const user = employeeData?.user;
+    const { user } = useAuthStore.getState();
+   
     if (!user) return;
 
-    setStatus(user.status ?? "OFFLINE");
-    setRadius(user.serviceRadius ?? 500);
-    setSelectedTiers(user.serviceTierIds ?? []);
-    setSelectedCategories(user.categoryIds ?? []);
+    setStatus(user.worker?.status ?? "OFFLINE");
+    setRadius(user.worker?.serviceRadius ?? 500);
+    setSelectedTiers(user.worker?.serviceTierIds ?? []);
+    setSelectedCategories(user.worker?.categoryIds ?? []);
 
  
     if (user.location?.coordinates?.length === 2) {
@@ -129,12 +129,12 @@ useEffect(() => {
   serviceSettingsMutation.mutate(payload, {
     onSuccess: () => {
       
-      useAuthStore.getState().updateUserProfile({
-        serviceTierIds: selectedTiers,
-        categoryIds: selectedCategories,
-        serviceRadius: radius,
-        location: { type: "Point", coordinates: [lng, lat] },
-      });
+      useAuthStore.getState().updateWorker({
+  serviceTierIds: selectedTiers,
+  categoryIds: selectedCategories,
+  serviceRadius: radius,
+  location: { type: "Point", coordinates: [lng, lat] },
+});
 
       toast.success("Updated successfully");
       setModalOpen(false);

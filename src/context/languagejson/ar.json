@@ -305,7 +305,12 @@
       "actions": "الإجراءات"
     },
     "actions": {
-      "cancel": "إلغاء"
+      "cancel": "إلغاء",
+      "start":"بدء",
+      "viewDetails": "عرض التفاصيل",
+      "stopwork": "إيقاف العمل",
+      "resumeWork": "استئناف العمل",
+      "completeWork": "إكمال العمل"
     },
 
     "pagination": {

@@ -7,7 +7,7 @@ export class WorkHistoryRepoImpl implements WorkHistoryRepo {
   async getWorkList(): Promise<Work[]> {
     const response = await api.get('/booking/get-assigned-booking');
     const data = response.data;
-
+   console.log(data);
     
     const works: Work[] = mapApiToWork(data);
 

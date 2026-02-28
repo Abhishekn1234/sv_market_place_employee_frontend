@@ -4,180 +4,196 @@ import { persist } from "zustand/middleware";
 import type { ApiDocument } from "@/pages/Profile/domain/entities/documents";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
+import type { Worker } from "@/pages/Profile/domain/entities/workertype";
 
+/* ----------------------------- Helpers ----------------------------- */
+
+const mapStatus = (status: string | number): WorkerStatus => {
+  switch (status) {
+    case "ONLINE":
+    case 1:
+    case "1":
+      return "ONLINE";
+    case "OFFLINE":
+    case 0:
+    case "0":
+      return "OFFLINE";
+    case "BUSY":
+      return "BUSY";
+    default:
+      return "OFFLINE";
+  }
+};
+
+/* ----------------------------- Types ----------------------------- */
 
 export interface EmployeeUser {
-  _id?:string
+  _id?: string;
   fullName?: string;
   email?: string;
-  address?: string;
   phone?: string;
-preferredTheme?: "light" | "dark";
+  address?: string;
+  location?: GeoPoint;
+
+  preferredTheme?: "light" | "dark";
+  preferredLanguage?: "EN" | "AR" | "HI";
+
   profileImage?: string;
   profilePictureUrl?: string;
   profilePicturePublicId?: string;
 
-  idProof?: string;
-  addressProof?: string;
-  photoProof?: string;
-
+  documents?: ApiDocument[];
   isVerified?: boolean;
   kycStatus?: string;
-  documents?: ApiDocument[];
-  serviceRadius?:number
+
   worker?: Worker;
-  location?: GeoPoint;
-   serviceTierIds?:string[];
-   serviceIds?:string[];
-   categoryIds?:string[];
-  status?: WorkerStatus |string;
-
-  /** ✅ user preference */
-  preferredLanguage?: "EN" | "AR" | "HI";
-
-  [key: string]: unknown;
-}
-
-export interface EmployeeData {
-  accessToken: string;
-  refreshToken: string;
-  user?: EmployeeUser;
 }
 
 interface AuthState {
-  employeeData: EmployeeData | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  user: EmployeeUser | null;
   isAuthenticated: boolean;
 
-  
-  login: (data: EmployeeData) => void;
+  /* Core */
+  setAuth: (user: EmployeeUser) => void;
+  setTokens: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
 
-  
-  updateTokens: (accessToken: string, refreshToken: string) => void;
-
-
-  updateUserStatus: (status: WorkerStatus) => void;
+  /* Updates */
   updateUserProfile: (payload: Partial<EmployeeUser>) => void;
+  updateUserStatus: (status: WorkerStatus) => void;
+  updateWorker: (payload: Partial<Worker>) => void;
+
+  /* Preferences */
   setPreferredLanguage: (lang: "EN" | "AR" | "HI") => void;
-    setPreferredTheme: (theme: "light" | "dark") => void;
-     setUserLocation: (location: GeoPoint) => void;
+  setPreferredTheme: (theme: "light" | "dark") => void;
+  setUserLocation: (location: GeoPoint) => void;
 }
 
-
+/* ----------------------------- Store ----------------------------- */
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      employeeData: null,
+      accessToken: null,
+      refreshToken: null,
+      user: null,
       isAuthenticated: false,
 
-    
-      login: (data) =>
+      /* ------------------ SET USER ------------------ */
+      setAuth: (user) =>
         set({
-          employeeData: data,
+          user,
           isAuthenticated: true,
         }),
 
-      
-      logout: () => {
-        useAuthStore.persist.clearStorage();
+      /* ------------------ SET TOKENS ------------------ */
+      setTokens: (accessToken, refreshToken) =>
         set({
-          employeeData: null,
+          accessToken,
+          refreshToken,
+          isAuthenticated: true,
+        }),
+
+      /* ------------------ LOGOUT ------------------ */
+      logout: () =>
+        set({
+          accessToken: null,
+          refreshToken: null,
+          user: null,
           isAuthenticated: false,
-        });
-      },
+        }),
 
-      updateTokens: (accessToken, refreshToken) => {
-        const state = get();
-        if (!state.employeeData) return;
+      /* ------------------ UPDATE PROFILE ------------------ */
+      updateUserProfile: (payload) => {
+        const { user } = get();
+        if (!user) return;
 
         set({
-          employeeData: {
-            ...state.employeeData,
-            accessToken,
-            refreshToken,
+          user: {
+            ...user,
+            ...payload,
           },
         });
       },
 
+      /* ------------------ UPDATE STATUS ------------------ */
       updateUserStatus: (status) => {
-        const state = get();
-        if (!state.employeeData?.user) return;
+        const { user } = get();
+        if (!user?.worker) return;
 
         set({
-          employeeData: {
-            ...state.employeeData,
-            user: {
-              ...state.employeeData.user,
-              status,
+          user: {
+            ...user,
+            worker: {
+              ...user.worker,
+              status: mapStatus(status),
             },
           },
         });
       },
 
-  
-      updateUserProfile: (payload) => {
-        const state = get();
-        if (!state.employeeData?.user) return;
+      /* ------------------ UPDATE WORKER ------------------ */
+      updateWorker: (payload) => {
+        const { user } = get();
+        if (!user?.worker) return;
 
         set({
-          employeeData: {
-            ...state.employeeData,
-            user: {
-              ...state.employeeData.user,
+          user: {
+            ...user,
+            worker: {
+              ...user.worker,
               ...payload,
             },
           },
         });
       },
+
+      /* ------------------ LANGUAGE ------------------ */
       setPreferredLanguage: (lang) => {
-  const state = get();
-  if (!state.employeeData?.user) return;
+        const { user } = get();
+        if (!user) return;
 
-  set({
-    employeeData: {
-      ...state.employeeData,
-      user: {
-        ...state.employeeData.user,
-        preferredLanguage: lang,
+        set({
+          user: {
+            ...user,
+            preferredLanguage: lang,
+          },
+        });
       },
-    },
-  });
-},
-setPreferredTheme: (theme: "light" | "dark") => {
-  const state = get();
-  if (!state.employeeData?.user) return;
 
-  set({
-    employeeData: {
-      ...state.employeeData,
-      user: {
-        ...state.employeeData.user,
-        preferredTheme: theme,
+      /* ------------------ THEME ------------------ */
+      setPreferredTheme: (theme) => {
+        const { user } = get();
+        if (!user) return;
+
+        set({
+          user: {
+            ...user,
+            preferredTheme: theme,
+          },
+        });
       },
-    },
-  });
-},
-setUserLocation: (location) => {
-  const state = get();
-  if (!state.employeeData?.user) return;
 
-  set({
-    employeeData: {
-      ...state.employeeData,
-      user: {
-        ...state.employeeData.user,
-        location,
+      /* ------------------ LOCATION ------------------ */
+      setUserLocation: (location) => {
+        const { user } = get();
+        if (!user?.worker) return;
+
+        set({
+          user: {
+            ...user,
+            worker: {
+              ...user.worker,
+              location,
+            },
+          },
+        });
       },
-    },
-  });
-},
-
-
     }),
-    
     {
-      name: "auth-store",
+      name: "auth-storage",
     }
   )
 );
@@ -185,13 +201,16 @@ setUserLocation: (location) => {
 
 
 export const useEmployeeUser = () =>
-  useAuthStore((s) => s.employeeData?.user);
+  useAuthStore((s) => s.user);
 
-export const useEmployeeStatus = () =>
-  useAuthStore((s) => s.employeeData?.user?.status);
+export const useEmployeeWorker = () =>
+  useAuthStore((s) => s.user?.worker);
 
 export const useIsAuthenticated = () =>
   useAuthStore((s) => s.isAuthenticated);
 
 export const usePreferredLanguage = () =>
-  useAuthStore((s) => s.employeeData?.user?.preferredLanguage);
+  useAuthStore((s) => s.user?.preferredLanguage);
+
+export const usePreferredTheme = () =>
+  useAuthStore((s) => s.user?.preferredTheme);

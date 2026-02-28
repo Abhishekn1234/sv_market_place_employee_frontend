@@ -20,7 +20,7 @@ import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 
 
 export const getLastNotifiedLocation = () => {
-  return useAuthStore.getState().employeeData?.user?.location ?? null;
+  return useAuthStore.getState().user?.location ?? null;
 };
 
 /**
@@ -28,15 +28,9 @@ export const getLastNotifiedLocation = () => {
  */
 export const setLastNotifiedLocation = (location: GeoPoint) => {
   const state = useAuthStore.getState();
-  if (!state.employeeData?.user) return;
+  if (!state.user?.worker) return;
 
-  useAuthStore.setState({
-    employeeData: {
-      ...state.employeeData,
-      user: {
-        ...state.employeeData.user,
-        location,
-      },
-    },
+  useAuthStore.getState().updateWorker({
+    location,
   });
 };
