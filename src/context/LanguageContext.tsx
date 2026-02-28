@@ -20,7 +20,7 @@ const allTranslations: Record<Language, TranslationSchema> = {
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const userLang = useAuthStore((s) => s.employeeData?.user?.preferredLanguage);
+  const userLang = useAuthStore((s) => s.user?.preferredLanguage);
 
   const [language, setLanguage] = useState<Language>(userLang || "EN");
 

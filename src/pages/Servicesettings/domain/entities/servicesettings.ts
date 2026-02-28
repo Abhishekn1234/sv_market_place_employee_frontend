@@ -6,7 +6,7 @@ export interface WorkerPayload {
   categoryIds?: string[];
   serviceTierIds?: string[];
   status: WorkerStatus | string;
-  location?: GeoPoint;  // ✅ location goes here
+  location?: GeoPoint;  
  serviceRadius?:number;
 }
 

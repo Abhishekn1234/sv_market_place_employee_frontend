@@ -13,7 +13,7 @@ interface ThemeContextProps {
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const userTheme = useAuthStore((s) => s.employeeData?.user?.preferredTheme);
+  const userTheme = useAuthStore((s) => s.user?.preferredTheme);
   const setPreferredTheme = useAuthStore((s) => s.setPreferredTheme);
 
   // Initialize theme from store if available, otherwise default to light

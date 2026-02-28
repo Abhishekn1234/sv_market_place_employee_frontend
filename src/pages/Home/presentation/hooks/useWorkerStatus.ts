@@ -4,17 +4,18 @@ import type { Worker } from "@/pages/Profile/domain/entities/workertype";
 import { useServiceSettings } from "@/pages/Servicesettings/presentation/hooks/useServicesettings";
 import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/servicesettings";
 import { useAuthStore } from "@/core/store/auth";
+import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
 
 export function useWorkerStatus() {
   const [loading, setLoading] = useState(false);
 
-  const { employeeData, updateUserStatus } = useAuthStore();
+  const { user, updateUserStatus } = useAuthStore();
 
   const serviceSettingsMutation = useServiceSettings();
 
   // 🔹 Worker derived from Zustand (single source of truth)
-  const worker: Worker | null = employeeData?.user
-    ? (employeeData.user as  any as Worker)
+  const worker: Worker | null = user?.worker
+    ? (user.worker as  any as Worker)
     : null;
 
   // 🔹 Update worker status
@@ -31,7 +32,7 @@ export function useWorkerStatus() {
       serviceSettingsMutation.mutate(payload, {
         onSuccess: () => {
           // ✅ Update Zustand store (auto-persisted)
-          updateUserStatus(payload.status);
+         updateUserStatus(user?.worker?.status as WorkerStatus)
 
           toast.success(`Status updated to ${payload.status}`);
           setLoading(false);
