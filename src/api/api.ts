@@ -2,24 +2,12 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { baseURL } from "./apiConfig";
 import { useAuthStore } from "@/core/store/auth";
 
-/* ---------------- Initial Token Cache ---------------- */
-
-let accessTokenCache: string | null =
-  useAuthStore.getState().accessToken ?? null;
-
-let refreshTokenCache: string | null =
-  useAuthStore.getState().refreshToken ?? null;
-
-/* ---------------- Axios Instance ---------------- */
-
 const api = axios.create({
   baseURL,
   headers: {
     "Content-Type": "application/json",
   },
 });
-
-/* ---------------- Refresh Handling ---------------- */
 
 let isRefreshing = false;
 
@@ -36,8 +24,6 @@ const processQueue = (error: any, token: string | null = null) => {
   }
 };
 
-/* ---------------- Request Interceptor ---------------- */
-
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = useAuthStore.getState().accessToken;
@@ -50,8 +36,6 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
-/* ---------------- Response Interceptor ---------------- */
 
 api.interceptors.response.use(
   (response) => response,
@@ -71,8 +55,6 @@ api.interceptors.response.use(
       logout();
       return Promise.reject(error);
     }
-
-    /* ---------------- If Already Refreshing ---------------- */
 
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
@@ -95,15 +77,10 @@ api.interceptors.response.use(
         { refreshToken: currentRefreshToken },
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log(refreshResponse);
 
       const { accessToken, refreshToken } = refreshResponse.data;
 
-      /* ✅ Update Zustand */
       setTokens(accessToken, refreshToken);
-
-      accessTokenCache = accessToken;
-      refreshTokenCache = refreshToken;
 
       processQueue(null, accessToken);
 
