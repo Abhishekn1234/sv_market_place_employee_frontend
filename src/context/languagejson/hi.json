@@ -456,7 +456,8 @@
        "cancelled": "रद्द",
       "confirmed": "पुष्टि की गई",
       "inProgress": "प्रगति में",
-      "requested": "अनुरोधित"
+      "requested": "अनुरोधित",
+       "workCompletedPending": "कार्य पूर्ण लेकिन लंबित"
     },
       "table": {
       "service": "सेवा",

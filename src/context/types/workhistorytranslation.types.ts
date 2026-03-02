@@ -22,5 +22,6 @@ export type WorkHistoryTranslations = {
     stopwork:string;
     resumeWork:string;
     completeWork:string;
+    
   };
 };

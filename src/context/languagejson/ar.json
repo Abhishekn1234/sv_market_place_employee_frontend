@@ -500,7 +500,8 @@
        "cancelled": "ملغاة",
       "confirmed": "مؤكدة",
       "inProgress": "قيد التنفيذ",
-      "requested": "تم الطلب"
+      "requested": "تم الطلب",
+        "workCompletedPending": "العمل مكتمل لكنه معلق"
     },
     "table": {
       "service": "الخدمة",

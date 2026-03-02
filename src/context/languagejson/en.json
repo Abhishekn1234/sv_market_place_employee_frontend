@@ -502,7 +502,8 @@
       "cancelled": "Cancelled",
       "confirmed": "Confirmed",
       "inProgress": "In Progress",
-      "requested": "Requested"
+      "requested": "Requested",
+        "workCompletedPending": "Work Completed Pending"
     },
     "pagination": {
       "previous": "Previous",

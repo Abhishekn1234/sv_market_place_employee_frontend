@@ -119,7 +119,7 @@ useEffect(() => {
   const [lat, lng] = tempLocation;
 
   const payload: WorkerPayload = {
-    status: status || "ONLINE",
+   status: status,
     serviceTierIds: selectedTiers,
     categoryIds: selectedCategories,
     serviceRadius: radius,

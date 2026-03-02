@@ -38,5 +38,13 @@ export function useStatusConfig(): Record<
       label: statusOptions.ongoing,
       color: "bg-red-100 text-red-700",
     },
+    workCompletedPending:{
+      label:statusOptions.completed,
+      color:"bg-blue-100"
+    },
+    WORK_COMPLETED_PENDING:{
+      label:statusOptions.completed,
+      color:"bg-green-100"
+    }
   };
 }

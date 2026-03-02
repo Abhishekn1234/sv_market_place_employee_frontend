@@ -5,4 +5,4 @@ export type WorkerStatus =
   | "IN_SERVICE"
   | "WAITING_DOCUMENTS"
   | "PENDING_APPROVAL"
-  | "REJECTED"|"BUSY" ;
+  | "REJECTED"|"BUSY" |string ;
