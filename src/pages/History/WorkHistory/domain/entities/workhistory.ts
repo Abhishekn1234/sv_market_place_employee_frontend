@@ -4,7 +4,7 @@ import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/se
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 
 export interface Work {
-  id: string; 
+  _id: string; 
   status: WorkStatus; 
   assignedAt: string; 
   booking: Booking

@@ -3,23 +3,25 @@ import type { WorkStatus } from "../../domain/entities/workstatus";
 import type { Booking } from "@/pages/History/BookingHistory/domain/entities/booking";
 
 export function mapApiToWork(apiData: any[]): Work[] {
-  const statusMap: Record<string, WorkStatus> = {
-    ASSIGNED: "assigned",
-    WORKER_ACCEPTED: "work-accepted",
-    WORK_CANCELLED: "work-cancelled",
-    COMPLETED: "completed",
-    IN_PROGRESS: "in-progress",
-  };
+const statusMap: Record<string, WorkStatus> = {
+  ASSIGNED: "assigned",
+  WORKER_ACCEPTED: "workAccepted",
+  WORK_CANCELLED: "workCancelled",
+  COMPLETED: "completed",
+  IN_PROGRESS: "inProgress",
+  STARTED: "inProgress",
+  WORK_COMPLETED_PENDING: "workCompletedPending",
+};
 
   return apiData.map((w) => {
     const bookingData = w.booking;
 
     const booking: Booking = {
-      id: bookingData._id, // map API _id → Booking.id
+      id: bookingData._id,
       clientName: w.customer?.fullName || "Unknown",
-      clientEmail: w.customer?.phone || "", // fallback if email not provided
+      clientEmail: w.customer?.phone || "",
       serviceType: w.service?.name || "Unknown",
-      date: bookingData.date || "", 
+      date: bookingData.date || "",
       time: bookingData.time || "",
       duration: bookingData.duration || 1,
       status: bookingData.status,
@@ -28,12 +30,11 @@ export function mapApiToWork(apiData: any[]): Work[] {
       location: bookingData.location
         ? `${bookingData.location.coordinates[1]},${bookingData.location.coordinates[0]}`
         : "",
-    
     };
-    console.log(booking);
+
     return {
-      id: w._id,
-      status: statusMap[w.status] || "assigned",
+      _id: w._id,
+      status: statusMap[w.status] || "assigned", // 🔥 FIXED
       assignedAt: w.assignedAt,
       booking,
       service: w.service

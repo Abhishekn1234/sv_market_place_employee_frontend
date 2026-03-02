@@ -5,7 +5,7 @@ import type { WorkerStatus } from "./workerstatus";
 export interface WorkerPayload {
   categoryIds?: string[];
   serviceTierIds?: string[];
-  status: WorkerStatus | string;
+  status: WorkerStatus;
   location?: GeoPoint;  
  serviceRadius?:number;
 }

@@ -96,7 +96,7 @@ export function CommonTable<T>({
                 return (
                   <React.Fragment key={rowKey}>
                     {/* ROW */}
-                    <TableRow className="block md:table-row border md:border-0 mb-4 md:mb-0 rounded-lg md:rounded-none">
+                  <TableRow className="block md:table-row mb-4 md:mb-0 border-b md:border-0 last:border-b-0">
                       {renderedColumns.map((col) => {
                         const value =
                           col.render !== undefined

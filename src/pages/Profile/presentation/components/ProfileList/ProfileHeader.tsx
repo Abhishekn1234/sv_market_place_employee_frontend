@@ -85,7 +85,7 @@ export function ProfileHeader({
           <h2 className="text-base sm:text-lg md:text-xl font-semibold">
             {profile.fullName}
           </h2>
-          <span className="px-3 py-1 text-xs sm:text-sm rounded-full bg-gray-100">
+          <span className="px-3 py-1 text-xs sm:text-sm rounded-full">
             {profile.kycStatus}
           </span>
         </div>

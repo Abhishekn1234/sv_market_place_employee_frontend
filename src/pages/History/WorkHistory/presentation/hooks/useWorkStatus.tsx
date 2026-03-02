@@ -2,11 +2,18 @@ import { useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import type { Work } from "../../domain/entities/workhistory";
 import type { WorkStatsCard } from "../../domain/entities/workstats";
+import { getNormalizedStatus } from "../utils/workhistory";
 
 export function useWorkStatsCards(works: Work[]): WorkStatsCard[] {
   const { translations } = useLanguage();
 
   return useMemo(() => {
+    const counts = works.reduce((acc, w) => {
+      const status = getNormalizedStatus(w);
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
     return [
       {
         label: translations.workHistory.cards.totalWorks,
@@ -14,33 +21,33 @@ export function useWorkStatsCards(works: Work[]): WorkStatsCard[] {
       },
       {
         label: translations.workHistory.cards.completed,
-        value: works.filter((w) => w.status === "completed").length,
+        value: counts.completed || 0,
         color: "text-green-600",
       },
       {
         label: translations.workHistory.cards.inProgress,
-        value: works.filter((w) => w.status === "in-progress" || w.status === "in Progress").length,
+        value: counts.inProgress || 0,
         color: "text-blue-600",
       },
       {
-        label: translations.workHistory.cards.upcoming,
-        value: works.filter((w) => w.status === "upcoming").length,
-        color: "text-purple-600",
-      },
-      {
         label: translations.workHistory.cards.assigned,
-        value: works.filter((w) => w.status === "assigned").length,
+        value: counts.assigned || 0,
         color: "text-yellow-600",
       },
       {
         label: translations.workHistory.cards.workAccepted,
-        value: works.filter((w) => w.status === "work-accepted").length,
+        value: counts.workAccepted || 0,
         color: "text-teal-600",
       },
       {
         label: translations.workHistory.cards.workCancelled,
-        value: works.filter((w) => w.status === "work-cancelled").length,
+        value: counts.workCancelled || 0,
         color: "text-red-600",
+      },
+      {
+        label: translations.workHistory.cards.workCompletedPending,
+        value: counts.workCompletedPending || 0,
+        color: "text-orange-600",
       },
     ];
   }, [works, translations]);

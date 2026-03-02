@@ -50,7 +50,7 @@ export default function CommonTabs<T extends string>({
       className="w-full"
     >
       {/* Tabs Header */}
-      <div className="sticky top-0 z-10 bg-background">
+      <div className="sticky top-0 z-10">
         <TabsList
           className={`
             h-10 md:h-12

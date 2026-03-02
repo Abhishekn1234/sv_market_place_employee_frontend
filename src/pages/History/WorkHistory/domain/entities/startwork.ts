@@ -1,4 +1,5 @@
 export interface Startworkrequest{
     bookingId:string;
-    otp:string;
+    otp?:string;
+    
 }

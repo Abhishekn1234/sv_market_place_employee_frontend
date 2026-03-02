@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // OTP input
 import type { Work } from "../../domain/entities/workhistory";
 import { useStartWork } from "../hooks/useStartWork";
+import { toast } from "react-toastify";
 
 type Props = {
   work: Work; // Selected work
@@ -36,11 +37,11 @@ export default function StartWork({ work, open, onClose }: Props) {
     },
     {
       onSuccess: () => {
-        alert("Work started successfully!");
+     toast.success("Work Started");
         onClose();
       },
       onError: (err: any) => {
-        alert(err?.message || "Failed to start work");
+        toast.error(err?.message || "Failed to start work");
       },
     }
   );

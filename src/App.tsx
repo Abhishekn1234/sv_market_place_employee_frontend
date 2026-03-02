@@ -2,14 +2,11 @@ import './App.css';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ToastContainer } from "react-toastify";
-
 import { LocationProvider } from './context/LocationContext';
 import { LocationTracker } from './pages/Profile/presentation/components/Location/LocationTracker';
 import { LanguageProvider } from './context/LanguageContext';
 import ProtectedRoute from './ProtectedRoute';
 import AppLayout from './components/Layout/AppLayout';
-
-
 import HomePage from './pages/Home/presentation/home.page';
 import ProfileSettings from './pages/Profile/presentation/profile.page';
 import RegisterPage from './pages/Auth/Register/presentation/register.page';
@@ -31,15 +28,10 @@ import { useDynamicLocation } from '@/utils/useNotification';
 import AvailableBookingPage from './pages/Booking/AvailableBooking/presentation/availablebooking.page';
 import CurrentBookingPage from './pages/Booking/CurrentBooking/presentation/currentbooking.page';
 import OngoingServicesPage from './pages/Booking/OngoingServices/presentation/ongoingservices.page';
-
-
 function AppContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
-
-
-
-  useDynamicLocation();
+useDynamicLocation();
 useEffect(() => {
   console.log("Current URL:", window.location.pathname);
 }, [window.location.pathname]);
@@ -64,23 +56,18 @@ useEffect(() => {
   return () => navigator.serviceWorker?.removeEventListener("message", handler);
 }, [navigate]);
 
-
-  return (
+return (
     <LanguageProvider>
       <ToastContainer position="top-right" autoClose={5000} />
-
-      <Routes>
-        {/* Public routes */}
-        <Route path="/register" element={<RegisterPage />} />
+     <Routes>
+      <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/verify-otp" element={<VerifyOtpPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/services/employee" element={<ServiceSettings />} />
         <Route path="/services/documents" element={<DocumentOnboarding />} />
-
-        {/* Protected routes */}
-        <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+         <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<HomePage />} />
           <Route path="settings/profile" element={<ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} />} />
           <Route path="history/booking" element={<BookingHistory />} />
@@ -95,11 +82,7 @@ useEffect(() => {
           <Route path="notifications" element={<NotificationsPage />} />
         </Route>
       </Routes>
-
-      {/* Only show modal if logged in */}
-    
-
-      <LocationTracker />
+     <LocationTracker />
     </LanguageProvider>
   );
 }

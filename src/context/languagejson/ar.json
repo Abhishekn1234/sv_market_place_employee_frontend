@@ -263,7 +263,8 @@
       "upcoming": "قادمة",
       "assigned": "مخصص",
       "workAccepted": "تم قبول العمل",
-      "workCancelled": "تم إلغاء العمل"
+      "workCancelled": "تم إلغاء العمل",
+       "workCompletedPending": "العمل مكتمل لكنه معلق"
     },
 
     "filters": {
@@ -287,7 +288,9 @@
       "upcoming": "قادمة",
       "assigned": "مخصص",
       "workAccepted": "تم قبول العمل",
-      "workCancelled": "تم إلغاء العمل"
+      "workCancelled": "تم إلغاء العمل",
+       "workCompletedPending": "العمل مكتمل لكنه معلق",
+       "otpPending":"يحتاج العميل إلى إنشاء رمز التحقق OTP"
     },
 
     "tableHeaders": {
@@ -310,7 +313,9 @@
       "viewDetails": "عرض التفاصيل",
       "stopwork": "إيقاف العمل",
       "resumeWork": "استئناف العمل",
-      "completeWork": "إكمال العمل"
+      "completeWork": "إكمال العمل",
+       "payment": "دفع",
+      "generateInvoice": "إنشاء فاتورة"
     },
 
     "pagination": {

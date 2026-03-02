@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTheme } from "@/context/ThemeContext";
+import { allowedStatuses } from "../utils/allstatuses";
 
 interface Props {
   searchTerm: string;
@@ -83,18 +84,24 @@ export function WorkFilters({
       </Select>
 
       {/* STATUS */}
-      <Select value={statusFilter} onValueChange={onStatusChange}>
-        <SelectTrigger className="w-full md:w-[160px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent align={isRTL ? "center" : "start"}>
-          {Object.entries(workHistory.statusOptions).map(([key, label]: [string, any]) => (
-            <SelectItem key={key} value={key}>
-              {label as React.ReactNode}
+              <Select value={statusFilter} onValueChange={onStatusChange}>
+          <SelectTrigger className="w-full md:w-[160px]">
+            <SelectValue />
+          </SelectTrigger>
+
+          <SelectContent align={isRTL ? "center" : "start"}>
+            {/* Optional: Keep ALL */}
+            <SelectItem value="all">
+              {workHistory.statusOptions.all}
             </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+
+            {allowedStatuses.map((status) => (
+              <SelectItem key={status} value={status}>
+                {workHistory.statusOptions[status]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
       {/* PER PAGE */}
       <Select
