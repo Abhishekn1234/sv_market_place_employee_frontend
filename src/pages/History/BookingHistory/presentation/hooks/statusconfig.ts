@@ -45,6 +45,18 @@ export function useStatusConfig(): Record<
     WORK_COMPLETED_PENDING:{
       label:statusOptions.completed,
       color:"bg-green-100"
+    },
+    IN_PROGRESS:{
+      label:statusOptions.inProgress,
+      color:"bg-yellow-100"
+    },
+    WORK_COMPLETED:{
+      label:statusOptions.completed,
+      color:"bg-gray-100"
+    },
+    WORKER_ACCEPTED:{
+      label:statusOptions.completed,
+      color:"bg-blue-100"
     }
   };
 }
