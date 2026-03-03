@@ -26,6 +26,8 @@ export interface Booking {
   payment: number;
   location?: GeoPoint | string;
   notes?: string;
+  assignedAt?:string |Date;
+  startedAt?:string;
 }
 
 export interface BookingResponse{

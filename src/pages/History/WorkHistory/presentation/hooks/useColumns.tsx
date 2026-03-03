@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { TableColumn } from "@/components/common/CommonTable";
 import type { Work } from "../../domain/entities/workhistory";
 import { getStatusColor, getStatusIcon } from "../utils/workhistory";
@@ -100,35 +100,77 @@ export function useWorkColumns({
         });
       },
     },
-    {
-      key: "status",
-      header: WorkHistory.status,
-      className: headerClass,
-      render: (w) => {
-        let displayStatus = w.booking?.status || w.status;
+   {
+  key: "status",
+  header: WorkHistory.status,
+  className: headerClass,
+  render: (w) => {
+    const [remainingTime, setRemainingTime] = useState<string>("");
 
-        if (displayStatus === "WORK_COMPLETED_PENDING")
-          displayStatus = "workCompletedPending";
-        if (displayStatus === "WORK_COMPLETED")
-          displayStatus = "completed";
-        if (displayStatus === "IN_PROGRESS")
-          displayStatus = "inProgress";
-        if(displayStatus==="WORKER_ACCEPTED"){
-          displayStatus="confirmed"
-        }
+    let displayStatus = w.booking?.status || w.status;
 
-        return (
-          <span
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(
-              displayStatus
-            )}`}
-          >
-            {getStatusIcon(displayStatus)}
-            {t(`workHistory.statusOptions.${displayStatus}`)}
-          </span>
-        );
-      },
-    },
+    if (displayStatus === "WORK_COMPLETED_PENDING")
+      displayStatus = "workCompletedPending";
+    if (displayStatus === "WORK_COMPLETED") displayStatus = "completed";
+    if (displayStatus === "IN_PROGRESS") displayStatus = "inProgress";
+    if (displayStatus === "WORKER_ACCEPTED") displayStatus = "confirmed";
+
+   
+  if (displayStatus === "inProgress" && w.assignedAt) {
+  useEffect(() => {
+    const startedAt = w.assignedAt;
+    if (!startedAt) return;
+
+    const startTime = new Date(startedAt).getTime();
+    const maxDurationMs =
+      (w.booking?.duration || 1) * 60 * 60 * 1000; // duration in hours
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - startTime;
+
+      // ✅ Stop at max duration
+      const safeElapsed =
+        elapsed >= maxDurationMs ? maxDurationMs : elapsed;
+
+      const hours = Math.floor(safeElapsed / (1000 * 60 * 60));
+      const minutes = Math.floor(
+        (safeElapsed % (1000 * 60 * 60)) / (1000 * 60)
+      );
+      const seconds = Math.floor((safeElapsed % (1000 * 60)) / 1000);
+
+      setRemainingTime(
+        `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+          2,
+          "0"
+        )}:${String(seconds).padStart(2, "0")}`
+      );
+
+      // ✅ Clear when reached duration
+      if (elapsed >= maxDurationMs) {
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [w.assignedAt, w.booking?.duration]);
+}
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(
+          displayStatus
+        )}`}
+      >
+        {getStatusIcon(displayStatus)}
+        {t(`workHistory.statusOptions.${displayStatus}`)}
+        {displayStatus === "inProgress" && remainingTime && (
+          <span className="ml-2 font-mono">{remainingTime}</span>
+        )}
+      </span>
+    );
+  },
+},
     {
       key: "customerName",
       header: WorkHistory.customerName,

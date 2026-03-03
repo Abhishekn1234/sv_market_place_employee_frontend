@@ -29,7 +29,7 @@ export default function BookingHistory() {
   const isRTL = language === "AR";
 
   const statusConfig = useStatusConfig();
-  const { data, isLoading, isError } = useBookingHistory(page);
+  const { data } = useBookingHistory(page);
   const { data: categories = [] } = useServiceCategory();
 
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -88,21 +88,21 @@ export default function BookingHistory() {
     onIgnore: handleIgnore,
   });
 
-  if (isLoading) {
-    return (
-      <div className="p-6 text-center text-sm sm:text-base">
-        Loading booking history…
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="p-6 text-center text-sm sm:text-base">
+  //       Loading booking history…
+  //     </div>
+  //   );
+  // }
 
-  if (isError) {
-    return (
-      <div className="p-6 text-center text-sm sm:text-base text-red-500">
-        Failed to load booking history
-      </div>
-    );
-  }
+  // if (isError) {
+  //   return (
+  //     <div className="p-6 text-center text-sm sm:text-base text-red-500">
+  //       Failed to load booking history
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-14">

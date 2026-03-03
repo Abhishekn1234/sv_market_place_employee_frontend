@@ -15,13 +15,14 @@ const statusMap: Record<string, WorkStatus> = {
 
   return apiData.map((w) => {
     const bookingData = w.booking;
-
+     console.log(bookingData);
     const booking: Booking = {
       id: bookingData._id,
       clientName: w.customer?.fullName || "Unknown",
       clientEmail: w.customer?.phone || "",
       serviceType: w.service?.name || "Unknown",
       date: bookingData.date || "",
+      startedAt:bookingData.startedAt,
       time: bookingData.time || "",
       duration: bookingData.duration || 1,
       status: bookingData.status,
@@ -31,11 +32,13 @@ const statusMap: Record<string, WorkStatus> = {
         ? `${bookingData.location.coordinates[1]},${bookingData.location.coordinates[0]}`
         : "",
     };
+    console.log(booking);
 
     return {
       _id: w._id,
       status: statusMap[w.status] || "assigned", // 🔥 FIXED
       assignedAt: w.assignedAt,
+      
       booking,
       service: w.service
         ? {
