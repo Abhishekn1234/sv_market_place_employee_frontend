@@ -20,8 +20,8 @@ export default function WorkingHistoryPage() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: works, isLoading, isError, error } = useWorkHistory();
-
+  const { data: works} = useWorkHistory();
+  // isError, error 
   // ✅ FILTER LOGIC
   const filteredForTable = useMemo(() => {
     if (!works || !Array.isArray(works)) return [];
@@ -86,23 +86,14 @@ export default function WorkingHistoryPage() {
   // ✅ Stats Cards
   const cards = useWorkStatsCards(works || []);
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="p-6 text-center">
-        Loading work history...
-      </div>
-    );
-  }
-
-  // Error state
-  if (isError) {
-    return (
-      <div className="p-6 text-center text-red-500">
-        Error: {error?.message}
-      </div>
-    );
-  }
+  // // Error state
+  // if (isError) {
+  //   return (
+  //     <div className="p-6 text-center text-red-500">
+  //       Error: {error?.message}
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">

@@ -277,18 +277,21 @@
     "workAccepted": "काम स्वीकार किया गया",
     "workCancelled": "काम रद्द किया गया",
     "workCompletedPending": "कार्य पूर्ण लेकिन लंबित",
-    "otpPending":"ग्राहक को OTP उत्पन्न करना आवश्यक है"
+    "otpPending":"ग्राहक को OTP उत्पन्न करना आवश्यक है",
+    "confirmed":"की पुष्टि"
   },
-  "actions": {
-      "cancel": "रद्द करें",
-      "start":"शुरू करें",
-      "viewDetails": "विवरण देखें",
-      "stopwork": "काम रोकें",
-      "resumeWork": "काम फिर से शुरू करें",
-      "completeWork": "काम पूरा करें",
-      "payment": "भुगतान",
-      "generateInvoice": "चालान बनाएं"
-    },
+ "actions": {
+  "cancel": "रद्द करें",
+  "start": "शुरू करें",
+  "viewDetails": "विवरण देखें",
+  "stopwork": "काम रोकें",
+  "resumeWork": "काम फिर से शुरू करें",
+  "completeWork": "काम पूरा करें",
+  "payment": "भुगतान",
+  "generateInvoice": "इनवॉइस जनरेट करें",
+  "generateOtp": "ओटीपी जनरेट करें",
+  "verifyOtp": "ओटीपी सत्यापित करें"
+},
   "timeOptions": {
     "week": "इस सप्ताह",
     "month": "इस महीने",

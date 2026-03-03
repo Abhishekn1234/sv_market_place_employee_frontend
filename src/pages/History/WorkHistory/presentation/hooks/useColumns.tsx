@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import type { TableColumn } from "@/components/common/CommonTable";
 import type { Work } from "../../domain/entities/workhistory";
@@ -5,7 +7,6 @@ import { getStatusColor, getStatusIcon } from "../utils/workhistory";
 import { useLanguage } from "@/context/LanguageContext";
 import { reverseGeocode } from "@/components/common/CommonMap";
 import { formatDuration, pricingModeMap } from "../utils/formatduration";
-
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useCancel } from "@/pages/AssignedWorks/presentation/hooks/useCancel";
@@ -14,6 +15,7 @@ import { useTheme } from "@/context/ThemeContext";
 type Props = {
   onStartWork: (work: Work) => void;
   onCompleteWork: (work: Work) => void;
+  onVerifyOtp?: (work: Work) => void;
   onGenerateInvoice?: (work: Work) => void;
   onPayment?: (work: Work) => void;
 };
@@ -21,8 +23,9 @@ type Props = {
 export function useWorkColumns({
   onStartWork,
   onCompleteWork,
+  onVerifyOtp,
   onGenerateInvoice,
-  onPayment,
+
 }: Props): TableColumn<Work>[] {
   const { translations, t } = useLanguage();
   const [locations, setLocations] = useState<Record<string, string>>({});
@@ -97,43 +100,35 @@ export function useWorkColumns({
         });
       },
     },
-   {
-  key: "status",
-  header: WorkHistory.status,
-  className: headerClass,
-  render: (w) => {
-    // Determine the effective status
-    let displayStatus = w.booking?.status || w.status;
+    {
+      key: "status",
+      header: WorkHistory.status,
+      className: headerClass,
+      render: (w) => {
+        let displayStatus = w.booking?.status || w.status;
 
-    // Map WORK_COMPLETED_PENDING → workCompletedPending
-    if (displayStatus === "WORK_COMPLETED_PENDING") {
-      displayStatus = "workCompletedPending";
-    }
+        if (displayStatus === "WORK_COMPLETED_PENDING")
+          displayStatus = "workCompletedPending";
+        if (displayStatus === "WORK_COMPLETED")
+          displayStatus = "completed";
+        if (displayStatus === "IN_PROGRESS")
+          displayStatus = "inProgress";
+        if(displayStatus==="WORKER_ACCEPTED"){
+          displayStatus="confirmed"
+        }
 
-    const isOtpPending = displayStatus === "workCompletedPending"; // Show OTP text if needed
-
-    return (
-      <div className="flex flex-col gap-1">
-        {/* OTP Pending Text on top of the status */}
-        {isOtpPending && (
-          <span className="text-xs text-red-600 font-medium">
-            {t(`workHistory.statusOptions.otpPending`)}
+        return (
+          <span
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(
+              displayStatus
+            )}`}
+          >
+            {getStatusIcon(displayStatus)}
+            {t(`workHistory.statusOptions.${displayStatus}`)}
           </span>
-        )}
-
-        {/* Actual status badge */}
-        <span
-          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(
-            displayStatus
-          )}`}
-        >
-          {getStatusIcon(displayStatus)}
-          {t(`workHistory.statusOptions.${displayStatus}`)}
-        </span>
-      </div>
-    );
-  },
-},
+        );
+      },
+    },
     {
       key: "customerName",
       header: WorkHistory.customerName,
@@ -153,92 +148,76 @@ export function useWorkColumns({
         ),
     },
     {
-      key: "actions",
-      header: WorkHistory.actions || "Actions",
-      className: headerClass,
-      render: (w) => {
-        const bookingStatus = w.booking?.status;
-        const workStatus = w.status;
+  key: "actions",
+  header: WorkHistory.actions || "Actions",
+  className: headerClass,
+  render: (w) => {
+    const bookingStatus = w.booking?.status;
+    const workStatus = w.status;
 
-    
-        if (workStatus === "completed") {
-          return (
-            <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700 font-medium">
-              {t("workHistory.statusOptions.completed") || "Completed"}
-            </span>
-          );
-        }
+    // ✅ Final Completed → Show Badge Only
+    if (workStatus === "completed") {
+      return (
+        <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 font-medium">
+          {t("workHistory.statusOptions.completed")}
+        </span>
+      );
+    }
 
-        if (bookingStatus === "WORK_COMPLETED_PENDING") {
-          return (
-            <div className="flex items-center gap-2">
-              
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onGenerateInvoice?.(w)}
-              >
-                {t("workHistory.actions.generateInvoice") || "Generate Invoice"}
-              </Button>
+    // ✅ WORK_COMPLETED_PENDING → Show ONLY Verify OTP
+    if (bookingStatus === "WORK_COMPLETED_PENDING") {
+      return (
+        <Button size="sm" onClick={() => onVerifyOtp?.(w)}>
+          {t("workHistory.actions.verifyOtp")}
+        </Button>
+      );
+    }
 
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => onPayment?.(w)}
-              >
-                {t("workHistory.actions.payment") || "Payment"}
-              </Button>
-            </div>
-          );
-        }
+    // ✅ WORK_COMPLETED → Show ONLY Generate Invoice
+    if (bookingStatus === "WORK_COMPLETED") {
+      return (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onGenerateInvoice?.(w)}
+        >
+          {t("workHistory.actions.generateInvoice")}
+        </Button>
+      );
+    }
 
-        // ✅ IN PROGRESS → Show badge + Complete Work
-        if (workStatus === "inProgress") {
-          return (
-            <div className="inline-flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 font-medium whitespace-nowrap">
-                {t("workHistory.statusOptions.inProgress") ||
-                  "Work is in progress"}
-              </span>
+    // ✅ IN_PROGRESS → Complete Work
+    if (workStatus === "inProgress") {
+      return (
+        <Button size="sm" onClick={() => onCompleteWork(w)}>
+          {t("workHistory.actions.completeWork")}
+        </Button>
+      );
+    }
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onCompleteWork(w)}
-              >
-                {t("workHistory.actions.completeWork") || "Complete Work"}
-              </Button>
-            </div>
-          );
-        }
+    // ✅ Default → Start + Cancel
+    return (
+      <div className="flex gap-2">
+        <Button size="sm" onClick={() => onStartWork(w)}>
+          {t("workHistory.actions.start")}
+        </Button>
 
-        // ✅ NOT STARTED / ASSIGNED → Show Start + Cancel
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onStartWork(w)}
-            >
-              {t("workHistory.actions.start") || "Start"}
-            </Button>
-
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => {
-                if (!w.booking?.id) {
-                  toast.error("Booking not found for this work");
-                  return;
-                }
-                cancelWorkMutation(w.booking.id);
-              }}
-            >
-              {t("workHistory.actions.cancel") || "Cancel"}
-            </Button>
-          </div>
-        );
-      },
-    },
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={() => {
+            if (!w.booking?.id) {
+              toast.error("Booking not found");
+              return;
+            }
+            cancelWorkMutation(w.booking.id);
+          }}
+        >
+          {t("workHistory.actions.cancel")}
+        </Button>
+      </div>
+    );
+  },
+}
   ];
 }

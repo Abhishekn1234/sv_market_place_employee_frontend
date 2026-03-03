@@ -290,7 +290,8 @@
       "workAccepted": "تم قبول العمل",
       "workCancelled": "تم إلغاء العمل",
        "workCompletedPending": "العمل مكتمل لكنه معلق",
-       "otpPending":"يحتاج العميل إلى إنشاء رمز التحقق OTP"
+       "otpPending":"يحتاج العميل إلى إنشاء رمز التحقق OTP",
+       "confirmed":"مؤكد"
     },
 
     "tableHeaders": {
@@ -308,15 +309,17 @@
       "actions": "الإجراءات"
     },
     "actions": {
-      "cancel": "إلغاء",
-      "start":"بدء",
-      "viewDetails": "عرض التفاصيل",
-      "stopwork": "إيقاف العمل",
-      "resumeWork": "استئناف العمل",
-      "completeWork": "إكمال العمل",
-       "payment": "دفع",
-      "generateInvoice": "إنشاء فاتورة"
-    },
+  "cancel": "إلغاء",
+  "start": "ابدأ",
+  "viewDetails": "عرض التفاصيل",
+  "stopwork": "إيقاف العمل",
+  "resumeWork": "استئناف العمل",
+  "completeWork": "إكمال العمل",
+  "payment": "الدفع",
+  "generateInvoice": "إنشاء فاتورة",
+  "generateOtp": "إنشاء رمز التحقق",
+  "verifyOtp": "التحقق من رمز التحقق"
+},
 
     "pagination": {
       "pageInfo": "الصفحة {currentPage} من {totalPages}",

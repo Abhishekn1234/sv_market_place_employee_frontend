@@ -291,7 +291,8 @@
       "workAccepted": "Work Accepted",
       "workCancelled": "Work Cancelled",
       "workCompletedPending": "Work Completed Pending",
-      "otpPending":"Customer needs to generate OTP"
+      "otpPending":"Customer needs to generate OTP",
+      "confirmed":"Confirmed"
     
     },
 
@@ -310,16 +311,17 @@
       "actions":"Actions"
     },
      "actions": {
-      "cancel": "Cancel",
-      "start":"Start",
-      "viewDetails": "View Details",
-      "stopwork": "Stop Work",
-      "resumeWork": "Resume Work",
-      "completeWork": "Complete Work",
-      "payment":"Payment",
-      "generateInvoice":"Generate Invoice"
-    },
-
+  "cancel": "Cancel",
+  "start": "Start",
+  "viewDetails": "View Details",
+  "stopwork": "Stop Work",
+  "resumeWork": "Resume Work",
+  "completeWork": "Complete Work",
+  "payment": "Payment",
+  "generateInvoice": "Generate Invoice",
+  "generateOtp": "Generate OTP",
+   "verifyOtp": "Verify OTP"
+},
     "pagination": {
       "pageInfo": "Page {currentPage} of {totalPages}",
       "first": "First",

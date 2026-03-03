@@ -15,6 +15,8 @@ export interface CurrentBookings {
     requested:string;
     WORK_COMPLETED_PENDING:string;
     workCompletedPending:string;
+    IN_PROGRESS?:string;
+    WORK_COMPLETED?:string;
   };
 
   table: {

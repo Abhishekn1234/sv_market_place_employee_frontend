@@ -8,6 +8,7 @@ import StartWork from "../components/StartWork";
 import CompleteWork from "./CompleteWork";
 import PaymentModal from "../components/PaymentModal";
 import InvoiceModal from "../components/InvoiceModal";
+import VerifyOtpModal from "./VerifyOtpModal";
 
 export function WorkHistoryTable({
   data,
@@ -22,37 +23,30 @@ export function WorkHistoryTable({
   onPageChange: (p: number) => void;
   isRTL: boolean;
 }) {
-  // Local state to allow table updates after work completion
   const [localData, setLocalData] = useState<Work[]>(data);
 
   useEffect(() => {
-    // Keep local data in sync if parent data changes
     setLocalData(data);
   }, [data]);
 
   const [selectedWork, setSelectedWork] = useState<Work | null>(null);
   const [completeWork, setCompleteWork] = useState<Work | null>(null);
+  const [verifyWork, setVerifyWork] = useState<Work | null>(null);
   const [paymentWork, setPaymentWork] = useState<Work | null>(null);
   const [invoiceWork, setInvoiceWork] = useState<Work | null>(null);
 
-  // Callback to update table row after work is completed
-  const handleWorkCompleted = (updatedWork: Work) => {
+  const handleWorkUpdated = (updatedWork: Work) => {
     setLocalData((prev) =>
-      prev.map((w) => (w._id === updatedWork._id ? { ...w, ...updatedWork } : w))
+      prev.map((w) => (w._id === updatedWork._id ? updatedWork : w))
     );
   };
 
-  const handleCompleteClick = (work: Work) => setCompleteWork(work);
- 
-  const handleStartClick = (work: Work) => setSelectedWork(work);
-
-  // Memoize columns to ensure they see latest data and rerender on updates
- const columns = useWorkColumns({
-  onStartWork: handleStartClick,
-  onCompleteWork: handleCompleteClick,
-
- 
-});
+  const columns = useWorkColumns({
+    onStartWork: setSelectedWork,
+    onCompleteWork: setCompleteWork,
+    onVerifyOtp: setVerifyWork,
+    onGenerateInvoice: setInvoiceWork,
+  });
 
   return (
     <>
@@ -64,42 +58,43 @@ export function WorkHistoryTable({
         totalPages={totalPages}
         onPageChange={onPageChange}
         isRTL={isRTL}
-        emptyMessage="No work history found"
+        emptyMessage="No records found"
       />
 
-      {/* Start Work Modal */}
       {selectedWork && (
-        <StartWork
-          work={selectedWork}
-          open={!!selectedWork}
-          onClose={() => setSelectedWork(null)}
-        />
+        <StartWork work={selectedWork} open onClose={() => setSelectedWork(null)} />
       )}
 
-      {/* Complete Work Modal */}
       {completeWork && (
         <CompleteWork
           work={completeWork}
-          open={!!completeWork}
+          open
           onClose={() => setCompleteWork(null)}
-          onSuccess={handleWorkCompleted} // update table after completion
+          onSuccess={handleWorkUpdated}
         />
       )}
 
-      {/* Payment Modal */}
+      {verifyWork && (
+        <VerifyOtpModal
+          work={verifyWork}
+          open
+          onClose={() => setVerifyWork(null)}
+          onSuccess={handleWorkUpdated}
+        />
+      )}
+
       {paymentWork && (
         <PaymentModal
           work={paymentWork}
-          open={!!paymentWork}
+          open
           onClose={() => setPaymentWork(null)}
         />
       )}
 
-      {/* Invoice Modal */}
       {invoiceWork && (
         <InvoiceModal
           work={invoiceWork}
-          open={!!invoiceWork}
+          open
           onClose={() => setInvoiceWork(null)}
         />
       )}
