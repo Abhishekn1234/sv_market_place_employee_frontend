@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { BookingHistoryRepoImpl } from "../../data/repositories/BookingHistoryImpl";
-import { GetBookingHistoryUsecase } from "../../domain/usecase/GetBookingHistoryUsecase";
+import { BookingHistoryRepoImpl } from "../../data/repositories/AvailableBookingHistoryImpl";
+import { GetBookingHistoryUsecase } from "../../domain/usecase/GetAvailableBookingUsecase";
 import type { BookingResponse } from "../../domain/entities/booking";
 
-export function useBookingHistory(page: number) {
+export function useGetBookingAvailable(page: number) {
   const repo = new BookingHistoryRepoImpl();
   const usecase = new GetBookingHistoryUsecase(repo);
 

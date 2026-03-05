@@ -24,7 +24,12 @@ const statusMap: Record<string, WorkStatus> = {
       date: bookingData.date || "",
       startedAt:bookingData.startedAt,
       time: bookingData.time || "",
-      duration: bookingData.duration || 1,
+    duration:
+  bookingData.pricingMode === "HOURLY"
+    ? bookingData.schedule?.estimatedHours ?? 1
+    : bookingData.schedule?.estimatedDays ?? 1,
+    workerPoolAmount:bookingData.workerPoolAmount,
+    numberofWorkers:bookingData.numberOfWorkers,
       status: bookingData.status,
       pricingMode: bookingData.pricingMode,
       payment: bookingData.amount || 0,

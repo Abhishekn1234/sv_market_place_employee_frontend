@@ -5,6 +5,7 @@ import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servic
 
 export interface Work {
   _id: string; 
+  bookingId?:string;
   status: WorkStatus; 
   assignedAt: string; 
   booking: Booking

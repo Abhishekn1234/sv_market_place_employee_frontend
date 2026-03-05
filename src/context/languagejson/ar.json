@@ -300,6 +300,7 @@
       "location": "الموقع",
       "assignedDate": "تاريخ التعيين",
       "dueDate": "تاريخ الانتهاء",
+       "workerPoolAmount": "مبلغ تجمع العمال",
       "status": "الحالة",
       "duration": "المدة",
       "extraInfo": "معلومات إضافية",
@@ -457,6 +458,7 @@
     "currentBooking": "الحجوزات الحالية",
     "ongoingServices": "الخدمات الجارية",
   "activity": "النشاط",
+  "availableWork": "العمل المتاح",
   "recentActivity": "النشاط الأخير",
   "pastActivity": "النشاط السابق",
 

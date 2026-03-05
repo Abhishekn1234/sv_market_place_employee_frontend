@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { useLanguage } from "@/context/LanguageContext";
 import { useStatusConfig } from "./hooks/statusconfig";
 import { useBookingColumns } from "./hooks/useColumns";
-import { useBookingHistory } from "./hooks/useBookingHistory";
+import { useGetBookingAvailable } from "./hooks/useGetAvailbaleBooking";
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
 
 import { BookingFilters } from "./components/BookingFilters";
@@ -29,7 +29,7 @@ export default function BookingHistory() {
   const isRTL = language === "AR";
 
   const statusConfig = useStatusConfig();
-  const { data } = useBookingHistory(page);
+  const { data } = useGetBookingAvailable(page);
   const { data: categories = [] } = useServiceCategory();
 
   const [bookings, setBookings] = useState<Booking[]>([]);

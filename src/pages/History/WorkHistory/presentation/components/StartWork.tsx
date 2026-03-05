@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // OTP input
+import { Input } from "@/components/ui/input";
 import type { Work } from "../../domain/entities/workhistory";
 import { useStartWork } from "../hooks/useStartWork";
 import { toast } from "react-toastify";
 
 type Props = {
-  work: Work; // Selected work
-  open: boolean; // Modal visibility
-  onClose: () => void; // Close callback
+  work: Work;
+  open: boolean;
+  onClose: () => void;
 };
 
 export default function StartWork({ work, open, onClose }: Props) {
@@ -19,34 +19,34 @@ export default function StartWork({ work, open, onClose }: Props) {
   const startWorkMutation = useStartWork();
 
   const handleConfirm = () => {
-  const otpStr = otp.toString();
-  if (otpStr.length !== 6) {
-    alert("Please enter a valid 6-digit OTP");
-    return;
-  }
-
-  if (!work.booking?.id) {
-    alert("Booking ID not found");
-    return;
-  }
-
-  startWorkMutation.mutate(
-    {
-      bookingId: work.booking.id, // must be MongoDB ID string
-      otp: otpStr,
-    },
-    {
-      onSuccess: () => {
-     toast.success("Work Started");
-        onClose();
-      },
-      onError: (err: any) => {
-        toast.error(err?.message || "Failed to start work");
-      },
+    const otpStr = otp.toString();
+    if (otpStr.length !== 6) {
+      alert("Please enter a valid 6-digit OTP");
+      return;
     }
-  );
-};
 
+    // ✅ Use bookingId from work (root level)
+    if (!work.bookingId) {
+      alert("Booking ID not found");
+      return;
+    }
+
+    startWorkMutation.mutate(
+      {
+        bookingId: work.bookingId, // ✅ correct field
+        otp: otpStr,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Work Started");
+          onClose();
+        },
+        onError: (err: any) => {
+          toast.error(err?.message || "Failed to start work");
+        },
+      }
+    );
+  };
 
   return (
     <CommonModal open={open} onOpenChange={onClose}>

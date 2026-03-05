@@ -25,9 +25,9 @@ import Wallet from './pages/Wallet/presentation/wallet.page';
 import NotificationsPage from './pages/Notifications/presentation/notification.page';
 import { ThemeProvider } from './context/ThemeContext';
 import { useDynamicLocation } from '@/utils/useNotification';
-import AvailableBookingPage from './pages/Booking/AvailableBooking/presentation/availablebooking.page';
-import CurrentBookingPage from './pages/Booking/CurrentBooking/presentation/currentbooking.page';
-import OngoingServicesPage from './pages/Booking/OngoingServices/presentation/ongoingservices.page';
+import AvailableBookingPage from './pages/History/AvailableBooking/presentation/availablebooking.page';
+
+import AvailableWorkPage from './pages/History/AvaliableWorks/presentation/AvailableWorkPage';
 function AppContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
@@ -71,15 +71,15 @@ return (
           <Route index element={<HomePage />} />
           <Route path="settings/profile" element={<ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} />} />
           <Route path="history/booking" element={<BookingHistory />} />
-          <Route path='booking/available' element={<AvailableBookingPage/>}/>
-          <Route path='booking/current' element={<CurrentBookingPage/>}/>
-          <Route path='booking/ongoing-services' element={<OngoingServicesPage/>}/>
+          
           <Route path="history/transaction" element={<TransactionHistory />} />
           <Route path="history/work" element={<WorkingHistory />} />
           <Route path="activity/recent" element={<RecentActivity />} />
           <Route path="activity/past" element={<PastActivity />} />
           <Route path="settings/wallet" element={<Wallet />} />
           <Route path="notifications" element={<NotificationsPage />} />
+          <Route path='availableWork' element={<AvailableWorkPage/>}/>
+          <Route path='availableBooking' element={<AvailableBookingPage/>}/>
         </Route>
       </Routes>
      <LocationTracker />

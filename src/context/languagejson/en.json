@@ -298,6 +298,7 @@
 
     "tableHeaders": {
       "title": "Title",
+      "workerPoolAmount": "Worker Pool Amount",
       "description": "Description",
       "location": "Location",
       "assignedDate": "Assigned Date",
@@ -461,6 +462,7 @@
     "availableBooking": "Available Booking",
     "currentBooking": "Current Booking",
     "ongoingServices": "Ongoing Services",
+    "availableWork":"Available Work",
 
   "settings": "Settings",
   "profileSettings": "Profile Settings",

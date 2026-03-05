@@ -6,7 +6,7 @@ import { mapApiToWork } from "../../presentation/mappers/workstatusmapping";
 export class WorkHistoryRepoImpl implements WorkHistoryRepo {
   async getWorkList(): Promise<Work[]> {
     const response = await api.get('/booking/get-assigned-booking');
-
+      console.log(response);
     const rawData = response.data;
 
     const dataArray = Array.isArray(rawData)

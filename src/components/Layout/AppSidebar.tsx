@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuthStore } from "@/core/store/auth";
 
+
 interface AppSidebarProps {
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
@@ -75,6 +76,8 @@ export default function AppSidebar({
         { id: "booking", title: t("sidebar.bookingHistory"), href: "/history/booking" },
         { id: "transaction", title: t("sidebar.transactionHistory"), href: "/history/transaction" },
         { id: "work", title: t("sidebar.workHistory"), href: "/history/work" },
+        {id:"available Booking", title:t("sidebar.availableBooking"),href:"/availableBooking"},
+        {id:"available Work", title:t("sidebar.availableWork"),href:"/availableWork"}
       ],
     },
     {

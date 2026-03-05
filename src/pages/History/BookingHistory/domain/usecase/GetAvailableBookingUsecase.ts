@@ -1,4 +1,4 @@
-import type { BookingHistoryRepo } from "../repositories/BookingHistoryRepo";
+import type { BookingHistoryRepo } from "../repositories/AvalableBookingHistoryRepo";
 
 export class GetBookingHistoryUsecase {
   private getBooking: BookingHistoryRepo;

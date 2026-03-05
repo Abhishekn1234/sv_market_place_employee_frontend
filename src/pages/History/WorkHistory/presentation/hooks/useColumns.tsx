@@ -6,7 +6,7 @@ import type { Work } from "../../domain/entities/workhistory";
 import { getStatusColor, getStatusIcon } from "../utils/workhistory";
 import { useLanguage } from "@/context/LanguageContext";
 import { reverseGeocode } from "@/components/common/CommonMap";
-import { formatDuration, pricingModeMap } from "../utils/formatduration";
+
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useCancel } from "@/pages/AssignedWorks/presentation/hooks/useCancel";
@@ -118,42 +118,50 @@ export function useWorkColumns({
    
   if (displayStatus === "inProgress" && w.assignedAt) {
   useEffect(() => {
-    const startedAt = w.assignedAt;
-    if (!startedAt) return;
+  const startedAt = w.assignedAt;
+  if (!startedAt) return;
 
-    const startTime = new Date(startedAt).getTime();
-    const maxDurationMs =
-      (w.booking?.duration || 1) * 60 * 60 * 1000; // duration in hours
+  const startTime = new Date(startedAt).getTime();
 
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const elapsed = now - startTime;
+  // ✅ get duration based on pricing mode
+  const durationHours =
+    w.booking?.pricingMode === "HOURLY"
+      ? w.booking?.schedule?.estimatedHours ?? 1
+      : (w.booking?.schedule?.estimatedDays ?? 1) * 24;
 
-      // ✅ Stop at max duration
-      const safeElapsed =
-        elapsed >= maxDurationMs ? maxDurationMs : elapsed;
+  const maxDurationMs = durationHours * 60 * 60 * 1000;
 
-      const hours = Math.floor(safeElapsed / (1000 * 60 * 60));
-      const minutes = Math.floor(
-        (safeElapsed % (1000 * 60 * 60)) / (1000 * 60)
-      );
-      const seconds = Math.floor((safeElapsed % (1000 * 60)) / 1000);
+  const interval = setInterval(() => {
+    const now = Date.now();
+    const elapsed = now - startTime;
 
-      setRemainingTime(
-        `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-          2,
-          "0"
-        )}:${String(seconds).padStart(2, "0")}`
-      );
+    const safeElapsed = elapsed >= maxDurationMs ? maxDurationMs : elapsed;
 
-      // ✅ Clear when reached duration
-      if (elapsed >= maxDurationMs) {
-        clearInterval(interval);
-      }
-    }, 1000);
+    const hours = Math.floor(safeElapsed / (1000 * 60 * 60));
+    const minutes = Math.floor(
+      (safeElapsed % (1000 * 60 * 60)) / (1000 * 60)
+    );
+    const seconds = Math.floor((safeElapsed % (1000 * 60)) / 1000);
 
-    return () => clearInterval(interval);
-  }, [w.assignedAt, w.booking?.duration]);
+    setRemainingTime(
+      `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+        2,
+        "0"
+      )}:${String(seconds).padStart(2, "0")}`
+    );
+
+    if (elapsed >= maxDurationMs) {
+      clearInterval(interval);
+    }
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [
+  w.assignedAt,
+  w.booking?.pricingMode,
+  w.booking?.schedule?.estimatedHours,
+  w.booking?.schedule?.estimatedDays,
+]);
 }
 
     return (
@@ -177,18 +185,19 @@ export function useWorkColumns({
       className: headerClass,
       render: (w) => w.customer?.fullName || "-",
     },
-    {
-      key: "duration",
-      header: WorkHistory.duration,
-      className: headerClass,
-      render: (w) =>
-        formatDuration(
-          w.booking?.duration || 1,
-          w.booking?.pricingMode
-            ? pricingModeMap[w.booking.pricingMode]
-            : "hourly"
-        ),
-    },
+{
+  key: "workerPoolAmount",
+  header: WorkHistory.workerPoolAmount,
+  className: headerClass,
+  render: (w) => {
+    const poolAmount = w.booking?.workerPoolAmount ?? 0;
+    const workers = w.booking?.numberofWorkers ?? 1;
+
+    const value = poolAmount / workers;
+
+    return `${value.toFixed(2)} ${w.booking?.currency ?? ""}`;
+  },
+},
     {
   key: "actions",
   header: WorkHistory.actions || "Actions",
