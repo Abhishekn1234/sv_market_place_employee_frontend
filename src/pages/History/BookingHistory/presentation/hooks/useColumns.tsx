@@ -4,145 +4,144 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 
 import type { TableColumn } from "@/components/common/CommonTable";
-import type { Booking } from "../../domain/entities/booking";
-
 import { useLanguage } from "@/context/LanguageContext";
 import { useStatusConfig } from "./statusconfig";
 import { useStringUtils } from "./useStringutils";
 
-import type { TableHeaders } from "../../domain/entities/tableheader.types";
-import { useAccept } from "@/core/Websocket/presentation/hooks/useAccept";
-import { useAvailableBookings } from "@/core/Websocket/presentation/hooks/useGet";
-import { useTheme } from "@/context/ThemeContext";
+import type { BookingHistory } from "../../domain/entities/bookinghistory";
+import type { BookingStatus } from "../../domain/entities/bookingstatus";
 
 type Params = {
   expandedBooking: string | null;
   toggleExpanded: (id: string) => void;
-  onIgnore: (bookingId: string) => void; 
+  onIgnore: (bookingId: string) => void;
 };
 
 export function useBookingColumns({
   expandedBooking,
   toggleExpanded,
   onIgnore,
-}: Params): TableColumn<Booking>[] {
+}: Params): TableColumn<BookingHistory>[] {
   const { translations } = useLanguage();
-  const tableHeaders = translations.bookingHistory.tableHeaders as TableHeaders;
-  const bookinghistorycancel = translations.bookingHistory;
+  const tableHeaders = translations.bookingHistory.tableHeaders;
+  const bookingActions = translations.bookingHistory.actions;
 
-  const { updateBooking } = useAvailableBookings();
-  const { mutate: acceptBooking } = useAccept();
-  const { theme } = useTheme();
-
+  const {  formatSmartDate } = useStringUtils();
   const statusConfig = useStatusConfig();
-  const { formatTime, formatSmartDate } = useStringUtils();
 
   const baseClass = "px-4 break-words whitespace-normal";
-  const cellClass =
-    theme === "dark"
-      ? `${baseClass} bg-gray-900 text-gray-100 hover:bg-gray-900 hover:text-gray-100`
-      : baseClass;
+  const cellClass = baseClass; 
 
   return [
     {
-      key: "id",
+      key: "_id",
       header: tableHeaders.id,
       className: cellClass,
     },
     {
-      key: "clientName",
+      key: "customer",
       header: tableHeaders.client,
       className: cellClass,
-      render: (b) => <span dir="ltr">{b.clientName}</span>,
+      render: (b) => <span dir="ltr">{b.customer?.fullName ?? "—"}</span>,
     },
     {
       key: "serviceType",
       header: tableHeaders.service,
       className: cellClass,
-      render: (b) => b.serviceType,
+      render: (b) =>
+        typeof b.service === "object" ? b.service?.name ?? "—" : b.service ?? "—",
     },
     {
       key: "date",
       header: tableHeaders.date,
       className: cellClass,
-      render: (b) => <span dir="ltr">{formatSmartDate(b.date)}</span>,
-    },
-    {
-      key: "time",
-      header: tableHeaders.time,
-      className: cellClass,
-      render: (b) => <span dir="ltr">{formatTime(b.time)}</span>,
-    },
-    {
-      key: "payment",
-      header: tableHeaders.payment,
-      className: cellClass,
       render: (b) => (
         <span dir="ltr">
-          {b.currency} {b.payment}
+          {formatSmartDate(b.booking?.schedule?.startDateTime?.toLocaleString() ?? "")}
         </span>
       ),
     },
+   {
+  key: "time",
+  header: tableHeaders.time,
+  className: cellClass,
+  render: (b) => {
+    const mode = b.booking?.pricingMode;
+    const schedule = b.booking?.schedule;
+
+    let timeDisplay = "—";
+
+    if (mode === "HOURLY" && schedule?.estimatedHours != null) {
+      timeDisplay = `${schedule.estimatedHours} hrs`;
+    } else if (mode === "PER_DAY" && schedule?.estimatedDays != null) {
+      timeDisplay = `${schedule.estimatedDays} days`;
+    }
+
+    return <span dir="ltr">{timeDisplay}</span>;
+  },
+},{
+  key: "payment",
+  header: tableHeaders.payment,
+  className: cellClass,
+  render: (b) => {
+   return<span>{b.booking.currency} {b.booking.amount}</span>;
+  },
+},
     {
       key: "status",
       header: tableHeaders.status,
       className: cellClass,
-      render: (b) => (
-        <Badge className={statusConfig[b.status].color}>
-          {statusConfig[b.status].label}
-        </Badge>
-      ),
+      render: (b) => {
+        const status = b.status as BookingStatus;
+        console.log(status);
+        const config = statusConfig[status];
+        return (
+          <Badge className={config?.color ?? ""}>{config?.label ?? status}</Badge>
+        );
+      },
     },
     {
-  key: "actions",
-  header: tableHeaders.actions,
-  className: cellClass,
-  render: (b) => (
-    <div className="flex items-center gap-2 whitespace-nowrap">
-      {/* View Details is always visible */}
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => toggleExpanded(b.id)}
-        className="flex items-center gap-1 cursor-pointer"
-      >
-        {bookinghistorycancel.actions["View Details"]}
-        {expandedBooking === b.id ? <ChevronUp /> : <ChevronDown />}
-      </Button>
-
-     
-      {b.status === "requested" && (
-        <>
+      key: "actions",
+      header: tableHeaders.actions,
+      className: cellClass,
+      render: (b) => (
+        <div className="flex items-center gap-2 whitespace-nowrap">
           <Button
             size="sm"
-            variant="default"
-            onClick={() => {
-              updateBooking(b.id, { status: "WORKER_ACCEPTED" });
-
-              acceptBooking({
-                bookingId: b.id,
-                bookingStatus: "WORKER_ACCEPTED",
-              });
-
-              toast.success("Booking accepted");
-            }}
-            className="bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+            variant="outline"
+            onClick={() => toggleExpanded(b._id)}
+            className="flex items-center gap-1 cursor-pointer"
           >
-            {bookinghistorycancel.actions.Accept}
+            {bookingActions["View Details"]}
+            {expandedBooking === b._id ? <ChevronUp /> : <ChevronDown />}
           </Button>
 
-          <Button
-            size="sm"
-            variant="default"
-            onClick={() => onIgnore(b.id)}
-            className="bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-          >
-            {bookinghistorycancel.actions.Ignore}
-          </Button>
-        </>
-      )}
-    </div>
-  ),
-},
+          {b.status === "requested" && (
+            <>
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => {
+                  // Implement accept logic here
+                  toast.success("Booking accepted");
+                }}
+                className="bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+              >
+                {bookingActions.Accept}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => onIgnore(b._id)}
+                className="bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+              >
+                {bookingActions.Ignore}
+              </Button>
+            </>
+          )}
+        </div>
+      ),
+    },
   ];
 }

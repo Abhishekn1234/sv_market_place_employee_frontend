@@ -32,7 +32,7 @@ export default function VerifyOtpModal({
 
     mutate(
       {
-        bookingId: work.booking.id,   
+       bookingId: work.bookingId ?? work.booking?._id ?? "",
         otp,
         purpose:"WORK_COMPLETE"
       },

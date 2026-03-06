@@ -5,6 +5,8 @@ import { useCompleteWork } from "../hooks/useCompleteWork";
 import { Button } from "@/components/ui/button";
 import type { Work } from "../../domain/entities/workhistory";
 import type { CompleteWork } from "../../domain/entities/completework";
+import { toast } from "react-toastify";
+import type { WorkStatus } from "../../domain/entities/workstatus";
 
 type Props = {
   work: Work;
@@ -22,27 +24,46 @@ export default function CompleteWork({ work, open, onClose, onSuccess }: Props) 
   if (!open) return null;
 
   const handleConfirmClick = () => {
-    if (!work.booking.id) return;
+  const bookingId = work.bookingId || work.booking?._id;
+  if (!bookingId) {
+    console.log("No booking ID found. Aborting...");
+    return;
+  }
 
-    const payload: CompleteWork = {
-      bookingId: work.booking.id,
-      actualWorkHours,
-      actualWorkDays,
-    };
+  console.log("Booking ID to complete:", bookingId);
+  console.log("Work Object:", work);
+  console.log("Actual Work Hours:", actualWorkHours);
+  console.log("Actual Work Days:", actualWorkDays);
 
-    completeWorkMutation(payload, {
-      onSuccess: (updatedBooking) => {
-        // Update the table row
-        onSuccess({
-          ...work,
-          status: "completed",
-          booking: { ...work.booking, ...updatedBooking },
-        });
-
-        onClose();
-      },
-    });
+  const payload: CompleteWork = {
+    bookingId,
+    actualWorkHours,
+    actualWorkDays,
   };
+
+  console.log("Payload to send:", payload);
+
+  completeWorkMutation(payload, {
+    onSuccess: (updatedBooking) => {
+      console.log("Updated Booking:", updatedBooking);
+
+     const updatedWork: Work = {
+  ...work,
+  status: "WORK_COMPLETED_PENDING" as WorkStatus,
+  booking: { ...work.booking, ...updatedBooking },
+};
+
+      console.log("Updated Work Object:", updatedWork);
+
+      onSuccess(updatedWork);
+      toast.success("Work Completed Successfully!");
+      onClose();
+    },
+    onError: (error) => {
+      console.error("Mutation Failed:", error);
+    },
+  });
+};
 
   const assignedTime = work.assignedAt ? new Date(work.assignedAt).getTime() : 0;
   const now = Date.now();
@@ -56,7 +77,14 @@ export default function CompleteWork({ work, open, onClose, onSuccess }: Props) 
         <div className="space-y-2 text-sm mb-4">
           <p><strong>Service:</strong> {work.service?.name || "N/A"}</p>
           <p><strong>Customer:</strong> {work.customer?.fullName || "N/A"}</p>
-          <p><strong>Scheduled Duration:</strong> {work.booking?.duration || 1} hour(s)</p>
+          <p>
+          <strong>Scheduled Duration:</strong>{" "}
+          {work.booking.pricingMode === "HOURLY"
+            ? `${work.booking?.schedule?.estimatedHours ?? "-"} hour(s)`
+            : work.booking.pricingMode === "PER_DAY"
+            ? `${work.booking?.schedule?.estimatedHours ?? "-"} day(s)`
+            : "-"}
+        </p>
           <p><strong>Worked Time:</strong> {workedMinutes} minutes</p>
         </div>
 

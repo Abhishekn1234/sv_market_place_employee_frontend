@@ -1,9 +1,9 @@
 import api from "@/api/api";
 import type { Work } from "../../domain/entities/workhistory";
-import type { WorkHistoryRepo } from "../../domain/repositories/WorkHistoryRepo";
+import type { AvailableWork } from "../../domain/repositories/AvailableWork";
 import { mapApiToWork } from "../../presentation/mappers/workstatusmapping";
 
-export class WorkHistoryRepoImpl implements WorkHistoryRepo {
+export class AvailableWorkImpl implements AvailableWork {
   async getWorkList(): Promise<Work[]> {
     const response = await api.get('/booking/get-assigned-booking');
       console.log(response);

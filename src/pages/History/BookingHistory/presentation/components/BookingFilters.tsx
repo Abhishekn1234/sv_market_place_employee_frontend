@@ -39,7 +39,14 @@ export function BookingFilters({
 }: Props) {
   const {translations,language}=useLanguage();
   const isRTL=language==="AR";
-  const bookingfilters=translations.bookingHistory
+  const bookingfilters=translations.bookingHistory;
+  const uniqueStatusOptions = Object.entries(statusConfig).reduce<Record<string, string>>((acc, [key, cfg]) => {
+  if (!Object.values(acc).includes(cfg.label)) {
+    acc[key] = cfg.label;
+  }
+  return acc;
+}, {});
+
   return (
     <div className={`${isRTL?"grid grid-cols-1 md:grid-cols-3 gap-4":"grid grid-cols-1 md:grid-cols-3 gap-4"}`}>
      <div className={`${isRTL?"order-3":""}`}>
@@ -50,22 +57,19 @@ export function BookingFilters({
       />
      </div>
       <div className={`${isRTL?"order-2":""}`}>
-          <Select
-        value={statusFilter}
-        onValueChange={(v) => onStatusChange(v as BookingStatus | "all")}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder={bookingfilters.statusPlaceholder} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{bookingfilters.statusOptions.all}</SelectItem>
-          {Object.entries(statusConfig).map(([key, cfg]) => (
-            <SelectItem key={key} value={key}>
-              {cfg.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+         <Select value={statusFilter} onValueChange={(v) => onStatusChange(v as BookingStatus | "all")}>
+  <SelectTrigger>
+    <SelectValue placeholder={bookingfilters.statusPlaceholder} />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="all">{bookingfilters.statusOptions.all}</SelectItem>
+    {Object.entries(uniqueStatusOptions).map(([key, label]) => (
+      <SelectItem key={key} value={key}>
+        {label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
       </div>
     
         <div className={`${isRTL?"order-1":""}`}>

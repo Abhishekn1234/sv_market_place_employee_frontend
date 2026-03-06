@@ -1,13 +1,13 @@
-import type { BookingHistoryRepo } from "../repositories/AvalableBookingHistoryRepo";
+import type { AvailableBookingRepo } from "../repositories/AvalableBookingRepo";
 
-export class GetBookingHistoryUsecase {
-  private getBooking: BookingHistoryRepo;
+export class GetBookingAvailableUsecase {
+  private getBooking: AvailableBookingRepo;
 
-  constructor(GetBooking: BookingHistoryRepo) {
+  constructor(GetBooking: AvailableBookingRepo) {
     this.getBooking = GetBooking;
   }
 
   async execute(page: number) {
-    return this.getBooking.getBookingHistory(page);
+    return this.getBooking.getBookingAvailable(page);
   }
 }

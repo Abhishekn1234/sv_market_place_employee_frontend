@@ -43,34 +43,47 @@ export function useStringUtils() {
 
   return time;
 };
-const formatSmartDate = (dateInput: string | Date): string => {
-  if (!dateInput) return "";
+const formatSmartDate = (
+    dateInput: string | Date,
+    options?: { showTime?: boolean }
+  ): string => {
+    if (!dateInput) return "";
 
-  // Ensure we have a Date object
-  const inputDate = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+    const inputDate = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
 
-  // Reset hours to midnight for comparison
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  const compareDate = new Date(inputDate);
-  compareDate.setHours(0, 0, 0, 0);
+    const compareDate = new Date(inputDate);
+    compareDate.setHours(0, 0, 0, 0);
 
-  const diffDays =
-    (compareDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+    const diffDays = (compareDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
 
-  const formattedDate = inputDate.toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+    // Format date as "Mar 05, 2026"
+    let formattedDate = inputDate.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
 
-  if (diffDays === 0) return `Today (${formattedDate})`;
-  if (diffDays === 1) return `Tomorrow (${formattedDate})`;
-  if (diffDays === -1) return `Yesterday (${formattedDate})`;
+    // Format time as "10:18 AM"
+    let formattedTime = "";
+    if (options?.showTime) {
+      formattedTime = inputDate.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true, // 12-hour format
+      });
+      formattedDate += ` ${formattedTime}`;
+    }
 
-  return formattedDate;
-};
+    // Prepend Today / Yesterday / Tomorrow
+    if (diffDays === 0) return `Today (${formattedDate})`;
+    if (diffDays === 1) return `Tomorrow (${formattedDate})`;
+    if (diffDays === -1) return `Yesterday (${formattedDate})`;
+
+    return formattedDate;
+  };
 
 
  const formatDuration = (

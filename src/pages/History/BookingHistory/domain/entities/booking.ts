@@ -3,10 +3,12 @@ import type { Pagination } from "./bookingpagination";
 import type { BookingStatus } from "./bookingstatus";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
+import type { PricingTier } from "./pricingtier.types";
+import type { Bookingschedule } from "./bookingschedule";
 
 export interface Booking {
   id: string;
-  // _id?:string;
+   _id?:string;
   clientName: string;
   startDate?:Date;
   clientEmail: string;
@@ -15,20 +17,20 @@ export interface Booking {
   clientPhone?:string;
   clientPhoto?:string;
   serviceType: string;
+  amount?:number;
   bookingType?:string;
   date: string;
   time: string;
   duration: number;
+  pricingTier?:PricingTier[];
   pricingMode?:"HOURLY" |"PER_DAY";
   currency?:string;
   service?:ServiceCategory | string;
   serviceTier?:ServiceTier | string;
-    schedule?: {
-    startDateTime?: string;
-    estimatedHours?: number;
-    estimatedDays?: number;
-  };
-
+  schedule?:Bookingschedule;
+  actualWorkers?:number;
+  actualWorkHours?:number;
+  actualDays?:number;
   status: BookingStatus;
   payment: number;
   location?: GeoPoint | string;

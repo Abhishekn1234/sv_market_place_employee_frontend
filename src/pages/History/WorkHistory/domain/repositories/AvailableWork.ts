@@ -1,5 +1,5 @@
 import type { Work } from "../entities/workhistory";
 
-export interface WorkHistoryRepo{
+export interface AvailableWork{
     getWorkList:()=>Promise<Work[]>
 }

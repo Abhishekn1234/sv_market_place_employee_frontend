@@ -123,7 +123,7 @@ export function useWorkColumns({
 
   const startTime = new Date(startedAt).getTime();
 
-  // ✅ get duration based on pricing mode
+ 
   const durationHours =
     w.booking?.pricingMode === "HOURLY"
       ? w.booking?.schedule?.estimatedHours ?? 1

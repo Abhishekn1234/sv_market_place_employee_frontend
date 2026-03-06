@@ -6,7 +6,7 @@ import { WorkStatsCards } from "./components/WorkStatsCards";
 import { WorkFilters } from "./components/WorkFilters";
 import { WorkHistoryTable } from "./components/WorkHistoryTable";
 import { useWorkStatsCards } from "./hooks/useWorkStatus";
-import { useWorkHistory } from "./hooks/useWorkHistory";
+import { useWorkHistory } from "./hooks/useAvailableWork";
 import WorkHeader from "./components/WorkHeader";
 import { getNormalizedStatus } from "./utils/workhistory";
 

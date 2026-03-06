@@ -1,10 +1,10 @@
 import api from "@/api/api";
-import type { BookingHistoryRepo } from "../../domain/repositories/AvalableBookingHistoryRepo";
+import type { AvailableBookingRepo } from "../../domain/repositories/AvalableBookingRepo";
 import type { Booking, BookingResponse } from "../../domain/entities/booking";
 import { mapBookingStatus } from "../../presentation/helpers/mapstatus";
 
-export class BookingHistoryRepoImpl implements BookingHistoryRepo {
-  async getBookingHistory(page: number): Promise<BookingResponse> {
+export class AvailableBookingImpl implements AvailableBookingRepo {
+  async getBookingAvailable(page: number): Promise<BookingResponse> {
     const res = await api.get("/booking/available", {
       params: {
         page,
@@ -58,5 +58,6 @@ export class BookingHistoryRepoImpl implements BookingHistoryRepo {
       pagination: res.data.pagination,
     };
   }
+ 
 }
 

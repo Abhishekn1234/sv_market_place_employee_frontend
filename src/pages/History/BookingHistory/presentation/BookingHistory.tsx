@@ -8,14 +8,15 @@ import { toast } from "react-toastify";
 import { useLanguage } from "@/context/LanguageContext";
 import { useStatusConfig } from "./hooks/statusconfig";
 import { useBookingColumns } from "./hooks/useColumns";
-import { useGetBookingAvailable } from "./hooks/useGetAvailbaleBooking";
+import { useGetBookingHistory } from "./hooks/useGetBookingHistory"; // <-- updated
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
 
 import { BookingFilters } from "./components/BookingFilters";
 import { BookingExpandedRow } from "./components/BookingExpandedColumns";
 
-import type { Booking } from "../domain/entities/booking";
+
 import type { BookingStatus } from "../domain/entities/bookingstatus";
+import type {  BookingHistory } from "../domain/entities/bookinghistory";
 
 export default function BookingHistory() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,10 +30,10 @@ export default function BookingHistory() {
   const isRTL = language === "AR";
 
   const statusConfig = useStatusConfig();
-  const { data } = useGetBookingAvailable(page);
+  const { data, isLoading, isError } = useGetBookingHistory({ page }); // <-- pass query params if needed
   const { data: categories = [] } = useServiceCategory();
 
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<BookingHistory[]>([]);
 
   useEffect(() => {
     if (data?.data) {
@@ -50,9 +51,9 @@ export default function BookingHistory() {
       const search = searchTerm.toLowerCase();
 
       const matchesSearch =
-        b.clientName?.toLowerCase().includes(search) ||
-        b.id?.toLowerCase().includes(search) ||
-        b.serviceType?.toLowerCase().includes(search) ||
+        b.customer.fullName.toLowerCase().includes(search) ||
+        b._id?.toLowerCase().includes(search) ||
+        b.service.name?.toLowerCase().includes(search) ||
         (typeof b.service === "object" &&
           b.service?.name?.toLowerCase().includes(search));
 
@@ -75,7 +76,7 @@ export default function BookingHistory() {
 
   const handleIgnore = (bookingId: string) => {
     try {
-      setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+      setBookings((prev) => prev.filter((b) => b._id !== bookingId));
       toast.success("Booking ignored successfully");
     } catch {
       toast.error("Failed to ignore booking");
@@ -88,21 +89,21 @@ export default function BookingHistory() {
     onIgnore: handleIgnore,
   });
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="p-6 text-center text-sm sm:text-base">
-  //       Loading booking history…
-  //     </div>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <div className="p-6 text-center text-sm sm:text-base">
+        Loading booking history…
+      </div>
+    );
+  }
 
-  // if (isError) {
-  //   return (
-  //     <div className="p-6 text-center text-sm sm:text-base text-red-500">
-  //       Failed to load booking history
-  //     </div>
-  //   );
-  // }
+  if (isError) {
+    return (
+      <div className="p-6 text-center text-sm sm:text-base text-red-500">
+        Failed to load booking history
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-14">
@@ -149,11 +150,11 @@ export default function BookingHistory() {
         </div>
       </CommonCard>
 
-      {/* TABLE (no extra overflow wrapper needed) */}
-      <CommonTable<Booking>
+      {/* TABLE */}
+      <CommonTable<BookingHistory>
         columns={columns}
         data={filteredBookings}
-        keyExtractor={(b) => b.id}
+        keyExtractor={(b) => b._id}
         currentPage={pagination?.currentPage}
         totalPages={pagination?.totalPages}
         onPageChange={setPage}

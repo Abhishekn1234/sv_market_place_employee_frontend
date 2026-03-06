@@ -1,9 +1,9 @@
 import type { Work } from "../entities/workhistory";
-import type { WorkHistoryRepo } from "../repositories/WorkHistoryRepo";
+import type { AvailableWork } from "../repositories/AvailableWork";
 
 export class WorkHistoryGetUsecase{
-  private workHistoryRepo:WorkHistoryRepo;
-  constructor (workhistory:WorkHistoryRepo){
+  private workHistoryRepo:AvailableWork;
+  constructor (workhistory:AvailableWork){
     this.workHistoryRepo=workhistory
   }
   async execute():Promise<Work[]>{

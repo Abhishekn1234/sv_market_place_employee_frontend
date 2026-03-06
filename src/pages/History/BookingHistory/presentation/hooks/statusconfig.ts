@@ -7,12 +7,21 @@ export function useStatusConfig(): Record<
   { label: string; color: string }
 > {
   const { translations } = useLanguage();
+  const completed = translations.bookingHistory.statusOptions.completed;
+  const C = completed.toLocaleUpperCase();
+  console.log(C);
+
   const statusOptions = translations.bookingHistory.statusOptions as unknown as StatusOptions;
-   console.log(statusOptions);
+  console.log(statusOptions);
+
   return {
-    completed: {
+    [C]: {  // <- dynamic key
       label: statusOptions.completed,
       color: "bg-green-100 text-green-700",
+    },
+    completed:{
+      label:statusOptions.completed,
+      color:"bg-gray-100"
     },
     confirmed: {
       label: statusOptions.confirmed,

@@ -107,17 +107,23 @@ useEffect(() => {
 
         const startTime = new Date(startedAt).getTime();
 
-        // Get duration based on pricing mode
-        const durationHours =
-          w.booking?.pricingMode === "HOURLY"
-            ? w.booking?.schedule?.estimatedHours ?? 1
-            : (w.booking?.schedule?.estimatedDays ?? 1) * 24;
+        let maxDurationMs = 0;
 
-        const maxDurationMs = durationHours * 60 * 60 * 1000;
+        if (w.booking?.pricingMode === "HOURLY") {
+          const hours = w.booking?.schedule?.estimatedHours ?? 1;
+          maxDurationMs = hours * 60 * 60 * 1000;
+        }
+
+        if (w.booking?.pricingMode === "PER_DAY") {
+          const days = w.booking?.schedule?.estimatedDays ?? 1;
+          maxDurationMs = days * 24 * 60 * 60 * 1000;
+        }
 
         const now = Date.now();
         const elapsed = now - startTime;
-        const safeElapsed = elapsed >= maxDurationMs ? maxDurationMs : elapsed;
+
+
+        const safeElapsed = Math.min(elapsed, maxDurationMs);
 
         const hours = Math.floor(safeElapsed / (1000 * 60 * 60));
         const minutes = Math.floor((safeElapsed % (1000 * 60 * 60)) / (1000 * 60));
@@ -166,7 +172,7 @@ useEffect(() => {
                     Worker Pool Amount: {amount} {w.booking?.currency}
                   </p>
                   <p className="text-sm text-gray-500">Pricing: {w.booking?.pricingMode}</p>
-                  <p className="text-sm text-gray-500">Status: {w.status}</p>
+                  <p className="text-sm text-gray-500">Status: {w.booking?.status}</p>
                   <p className="text-sm text-gray-500">Category: {categoryName}</p>
 
                   {(w.status === "inProgress" ||
@@ -190,7 +196,7 @@ useEffect(() => {
                     </>
                   )}
 
-                  {(w.status === "inProgress" || w.status === "IN_PROGRESS" || w.status === "STARTED") && (
+                  {(w.status === "inProgress" || w.status === "IN_PROGRESS" || w.status === "STARTED" ) && (
                     <Button size="sm" className="flex-1" onClick={() => openModal(w, "complete")}>
                       {t("workHistory.actions.completeWork")}
                     </Button>
