@@ -48,33 +48,43 @@ export default function MultiSelectDropdownCard() {
     );
 
   const handleSubmit = () => {
-    if (!location) {
-      toast.error("Please select a location");
-      return;
-    }
+  if (!location) {
+    toast.error("Please select a location");
+    return;
+  }
 
-    const payload: WorkerPayload = {
-      categoryIds: selectedServices.map((s) => s._id),
-      serviceTierIds: selectedTiers.map((t) => t._id),
-      status: "OFFLINE",
-      location,
-      serviceRadius: serviceRadius / 1000,
-    };
-
-    mutation.mutate(payload, {
-      onSuccess: () => {
-     useAuthStore.getState().updateWorker({
-          categoryIds: payload.categoryIds,
-          serviceTierIds: payload.serviceTierIds,
-          status: payload.status as WorkerStatus,
-          serviceRadius: payload.serviceRadius,
-          location: payload.location,
-        });
-        navigate("/services/documents");
-      },
-      onError: () => toast.error("Update failed"),
-    });
+  const payload: WorkerPayload = {
+    categoryIds: selectedServices.map((s) => s._id),
+    serviceTierIds: selectedTiers.map((t) => t._id),
+    status: "OFFLINE",
+    location,
+    serviceRadius: serviceRadius / 1000,
   };
+
+  mutation.mutate(payload, {
+    onSuccess: () => {
+      useAuthStore.getState().updateWorker({
+        categoryIds: payload.categoryIds,
+        serviceTierIds: payload.serviceTierIds,
+        status: payload.status as WorkerStatus,
+        serviceRadius: payload.serviceRadius,
+        location: payload.location,
+      });
+
+      toast.success("Worker updated successfully");
+      navigate("/services/documents");
+    },
+
+    onError: (err: any) => {
+      const message =
+        err?.response?.data?.message || 
+        err?.message ||                
+        "Update failed";
+
+      toast.error(message);
+    },
+  });
+};
 
   return (
     <div className="flex justify-center p-4 sm:p-6 lg:p-8">

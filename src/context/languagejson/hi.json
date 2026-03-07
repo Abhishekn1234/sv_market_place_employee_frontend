@@ -11,7 +11,8 @@
     "completed": "पूर्ण",
     "pending": "लंबित",
     "failed": "विफल",
-    "hoursAgo": "{{count}} घंटे पहले"
+    "hoursAgo": "{{count}} घंटे पहले",
+    "logoutSuccess":"सफलतापूर्वक लॉग आउट हो गया"
   },
   "HomePage": {
   "dashboard": "डैशबोर्ड",

@@ -82,31 +82,36 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    try {
-      const data = new FormData();
+  try {
+    const data = new FormData();
 
-      Object.entries(formData).forEach(([k, v]) => data.append(k, v));
+    Object.entries(formData).forEach(([k, v]) => data.append(k, v));
 
-      Object.entries(files).forEach(([k, f]) => {
-        if (f) data.append(k, f);
-      });
+    Object.entries(files).forEach(([k, f]) => {
+      if (f) data.append(k, f);
+    });
 
-      Object.entries(fileUrls).forEach(([k, url]) => {
-        if (!files[k as keyof typeof files]) {
-          data.append(`${k}Url`, url);
-        }
-      });
+    Object.entries(fileUrls).forEach(([k, url]) => {
+      if (!files[k as keyof typeof files]) {
+        data.append(`${k}Url`, url);
+      }
+    });
 
-      await mutateAsync(data);
-      toast.success("Profile updated successfully!");
-      switchTab("profile");
-    } catch {
-      toast.error("Failed to update profile");
-    }
-  };
+    await mutateAsync(data);
+    toast.success("Profile updated successfully!");
+    switchTab("profile");
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.message ||
+      err?.message ||                 
+      "Failed to update profile";     
+
+    toast.error(message);
+  }
+};
 
   const fileFields = [
     { label: "Profile Image", key: "profileImage" },

@@ -1,7 +1,7 @@
 import { useLanguage } from "@/context/LanguageContext";
 import type { GetBooking } from "@/core/Websocket/domain/entities/getrepo";
 import { useAvailableBookings } from "@/core/Websocket/presentation/hooks/useGet";
-import { useAssign } from "@/pages/AssignedWorks/presentation/hooks/useAssign";
+import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
 import { data } from "@/pages/Notifications/presentation/data/mockdata";
 import { ClipboardList, Wrench, CreditCard, Bell } from "lucide-react";
 

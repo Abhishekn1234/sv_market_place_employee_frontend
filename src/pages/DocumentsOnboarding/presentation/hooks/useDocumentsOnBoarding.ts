@@ -1,3 +1,5 @@
+"use client";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DocumentsOnboardingImpl } from "../../data/repositories/DocumentsOnboardingImpl";
 import { DocumentsOnboardingusecase } from "../../domain/usecase/Documentsusecase";
@@ -18,8 +20,8 @@ export function useDocumentsOnBoarding() {
 
   return useMutation<
     DocumentsOnboardingResponse, 
-    Error,
-    DocumentsOnboarding           
+    any,      
+    DocumentsOnboarding
   >({
     mutationFn: (payload) => usecase.execute(payload),
 
@@ -34,17 +36,22 @@ export function useDocumentsOnBoarding() {
           .updateUserProfile({ documents });
       }
 
-    
       queryClient.setQueryData(["profile"], (old: any) => ({
         ...old,
         documents,
       }));
 
+      toast.success("Documents uploaded successfully");
       navigate("/");
     },
 
-    onError: (err) => {
-      toast.error(err.message || "Something went wrong");
+    onError: (err: any) => {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong";
+
+      toast.error(message);
     },
   });
 }

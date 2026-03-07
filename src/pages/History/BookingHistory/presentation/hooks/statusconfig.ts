@@ -1,5 +1,5 @@
 import { useLanguage } from "@/context/LanguageContext";
-import type { BookingStatus } from "../../domain/entities/bookingstatus";
+import type { BookingStatus } from "../../../../Booking/AvailableBooking/domain/entities/bookingstatus";
 import type { StatusOptions } from "../../domain/entities/statusoptions.types";
 
 export function useStatusConfig(): Record<

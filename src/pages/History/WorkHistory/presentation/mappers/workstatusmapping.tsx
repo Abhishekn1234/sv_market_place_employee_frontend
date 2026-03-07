@@ -1,6 +1,6 @@
-import type { Work } from "../../domain/entities/workhistory";
+import type { Work } from "@/pages/Booking/AvaliableWorks/domain/entities/work";
 import type { WorkStatus } from "../../domain/entities/workstatus";
-import type { Booking } from "@/pages/History/BookingHistory/domain/entities/booking";
+import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
 
 export function mapApiToWork(apiData: any[]): Work[] {
 const statusMap: Record<string, WorkStatus> = {

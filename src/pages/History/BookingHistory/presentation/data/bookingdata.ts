@@ -1,4 +1,4 @@
-import type { Booking } from "../../domain/entities/booking";
+import type { Booking } from "../../../../Booking/AvailableBooking/domain/entities/booking";
 
 
 export const mockBookings:Booking[] = [

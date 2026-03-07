@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { BookingStatus } from "../../domain/entities/bookingstatus";
+import type { BookingStatus } from "../../../../Booking/AvailableBooking/domain/entities/bookingstatus";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -19,7 +19,8 @@ type Props = {
 
   statusFilter: BookingStatus | "all";
   onStatusChange: (value: BookingStatus | "all") => void;
-
+  limit: number;
+onLimitChange: (value: number) => void;
   serviceFilter: string;
   onServiceChange: (value: string) => void;
 
@@ -35,11 +36,14 @@ export function BookingFilters({
   serviceFilter,
   onServiceChange,
   services,
+  limit,
+  onLimitChange,
   statusConfig,
 }: Props) {
   const {translations,language}=useLanguage();
   const isRTL=language==="AR";
   const bookingfilters=translations.bookingHistory;
+  const limits = [5, 10, 20, 50];
   const uniqueStatusOptions = Object.entries(statusConfig).reduce<Record<string, string>>((acc, [key, cfg]) => {
   if (!Object.values(acc).includes(cfg.label)) {
     acc[key] = cfg.label;
@@ -48,7 +52,7 @@ export function BookingFilters({
 }, {});
 
   return (
-    <div className={`${isRTL?"grid grid-cols-1 md:grid-cols-3 gap-4":"grid grid-cols-1 md:grid-cols-3 gap-4"}`}>
+    <div className={`${isRTL?"grid grid-cols-1 md:grid-cols-4 gap-4":"grid grid-cols-1 md:grid-cols-4 gap-4"}`}>
      <div className={`${isRTL?"order-3":""}`}>
       <Input
         placeholder={bookingfilters.searchPlaceholder}
@@ -88,7 +92,20 @@ export function BookingFilters({
         </SelectContent>
       </Select>
         </div>
-      
+       <div>
+  <Select value={limit.toString()} onValueChange={(v) => onLimitChange(Number(v))}>
+    <SelectTrigger>
+      <SelectValue placeholder="Rows per page" />
+    </SelectTrigger>
+    <SelectContent>
+      {limits.map((l) => (
+        <SelectItem key={l} value={l.toString()}>
+          {l}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
      
     </div>
   );

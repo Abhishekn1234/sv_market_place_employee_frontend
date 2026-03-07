@@ -10,9 +10,10 @@ export function useProfile() {
   return useQuery({
     queryKey: ["profile"],
     queryFn: () => usecase.execute(),
-    staleTime: 1000 * 60 * 5,
+
+    staleTime: Infinity, 
+    gcTime: 1000 * 60 * 30, 
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
     retry: 1,
   });
 }

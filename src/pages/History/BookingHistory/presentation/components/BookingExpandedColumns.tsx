@@ -27,23 +27,32 @@ type Props = {
 export function BookingExpandedRow({ booking, bookingCategories }: Props) {
   const { formatSmartDate } = useStringUtils();
   const [locationName, setLocationName] = useState<string>("—");
+ const geoCache = new Map<string, string>();
+ useEffect(() => {
+  if (
+    booking.booking.location &&
+    typeof booking.booking.location !== "string" &&
+    booking.booking.location.type === "Point" &&
+    Array.isArray(booking.booking.location.coordinates)
+  ) {
+    const [lng, lat] = booking.booking.location.coordinates;
 
-  // Get location name from coordinates
-  useEffect(() => {
-    if (
-      booking.booking.location &&
-      typeof booking.booking.location !== "string" &&
-      booking.booking.location.type === "Point" &&
-      Array.isArray(booking.booking.location.coordinates)
-    ) {
-      const [lng, lat] = booking.booking.location.coordinates;
-      reverseGeocode(lat, lng)
-        .then((name) => setLocationName(name))
-        .catch(() => setLocationName("—"));
+    const key = `${lat}-${lng}`;
+
+    // return cached result
+    if (geoCache.has(key)) {
+      setLocationName(geoCache.get(key)!);
+      return;
     }
-  }, [booking.booking.location]);
 
-  // Find category object
+    reverseGeocode(lat, lng)
+      .then((name) => {
+        geoCache.set(key, name);
+        setLocationName(name);
+      })
+      .catch(() => setLocationName("—"));
+  }
+}, [booking.booking.location]);
   const category = useMemo<ServiceCategory | undefined>(() => {
     if (typeof booking.service === "object" && booking.service?.category) {
       return bookingCategories.find(

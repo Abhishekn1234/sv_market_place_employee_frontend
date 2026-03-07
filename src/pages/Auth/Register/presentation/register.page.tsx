@@ -91,11 +91,16 @@ const handleCountryChange = (iso: string) => {
     setAuth(res.user)
 
       toast.success("Registration successful! You are now logged in.");
-      navigate("/login"); // navigate directly to dashboard/home
+      navigate("/login"); 
     },
     onError: (err: any) => {
-      toast.error("Registration failed: " + err.message);
-    },
+  const message =
+    err?.response?.data?.message ||
+    err?.message ||
+    "Registration failed";
+
+  toast.error("Registration failed: " + message);
+},
   });
 };
   const handleKeyPress = (e: React.KeyboardEvent) => {

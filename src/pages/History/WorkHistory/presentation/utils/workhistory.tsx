@@ -1,5 +1,5 @@
 import { AlertCircle, CheckCircle2, PlayCircle, XCircle } from "lucide-react";
-import type { Work } from "../../domain/entities/workhistory";
+import type { Work } from "@/pages/Booking/AvaliableWorks/domain/entities/work";
 
 export const getStatusColor = (status: string) => {
   switch (status) {

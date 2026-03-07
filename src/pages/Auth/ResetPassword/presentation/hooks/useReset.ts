@@ -18,32 +18,20 @@ export const useResetPassword = () => {
       setLoading(false);
 
       if (result.success) {
-        toast.success(result.message, {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        toast.success(result.message);
       } else {
-        toast.error(result.message, {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        toast.error(result.message);
       }
+
     } catch (err: any) {
       setLoading(false);
-      toast.error(err.message || 'Something went wrong', {
-        position: "top-right",
-        autoClose: 3000,
-      });
+
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong";
+
+      toast.error(message);
     }
   };
 

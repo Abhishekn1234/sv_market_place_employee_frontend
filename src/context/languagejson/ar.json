@@ -11,7 +11,8 @@
     "completed": "مكتمل",
     "pending": "قيد الانتظار",
     "failed": "فشل",
-    "hoursAgo": "منذ {{count}} ساعات"
+    "hoursAgo": "منذ {{count}} ساعات",
+    "logoutSuccess":"تم تسجيل الخروج بنجاح"
   },
   "HomePage": {
   "dashboard": "لوحة التحكم",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -21,14 +21,17 @@ interface CommonMapProps {
   setRadius?: (r: number) => void;
   onLocationNameChange?: (name: string) => void;
   draggableMarker?: boolean;
-  height?: string | number; // optional, defaults to responsive
+  height?: string | number;
 }
+
+/* ---------------- ICON ---------------- */
 
 export const defaultIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
   iconSize: [30, 30],
   iconAnchor: [15, 30],
 });
+
 export function initLeafletIcons() {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
 
@@ -42,6 +45,8 @@ export function initLeafletIcons() {
   });
 }
 
+/* ---------------- UTILS ---------------- */
+
 export const normalize = (n: number) => parseFloat(n.toFixed(6));
 
 export const reverseGeocode = async (lat: number, lng: number) => {
@@ -49,18 +54,42 @@ export const reverseGeocode = async (lat: number, lng: number) => {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
     );
+
     const data = await res.json();
+
     return data.display_name ?? `${lat}, ${lng}`;
   } catch {
     return `${lat}, ${lng}`;
   }
 };
 
+/* ---------------- CACHE ---------------- */
+
+const geoCache = new Map<string, string>();
+
+const getLocationName = async (lat: number, lng: number) => {
+  const key = `${lat.toFixed(5)}-${lng.toFixed(5)}`;
+
+  if (geoCache.has(key)) {
+    return geoCache.get(key)!;
+  }
+
+  const name = await reverseGeocode(lat, lng);
+
+  geoCache.set(key, name);
+
+  return name;
+};
+
+/* ---------------- MAP HELPERS ---------------- */
+
 const RecenterMap = ({ location }: { location: [number, number] }) => {
   const map = useMap();
+
   useEffect(() => {
     map.setView(location, map.getZoom(), { animate: true });
   }, [map, location]);
+
   return null;
 };
 
@@ -78,8 +107,11 @@ const ManualLocationPicker = ({
         }
       : undefined,
   });
+
   return null;
 };
+
+/* ---------------- MAIN COMPONENT ---------------- */
 
 export const CommonMap: React.FC<CommonMapProps> = ({
   location,
@@ -91,50 +123,76 @@ export const CommonMap: React.FC<CommonMapProps> = ({
   draggableMarker = true,
   height,
 }) => {
-  console.log(setRadius);
   const [currentRadius, setCurrentRadius] = useState(radius);
 
-  useEffect(() => setCurrentRadius(radius), [radius]);
+  const debounceRef = useRef<number| null>(null);
+
+
 
   useEffect(() => {
-    if (onLocationNameChange) {
-      reverseGeocode(location[0], location[1]).then(onLocationNameChange);
+    setCurrentRadius(radius);
+  }, [radius]);
+
+  /* Cleanup debounce */
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  /* -------- Optimized Reverse Geocode -------- */
+
+  useEffect(() => {
+    if (!onLocationNameChange) return;
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
+
+    debounceRef.current = setTimeout(() => {
+      getLocationName(location[0], location[1]).then(onLocationNameChange);
+    }, 400);
   }, [location, onLocationNameChange]);
 
-  const handleMarkerDrag = async (e: L.DragEndEvent) => {
+  /* -------- Marker Drag -------- */
+
+  const handleMarkerDrag = (e: L.DragEndEvent) => {
     const pos = e.target.getLatLng();
+
     const lat = normalize(pos.lat);
     const lng = normalize(pos.lng);
-    setLocation([lat, lng]);
 
-    if (onLocationNameChange) {
-      const name = await reverseGeocode(lat, lng);
-      onLocationNameChange(name);
-    }
+    setLocation([lat, lng]);
   };
+
+  /* -------- Map Click -------- */
 
   const handleMapClick = (lat: number, lng: number) => {
     const nLat = normalize(lat);
     const nLng = normalize(lng);
+
     setLocation([nLat, nLng]);
+  };
+
+  /* -------- Radius Change -------- */
+
+  const handleRadiusChange = (r: number) => {
+    setCurrentRadius(r);
+    setRadius?.(r);
   };
 
   return (
     <div
       className="w-full rounded-md overflow-hidden border"
-      style={{
-        height: height ?? undefined,
-      }}
+      style={{ height: height ?? undefined }}
     >
       <MapContainer
         center={location}
         zoom={13}
         style={{
           width: "100%",
-          height: height
-            ? height
-            : "14rem", 
+          height: height ? height : "14rem",
         }}
         className="sm:h-64 md:h-72 lg:h-80 xl:h-96 2xl:h-[600px]"
       >
@@ -163,9 +221,33 @@ export const CommonMap: React.FC<CommonMapProps> = ({
         <Circle
           center={location}
           radius={currentRadius}
-          pathOptions={{ color: "blue", fillColor: "blue", fillOpacity: 0.2 }}
+          pathOptions={{
+            color: "blue",
+            fillColor: "blue",
+            fillOpacity: 0.2,
+          }}
         />
       </MapContainer>
+
+      {/* Optional Radius Slider */}
+
+      {setRadius && (
+        <div className="p-2 bg-white border-t">
+          <label className="text-sm font-medium">
+            Radius: {(currentRadius / 1000).toFixed(2)} km
+          </label>
+
+          <input
+            type="range"
+            min={100}
+            max={5000}
+            step={100}
+            value={currentRadius}
+            onChange={(e) => handleRadiusChange(Number(e.target.value))}
+            className="w-full mt-1"
+          />
+        </div>
+      )}
     </div>
   );
 };

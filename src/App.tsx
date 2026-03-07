@@ -25,9 +25,8 @@ import Wallet from './pages/Wallet/presentation/wallet.page';
 import NotificationsPage from './pages/Notifications/presentation/notification.page';
 import { ThemeProvider } from './context/ThemeContext';
 import { useDynamicLocation } from '@/utils/useNotification';
-import AvailableBookingPage from './pages/History/AvailableBooking/presentation/availablebooking.page';
-
-import AvailableWorkPage from './pages/History/AvaliableWorks/presentation/AvailableWorkPage';
+import AvailableBookingPage from './pages/Booking/AvailableBooking/presentation/availablebooking.page';
+import AvailableWorkPage from './pages/Booking/AvaliableWorks/presentation/AvailableWorkPage';
 function AppContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");

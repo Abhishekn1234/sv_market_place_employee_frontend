@@ -1,8 +1,8 @@
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
-import type { Booking } from "./booking";
+import type { Booking } from "../../../../Booking/AvailableBooking/domain/entities/booking";
 import type { Customer } from "./customer.types";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
-import type { BookingStatus } from "./bookingstatus";
+import type { BookingStatus } from "../../../../Booking/AvailableBooking/domain/entities/bookingstatus";
 
 
 export interface BookingHistoryResponse {

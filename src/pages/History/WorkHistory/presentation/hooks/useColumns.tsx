@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import type { TableColumn } from "@/components/common/CommonTable";
-import type { Work } from "../../domain/entities/workhistory";
+import type { Work } from "@/pages/Booking/AvaliableWorks/domain/entities/work";
 import { getStatusColor, getStatusIcon } from "../utils/workhistory";
 import { useLanguage } from "@/context/LanguageContext";
 import { reverseGeocode } from "@/components/common/CommonMap";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
-import { useCancel } from "@/pages/AssignedWorks/presentation/hooks/useCancel";
+import { useCancel } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useCancel";
 import { useTheme } from "@/context/ThemeContext";
 
 type Props = {

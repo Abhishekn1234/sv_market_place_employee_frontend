@@ -1,4 +1,4 @@
-// presentation/hooks/useOtp.ts
+
 import { useMutation } from "@tanstack/react-query";
 import { VerifyOtpImpl } from "../../data/repositories/VerifyOtpImpl";
 import { VerifyOtpUsecase } from "../../domain/usecase/verifyusecase";

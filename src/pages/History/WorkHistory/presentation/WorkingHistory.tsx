@@ -5,8 +5,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import { WorkStatsCards } from "./components/WorkStatsCards";
 import { WorkFilters } from "./components/WorkFilters";
 import { WorkHistoryTable } from "./components/WorkHistoryTable";
-import { useWorkStatsCards } from "./hooks/useWorkStatus";
-import { useWorkHistory } from "./hooks/useAvailableWork";
+import { useWorkStatsCards } from "../../../Booking/AvaliableWorks/presentation/hooks/useWorkStatus";
+import { useWorkHistory } from "../../../Booking/AvaliableWorks/presentation/hooks/useAvailableWork";
 import WorkHeader from "./components/WorkHeader";
 import { getNormalizedStatus } from "./utils/workhistory";
 

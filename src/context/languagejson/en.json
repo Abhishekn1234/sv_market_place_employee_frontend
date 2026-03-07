@@ -11,7 +11,8 @@
     "completed": "Completed",
     "pending": "Pending",
     "failed": "Failed",
-    "hoursAgo": "{{count}} hours ago"
+    "hoursAgo": "{{count}} hours ago",
+    "logoutSuccess":"Logged out successfully"
   },
   "HomePage": {
   "dashboard": "Dashboard",

@@ -40,29 +40,36 @@ export default function VerifyOtp() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const otpValue = otp.join("");
+ const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (otpValue.length !== 6) {
-      toast.error("Please enter complete OTP");
-      return;
+  const otpValue = otp.join("");
+
+  if (otpValue.length !== 6) {
+    toast.error("Please enter complete OTP");
+    return;
+  }
+
+  mutate(
+    { hash, otp: otpValue },
+    {
+      onSuccess: (data: any) => {
+        sessionStorage.setItem("resetPasswordToken", data.accessToken);
+        toast.success("OTP verified");
+        navigate("/reset-password", { replace: true });
+      },
+
+      onError: (err: any) => {
+        const message =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Invalid OTP";
+
+        toast.error(message);
+      },
     }
-
-    mutate(
-      { hash, otp: otpValue },
-      {
-        onSuccess: (data: any) => {
-          sessionStorage.setItem("resetPasswordToken", data.accessToken);
-          toast.success("OTP verified");
-          navigate("/reset-password", { replace: true });
-        },
-        onError: (err: any) => {
-          toast.error(err?.response?.data?.message || "Invalid OTP");
-        },
-      }
-    );
-  };
+  );
+};
 
   return (
     <div className="

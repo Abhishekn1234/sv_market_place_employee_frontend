@@ -10,6 +10,7 @@ import {
   // Home,
   ChevronRight,
   ChevronLeft,
+  CalendarCheck,
   // CalendarCheck,
 } from "lucide-react";
 
@@ -76,10 +77,27 @@ export default function AppSidebar({
         { id: "booking", title: t("sidebar.bookingHistory"), href: "/history/booking" },
         { id: "transaction", title: t("sidebar.transactionHistory"), href: "/history/transaction" },
         { id: "work", title: t("sidebar.workHistory"), href: "/history/work" },
-        {id:"available Booking", title:t("sidebar.availableBooking"),href:"/availableBooking"},
-        {id:"available Work", title:t("sidebar.availableWork"),href:"/availableWork"}
+        
       ],
     },
+     {
+    id: "booking",
+    title: t("sidebar.booking"),
+    icon: CalendarCheck,
+    subLinks: [
+      {
+        id: "available Booking",
+        title: t("sidebar.availableBooking"),
+        href: "/availableBooking",
+      },
+      {
+        id: "available Work",
+        title: t("sidebar.availableWork"),
+        href: "/availableWork",
+      },
+      
+    ],
+  },
     {
       id: "activity",
       title: t("sidebar.activity"),
@@ -89,28 +107,7 @@ export default function AppSidebar({
         { id: "past", title: t("sidebar.pastActivity"), href: "/activity/past" },
       ],
     },
-  //    {
-  //   id: "booking",
-  //   title: t("sidebar.booking"),
-  //   icon: CalendarCheck,
-  //   subLinks: [
-  //     {
-  //       id: "available-booking",
-  //       title: t("sidebar.availableBooking"),
-  //       href: "/booking/available",
-  //     },
-  //     {
-  //       id: "current-booking",
-  //       title: t("sidebar.currentBooking"),
-  //       href: "/booking/current",
-  //     },
-  //     {
-  //       id: "ongoing-services",
-  //       title: t("sidebar.ongoingServices"),
-  //       href: "/booking/ongoing-services",
-  //     },
-  //   ],
-  // },
+    
     {
       id: "settings",
       title: t("sidebar.settings"),

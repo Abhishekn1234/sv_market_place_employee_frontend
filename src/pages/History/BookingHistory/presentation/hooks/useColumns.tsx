@@ -9,7 +9,7 @@ import { useStatusConfig } from "./statusconfig";
 import { useStringUtils } from "./useStringutils";
 
 import type { BookingHistory } from "../../domain/entities/bookinghistory";
-import type { BookingStatus } from "../../domain/entities/bookingstatus";
+import type { BookingStatus } from "../../../../Booking/AvailableBooking/domain/entities/bookingstatus";
 
 type Params = {
   expandedBooking: string | null;

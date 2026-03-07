@@ -57,8 +57,13 @@ const handleSubmit = (e: React.FormEvent) => {
       navigate("/services/employee");
     },
 
-    onError: (error) => {
-      toast.error(error.message);
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+
+      toast.error(message);
     },
   });
 };

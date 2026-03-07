@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { CommonTable } from "@/components/common/CommonTable";
-import type { Work } from "../../domain/entities/workhistory";
+import type { Work } from "@/pages/Booking/AvaliableWorks/domain/entities/work";
 import { useWorkColumns } from "../hooks/useColumns";
-import StartWork from "../components/StartWork";
-import CompleteWork from "./CompleteWork";
-import PaymentModal from "../components/PaymentModal";
-import InvoiceModal from "../components/InvoiceModal";
-import VerifyOtpModal from "./VerifyOtpModal";
+import StartWork from "../../../../Booking/AvaliableWorks/presentation/components/StartWork";
+import CompleteWork from "../../../../Booking/AvaliableWorks/presentation/components/CompleteWork";
+import PaymentModal from "../../../../Booking/AvaliableWorks/presentation/components/PaymentModal";
+import InvoiceModal from "../../../../Booking/AvaliableWorks/presentation/components/InvoiceModal";
+import VerifyOtpModal from "../../../../Booking/AvaliableWorks/presentation/components/VerifyOtpModal";
 
 export function WorkHistoryTable({
   data,
