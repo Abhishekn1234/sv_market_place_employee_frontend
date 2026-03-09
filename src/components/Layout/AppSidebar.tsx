@@ -76,7 +76,7 @@ export default function AppSidebar({
       subLinks: [
         { id: "booking", title: t("sidebar.bookingHistory"), href: "/history/booking" },
         { id: "transaction", title: t("sidebar.transactionHistory"), href: "/history/transaction" },
-        { id: "work", title: t("sidebar.workHistory"), href: "/history/work" },
+        // { id: "work", title: t("sidebar.workHistory"), href: "/history/work" },
         
       ],
     },
