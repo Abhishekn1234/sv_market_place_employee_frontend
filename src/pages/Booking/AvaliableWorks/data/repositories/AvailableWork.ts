@@ -8,13 +8,13 @@ export class AvailableWorkImpl implements AvailableWork {
     const response = await api.get('/booking/get-assigned-booking');
       console.log(response);
     const rawData = response.data;
-
+     console.log(rawData);
     const dataArray = Array.isArray(rawData)
       ? rawData
       : rawData?.data
       ? rawData.data
       : [rawData];
-
+    console.log(dataArray);
     const works: Work[] = mapApiToWork(dataArray);
 
     console.log("Mapped Works:", works);
