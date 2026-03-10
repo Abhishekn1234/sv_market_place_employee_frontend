@@ -1,34 +1,39 @@
 import { useLanguage } from "@/context/LanguageContext";
-import type { GetBooking } from "@/core/Websocket/domain/entities/getrepo";
-import { useAvailableBookings } from "@/core/Websocket/presentation/hooks/useGet";
-import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
-import { data } from "@/pages/Notifications/presentation/data/mockdata";
+import type { BookingHistory } from "@/pages/History/BookingHistory/domain/entities/bookinghistory";
+import { useGetBookingHistory } from "@/pages/History/BookingHistory/presentation/hooks/useGetBookingHistory";
+import { data as notificationData } from "@/pages/Notifications/presentation/data/mockdata";
+
 import { ClipboardList, Wrench, CreditCard, Bell } from "lucide-react";
 
 export const useHomeCards = () => {
   const { translations } = useLanguage();
   const homeTranslations = translations.HomePage;
 
-  const { bookings = [] } = useAvailableBookings();
-  const { assignedWorks = [] } = useAssign();
+  const { data: bookingHistory } = useGetBookingHistory();
+
+  const bookings: BookingHistory[] = bookingHistory?.data ?? [];
 
   const totalBookingsCount = bookings.length;
 
-  const calculateMonthlyRevenue = (bookings: GetBooking[]) => {
+  const assignedWorks = bookings.filter(
+    (item) => item.booking?.status === "WORK_COMPLETED_PENDING"
+  );
+
+  const calculateMonthlyRevenue = (bookings: BookingHistory[]) => {
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
 
     return bookings.reduce((total, booking) => {
-      if (!booking.createdAt || !booking.amount) return total;
+      if (!booking?.booking?.startedAt || !booking?.booking?.amount) return total;
 
-      const bookingDate = new Date(booking.createdAt);
+      const bookingDate = new Date(booking.booking.startedAt);
 
       if (
         bookingDate.getMonth() === currentMonth &&
         bookingDate.getFullYear() === currentYear
       ) {
-        return total + booking.amount;
+        return total + booking.booking.amount;
       }
 
       return total;
@@ -61,11 +66,10 @@ export const useHomeCards = () => {
     },
     {
       title: homeTranslations.notifications,
-      value: data.length,
+      value: notificationData.length,
       icon: Bell,
       bg: "bg-red-100",
       text: "text-red-600",
     },
   ];
 };
-
