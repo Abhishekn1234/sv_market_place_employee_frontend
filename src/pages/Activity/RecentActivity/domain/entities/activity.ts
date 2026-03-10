@@ -1,5 +1,6 @@
 import type { ActivityType } from "./activitytype.type";
-import type { ActivityStatus } from "./activitystatus.type";
+
+import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";
 
 export interface Activity {
   id: string;
@@ -7,8 +8,9 @@ export interface Activity {
   title: string;
   description: string;
   timestamp: Date;
-  status: ActivityStatus;
+  status: BookingStatus;
   amount?: number;
   client?: string;
   location?: string;
+  currency?:string;
 }

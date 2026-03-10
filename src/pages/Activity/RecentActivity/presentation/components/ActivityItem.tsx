@@ -9,9 +9,14 @@ import {
   MapPin,
   CheckCircle2,
   AlertCircle,
+  Receipt,
 } from "lucide-react";
+
 import type { Activity } from "../../domain/entities/activity";
 import { useTheme } from "@/context/ThemeContext";
+import { formatDate } from "../helpers/formatdate";
+import type { StatusConfig } from "../../domain/entities/activitystatus.type";
+
 
 const ICONS = {
   booking: Calendar,
@@ -19,39 +24,89 @@ const ICONS = {
   payment: DollarSign,
 };
 
-const STATUS_ICONS = {
-  completed: CheckCircle2,
-  confirmed: CheckCircle2,
-  pending: Clock,
-  cancelled: AlertCircle,
+const STATUS_CONFIG: Record<string, StatusConfig> = {
+  completed: {
+    color: "text-green-600 bg-green-50",
+    icon: CheckCircle2,
+  },
+
+  confirmed: {
+    color: "text-blue-600 bg-blue-50",
+    icon: CheckCircle2,
+  },
+
+  pending: {
+    color: "text-amber-600 bg-amber-50",
+    icon: Clock,
+  },
+
+  requested: {
+    color: "text-yellow-600 bg-yellow-50",
+    icon: Clock,
+  },
+
+  IN_PROGRESS: {
+    color: "text-indigo-600 bg-indigo-50",
+    icon: TrendingUp,
+  },
+
+  worker_accepted: {
+    color: "text-cyan-600 bg-cyan-50",
+    icon: CheckCircle2,
+  },
+
+  invoice_generated: {
+    color: "text-purple-600 bg-purple-50",
+    icon: Receipt,
+  },
+
+  cancelled: {
+    color: "text-red-600 bg-red-50",
+    icon: AlertCircle,
+  },
+
+  customer_cancelled: {
+    color: "text-red-600 bg-red-50",
+    icon: AlertCircle,
+  },
+
+  worker_cancelled: {
+    color: "text-red-600 bg-red-50",
+    icon: AlertCircle,
+  },
 };
 
-const STATUS_COLORS = {
-  completed: "text-green-600",
-  confirmed: "text-blue-600",
-  pending: "text-amber-600",
-  cancelled: "text-red-600",
-};
+
 
 export function ActivityItem({ activity }: { activity: Activity }) {
-  const TypeIcon = ICONS[activity.type];
-  const StatusIcon = STATUS_ICONS[activity.status];
   const { theme } = useTheme();
+
+  const TypeIcon = ICONS[activity.type] ?? Calendar;
+
+  const statusConfig =
+    STATUS_CONFIG[activity.status] ??
+    { color: "text-gray-600 bg-gray-100", icon: Clock };
+
+  const StatusIcon = statusConfig.icon;
 
   return (
     <CommonCard className="p-4 transition hover:shadow-md">
       <div className="flex gap-4 items-start">
-        {/* Icon */}
+
+        {/* Activity Icon */}
         <div className="size-10 shrink-0 flex items-center justify-center rounded-full bg-gray-100">
           <TypeIcon className="size-5 text-gray-700" />
         </div>
 
-        {/* Content */}
+        {/* Main Content */}
         <div className="flex-1 space-y-2">
-          {/* Top row */}
+
+          {/* Header */}
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start">
             <div className="space-y-1">
+
               <div className="flex items-center gap-2">
+
                 <h3
                   className={`font-medium ${
                     theme === "dark" ? "text-gray-100" : "text-gray-900"
@@ -60,9 +115,7 @@ export function ActivityItem({ activity }: { activity: Activity }) {
                   {activity.title}
                 </h3>
 
-                <StatusIcon
-                  className={`size-4 ${STATUS_COLORS[activity.status]}`}
-                />
+                <StatusIcon className={`size-4 ${statusConfig.color}`} />
               </div>
 
               <p
@@ -72,21 +125,26 @@ export function ActivityItem({ activity }: { activity: Activity }) {
               >
                 {activity.description}
               </p>
+
             </div>
 
-            {/* Status + amount */}
+            {/* Status + Amount */}
             <div className="flex flex-row sm:flex-col sm:text-right gap-2">
-              <Badge className="w-fit">{activity.status}</Badge>
+
+              <Badge className={`capitalize ${statusConfig.color}`}>
+                {activity.status.replace(/_/g, " ")}
+              </Badge>
 
               {activity.amount && activity.amount > 0 && (
-                <p className="text-green-600 font-medium">
-                  ${activity.amount}
+                <p className="font-medium text-green-600">
+                  {activity.currency ?? "INR"} {activity.amount}
                 </p>
               )}
+
             </div>
           </div>
 
-          {/* Meta info */}
+      
           <div
             className={`flex flex-wrap gap-x-4 gap-y-2 text-sm ${
               theme === "dark" ? "text-gray-400" : "text-gray-500"
@@ -94,7 +152,7 @@ export function ActivityItem({ activity }: { activity: Activity }) {
           >
             <span className="flex items-center gap-1">
               <Clock className="size-3.5" />
-              {activity.timestamp.toLocaleString()}
+              {formatDate(activity.timestamp)}
             </span>
 
             {activity.client && (
@@ -111,6 +169,7 @@ export function ActivityItem({ activity }: { activity: Activity }) {
               </span>
             )}
           </div>
+
         </div>
       </div>
     </CommonCard>

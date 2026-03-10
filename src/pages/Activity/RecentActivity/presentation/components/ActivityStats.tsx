@@ -52,7 +52,7 @@ export function ActivityStats({ activities }: { activities: Activity[] }) {
   const isRTL = language === "AR";
 
   const totalEarnings = activities
-    .filter((a) => a.status === "completed" && a.amount)
+    .filter((a) => a.amount)
     .reduce((sum, a) => sum + (a.amount || 0), 0);
 
   return (
