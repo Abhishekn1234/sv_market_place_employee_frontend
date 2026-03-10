@@ -191,7 +191,7 @@ export default function ActivityAnalytics({
 
           <Insight
             title={pa.insights.averageEarnings}
-            value={`$${completedCount
+            value={`${completedCount
               ? (totalEarnings / completedCount).toFixed(2)
               : 0}`}
             icon={DollarSign}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,  useEffect } from "react";
 
 import ActivityHeader from "./components/ActivityHeader";
 import {
@@ -19,24 +19,79 @@ import {
 
 import type { ActivityType } from "../domain/entities/activitytype";
 import type { TimePeriod } from "../domain/entities/timeperiod";
+import type { Activity } from "../domain/entities/activity";
 
-import { generateMockActivities } from "./helpers/getMockdata";
 import { useActivityAnalytics } from "./helpers/prepare";
+import { useAuthStore } from "@/core/store/auth";
+import { useGetBookingHistory } from "@/pages/History/BookingHistory/presentation/hooks/useGetBookingHistory";
+import { reverseGeocode } from "@/components/common/CommonMap";
 
-interface PastActivityProps {
-  employeeName?: string;
-  employeeId?: string;
-}
+export default function PastActivity() {
 
-export default function PastActivity({
-  employeeName = "John Doe",
-  employeeId = "EMP-2024-001",
-}: PastActivityProps) {
+  const { user } = useAuthStore();
+  const { data } = useGetBookingHistory();
+
+  const bookings = data?.data ?? [];
+
+  const employeeName = user?.fullName ?? "";
+  const employeeId = user?._id ?? "";
+
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1month");
   const [selectedType, setSelectedType] = useState<ActivityType | "all">("all");
   const [showAnalytics, setShowAnalytics] = useState(false);
 
-  const allActivities = generateMockActivities();
+
+const [allActivities, setAllActivities] = useState<Activity[]>([]);
+
+useEffect(() => {
+  const prepareActivities = async () => {
+
+    const activities: Activity[] = await Promise.all(
+      bookings.map(async (item, index) => {
+
+        const loc = item.booking?.location;
+
+        let location = "Unknown location";
+
+        if (typeof loc === "string") {
+          location = loc;
+        } else if (loc) {
+          location = await reverseGeocode(loc.coordinates[1], loc.coordinates[0]);
+        }
+
+        return {
+          id: item._id ?? String(index),
+
+          type: "booking",
+
+          title: item.service?.name ?? "Service Booking",
+
+          description: item.customer?.fullName ?? "Customer",
+
+          timestamp: item.booking?.startedAt
+            ? new Date(item.booking.startedAt)
+            : new Date(),
+
+          status:
+            (item.booking?.status?.toLowerCase() as Activity["status"]) ??
+            "pending",
+
+          amount: item.booking?.amount ?? 0,
+
+          client: item.customer?.email ?? "Client",
+
+          location,
+        };
+      })
+    );
+
+    setAllActivities(activities);
+  };
+
+  if (bookings?.length) {
+    prepareActivities();
+  }
+}, [bookings]);
 
   const {
     filteredActivities,
@@ -46,23 +101,9 @@ export default function PastActivity({
   } = useActivityAnalytics(allActivities, selectedPeriod, selectedType);
 
   return (
-    <div
-      className="
-        min-h-screen
-        px-3 py-4
-        sm:px-4 sm:py-6
-        lg:px-6
-      "
-    >
-      <div
-        className="
-          mx-auto
-          max-w-7xl
-          space-y-4
-          sm:space-y-6
-          lg:space-y-8
-        "
-      >
+    <div className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-6">
+      <div className="mx-auto max-w-7xl space-y-4 sm:space-y-6 lg:space-y-8">
+
         {/* Header */}
         <ActivityHeader
           employeeName={employeeName}
@@ -92,7 +133,7 @@ export default function PastActivity({
           totalEarnings={stats.totalEarnings}
         />
 
-        {/* Analytics (optional) */}
+        {/* Analytics */}
         {showAnalytics && (
           <ActivityAnalytics
             earningsTrendData={charts.earningsTrendData}
@@ -106,14 +147,14 @@ export default function PastActivity({
           />
         )}
 
-        {/* Current period label */}
+        {/* Period label */}
         <ActivityCurrent
           getPeriodLabel={getPeriodLabel}
           selectedPeriod={selectedPeriod}
           filteredActivities={filteredActivities}
         />
 
-        {/* Timeline / Empty */}
+        {/* Timeline */}
         {Object.keys(groupedActivities).length > 0 ? (
           <ActivityTimeline
             groupedActivities={groupedActivities}
@@ -124,6 +165,7 @@ export default function PastActivity({
         ) : (
           <ActivityEmptyState />
         )}
+
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ import type { CommonTab } from "@/components/common/CommonTabs";
 import { useTheme } from "@/context/ThemeContext";
 
 type ActivityType = "all" | "booking" | "payment" | "transaction";
-type TimePeriod = "7days" | "15days" | "1month" | "3months" | "6months";
+import type { TimePeriod } from "../../domain/entities/timeperiod";
 
 interface ActivityFiltersProps {
   period: TimePeriod;
