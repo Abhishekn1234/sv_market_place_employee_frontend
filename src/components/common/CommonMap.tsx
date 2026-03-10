@@ -10,7 +10,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-
+import api from "@/api/api";
 export type LocationMode = "CURRENT" | "MANUAL";
 
 interface CommonMapProps {
@@ -45,25 +45,26 @@ export function initLeafletIcons() {
   });
 }
 
-/* ---------------- UTILS ---------------- */
+
 
 export const normalize = (n: number) => parseFloat(n.toFixed(6));
 
 export const reverseGeocode = async (lat: number, lng: number) => {
   try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
-    );
+    const res = await api.get("/geolocation/reverse", {
+      params: { lat, lon:lng },
+    });
 
-    const data = await res.json();
+    if (res.data?.placeName) return res.data.placeName;
+    if (res.data?.address) return res.data.address;
 
-    return data.display_name ?? `${lat}, ${lng}`;
-  } catch {
-    return `${lat}, ${lng}`;
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  } catch (err) {
+    console.error(err);
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
 };
 
-/* ---------------- CACHE ---------------- */
 
 const geoCache = new Map<string, string>();
 
@@ -141,19 +142,26 @@ export const CommonMap: React.FC<CommonMapProps> = ({
     };
   }, []);
 
-  /* -------- Optimized Reverse Geocode -------- */
 
-  useEffect(() => {
-    if (!onLocationNameChange) return;
+const lastCoordsRef = useRef<string | null>(null);
+useEffect(() => {
+  if (!onLocationNameChange) return;
 
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
+  const key = `${location[0].toFixed(5)}-${location[1].toFixed(5)}`;
 
-    debounceRef.current = setTimeout(() => {
-      getLocationName(location[0], location[1]).then(onLocationNameChange);
-    }, 400);
-  }, [location, onLocationNameChange]);
+  // Prevent duplicate calls
+  if (lastCoordsRef.current === key) return;
+
+  lastCoordsRef.current = key;
+
+  if (debounceRef.current) {
+    clearTimeout(debounceRef.current);
+  }
+
+  debounceRef.current = window.setTimeout(() => {
+    getLocationName(location[0], location[1]).then(onLocationNameChange);
+  }, 400);
+}, [location, onLocationNameChange]);
 
   /* -------- Marker Drag -------- */
 

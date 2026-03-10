@@ -91,7 +91,7 @@ const handleCountryChange = (iso: string) => {
     setAuth(res.user)
 
       toast.success("Registration successful! You are now logged in.");
-      navigate("/login"); 
+      navigate("/send-otp-mobile"); 
     },
     onError: (err: any) => {
   const message =

@@ -27,6 +27,10 @@ import { ThemeProvider } from './context/ThemeContext';
 import { useDynamicLocation } from '@/utils/useNotification';
 import AvailableBookingPage from './pages/Booking/AvailableBooking/presentation/availablebooking.page';
 import AvailableWorkPage from './pages/Booking/AvaliableWorks/presentation/AvailableWorkPage';
+import VerifyMobilePage from './pages/Auth/MobileVerification/presentation/VerifyMobilePage';
+import { SendOtpEmailPage } from './pages/Auth/EmailVerification/presentation/SendOtpEmailPage';
+import { VerifyOtpEmailPage } from './pages/Auth/EmailVerification/presentation/components/VerificationOtpEmail';
+import SendOtpMobilePage from './pages/Auth/MobileVerification/presentation/components/SendOtpMobilePage';
 function AppContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
@@ -66,6 +70,10 @@ return (
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/services/employee" element={<ServiceSettings />} />
         <Route path="/services/documents" element={<DocumentOnboarding />} />
+        <Route path='/verify-otp-mobile' element={<VerifyMobilePage/>}/>
+        <Route path="/send-otp-mobile" element={<SendOtpMobilePage/>}/>
+        <Route path='/email-verification' element={<SendOtpEmailPage/>}/>
+        <Route path="/verify-otp-email" element={<VerifyOtpEmailPage/>}/>
          <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<HomePage />} />
           <Route path="settings/profile" element={<ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} />} />
