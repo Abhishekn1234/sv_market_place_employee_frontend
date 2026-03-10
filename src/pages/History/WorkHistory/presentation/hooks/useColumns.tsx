@@ -112,11 +112,11 @@ export function useWorkColumns({
     if (displayStatus === "WORK_COMPLETED_PENDING")
       displayStatus = "workCompletedPending";
     if (displayStatus === "WORK_COMPLETED") displayStatus = "completed";
-    if (displayStatus === "IN_PROGRESS") displayStatus = "inProgress";
+    if (displayStatus === "IN_PROGRESS") displayStatus = "IN_PROGRESS";
     if (displayStatus === "WORKER_ACCEPTED") displayStatus = "confirmed";
 
    
-  if (displayStatus === "inProgress" && w.assignedAt) {
+  if (displayStatus === "IN_PROGRESS" && w.assignedAt) {
   useEffect(() => {
   const startedAt = w.assignedAt;
   if (!startedAt) return;
@@ -172,7 +172,7 @@ export function useWorkColumns({
       >
         {getStatusIcon(displayStatus)}
         {t(`workHistory.statusOptions.${displayStatus}`)}
-        {displayStatus === "inProgress" && remainingTime && (
+        {displayStatus === "IN_PROGRESS" && remainingTime && (
           <span className="ml-2 font-mono">{remainingTime}</span>
         )}
       </span>

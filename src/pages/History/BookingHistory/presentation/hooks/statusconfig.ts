@@ -19,6 +19,10 @@ export function useStatusConfig(): Record<
       label: statusOptions.completed,
       color: "bg-green-100 text-green-700",
     },
+    INVOICE_GENERATED:{
+      label:statusOptions.completed,
+      color:"bg-gray-100"
+    },
     completed:{
       label:statusOptions.completed,
       color:"bg-gray-100"
@@ -31,7 +35,7 @@ export function useStatusConfig(): Record<
       label: statusOptions.pending,
       color: "bg-yellow-100 text-yellow-700",
     },
-    inProgress: {
+    IN_PROGRESS: {
       label: statusOptions.inProgress,
       color: "bg-purple-100 text-purple-700",
     },
@@ -55,10 +59,7 @@ export function useStatusConfig(): Record<
       label:statusOptions.completed,
       color:"bg-green-100"
     },
-    IN_PROGRESS:{
-      label:statusOptions.inProgress,
-      color:"bg-yellow-100"
-    },
+   
     WORK_COMPLETED:{
       label:statusOptions.completed,
       color:"bg-gray-100"

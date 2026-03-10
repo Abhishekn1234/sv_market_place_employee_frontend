@@ -19,7 +19,7 @@ export function mapBookingStatus(apiStatus: string): BookingStatus {
 
     case "IN_PROGRESS":
     case "IN-PROGRESS":
-      return "inProgress";
+      return "IN_PROGRESS";
 
     default:
       console.warn("Unknown booking status:", apiStatus);

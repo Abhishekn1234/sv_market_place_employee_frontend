@@ -61,7 +61,7 @@ export const mockBookings:Booking[] = [
     date: '2024-12-19',
     time: '01:00 PM',
     duration: 120,
-    status: 'inProgress',
+    status: 'IN_PROGRESS',
     payment: 150,
     location: '555 Maple Drive',
     notes: 'Regular weekly cleaning'
