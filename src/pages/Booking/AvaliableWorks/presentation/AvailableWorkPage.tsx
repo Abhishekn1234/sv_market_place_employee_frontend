@@ -52,20 +52,61 @@ export default function AvailableWorkPage() {
   }, [workList, locations]);
 
   // Update work locally
-  const updateWork = (updated: any) => {
-    setWorkList((prev) =>
-      prev.map((w) => (w._id === updated._id ? { ...w, ...updated } : w))
-    );
-  };
+  // Update work locally and stop timer if completed
+const updateWork = (updated: any) => {
+  setWorkList((prev) =>
+    prev.map((w) => {
+      if (w._id === updated._id) {
+        // Stop timer if status changed to completed
+        if (
+          updated.status === "WORK_COMPLETED_PENDING" ||
+          updated.status === "COMPLETED"
+        ) {
+          setTimers((prevTimers) => {
+            const { [w._id]: _, ...rest } = prevTimers; // remove timer
+            return rest;
+          });
+
+          // Record total elapsed time
+          const startedAt = w.assignedAt || w.booking?.schedule?.startDateTime;
+          if (startedAt) {
+            const totalElapsedMs = Date.now() - new Date(startedAt).getTime();
+            const hours = Math.floor(totalElapsedMs / (1000 * 60 * 60));
+            const minutes = Math.floor((totalElapsedMs % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((totalElapsedMs % (1000 * 60)) / 1000);
+            updated.totalTimeWorked = `${String(hours).padStart(2,"0")}:${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+          }
+        }
+        return { ...w, ...updated };
+      }
+      return w;
+    })
+  );
+};
 
   // Open modals
-  const openModal = (work: any, type: "start" | "complete" | "verify") => {
-    setSelectedWork({
-      ...work,
-      bookingId: work.bookingId || work.booking?._id,
-    });
-    setModalType(type);
-  };
+ const openModal = (work: any, type: "start" | "complete" | "verify") => {
+  setSelectedWork({
+    ...work,
+    bookingId: work.bookingId || work.booking?._id,
+  });
+  setModalType(type);
+
+  // Immediately initialize timer for newly started work
+  if (type === "start") {
+    setTimers((prev) => ({
+      ...prev,
+      [work._id]: "00:00:00", // start at zero immediately
+    }));
+
+    // Update workList with assignedAt if missing
+    setWorkList((prev) =>
+      prev.map((w) =>
+        w._id === work._id ? { ...w, assignedAt: w.assignedAt || new Date().toISOString() } : w
+      )
+    );
+  }
+};
   const closeModal = () => {
     setSelectedWork(null);
     setModalType(null);
@@ -99,6 +140,7 @@ useEffect(() => {
     const updatedTimers: Record<string, string> = {};
 
     workList.forEach((w) => {
+      // Only track timer for active works
       if (
         w.status === "inProgress" ||
         w.status === "IN_PROGRESS" ||
@@ -124,17 +166,15 @@ useEffect(() => {
         const now = Date.now();
         const elapsed = now - startTime;
 
-
         const safeElapsed = Math.min(elapsed, maxDurationMs);
 
         const hours = Math.floor(safeElapsed / (1000 * 60 * 60));
         const minutes = Math.floor((safeElapsed % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((safeElapsed % (1000 * 60)) / 1000);
 
-        updatedTimers[w._id] = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-          2,
-          "0"
-        )}:${String(seconds).padStart(2, "0")}`;
+        updatedTimers[w._id] = `${String(hours).padStart(2, "0")}:${String(
+          minutes
+        ).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
       }
     });
 
@@ -142,7 +182,7 @@ useEffect(() => {
   }, 1000);
 
   return () => clearInterval(interval);
-}, [workList]);
+}, [workList]); 
   return (
     <CommonCard title={translations?.sidebar.availableWork || "Available Work"} className="mt-6"  headerAlign={isRTL ? "right" : "left"}>
       {(!workList || workList.length === 0) && (
@@ -177,13 +217,14 @@ useEffect(() => {
                   <p className="text-sm text-gray-500">Status: {w.booking?.status}</p>
                   <p className="text-sm text-gray-500">Category: {categoryName}</p>
 
-                  {(w.status === "inProgress" ||
-                    w.status === "IN_PROGRESS" ||
-                    w.status === "STARTED") && (
-                    <p className="text-sm text-green-600 font-semibold">
-                      Time Working: {timers[w._id] || "Loading..."}
-                    </p>
-                  )}
+                {((w.status === "inProgress" ||
+                      w.status === "IN_PROGRESS" ||
+                      w.status === "STARTED") ||
+                      w.totalTimeWorked) && (
+                      <p className="text-sm text-green-600 font-semibold">
+                        Time Working: {w.totalTimeWorked || timers[w._id] || "Loading..."}
+                      </p>
+                    )}
                 </div>
 
                 <div className="flex gap-2 pt-3">
