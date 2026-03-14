@@ -51,58 +51,73 @@ export default function AvailableWorkPage() {
     });
   }, [workList, locations]);
 
-  // Update work locally
-  // Update work locally and stop timer if completed
-const updateWork = (updated: any) => {
+  const updateWork = (updated: any) => {
   setWorkList((prev) =>
     prev.map((w) => {
       if (w._id === updated._id) {
-        // Stop timer if status changed to completed
         if (
           updated.status === "WORK_COMPLETED_PENDING" ||
           updated.status === "COMPLETED"
         ) {
           setTimers((prevTimers) => {
-            const { [w._id]: _, ...rest } = prevTimers; // remove timer
+            const { [w._id]: _, ...rest } = prevTimers;
             return rest;
           });
 
-          // Record total elapsed time
-          const startedAt = w.assignedAt || w.booking?.schedule?.startDateTime;
+          const startedAt =
+            w.workStartedAt ||
+            w.assignedAt ||
+            w.booking?.schedule?.startDateTime;
+
           if (startedAt) {
             const totalElapsedMs = Date.now() - new Date(startedAt).getTime();
+
             const hours = Math.floor(totalElapsedMs / (1000 * 60 * 60));
-            const minutes = Math.floor((totalElapsedMs % (1000 * 60 * 60)) / (1000 * 60));
+            const minutes = Math.floor(
+              (totalElapsedMs % (1000 * 60 * 60)) / (1000 * 60)
+            );
             const seconds = Math.floor((totalElapsedMs % (1000 * 60)) / 1000);
-            updated.totalTimeWorked = `${String(hours).padStart(2,"0")}:${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+
+            updated.totalTimeWorked = `${String(hours).padStart(2, "0")}:${String(
+              minutes
+            ).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
           }
         }
+
         return { ...w, ...updated };
       }
+
       return w;
     })
   );
 };
-
   // Open modals
  const openModal = (work: any, type: "start" | "complete" | "verify") => {
+  const now = new Date().toISOString();
+
   setSelectedWork({
     ...work,
     bookingId: work.bookingId || work.booking?._id,
   });
+
   setModalType(type);
 
-  // Immediately initialize timer for newly started work
   if (type === "start") {
+    // Start timer immediately in UI
     setTimers((prev) => ({
       ...prev,
-      [work._id]: "00:00:00", // start at zero immediately
+      [work._id]: "00:00:00",
     }));
 
-    // Update workList with assignedAt if missing
+    // Store start time locally
     setWorkList((prev) =>
       prev.map((w) =>
-        w._id === work._id ? { ...w, assignedAt: w.assignedAt || new Date().toISOString() } : w
+        w._id === work._id
+          ? {
+              ...w,
+              workStartedAt: now,
+            }
+          : w
       )
     );
   }
@@ -140,13 +155,17 @@ useEffect(() => {
     const updatedTimers: Record<string, string> = {};
 
     workList.forEach((w) => {
-      // Only track timer for active works
       if (
         w.status === "inProgress" ||
         w.status === "IN_PROGRESS" ||
         w.status === "STARTED"
       ) {
-        const startedAt = w.assignedAt || w.booking?.schedule?.startDateTime;
+        // Use correct start time
+        const startedAt =
+          w.workStartedAt ||
+          w.assignedAt ||
+          w.booking?.schedule?.startDateTime;
+
         if (!startedAt) return;
 
         const startTime = new Date(startedAt).getTime();
