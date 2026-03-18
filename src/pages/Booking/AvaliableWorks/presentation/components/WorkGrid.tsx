@@ -14,6 +14,7 @@ export default function WorkGrid({
 }: any) {
   const [locations, setLocations] = useState<Record<string, string>>({});
 
+  // ✅ Fetch addresses (no infinite loop)
   useEffect(() => {
     workList?.forEach((w: any) => {
       if (locations[w._id]) return;
@@ -48,7 +49,7 @@ export default function WorkGrid({
           });
       } catch {}
     });
-  }, [workList]); // ✅ removed locations from deps (important)
+  }, [workList]);
 
   if (!workList?.length) {
     return (
@@ -123,18 +124,19 @@ export default function WorkGrid({
                 </>
               )}
 
-              {(workStatus === "STARTED" ||
-                workStatus === "IN_PROGRESS") &&
+              {/* ✅ SHOW ONLY ONE BUTTON */}
+              {bookingStatus === "WORK_COMPLETED_PENDING" ? (
+                <Button onClick={() => onVerify(w)}>
+                  Verify OTP
+                </Button>
+              ) : (
+                (workStatus === "STARTED" ||
+                  workStatus === "IN_PROGRESS") &&
                 bookingStatus !== "COMPLETED" && (
                   <Button onClick={() => onComplete(w)}>
                     Complete
                   </Button>
-                )}
-
-              {bookingStatus === "WORK_COMPLETED_PENDING" && (
-                <Button onClick={() => onVerify(w)}>
-                  Verify OTP
-                </Button>
+                )
               )}
             </div>
           </CommonCard>

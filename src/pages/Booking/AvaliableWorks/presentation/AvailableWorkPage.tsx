@@ -25,20 +25,24 @@ export default function AvailableWorkPage() {
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
 
-  // ✅ Sync assigned works (IMPORTANT FIX)
+  // ✅ Sync API data
   useEffect(() => {
     setWorkList(assignedWorks || []);
   }, [assignedWorks]);
 
-  // ✅ TIMER LOGIC (FIXED)
   useEffect(() => {
     const interval = setInterval(() => {
       const updated: Record<string, string> = {};
 
       (workList || []).forEach((w) => {
         const status = w.status?.toUpperCase();
+        const bookingStatus = w.booking?.status?.toUpperCase();
 
+   
         if (!["IN_PROGRESS", "STARTED"].includes(status)) return;
+
+      
+        if (bookingStatus === "COMPLETED") return;
 
         const startedAt =
           w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
@@ -46,17 +50,15 @@ export default function AvailableWorkPage() {
         if (!startedAt) return;
 
         const elapsed = Date.now() - new Date(startedAt).getTime();
-
         if (elapsed < 0) return;
 
         const h = Math.floor(elapsed / 3600000);
         const m = Math.floor((elapsed % 3600000) / 60000);
         const s = Math.floor((elapsed % 60000) / 1000);
 
-        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(
-          2,
-          "0"
-        )}:${String(s).padStart(2, "0")}`;
+        updated[w._id] = `${String(h).padStart(2, "0")}:${String(
+          m
+        ).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
       });
 
       setTimers(updated);
@@ -65,7 +67,7 @@ export default function AvailableWorkPage() {
     return () => clearInterval(interval);
   }, [workList]);
 
-  // ✅ ACTIONS
+
   const openModal = (work: any, type: any) => {
     setSelectedWork({ ...work, bookingId: work.booking?._id });
     setModalType(type);
@@ -76,10 +78,21 @@ export default function AvailableWorkPage() {
     setModalType(null);
   };
 
+  // ✅ update + STOP TIMER after complete
   const updateWork = (updated: any) => {
     setWorkList((prev) =>
       prev.map((w) =>
-        w._id === updated._id ? { ...w, ...updated } : w
+        w._id === updated._id
+          ? {
+              ...w,
+              ...updated,
+             
+              workStartedAt:
+                updated.status?.toUpperCase() === "COMPLETED"
+                  ? null
+                  : w.workStartedAt,
+            }
+          : w
       )
     );
   };
