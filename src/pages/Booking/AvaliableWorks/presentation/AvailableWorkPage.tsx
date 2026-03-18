@@ -19,34 +19,32 @@ export default function AvailableWorkPage() {
 
   const [workList, setWorkList] = useState<any[]>([]);
   const [selectedWork, setSelectedWork] = useState<any>(null);
-  const [modalType, setModalType] = useState<
-    "start" | "complete" | "verify" | null
-  >(null);
+  const [modalType, setModalType] = useState<"start" | "complete" | "verify" | null>(null);
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
 
-  // ✅ Sync API data
+
   useEffect(() => {
     setWorkList(assignedWorks || []);
   }, [assignedWorks]);
 
+  
   useEffect(() => {
     const interval = setInterval(() => {
       const updated: Record<string, string> = {};
 
-      (workList || []).forEach((w) => {
-        const status = w.status?.toUpperCase();
+      workList.forEach((w) => {
+        const workStatus = w.status?.toUpperCase();
         const bookingStatus = w.booking?.status?.toUpperCase();
 
-   
-        if (!["IN_PROGRESS", "STARTED"].includes(status)) return;
+       
+        if (["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(workStatus)) return;
+        if (["COMPLETED", "CANCELLED"].includes(bookingStatus)) return;
 
-      
-        if (bookingStatus === "COMPLETED") return;
+        
+        if (!["IN_PROGRESS", "STARTED"].includes(workStatus)) return;
 
-        const startedAt =
-          w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
-
+        const startedAt = w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
         if (!startedAt) return;
 
         const elapsed = Date.now() - new Date(startedAt).getTime();
@@ -56,9 +54,7 @@ export default function AvailableWorkPage() {
         const m = Math.floor((elapsed % 3600000) / 60000);
         const s = Math.floor((elapsed % 60000) / 1000);
 
-        updated[w._id] = `${String(h).padStart(2, "0")}:${String(
-          m
-        ).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
       });
 
       setTimers(updated);
@@ -73,12 +69,12 @@ export default function AvailableWorkPage() {
     setModalType(type);
   };
 
+  
   const closeModal = () => {
     setSelectedWork(null);
     setModalType(null);
   };
 
-  // ✅ update + STOP TIMER after complete
   const updateWork = (updated: any) => {
     setWorkList((prev) =>
       prev.map((w) =>
@@ -86,15 +82,27 @@ export default function AvailableWorkPage() {
           ? {
               ...w,
               ...updated,
-             
               workStartedAt:
-                updated.status?.toUpperCase() === "COMPLETED"
+                updated.status?.toUpperCase() === "COMPLETED" ||
+                updated.booking?.status?.toUpperCase() === "COMPLETED"
                   ? null
                   : w.workStartedAt,
             }
           : w
       )
     );
+
+    // Remove timer if work is completed/cancelled
+    if (
+      ["COMPLETED", "CANCELLED"].includes(updated.status?.toUpperCase() ?? "") ||
+      ["COMPLETED", "CANCELLED"].includes(updated.booking?.status?.toUpperCase() ?? "")
+    ) {
+      setTimers((prev) => {
+        const copy = { ...prev };
+        delete copy[updated._id];
+        return copy;
+      });
+    }
   };
 
   return (
