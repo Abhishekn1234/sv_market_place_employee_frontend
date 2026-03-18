@@ -16,32 +16,49 @@ export default function WorkGrid({
   const [locations, setLocations] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    workList.forEach((w: any) => {
+    workList?.forEach((w: any) => {
       if (locations[w._id]) return;
 
       const loc = w.booking?.location;
       if (!loc) return;
 
-      const [lat, lng] =
-        typeof loc === "string"
-          ? loc.split(",").map(Number)
-          : [loc.coordinates[1], loc.coordinates[0]];
+      let lat: number, lng: number;
 
-      reverseGeocode(lat, lng)
-        .then((addr) =>
-          setLocations((prev) => ({ ...prev, [w._id]: addr }))
-        )
-        .catch(() =>
-          setLocations((prev) => ({
-            ...prev,
-            [w._id]: `${lat},${lng}`,
-          }))
-        );
+      try {
+        if (typeof loc === "string") {
+          [lat, lng] = loc.split(",").map(Number);
+        } else {
+          lat = loc.coordinates[1];
+          lng = loc.coordinates[0];
+        }
+
+        if (!lat || !lng) return;
+
+        reverseGeocode(lat, lng)
+          .then((addr) => {
+            setLocations((prev) => ({
+              ...prev,
+              [w._id]: addr,
+            }));
+          })
+          .catch(() => {
+            setLocations((prev) => ({
+              ...prev,
+              [w._id]: `${lat}, ${lng}`,
+            }));
+          });
+      } catch {
+        // ignore bad data
+      }
     });
-  }, [workList]);
+  }, [workList, locations]);
 
   if (!workList?.length) {
-    return <div className="text-center py-16 text-gray-500">No works available</div>;
+    return (
+      <div className="text-center py-16 text-gray-500">
+        No works available
+      </div>
+    );
   }
 
   return (
@@ -50,20 +67,49 @@ export default function WorkGrid({
         const workStatus = w.status?.toUpperCase();
         const bookingStatus = w.booking?.status?.toUpperCase();
 
-        const category =
-          categories?.find((c: any) => c._id === w.service?.category)?.name || "N/A";
+        const categoryName =
+          categories?.find((c: any) => c._id === w.service?.category)?.name ||
+          "N/A";
+
+        const amount =
+          w.booking?.workerAmount ||
+          w.booking?.amount ||
+          "N/A";
 
         return (
-          <CommonCard key={w._id} className="aspect-square flex flex-col justify-between">
+          <CommonCard
+            key={w._id}
+            className="aspect-square flex flex-col justify-between"
+          >
             <div className="space-y-1 text-sm">
-              <h3 className="font-semibold">{w.service?.name}</h3>
+              <h3 className="font-semibold text-base">
+                {w.service?.name}
+              </h3>
+
               <p>Customer: {w.customer?.fullName}</p>
               <p>Location: {locations[w._id] || "Loading..."}</p>
-              <p>Category: {category}</p>
+              <p>Category: {categoryName}</p>
 
-              {(workStatus === "STARTED" || workStatus === "IN_PROGRESS") && (
+              <p className="text-gray-500">
+                Tier: {w.serviceTier?.displayName}
+              </p>
+
+              <p className="text-gray-500">
+                Worker Amount: {amount} {w.booking?.currency}
+              </p>
+
+              <p className="text-gray-500">
+                Pricing: {w.booking?.pricingMode}
+              </p>
+
+              <p className="text-gray-500">
+                Status: {bookingStatus}
+              </p>
+
+              {(workStatus === "STARTED" ||
+                workStatus === "IN_PROGRESS") && (
                 <p className="text-green-600 font-semibold">
-                  Time: {timers[w._id]}
+                  Time: {timers[w._id] || "00:00"}
                 </p>
               )}
             </div>
@@ -72,19 +118,27 @@ export default function WorkGrid({
               {workStatus === "ASSIGNED" && (
                 <>
                   <Button onClick={() => onStart(w)}>Start</Button>
-                  <Button variant="destructive" onClick={() => onCancel(w)}>
+                  <Button
+                    variant="destructive"
+                    onClick={() => onCancel(w)}
+                  >
                     Cancel
                   </Button>
                 </>
               )}
 
-              {(workStatus === "STARTED" || workStatus === "IN_PROGRESS") &&
+              {(workStatus === "STARTED" ||
+                workStatus === "IN_PROGRESS") &&
                 bookingStatus !== "COMPLETED" && (
-                  <Button onClick={() => onComplete(w)}>Complete</Button>
+                  <Button onClick={() => onComplete(w)}>
+                    Complete
+                  </Button>
                 )}
 
               {bookingStatus === "WORK_COMPLETED_PENDING" && (
-                <Button onClick={() => onVerify(w)}>Verify OTP</Button>
+                <Button onClick={() => onVerify(w)}>
+                  Verify OTP
+                </Button>
               )}
             </div>
           </CommonCard>
