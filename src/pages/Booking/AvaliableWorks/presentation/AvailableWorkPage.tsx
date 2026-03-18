@@ -264,11 +264,11 @@ useEffect(() => {
                     </Button>
                   )}
 
-                  {w.status === "WORK_COMPLETED_PENDING" && (
-                    <Button size="sm" className="flex-1" onClick={() => openModal(w, "verify")}>
-                      {t("workHistory.actions.verifyOtp")}
-                    </Button>
-                  )}
+                  {w.status?.toUpperCase() === "WORK_COMPLETED_PENDING" && (
+                      <Button size="sm" className="flex-1" onClick={() => openModal(w, "verify")}>
+                        {t("workHistory.actions.verifyOtp")}
+                      </Button>
+                    )}
                 </div>
               </CommonCard>
             );
