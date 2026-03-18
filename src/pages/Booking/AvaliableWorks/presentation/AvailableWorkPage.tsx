@@ -29,39 +29,66 @@ export default function AvailableWorkPage() {
   }, [assignedWorks]);
 
   
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const updated: Record<string, string> = {};
+// Timer logic
+useEffect(() => {
+  const interval = setInterval(() => {
+    const updated: Record<string, string> = {};
 
-      workList.forEach((w) => {
-        const workStatus = w.status?.toUpperCase();
-        const bookingStatus = w.booking?.status?.toUpperCase();
+    workList.forEach((w) => {
+      const workStatus = w.status?.toUpperCase();
+      const bookingStatus = w.booking?.status?.toUpperCase();
 
-       
-        if (["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(workStatus)) return;
-        if (["COMPLETED", "CANCELLED"].includes(bookingStatus)) return;
+      // Stop timer for completed, cancelled, or pending verification works
+      if (["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(workStatus)) return;
+      if (["COMPLETED", "CANCELLED"].includes(bookingStatus)) return;
 
-        
-        if (!["IN_PROGRESS", "STARTED"].includes(workStatus)) return;
+      if (!["IN_PROGRESS", "STARTED"].includes(workStatus)) return;
 
-        const startedAt = w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
-        if (!startedAt) return;
+      const startedAt = w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
+      if (!startedAt) return;
 
-        const elapsed = Date.now() - new Date(startedAt).getTime();
-        if (elapsed < 0) return;
+      const elapsed = Date.now() - new Date(startedAt).getTime();
+      if (elapsed < 0) return;
 
-        const h = Math.floor(elapsed / 3600000);
-        const m = Math.floor((elapsed % 3600000) / 60000);
-        const s = Math.floor((elapsed % 60000) / 1000);
+      const h = Math.floor(elapsed / 3600000);
+      const m = Math.floor((elapsed % 3600000) / 60000);
+      const s = Math.floor((elapsed % 60000) / 1000);
 
-        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-      });
+      updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    });
 
-      setTimers(updated);
-    }, 1000);
+    setTimers(updated);
+  }, 1000);
 
-    return () => clearInterval(interval);
-  }, [workList]);
+  return () => clearInterval(interval);
+}, [workList]);
+
+// Update work function
+const updateWork = (updated: any) => {
+  setWorkList((prev) =>
+    prev.map((w) =>
+      w._id === updated._id
+        ? {
+            ...w,
+            ...updated,
+            workStartedAt:
+              ["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(updated.status?.toUpperCase())
+                ? null
+                : w.workStartedAt,
+          }
+        : w
+    )
+  );
+
+  // Remove timer immediately for completed / cancelled / pending verification
+  if (["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(updated.status?.toUpperCase() ?? "")) {
+    setTimers((prev) => {
+      const copy = { ...prev };
+      delete copy[updated._id];
+      return copy;
+    });
+  }
+};
 
 
   const openModal = (work: any, type: any) => {
@@ -75,35 +102,7 @@ export default function AvailableWorkPage() {
     setModalType(null);
   };
 
-  const updateWork = (updated: any) => {
-    setWorkList((prev) =>
-      prev.map((w) =>
-        w._id === updated._id
-          ? {
-              ...w,
-              ...updated,
-              workStartedAt:
-                updated.status?.toUpperCase() === "COMPLETED" ||
-                updated.booking?.status?.toUpperCase() === "COMPLETED"
-                  ? null
-                  : w.workStartedAt,
-            }
-          : w
-      )
-    );
-
-    // Remove timer if work is completed/cancelled
-    if (
-      ["COMPLETED", "CANCELLED"].includes(updated.status?.toUpperCase() ?? "") ||
-      ["COMPLETED", "CANCELLED"].includes(updated.booking?.status?.toUpperCase() ?? "")
-    ) {
-      setTimers((prev) => {
-        const copy = { ...prev };
-        delete copy[updated._id];
-        return copy;
-      });
-    }
-  };
+ 
 
   return (
     <CommonCard
