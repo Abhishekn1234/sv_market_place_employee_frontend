@@ -29,7 +29,6 @@ export default function AvailableWorkPage() {
   }, [assignedWorks]);
 
   
-// Timer logic
 useEffect(() => {
   const interval = setInterval(() => {
     const updated: Record<string, string> = {};
@@ -38,11 +37,12 @@ useEffect(() => {
       const workStatus = w.status?.toUpperCase();
       const bookingStatus = w.booking?.status?.toUpperCase();
 
-      // Stop timer for completed, cancelled, or pending verification works
-      if (["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(workStatus)) return;
-      if (["COMPLETED", "CANCELLED"].includes(bookingStatus)) return;
+      // ✅ Only run timer if work is actually in progress
+      const isInProgress =
+        ["IN_PROGRESS", "STARTED"].includes(workStatus) &&
+        !["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(bookingStatus);
 
-      if (!["IN_PROGRESS", "STARTED"].includes(workStatus)) return;
+      if (!isInProgress) return;
 
       const startedAt = w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
       if (!startedAt) return;
@@ -62,7 +62,6 @@ useEffect(() => {
 
   return () => clearInterval(interval);
 }, [workList]);
-
 // Update work function
 const updateWork = (updated: any) => {
   setWorkList((prev) =>
