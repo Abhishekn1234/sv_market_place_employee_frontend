@@ -17,30 +17,46 @@ export default function AvailableWorkPage() {
 
   const isRTL = language === "AR";
 
-  const [workList, setWorkList] = useState(assignedWorks || []);
+  const [workList, setWorkList] = useState<any[]>([]);
   const [selectedWork, setSelectedWork] = useState<any>(null);
-  const [modalType, setModalType] = useState<"start" | "complete" | "verify" | null>(null);
+  const [modalType, setModalType] = useState<
+    "start" | "complete" | "verify" | null
+  >(null);
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
 
-  // ✅ TIMER LOGIC
+  // ✅ Sync assigned works (IMPORTANT FIX)
+  useEffect(() => {
+    setWorkList(assignedWorks || []);
+  }, [assignedWorks]);
+
+  // ✅ TIMER LOGIC (FIXED)
   useEffect(() => {
     const interval = setInterval(() => {
       const updated: Record<string, string> = {};
 
-      workList.forEach((w) => {
-        if (!["IN_PROGRESS", "STARTED", "inProgress"].includes(w.status)) return;
+      (workList || []).forEach((w) => {
+        const status = w.status?.toUpperCase();
 
-        const startedAt = w.workStartedAt;
+        if (!["IN_PROGRESS", "STARTED"].includes(status)) return;
+
+        const startedAt =
+          w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
+
         if (!startedAt) return;
 
         const elapsed = Date.now() - new Date(startedAt).getTime();
+
+        if (elapsed < 0) return;
 
         const h = Math.floor(elapsed / 3600000);
         const m = Math.floor((elapsed % 3600000) / 60000);
         const s = Math.floor((elapsed % 60000) / 1000);
 
-        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(
+          2,
+          "0"
+        )}:${String(s).padStart(2, "0")}`;
       });
 
       setTimers(updated);
@@ -62,7 +78,9 @@ export default function AvailableWorkPage() {
 
   const updateWork = (updated: any) => {
     setWorkList((prev) =>
-      prev.map((w) => (w._id === updated._id ? { ...w, ...updated } : w))
+      prev.map((w) =>
+        w._id === updated._id ? { ...w, ...updated } : w
+      )
     );
   };
 
@@ -76,9 +94,9 @@ export default function AvailableWorkPage() {
         workList={workList}
         categories={categories}
         timers={timers}
-        onStart={(w:any) => openModal(w, "start")}
-        onComplete={(w:any) => openModal(w, "complete")}
-        onVerify={(w:any) => openModal(w, "verify")}
+        onStart={(w: any) => openModal(w, "start")}
+        onComplete={(w: any) => openModal(w, "complete")}
+        onVerify={(w: any) => openModal(w, "verify")}
         onCancel={setCancelConfirmWork}
       />
 

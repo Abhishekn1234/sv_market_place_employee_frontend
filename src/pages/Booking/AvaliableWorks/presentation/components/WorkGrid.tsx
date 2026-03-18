@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { CommonCard } from "@/components/common/CommonCard";
 import { reverseGeocode } from "@/components/common/CommonMap";
@@ -28,8 +27,8 @@ export default function WorkGrid({
         if (typeof loc === "string") {
           [lat, lng] = loc.split(",").map(Number);
         } else {
-          lat = loc.coordinates[1];
-          lng = loc.coordinates[0];
+          lat = loc.coordinates?.[1];
+          lng = loc.coordinates?.[0];
         }
 
         if (!lat || !lng) return;
@@ -47,11 +46,9 @@ export default function WorkGrid({
               [w._id]: `${lat}, ${lng}`,
             }));
           });
-      } catch {
-        // ignore bad data
-      }
+      } catch {}
     });
-  }, [workList, locations]);
+  }, [workList]); // ✅ removed locations from deps (important)
 
   if (!workList?.length) {
     return (
@@ -71,10 +68,9 @@ export default function WorkGrid({
           categories?.find((c: any) => c._id === w.service?.category)?.name ||
           "N/A";
 
-       const poolAmount = w.booking?.workerPoolAmount ?? 0; 
-       const workers = w.booking?.numberOfWorkers ?? 1; 
-       
-       const amount = (poolAmount / workers).toFixed(2);
+        const poolAmount = w.booking?.workerPoolAmount ?? 0;
+        const workers = w.booking?.numberOfWorkers ?? 1;
+        const amount = (poolAmount / workers).toFixed(2);
 
         return (
           <CommonCard
@@ -109,7 +105,7 @@ export default function WorkGrid({
               {(workStatus === "STARTED" ||
                 workStatus === "IN_PROGRESS") && (
                 <p className="text-green-600 font-semibold">
-                  Time: {timers[w._id] || "00:00"}
+                  Time: {timers[w._id] || "00:00:00"}
                 </p>
               )}
             </div>
