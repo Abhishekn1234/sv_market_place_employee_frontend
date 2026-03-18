@@ -71,10 +71,10 @@ export default function WorkGrid({
           categories?.find((c: any) => c._id === w.service?.category)?.name ||
           "N/A";
 
-        const amount =
-          w.booking?.workerAmount ||
-          w.booking?.amount ||
-          "N/A";
+       const poolAmount = w.booking?.workerPoolAmount ?? 0; 
+       const workers = w.booking?.numberOfWorkers ?? 1; 
+       
+       const amount = (poolAmount / workers).toFixed(2);
 
         return (
           <CommonCard
