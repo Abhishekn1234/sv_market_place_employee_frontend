@@ -106,7 +106,7 @@ export default function WorkGrid({
               {(workStatus === "STARTED" ||
                 workStatus === "IN_PROGRESS") && (
                 <p className="text-green-600 font-semibold">
-                  Time: {timers[w._id] || "00:00:00"}
+                  Time: {timers[w._id]}
                 </p>
               )}
             </div>
