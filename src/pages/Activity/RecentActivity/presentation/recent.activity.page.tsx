@@ -142,7 +142,7 @@ useEffect(() => {
           totalEarnings={totalEarnings}
           completedBookings={
             activities.filter(
-              (a) => a.type === "booking" && a.status === "completed"
+              (a) => a.type === "booking"
             ).length
           }
         />
