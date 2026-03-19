@@ -17,7 +17,7 @@ export const useHomeCards = () => {
   const totalBookingsCount = bookingHistory?.pagination.totalItems ?? 0;
 
   const assignedWorks = bookings.filter(
-    (item) => item.booking?.status === "WORK_COMPLETED_PENDING" || item.booking.status==="WORKER_ACCEPTED"
+    (item) => item.booking?.status === "WORK_COMPLETED_PENDING"
   );
 
  const monthlyRevenue = calculateMonthlyRevenue(bookings);
