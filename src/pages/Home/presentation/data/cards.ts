@@ -11,10 +11,10 @@ export const useHomeCards = () => {
   const homeTranslations = translations.HomePage;
 
   const { data: bookingHistory } = useGetBookingHistory();
-
+  console.log(bookingHistory);
   const bookings: BookingHistory[] = bookingHistory?.data ?? [];
 
-const totalBookingsCount = bookingHistory?.data?.length ?? 0;
+  const totalBookingsCount = bookingHistory?.data?.length ?? 0;
 
   const assignedWorks = bookings.filter(
     (item) => item.booking?.status === "WORK_COMPLETED_PENDING"
