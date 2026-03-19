@@ -128,7 +128,7 @@ useEffect(() => {
   
   const totalEarnings = useMemo(() => {
     return activities
-      .filter((a) => a.status === "completed")
+      // .filter((a) => a.status === "completed")
       .reduce((sum, a) => sum + (a.amount ?? 0), 0);
   }, [activities]);
 
