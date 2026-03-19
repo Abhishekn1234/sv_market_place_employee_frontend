@@ -4,6 +4,7 @@ import { useGetBookingHistory } from "@/pages/History/BookingHistory/presentatio
 import { data as notificationData } from "@/pages/Notifications/presentation/data/mockdata";
 
 import { ClipboardList, Wrench, CreditCard, Bell } from "lucide-react";
+import { calculateMonthlyRevenue } from "../helpers/calculatemonthlyrevenue";
 
 export const useHomeCards = () => {
   const { translations } = useLanguage();
@@ -19,28 +20,7 @@ const totalBookingsCount = bookingHistory?.data?.length ?? 0;
     (item) => item.booking?.status === "WORK_COMPLETED_PENDING"
   );
 
-  const calculateMonthlyRevenue = (bookings: BookingHistory[]) => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-
-    return bookings.reduce((total, booking) => {
-      if (!booking?.booking?.startedAt || !booking?.booking?.amount) return total;
-
-      const bookingDate = new Date(booking.booking.startedAt);
-
-      if (
-        bookingDate.getMonth() === currentMonth &&
-        bookingDate.getFullYear() === currentYear
-      ) {
-        return total + booking.booking.amount;
-      }
-
-      return total;
-    }, 0);
-  };
-
-  const monthlyRevenue = calculateMonthlyRevenue(bookings);
+ const monthlyRevenue = calculateMonthlyRevenue(bookings);
 
   return [
     {
