@@ -13,7 +13,7 @@ export const useHomeCards = () => {
 
   const bookings: BookingHistory[] = bookingHistory?.data ?? [];
 
-  const totalBookingsCount = bookings.length;
+const totalBookingsCount = bookingHistory?.data?.length ?? 0;
 
   const assignedWorks = bookings.filter(
     (item) => item.booking?.status === "WORK_COMPLETED_PENDING"
