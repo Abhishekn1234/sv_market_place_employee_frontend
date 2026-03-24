@@ -6,6 +6,7 @@ import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/se
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
+import { toast } from "react-toastify";
 
 type Props = {
   tempLocation: [number, number];
@@ -29,7 +30,6 @@ type Props = {
 export default function LocationEditContent({
   tempLocation,
   setTempLocation,
-//   locationName,
   setLocationName,
   radius,
   setRadius,
@@ -44,11 +44,26 @@ export default function LocationEditContent({
   onClose,
   onSave,
 }: Props) {
-  const {translations}=useLanguage();
-  const edits=translations.profile;
+  const { translations } = useLanguage();
+  const edits = translations.profile;
+
+  const MAX_RADIUS_KM = 15;
+
+  // Handle input change for radius
+  const handleRadiusChange = (value: number) => {
+    if (value > MAX_RADIUS_KM) {
+      toast.error(`Radius cannot exceed ${MAX_RADIUS_KM} km`);
+      setRadius(MAX_RADIUS_KM * 1000); // limit to 15 km
+    } else if (value < 0) {
+      setRadius(0);
+    } else {
+      setRadius(value * 1000);
+    }
+  };
+
   return (
     <div className="space-y-5">
-     
+      {/* Location Mode */}
       <div>
         <Label>Location Mode</Label>
         <div className="flex gap-4 mt-2">
@@ -71,9 +86,15 @@ export default function LocationEditContent({
         </div>
       </div>
 
+      {/* Map */}
       <CommonMap
         location={tempLocation}
-        setLocation={setTempLocation}
+        setLocation={(coords) => {
+          // Ensure only 2 numbers: [lat, lng]
+          const lat = Math.max(-90, Math.min(90, coords[0]));
+          const lng = Math.max(-180, Math.min(180, coords[1]));
+          setTempLocation([lat, lng]);
+        }}
         locationMode={locationMode}
         radius={radius}
         setRadius={setRadius}
@@ -82,15 +103,17 @@ export default function LocationEditContent({
         height={540}
       />
 
+      {/* Radius input */}
       <div>
         <Label>Service Radius (km)</Label>
         <Input
           type="number"
           value={radius / 1000}
-          onChange={(e) => setRadius(Number(e.target.value) * 1000)}
+          onChange={(e) => handleRadiusChange(Number(e.target.value))}
         />
       </div>
 
+      {/* Categories */}
       <div>
         <Label>Service Categories</Label>
         <div className="flex flex-wrap gap-2 mt-2">
@@ -116,6 +139,7 @@ export default function LocationEditContent({
         </div>
       </div>
 
+      {/* Tiers */}
       <div>
         <Label>Service Tiers</Label>
         <div className="flex flex-wrap gap-2 mt-2">
@@ -141,6 +165,7 @@ export default function LocationEditContent({
         </div>
       </div>
 
+      {/* Actions */}
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onClose}>
           {edits.cancel}
@@ -148,7 +173,7 @@ export default function LocationEditContent({
         <Button
           onClick={() => {
             onSave();
-            onClose(); 
+            onClose();
           }}
         >
           {edits.update}
