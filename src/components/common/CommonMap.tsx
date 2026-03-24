@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState, useRef } from "react";
 import {
   MapContainer,
@@ -10,7 +12,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import api from "@/api/api";
+
 export type LocationMode = "CURRENT" | "MANUAL";
 
 interface CommonMapProps {
@@ -45,38 +47,23 @@ export function initLeafletIcons() {
   });
 }
 
-
+/* ---------------- UTILITIES ---------------- */
 
 export const normalize = (n: number) => parseFloat(n.toFixed(6));
 
-export const reverseGeocode = async (lat: number, lng: number) => {
-  try {
-    const res = await api.get("/geolocation/reverse", {
-      params: { lat, lon:lng },
-    });
-
-    if (res.data?.placeName) return res.data.placeName;
-    if (res.data?.address) return res.data.address;
-
-    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-  } catch (err) {
-    console.error(err);
-    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-  }
+// Simple "reverse geocode": just display lat/lng as a string
+export const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+  return `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
 };
 
-
+// Cache to avoid repeated formatting
 const geoCache = new Map<string, string>();
-
 const getLocationName = async (lat: number, lng: number) => {
   const key = `${lat.toFixed(5)}-${lng.toFixed(5)}`;
 
-  if (geoCache.has(key)) {
-    return geoCache.get(key)!;
-  }
+  if (geoCache.has(key)) return geoCache.get(key)!;
 
   const name = await reverseGeocode(lat, lng);
-
   geoCache.set(key, name);
 
   return name;
@@ -125,16 +112,10 @@ export const CommonMap: React.FC<CommonMapProps> = ({
   height,
 }) => {
   const [currentRadius, setCurrentRadius] = useState(radius);
+  const debounceRef = useRef<number | null>(null);
+  const lastCoordsRef = useRef<string | null>(null);
 
-  const debounceRef = useRef<number| null>(null);
-
-
-
-  useEffect(() => {
-    setCurrentRadius(radius);
-  }, [radius]);
-
-  /* Cleanup debounce */
+  useEffect(() => setCurrentRadius(radius), [radius]);
 
   useEffect(() => {
     return () => {
@@ -142,49 +123,33 @@ export const CommonMap: React.FC<CommonMapProps> = ({
     };
   }, []);
 
+  /* Update location name on change */
+  useEffect(() => {
+    if (!onLocationNameChange) return;
 
-const lastCoordsRef = useRef<string | null>(null);
-useEffect(() => {
-  if (!onLocationNameChange) return;
+    const key = `${location[0].toFixed(5)}-${location[1].toFixed(5)}`;
+    if (lastCoordsRef.current === key) return;
+    lastCoordsRef.current = key;
 
-  const key = `${location[0].toFixed(5)}-${location[1].toFixed(5)}`;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
-  // Prevent duplicate calls
-  if (lastCoordsRef.current === key) return;
+    debounceRef.current = window.setTimeout(() => {
+      getLocationName(location[0], location[1]).then(onLocationNameChange);
+    }, 400);
+  }, [location, onLocationNameChange]);
 
-  lastCoordsRef.current = key;
-
-  if (debounceRef.current) {
-    clearTimeout(debounceRef.current);
-  }
-
-  debounceRef.current = window.setTimeout(() => {
-    getLocationName(location[0], location[1]).then(onLocationNameChange);
-  }, 400);
-}, [location, onLocationNameChange]);
-
-  /* -------- Marker Drag -------- */
-
+  /* Marker drag */
   const handleMarkerDrag = (e: L.DragEndEvent) => {
     const pos = e.target.getLatLng();
-
-    const lat = normalize(pos.lat);
-    const lng = normalize(pos.lng);
-
-    setLocation([lat, lng]);
+    setLocation([normalize(pos.lat), normalize(pos.lng)]);
   };
 
-  /* -------- Map Click -------- */
-
+  /* Map click */
   const handleMapClick = (lat: number, lng: number) => {
-    const nLat = normalize(lat);
-    const nLng = normalize(lng);
-
-    setLocation([nLat, nLng]);
+    setLocation([normalize(lat), normalize(lng)]);
   };
 
-  /* -------- Radius Change -------- */
-
+  /* Radius slider */
   const handleRadiusChange = (r: number) => {
     setCurrentRadius(r);
     setRadius?.(r);
@@ -198,10 +163,7 @@ useEffect(() => {
       <MapContainer
         center={location}
         zoom={13}
-        style={{
-          width: "100%",
-          height: height ? height : "14rem",
-        }}
+        style={{ width: "100%", height: height ?? "14rem" }}
         className="sm:h-64 md:h-72 lg:h-80 xl:h-96 2xl:h-[600px]"
       >
         <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
@@ -229,22 +191,15 @@ useEffect(() => {
         <Circle
           center={location}
           radius={currentRadius}
-          pathOptions={{
-            color: "blue",
-            fillColor: "blue",
-            fillOpacity: 0.2,
-          }}
+          pathOptions={{ color: "blue", fillColor: "blue", fillOpacity: 0.2 }}
         />
       </MapContainer>
-
-      {/* Optional Radius Slider */}
 
       {setRadius && (
         <div className="p-2 bg-white border-t">
           <label className="text-sm font-medium">
             Radius: {(currentRadius / 1000).toFixed(2)} km
           </label>
-
           <input
             type="range"
             min={100}
