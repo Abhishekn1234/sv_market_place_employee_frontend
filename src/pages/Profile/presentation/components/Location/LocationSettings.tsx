@@ -152,7 +152,7 @@ export default function LocationSettings({ setActiveTab }: Props) {
             return;
           }
 
-          // keep previous location when opening modal
+          
           setLocationMode("MANUAL");
           setModalOpen(true);
         }}
