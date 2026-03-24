@@ -102,36 +102,44 @@ export default function LocationSettings({ setActiveTab }: Props) {
 
   // ---------------- SAVE ----------------
   const saveChanges = () => {
-    if (!tempLocation) return;
+  if (!tempLocation) return;
 
-    const [lat, lng] = tempLocation;
+  const [lat, lng] = tempLocation;
 
-    const payload: WorkerPayload = {
-      status: status,
-      serviceTierIds: selectedTiers,
-      categoryIds: selectedCategories,
-      serviceRadius: radius,
-      location: { type: "Point", coordinates: [lng, lat] },
-    };
+  const MAX_RADIUS_KM = 15;
 
-    serviceSettingsMutation.mutate(payload, {
-      onSuccess: () => {
-        useAuthStore.getState().updateWorker({
-          serviceTierIds: selectedTiers,
-          categoryIds: selectedCategories,
-          serviceRadius: radius,
-          location: { type: "Point", coordinates: [lng, lat] },
-        });
+  // Check radius limit
+  if (radius / 1000 > MAX_RADIUS_KM) {
+    toast.error(`Service radius cannot exceed ${MAX_RADIUS_KM} km`);
+    return; // Prevent saving
+  }
 
-        setLocationMode("MANUAL");
-
-        toast.success("Updated successfully");
-        setModalOpen(false);
-        setActiveTab("location");
-      },
-      onError: () => toast.error("Update failed"),
-    });
+  const payload: WorkerPayload = {
+    status: status,
+    serviceTierIds: selectedTiers,
+    categoryIds: selectedCategories,
+    serviceRadius: radius,
+    location: { type: "Point", coordinates: [lng, lat] },
   };
+
+  serviceSettingsMutation.mutate(payload, {
+    onSuccess: () => {
+      useAuthStore.getState().updateWorker({
+        serviceTierIds: selectedTiers,
+        categoryIds: selectedCategories,
+        serviceRadius: radius,
+        location: { type: "Point", coordinates: [lng, lat] },
+      });
+
+      setLocationMode("MANUAL");
+
+      toast.success("Updated successfully");
+      setModalOpen(false);
+      setActiveTab("location");
+    },
+    onError: () => toast.error("Update failed"),
+  });
+};
 
   if (!tempLocation) return null;
 
