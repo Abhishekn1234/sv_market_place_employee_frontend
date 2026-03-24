@@ -5,6 +5,7 @@ import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/se
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
+import { toast } from "react-toastify";
 
 type Props = {
   tempLocation: [number, number];
@@ -87,12 +88,25 @@ export default function LocationEditModal({
   
       <div>
         <Label>Service Radius (km)</Label>
-        <Input
-          type="number"
-          value={radius / 1000}
-          onChange={(e) => setRadius(Number(e.target.value) * 1000)}
-          className="w-full border rounded px-3 py-2"
-        />
+       <div>
+          <Label>Service Radius (km)</Label>
+          <Input
+            type="number"
+            value={radius / 1000}
+            onChange={(e) => {
+              const valueKm = Number(e.target.value);
+              if (valueKm > 15) {
+                toast.error("Radius cannot exceed 15 km");
+                setRadius(15000); 
+              } else if (valueKm < 0) {
+                setRadius(0);
+              } else {
+                setRadius(valueKm * 1000);
+              }
+            }}
+            className="w-full border rounded px-3 py-2"
+          />
+       </div>
       </div>
 
       {/* Categories */}
