@@ -238,7 +238,7 @@ export function useWorkColumns({
     }
 
     // ✅ IN_PROGRESS → Complete Work
-    if (workStatus === "inProgress") {
+    if (workStatus === "IN_PROGRESS") {
       return (
         <Button size="sm" onClick={() => onCompleteWork(w)}>
           {t("workHistory.actions.completeWork")}
