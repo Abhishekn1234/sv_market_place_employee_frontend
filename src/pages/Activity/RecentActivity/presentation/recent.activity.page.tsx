@@ -115,6 +115,7 @@ useEffect(() => {
           statusMap[item.booking?.status ?? ""] ?? "pending",
 
         amount: item.booking?.amount ?? 0,
+        currency:item.booking.currency,
 
         client: item.customer?.email ?? "Client",
 

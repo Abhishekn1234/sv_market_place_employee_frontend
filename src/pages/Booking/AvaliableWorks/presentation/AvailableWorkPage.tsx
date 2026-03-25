@@ -37,7 +37,7 @@ useEffect(() => {
       const workStatus = w.status?.toUpperCase();
       const bookingStatus = w.booking?.status?.toUpperCase();
 
-      // ✅ Only run timer if work is actually in progress
+      // Only run timer if work is actually in progress
       const isInProgress =
         ["IN_PROGRESS", "STARTED"].includes(workStatus) &&
         !["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(bookingStatus);
@@ -47,34 +47,32 @@ useEffect(() => {
       const startedAt = w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
       if (!startedAt) return;
 
-        const startedTime = new Date(startedAt).getTime();
-          const now = Date.now();
+      const startedTime = new Date(startedAt).getTime();
+      const now = Date.now();
 
-          let elapsed = now - startedTime;
-          if (elapsed < 0) return;
+      let elapsed = now - startedTime;
+      if (elapsed < 0) elapsed = 0;
 
-            // 🔹 Get max allowed duration
-            let maxDuration = Infinity;
+      // Determine maximum allowed duration
+      let maxDuration = Infinity;
 
-            if (w.pricingMode === "HOURLY") {
-              const hours = w.booking?.schedule?.estimatedHours ?? 0;
-              maxDuration = hours * 60 * 60 * 1000;
-            } else if (w.pricingMode === "PER_DAY") {
-              const days = w.booking?.schedule?.estimatedDays ?? 0;
-              maxDuration = days * 24 * 60 * 60 * 1000;
-            }
+      if (w.booking?.pricingMode === "HOURLY") {
+        const hours = w.booking?.schedule?.estimatedHours ?? 0;
+        maxDuration = hours * 60 * 60 * 1000;
+      } else if (w.booking?.pricingMode === "PER_DAY") {
+        const days = w.booking?.schedule?.estimatedDays ?? 0;
+        maxDuration = days * 24 * 60 * 60 * 1000;
+      }
 
-            // 🔥 Cap elapsed time
-            if (elapsed > maxDuration) {
-              elapsed = maxDuration;
-            }
+      // Cap elapsed time to maxDuration
+      if (elapsed > maxDuration) elapsed = maxDuration;
 
-          // 🔹 Convert to HH:MM:SS
-          const h = Math.floor(elapsed / 3600000);
-          const m = Math.floor((elapsed % 3600000) / 60000);
-          const s = Math.floor((elapsed % 60000) / 1000);
+      // Convert elapsed to HH:MM:SS
+      const h = Math.floor(elapsed / 3600000);
+      const m = Math.floor((elapsed % 3600000) / 60000);
+      const s = Math.floor((elapsed % 60000) / 1000);
 
-          updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
     });
 
     setTimers(updated);
