@@ -95,7 +95,7 @@ export function ActivityHeader({
             theme === "dark" ? "text-gray-100" : "text-gray-900"
           }`}
         >
-          ${totalEarnings.toFixed(2)}
+          SAR {totalEarnings.toFixed(2)}
         </p>
 
         <p

@@ -73,7 +73,7 @@ const STATUS_VARIANTS: Record<
 
  
 };
-export const getStatusBadge = (status: ActivityStatus) => {
+export const getStatusBadge = (status: BookingStatus) => {
   const config = STATUS_VARIANTS[status] ?? STATUS_VARIANTS.pending;
 
   return <Badge variant={config.variant}>{config.label}</Badge>;

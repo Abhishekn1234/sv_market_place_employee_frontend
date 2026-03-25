@@ -137,7 +137,7 @@ export function ActivityItem({ activity }: { activity: Activity }) {
 
               {activity.amount && activity.amount > 0 && (
                 <p className="font-medium text-green-600">
-                  {activity.currency} {activity.amount}
+                  {activity.currency}  {activity.amount}
                 </p>
               )}
 

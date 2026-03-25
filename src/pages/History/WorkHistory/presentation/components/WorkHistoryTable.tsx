@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { CommonTable } from "@/components/common/CommonTable";
 import type { Work } from "@/pages/Booking/AvaliableWorks/domain/entities/work";
 import { useWorkColumns } from "../hooks/useColumns";
-import StartWork from "../../../../Booking/AvaliableWorks/presentation/components/StartWork";
-import CompleteWork from "../../../../Booking/AvaliableWorks/presentation/components/CompleteWork";
-import PaymentModal from "../../../../Booking/AvaliableWorks/presentation/components/PaymentModal";
-import InvoiceModal from "../../../../Booking/AvaliableWorks/presentation/components/InvoiceModal";
-import VerifyOtpModal from "../../../../Booking/AvaliableWorks/presentation/components/VerifyOtpModal";
+import StartWork from "../../../../Booking/AvaliableWorks/presentation/components/StartWork/StartWork";
+import CompleteWork from "../../../../Booking/AvaliableWorks/presentation/components/CompleteWork/CompleteWork";
+import PaymentModal from "../../../../Booking/AvaliableWorks/presentation/components/PaymentModal/PaymentModal";
+import InvoiceModal from "../../../../Booking/AvaliableWorks/presentation/components/InvoiceModal/InvoiceModal";
+import VerifyOtpModal from "../../../../Booking/AvaliableWorks/presentation/components/VerifyOtpModal/VerifyOtpModal";
 
 export function WorkHistoryTable({
   data,

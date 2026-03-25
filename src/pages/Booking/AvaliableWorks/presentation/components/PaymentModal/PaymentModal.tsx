@@ -1,6 +1,7 @@
 "use client";
 
-import type { Work } from "../../domain/entities/work";
+
+import type { Work } from "../../../domain/entities/work";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -9,13 +10,13 @@ type Props = {
   onClose: () => void;
 };
 
-export default function InvoiceModal({ work, open, onClose }: Props) {
+export default function PaymentModal({ work, open, onClose }: Props) {
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="bg-white rounded-lg p-6 w-96">
-        <h2 className="text-xl font-semibold mb-4">Invoice for Work</h2>
+        <h2 className="text-xl font-semibold mb-4">Payment for Work</h2>
         <p className="mb-4">
           Service: <strong>{work.service?.name || "-"}</strong>
         </p>
@@ -23,18 +24,18 @@ export default function InvoiceModal({ work, open, onClose }: Props) {
           Customer: <strong>{work.customer?.fullName || "-"}</strong>
         </p>
         <p className="mb-6">
-          Amount: <strong>{work.booking?.currency || "-"}</strong>
+          Duration: <strong>{work.booking?.duration || "-"}</strong>
         </p>
 
-        {/* Example: Download invoice action */}
+        {/* Example: Payment action */}
         <Button
           className="w-full mb-2"
           onClick={() => {
-            console.log("Downloading invoice for work", work._id);
+            console.log("Processing payment for work", work._id);
             onClose();
           }}
         >
-          Download Invoice
+          Pay Now
         </Button>
 
         <Button

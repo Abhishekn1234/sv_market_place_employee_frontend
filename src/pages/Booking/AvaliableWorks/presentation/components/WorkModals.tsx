@@ -1,6 +1,6 @@
-import StartWork from "@/pages/Booking/AvaliableWorks/presentation/components/StartWork";
-import CompleteWork from "@/pages/Booking/AvaliableWorks/presentation/components/CompleteWork";
-import VerifyOtpModal from "@/pages/Booking/AvaliableWorks/presentation/components/VerifyOtpModal";
+import StartWork from "@/pages/Booking/AvaliableWorks/presentation/components/StartWork/StartWork";
+import CompleteWork from "@/pages/Booking/AvaliableWorks/presentation/components/CompleteWork/CompleteWork";
+import VerifyOtpModal from "@/pages/Booking/AvaliableWorks/presentation/components/VerifyOtpModal/VerifyOtpModal";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
 

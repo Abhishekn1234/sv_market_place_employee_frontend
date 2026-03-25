@@ -1,17 +1,19 @@
 import type { Work } from "@/pages/Booking/AvaliableWorks/domain/entities/work";
-import type { WorkStatus } from "../../domain/entities/workstatus";
+
 import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
+import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";
 
 export function mapApiToWork(apiData: any[]): Work[] {
-const statusMap: Record<string, WorkStatus> = {
-  ASSIGNED: "assigned",
-  WORKER_ACCEPTED: "workAccepted",
-  WORK_CANCELLED: "workCancelled",
+const statusMap: Record<string, BookingStatus> = {
+  ASSIGNED: "requested",                  // or "pending"? choose logically
+  WORKER_ACCEPTED: "WORKER_ACCEPTED",
+  WORK_CANCELLED: "cancelled",
   COMPLETED: "completed",
-  IN_PROGRESS: "inProgress",
-  STARTED: "inProgress",
-  WORK_COMPLETED_PENDING: "workCompletedPending",
+  IN_PROGRESS: "IN_PROGRESS",
+  STARTED: "IN_PROGRESS",
+  WORK_COMPLETED_PENDING: "WORK_COMPLETED_PENDING",
 };
+
 
   return apiData.map((w) => {
     const bookingData = w.booking;

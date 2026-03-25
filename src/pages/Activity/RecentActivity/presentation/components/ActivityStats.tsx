@@ -75,7 +75,7 @@ export function ActivityStats({ activities }: { activities: Activity[] }) {
         <Stat
           icon={<DollarSign className="size-5 text-green-600" />}
           label={ra.charts.earningsTrend}
-          value={`SAR${totalEarnings}`}
+          value={`SAR ${totalEarnings}`}
         />
       </CommonCard>
 

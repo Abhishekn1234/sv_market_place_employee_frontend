@@ -23,103 +23,105 @@ export default function AvailableWorkPage() {
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
 
-
+  // Initialize work list
   useEffect(() => {
     setWorkList(assignedWorks || []);
   }, [assignedWorks]);
 
-  
-useEffect(() => {
-  const interval = setInterval(() => {
-    const updated: Record<string, string> = {};
+  // Timer effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const updated: Record<string, string> = {};
 
-    workList.forEach((w) => {
-      const workStatus = w.status?.toUpperCase();
-      const bookingStatus = w.booking?.status?.toUpperCase();
+      workList.forEach((w) => {
+        const workStatus = w.status?.toUpperCase();
+        const bookingStatus = w.booking?.status?.toUpperCase();
 
-      // Only run timer if work is actually in progress
-      const isInProgress =
-        ["IN_PROGRESS", "STARTED"].includes(workStatus) &&
-        !["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(bookingStatus);
+        const isInProgress =
+          ["STARTED", "IN_PROGRESS"].includes(workStatus) &&
+          !["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(bookingStatus);
 
-      if (!isInProgress) return;
+        if (!isInProgress) return;
 
-      const startedAt = w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
-      if (!startedAt) return;
+        const startedAt = w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
+        if (!startedAt) return;
 
-      const startedTime = new Date(startedAt).getTime();
-      const now = Date.now();
+        const startedTime = new Date(startedAt).getTime();
+        const now = Date.now();
+        let elapsed = now - startedTime;
 
-      let elapsed = now - startedTime;
-      if (elapsed < 0) elapsed = 0;
+        if (elapsed < 0) elapsed = 0;
 
-      // Determine maximum allowed duration
-      let maxDuration = Infinity;
+        // Max allowed duration
+        let maxDuration = Infinity;
+        if (w.booking?.pricingMode === "HOURLY") {
+          maxDuration = (w.booking?.schedule?.estimatedHours ?? 0) * 60 * 60 * 1000;
+        } else if (w.booking?.pricingMode === "PER_DAY") {
+          maxDuration = (w.booking?.schedule?.estimatedDays ?? 0) * 24 * 60 * 60 * 1000;
+        }
 
-      if (w.booking?.pricingMode === "HOURLY") {
-        const hours = w.booking?.schedule?.estimatedHours ?? 0;
-        maxDuration = hours * 60 * 60 * 1000;
-      } else if (w.booking?.pricingMode === "PER_DAY") {
-        const days = w.booking?.schedule?.estimatedDays ?? 0;
-        maxDuration = days * 24 * 60 * 60 * 1000;
-      }
+        if (elapsed > maxDuration) elapsed = maxDuration;
 
-      // Cap elapsed time to maxDuration
-      if (elapsed > maxDuration) elapsed = maxDuration;
+        const h = Math.floor(elapsed / 3600000);
+        const m = Math.floor((elapsed % 3600000) / 60000);
+        const s = Math.floor((elapsed % 60000) / 1000);
 
-      // Convert elapsed to HH:MM:SS
-      const h = Math.floor(elapsed / 3600000);
-      const m = Math.floor((elapsed % 3600000) / 60000);
-      const s = Math.floor((elapsed % 60000) / 1000);
+        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      });
 
-      updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      setTimers(updated);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [workList]);
+
+  // Update work function
+  const updateWork = (updated: any) => {
+    setWorkList((prev) =>
+      prev.map((w) =>
+        w._id === updated._id
+          ? {
+              ...w,
+              ...updated,
+              workStartedAt:
+                ["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(updated.status?.toUpperCase())
+                  ? null
+                  : w.workStartedAt,
+            }
+          : w
+      )
+    );
+
+    // Stop timer immediately
+    if (["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(updated.status?.toUpperCase() ?? "")) {
+      setTimers((prev) => {
+        const copy = { ...prev };
+        delete copy[updated._id];
+        return copy;
+      });
+    }
+  };
+
+  // Start work handler (after OTP verification)
+  const handleStartWork = (work: any) => {
+    const now = new Date().toISOString();
+    updateWork({
+      ...work,
+      status: "STARTED",
+      workStartedAt: now,
     });
-
-    setTimers(updated);
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, [workList]);
-// Update work function
-const updateWork = (updated: any) => {
-  setWorkList((prev) =>
-    prev.map((w) =>
-      w._id === updated._id
-        ? {
-            ...w,
-            ...updated,
-            workStartedAt:
-              ["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(updated.status?.toUpperCase())
-                ? null
-                : w.workStartedAt,
-          }
-        : w
-    )
-  );
-
-  // Remove timer immediately for completed / cancelled / pending verification
-  if (["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(updated.status?.toUpperCase() ?? "")) {
-    setTimers((prev) => {
-      const copy = { ...prev };
-      delete copy[updated._id];
-      return copy;
-    });
-  }
-};
-
+    openModal(work, "start");
+  };
 
   const openModal = (work: any, type: any) => {
     setSelectedWork({ ...work, bookingId: work.booking?._id });
     setModalType(type);
   };
 
-  
   const closeModal = () => {
     setSelectedWork(null);
     setModalType(null);
   };
-
- 
 
   return (
     <CommonCard
@@ -131,12 +133,11 @@ const updateWork = (updated: any) => {
         workList={workList}
         categories={categories}
         timers={timers}
-        onStart={(w: any) => openModal(w, "start")}
+        onStart={handleStartWork} // Start work & timer
         onComplete={(w: any) => openModal(w, "complete")}
         onVerify={(w: any) => openModal(w, "verify")}
         onCancel={setCancelConfirmWork}
       />
-
       <WorkModals
         selectedWork={selectedWork}
         modalType={modalType}
@@ -145,6 +146,7 @@ const updateWork = (updated: any) => {
         cancelConfirmWork={cancelConfirmWork}
         setCancelConfirmWork={setCancelConfirmWork}
         cancelMutation={cancelMutation}
+        timers={timers} // Pass timers for elapsed time
       />
     </CommonCard>
   );

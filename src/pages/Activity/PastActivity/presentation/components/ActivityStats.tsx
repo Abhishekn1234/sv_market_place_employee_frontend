@@ -53,7 +53,7 @@ export function ActivityStats({
         icon={<DollarSign className="size-5 text-emerald-600" />}
         iconBg="bg-emerald-100"
         label={pa.stats.totalEarnings}
-        value={`$${totalEarnings.toLocaleString()}`}
+        value={`SAR ${totalEarnings.toLocaleString()}`}
         theme={theme}
       />
 

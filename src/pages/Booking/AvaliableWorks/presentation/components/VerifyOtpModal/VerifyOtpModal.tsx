@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
-import type { Work } from "../../domain/entities/work";
-import { useVerifyOtp } from "../hooks/useVeirfyOtp";
+import type { Work } from "../../../domain/entities/work";
+import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
 
 type Props = {
   work: Work;

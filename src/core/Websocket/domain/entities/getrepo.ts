@@ -1,6 +1,8 @@
+import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
+
 export type GetBooking = {
   _id: string;
-  status: "REQUESTED" | "ACCEPTED" | "REJECTED" |"ASSIGNED" | "WORKER_ACCEPTED";
+  status: WorkerStatus;
   amount: number;
   currency?: string;
 

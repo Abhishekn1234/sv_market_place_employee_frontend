@@ -4,8 +4,8 @@ import { useState } from "react";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Work } from "../../domain/entities/work";
-import { useStartWork } from "../hooks/useStartWork";
+import type { Work } from "../../../domain/entities/work";
+import { useStartWork } from "../../hooks/useStartWork";
 import { toast } from "react-toastify";
 
 type Props = {
