@@ -62,13 +62,13 @@ export default function SocketBookingsModal({
 
   return (
     <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
-      <CommonModal.Content
-        className={`max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl ${
-          dark
-            ? "bg-gray-900 text-gray-100"
-            : "bg-gradient-to-br from-white to-gray-50 text-gray-900"
-        }`}
-      >
+     <CommonModal.Content
+  className={`w-full max-w-full sm:max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl ${
+    dark
+      ? "bg-gray-900 text-gray-100"
+      : "bg-gradient-to-br from-white to-gray-50 text-gray-900"
+  }`}
+>
         {/* HEADER */}
         <CommonModal.Header
           className={`border-b px-6 py-5 flex justify-between items-center ${
@@ -120,61 +120,55 @@ export default function SocketBookingsModal({
               )}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {bookings.map((booking) => {
                 const accepting =
                   isPending && selectedBooking === booking._id;
 
                 return (
                   <div
-                    key={booking._id}
-                    className={`border rounded-2xl p-6 shadow ${
-                      dark
-                        ? "bg-gray-800 border-gray-700"
-                        : "bg-white border-gray-200"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-bold text-lg">
-                        {booking.service?.name}
-                      </h3>
-
-                      <Badge
-                        className={`border ${
+                        key={booking._id}
+                        className={`border rounded-2xl p-4 sm:p-6 shadow w-full min-w-0 ${
                           dark
-                            ? "bg-gray-700 text-gray-300 border-gray-600"
-                            : "bg-gray-100 text-gray-700 border-gray-200"
+                            ? "bg-gray-800 border-gray-700"
+                            : "bg-white border-gray-200"
                         }`}
                       >
+                   <div className="flex flex-wrap items-start justify-between gap-2 mb-1 min-w-0">
+                                  <h3 className="font-bold text-lg break-words">
+                                    {booking.service?.name}
+                                  </h3>
+
+                      <Badge className="shrink-0">
                         {booking.status}
                       </Badge>
                     </div>
 
-                    <p
-                      className={`text-sm mb-3 ${
-                        dark ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
-                      {booking.serviceTier?.displayName}
-                    </p>
+                    <p className="text-sm mb-3 break-words text-gray-500">
+                            {booking.serviceTier?.displayName}
+                          </p>
 
-                    <div className="flex gap-2 text-sm mb-3">
-                      <User className="h-4 w-4" />
-                      {booking.customer?.fullName}
+                                      <div className="flex items-start gap-2 text-sm mb-3 min-w-0">
+                      <User className="h-4 w-4 shrink-0 mt-0.5" />
+                      <span className="break-words">
+                        {booking.customer?.fullName}
+                      </span>
                     </div>
 
-                    <div className="flex gap-2 text-sm mb-3">
-                      <Phone className="h-4 w-4" />
-                      {booking.customer?.phone}
+                    <div className="flex items-start gap-2 text-sm mb-3 min-w-0">
+                      <Phone className="h-4 w-4 shrink-0 mt-0.5" />
+                      <span className="break-words">
+                        {booking.customer?.phone}
+                      </span>
                     </div>
 
-                    <div className="flex gap-2 text-sm mb-4">
-                      <DollarSign className="h-4 w-4" />
-                      SAR {booking.amount}
-                    </div>
+                   <div className="flex items-start gap-2 text-sm mb-4">
+                        <DollarSign className="h-4 w-4 shrink-0 mt-0.5" />
+                        <span>SAR {booking.amount}</span>
+                      </div>
 
                   {booking.status !== "WORKER_CANCELLED" && (
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <button
                         disabled={accepting}
                         onClick={() => {
@@ -194,7 +188,7 @@ export default function SocketBookingsModal({
                             }
                           );
                         }}
-                        className="flex-1 bg-green-500 text-white py-2 rounded-xl disabled:opacity-60"
+                        className="w-full sm:flex-1 bg-green-500 text-white py-2 rounded-xl disabled:opacity-60"
                       >
                         {accepting ? (
                           <Loader2 className="animate-spin mx-auto" />
@@ -205,11 +199,7 @@ export default function SocketBookingsModal({
 
                       <button
                         onClick={() => removeBooking(booking._id)}
-                        className={`px-4 rounded-xl border ${
-                          dark
-                            ? "border-gray-600 text-gray-300"
-                            : "border-gray-300 text-gray-700"
-                        }`}
+                        className="w-full sm:w-auto px-4 py-2 rounded-xl border border-gray-300 text-gray-700"
                       >
                         Ignore
                       </button>
