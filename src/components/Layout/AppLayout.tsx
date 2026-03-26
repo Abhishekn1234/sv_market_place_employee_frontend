@@ -145,34 +145,34 @@ export default function AppLayout() {
         </main>
       </div>
 
-      {/* 🚨 Global Socket Status */}
+      {/* 🚨 Global Socket Status
       {!isSocketConnected && (
         <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded">
           Socket Disconnected
         </div>
-      )}
+      )} */}
 
       {/* ✅ Modal Switching */}
       {/* ✅ Modal Switching with route control */}
-{!isAvailableWorkPage && (
-  assignedOpen ? (
-    <AssignedWorkModal
-      open={assignedOpen}
-      onClose={() => setAssignedOpen(false)}
-      onCancelSuccess={() => {
-        setAssignedOpen(false);
-        setLiveBookingsOpen(true);
-      }}
-    />
-  ) : (
-    <SocketBookingsModal
-      open={liveBookingsOpen}
-      onClose={() => setLiveBookingsOpen(false)}
-      onBookingAccepted={handleBookingAccepted}
-      isConnected={isSocketConnected}
-    />
-  )
-)}
+    {!isAvailableWorkPage && (
+      assignedOpen ? (
+        <AssignedWorkModal
+          open={assignedOpen}
+          onClose={() => setAssignedOpen(false)}
+          onCancelSuccess={() => {
+            setAssignedOpen(false);
+            setLiveBookingsOpen(true);
+          }}
+        />
+      ) : (
+        <SocketBookingsModal
+          open={liveBookingsOpen}
+          onClose={() => setLiveBookingsOpen(false)}
+          onBookingAccepted={handleBookingAccepted}
+          isConnected={isSocketConnected}
+        />
+      )
+    )}
     </div>
   );
 }
