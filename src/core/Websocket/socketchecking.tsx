@@ -61,177 +61,158 @@ export default function SocketBookingsModal({
   };
 
   return (
-    <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
-     <CommonModal.Content
-  className={`w-full max-w-full sm:max-w-4xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl ${
-    dark
-      ? "bg-gray-900 text-gray-100"
-      : "bg-gradient-to-br from-white to-gray-50 text-gray-900"
-  }`}
->
-        {/* HEADER */}
-        <CommonModal.Header
-          className={`border-b px-6 py-5 flex justify-between items-center ${
-            dark ? "border-gray-700" : "border-gray-200"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div>
-              <h2 className="text-2xl font-bold">Live Bookings</h2>
-              <p className={dark ? "text-gray-400" : "text-gray-500"}>
-                Real-time service requests
-              </p>
+   <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
+  <CommonModal.Content
+    className={`w-full h-[100dvh] sm:h-auto sm:max-w-4xl max-h-[100dvh] sm:max-h-[90vh] flex flex-col overflow-hidden rounded-none sm:rounded-2xl ${
+      dark
+        ? "bg-gray-900 text-gray-100"
+        : "bg-gradient-to-br from-white to-gray-50 text-gray-900"
+    }`}
+  >
+    {/* HEADER */}
+    <CommonModal.Header
+      className={`border-b px-4 sm:px-6 py-4 flex justify-between items-center ${
+        dark ? "border-gray-700" : "border-gray-200"
+      }`}
+    >
+      <div className="flex flex-col">
+        <h2 className="text-lg sm:text-2xl font-bold">Live Bookings</h2>
+        <p className="text-xs sm:text-sm text-gray-500">
+          Real-time service requests
+        </p>
 
-              {/* ✅ Connection status */}
-               <div className="text-sm mt-1">
-              {isConnected ? (
-                <span className="text-green-500">● Connected</span>
-              ) : (
-                <span className="text-red-500">● Disconnected</span>
-              )}
-            </div>
-            </div>
-          </div>
-
-          <Button
-            onClick={onClose}
-            className={`p-2 rounded-xl ${
-              dark
-                ? "bg-gray-800 text-gray-300"
-                : "bg-white text-black"
-            }`}
-          >
-            <X />
-          </Button>
-        </CommonModal.Header>
-
-        {/* BODY */}
-        <CommonModal.Body className="p-6">
-          {bookings.length === 0 ? (
-            <div className="flex flex-col items-center py-20 gap-4">
-              <Clock className="h-14 w-14 text-gray-400" />
-              <p className="text-gray-500">Waiting for bookings…</p>
-
-              {/* ✅ Show reload when connected but empty */}
-               {isConnected && (
-                <Button onClick={handleReload} className="mt-3">
-                  Reload
-                </Button>
-              )}
-            </div>
+        <div className="text-xs mt-1">
+          {isConnected ? (
+            <span className="text-green-500">● Connected</span>
           ) : (
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              {bookings.map((booking) => {
-                const accepting =
-                  isPending && selectedBooking === booking._id;
+            <span className="text-red-500">● Disconnected</span>
+          )}
+        </div>
+      </div>
 
-                return (
-                  <div
-                        key={booking._id}
-                        className={`border rounded-2xl p-4 sm:p-6 shadow w-full min-w-0 ${
-                          dark
-                            ? "bg-gray-800 border-gray-700"
-                            : "bg-white border-gray-200"
-                        }`}
-                      >
-                   <div className="flex flex-wrap items-start justify-between gap-2 mb-1 min-w-0">
-                                  <h3 className="font-bold text-lg break-words">
-                                    {booking.service?.name}
-                                  </h3>
+      <Button
+        onClick={onClose}
+        className="p-2 rounded-lg sm:rounded-xl"
+      >
+        <X />
+      </Button>
+    </CommonModal.Header>
 
-                      <Badge className="shrink-0">
-                        {booking.status}
-                      </Badge>
-                    </div>
+    {/* BODY */}
+    <CommonModal.Body className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+      {bookings.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-full gap-4">
+          <Clock className="h-12 w-12 text-gray-400" />
+          <p className="text-gray-500 text-sm">Waiting for bookings…</p>
 
-                    <p className="text-sm mb-3 break-words text-gray-500">
-                            {booking.serviceTier?.displayName}
-                          </p>
+          {isConnected && (
+            <Button onClick={handleReload}>Reload</Button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {bookings.map((booking) => {
+            const accepting =
+              isPending && selectedBooking === booking._id;
 
-                                      <div className="flex items-start gap-2 text-sm mb-3 min-w-0">
-                      <User className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span className="break-words">
-                        {booking.customer?.fullName}
-                      </span>
-                    </div>
+            return (
+              <div
+                key={booking._id}
+                className={`border rounded-xl p-4 shadow-sm ${
+                  dark
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                {/* Title */}
+                <div className="flex justify-between items-start gap-2">
+                  <h3 className="font-semibold text-base break-words">
+                    {booking.service?.name}
+                  </h3>
+                  <Badge>{booking.status}</Badge>
+                </div>
 
-                    <div className="flex items-start gap-2 text-sm mb-3 min-w-0">
-                      <Phone className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span className="break-words">
-                        {booking.customer?.phone}
-                      </span>
-                    </div>
+                <p className="text-xs text-gray-500 mb-2 break-words">
+                  {booking.serviceTier?.displayName}
+                </p>
 
-                   <div className="flex items-start gap-2 text-sm mb-4">
-                        <DollarSign className="h-4 w-4 shrink-0 mt-0.5" />
-                        <span>SAR {booking.amount}</span>
-                      </div>
-
-                  {booking.status !== "WORKER_CANCELLED" && (
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <button
-                        disabled={accepting}
-                        onClick={() => {
-                          setSelectedBooking(booking._id);
-
-                          acceptBooking(
-                            {
-                              bookingId: booking._id,
-                              bookingStatus: "WORKER_ACCEPTED",
-                            },
-                            {
-                              onSuccess: () => {
-                                removeBooking(booking._id);
-                                onClose();
-                                onBookingAccepted?.();
-                              },
-                            }
-                          );
-                        }}
-                        className="w-full sm:flex-1 bg-green-500 text-white py-2 rounded-xl disabled:opacity-60"
-                      >
-                        {accepting ? (
-                          <Loader2 className="animate-spin mx-auto" />
-                        ) : (
-                          "Accept"
-                        )}
-                      </button>
-
-                      <button
-                        onClick={() => removeBooking(booking._id)}
-                        className="w-full sm:w-auto px-4 py-2 rounded-xl border border-gray-300 text-gray-700"
-                      >
-                        Ignore
-                      </button>
-                    </div>
-                  )}
+                {/* Info */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex gap-2">
+                    <User className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span className="break-words">
+                      {booking.customer?.fullName}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </CommonModal.Body>
 
-        {/* FOOTER */}
-        <CommonModal.Footer className="border-t px-6 py-4 text-sm text-gray-500 flex justify-between">
-          {bookings.length === 0 ? (
-            <Button
-              onClick={handleReload}
-              className={`px-4 py-1 rounded-lg ${
-                dark
-                  ? "bg-gray-700 text-white"
-                  : "bg-gray-200 text-black"
-              }`}
-            >
-              Reload
-            </Button>
-          ) : (
-            <span>
-                 {isConnected ? "Auto refresh" : "Socket disconnected"}
-            </span>
-          )}
-        </CommonModal.Footer>
-      </CommonModal.Content>
-    </CommonModal>
+                  <div className="flex gap-2">
+                    <Phone className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span>{booking.customer?.phone}</span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <DollarSign className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span>SAR {booking.amount}</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                {booking.status !== "WORKER_CANCELLED" && (
+                  <div className="flex flex-col gap-2 mt-4">
+                    <button
+                      disabled={accepting}
+                      onClick={() => {
+                        setSelectedBooking(booking._id);
+
+                        acceptBooking(
+                          {
+                            bookingId: booking._id,
+                            bookingStatus: "WORKER_ACCEPTED",
+                          },
+                          {
+                            onSuccess: () => {
+                              removeBooking(booking._id);
+                              onClose();
+                              onBookingAccepted?.();
+                            },
+                          }
+                        );
+                      }}
+                      className="w-full bg-green-500 text-white py-2 rounded-lg disabled:opacity-60"
+                    >
+                      {accepting ? (
+                        <Loader2 className="animate-spin mx-auto" />
+                      ) : (
+                        "Accept"
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => removeBooking(booking._id)}
+                      className="w-full border border-gray-300 py-2 rounded-lg text-gray-700"
+                    >
+                      Ignore
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </CommonModal.Body>
+
+    {/* FOOTER */}
+    <CommonModal.Footer className="border-t px-4 sm:px-6 py-3 text-xs sm:text-sm flex justify-between">
+      {bookings.length === 0 ? (
+        <Button onClick={handleReload}>Reload</Button>
+      ) : (
+        <span>
+          {isConnected ? "Auto refresh" : "Socket disconnected"}
+        </span>
+      )}
+    </CommonModal.Footer>
+  </CommonModal.Content>
+</CommonModal>
   );
 }
