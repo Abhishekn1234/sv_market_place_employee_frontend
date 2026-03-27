@@ -32,7 +32,7 @@ export default function EmployeeDetails({
 
   // ✅ Final permission
   const canEdit =
-    user?.kycStatus === "approved" && hasAllRequiredDocuments();
+    user?.kycStatus === "pending" && hasAllRequiredDocuments();
 
   // ✅ Toast on hover (only if disabled)
   const handleHover = () => {
