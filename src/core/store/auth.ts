@@ -5,6 +5,7 @@ import type { ApiDocument } from "@/pages/Profile/domain/entities/documents";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
 import type { Worker } from "@/pages/Profile/domain/entities/workertype";
+import { getOnboardingStatus, type OnboardingStatus } from "@/pages/Servicesettings/presentation/helpers/documentstatus";
 
 /* ----------------------------- Helpers ----------------------------- */
 
@@ -47,6 +48,8 @@ export interface EmployeeUser {
   kycStatus?: string;
 
   worker?: Worker;
+   isOnboarded?: boolean;
+   onboardingStatus?: OnboardingStatus;
 }
 
 interface AuthState {
@@ -69,6 +72,7 @@ interface AuthState {
   setPreferredLanguage: (lang: "EN" | "AR" | "HI") => void;
   setPreferredTheme: (theme: "light" | "dark") => void;
   setUserLocation: (location: GeoPoint) => void;
+  
 }
 
 /* ----------------------------- Store ----------------------------- */
@@ -82,11 +86,18 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       /* ------------------ SET USER ------------------ */
-      setAuth: (user) =>
+      setAuth: (user) => {
+        const status = getOnboardingStatus(user);
+
         set({
-          user,
+          user: {
+            ...user,
+            onboardingStatus: status,
+            isOnboarded: status === "COMPLETED",
+          },
           isAuthenticated: true,
-        }),
+        });
+      },
 
       /* ------------------ SET TOKENS ------------------ */
       setTokens: (accessToken, refreshToken) =>
@@ -97,13 +108,17 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       /* ------------------ LOGOUT ------------------ */
-      logout: () =>
-        set({
-          accessToken: null,
-          refreshToken: null,
-          user: null,
-          isAuthenticated: false,
-        }),
+     logout: () => {
+  set({
+    accessToken: null,
+    refreshToken: null,
+    user: null,
+    isAuthenticated: false,
+  });
+
+  // ✅ CLEAR persisted storage completely
+  localStorage.removeItem("employee-auth-storage");
+},
 
       /* ------------------ UPDATE PROFILE ------------------ */
       updateUserProfile: (payload) => {
@@ -120,35 +135,34 @@ export const useAuthStore = create<AuthState>()(
 
       /* ------------------ UPDATE STATUS ------------------ */
       updateUserStatus: (status) => {
-        const { user } = get();
-        if (!user?.worker) return;
+  const { user } = get();
+  if (!user) return;
 
-        set({
-          user: {
-            ...user,
-            worker: {
-              ...user.worker,
-              status: mapStatus(status),
-            },
-          },
-        });
+  set({
+    user: {
+      ...user,
+      worker: {
+        ...(user.worker || {}), // ✅ FIX
+        status: mapStatus(status),
       },
+    },
+  });},
 
       /* ------------------ UPDATE WORKER ------------------ */
-      updateWorker: (payload) => {
-        const { user } = get();
-        if (!user?.worker) return;
+     updateWorker: (payload) => {
+  const { user } = get();
+  if (!user) return;
 
-        set({
-          user: {
-            ...user,
-            worker: {
-              ...user.worker,
-              ...payload,
-            },
-          },
-        });
+  set({
+    user: {
+      ...user,
+      worker: {
+        ...(user.worker || {}), // ✅ FIX: create if missing
+        ...payload,
       },
+    },
+  });
+},
 
       /* ------------------ LANGUAGE ------------------ */
       setPreferredLanguage: (lang) => {

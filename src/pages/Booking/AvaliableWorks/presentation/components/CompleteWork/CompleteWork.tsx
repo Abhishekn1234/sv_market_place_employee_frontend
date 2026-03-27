@@ -8,7 +8,6 @@ import type { CompleteWork } from "../../../domain/entities/completework";
 import { toast } from "react-toastify";
 
 
-import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";
 
 type Props = {
   work: Work;
@@ -32,19 +31,25 @@ export default function CompleteWork({ work, open, onClose, onSuccess }: Props) 
     const payload: CompleteWork = { bookingId, actualWorkHours, actualWorkDays };
 
     completeWorkMutation(payload, {
-      onSuccess: (updatedBooking) => {
-        // Stop timer and record elapsed time
-        const updatedWork: Work = {
-          ...work,
-          status: "WORK_COMPLETED_PENDING" as BookingStatus,
-          booking: { ...work.booking, ...updatedBooking },
-          workElapsedTime: work.elapsedTime, // captured timer
-          workStartedAt: null,
-        };
-        onSuccess(updatedWork);
-        toast.success("Work Completed Successfully!");
-        onClose();
-      },
+     onSuccess: (updatedBooking) => {
+  const updatedWork: Work = {
+    ...work,
+    status: "WORK_COMPLETED_PENDING",
+
+    // ✅ THIS IS THE FIX
+    booking: {
+      ...work.booking,
+      ...updatedBooking,
+      status: "WORK_COMPLETED_PENDING", // 🔥 ADD THIS
+    },
+
+    workStartedAt: null,
+  };
+
+  onSuccess(updatedWork);
+  toast.success("Work Completed Successfully!");
+  onClose();
+},
       onError: (error) => console.error(error),
     });
   };

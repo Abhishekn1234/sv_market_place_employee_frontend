@@ -62,28 +62,38 @@ export default function MultiSelectDropdownCard() {
   };
 
   mutation.mutate(payload, {
-    onSuccess: () => {
-      useAuthStore.getState().updateWorker({
-        categoryIds: payload.categoryIds,
-        serviceTierIds: payload.serviceTierIds,
-        status: payload.status as WorkerStatus,
-        serviceRadius: payload.serviceRadius,
-        location: payload.location,
-      });
+  onSuccess: () => {
+    const store = useAuthStore.getState();
 
-      toast.success("Worker updated successfully");
-      navigate("/services/documents");
-    },
+    // ✅ Update worker details
+    store.updateWorker({
+      categoryIds: payload.categoryIds,
+      serviceTierIds: payload.serviceTierIds,
+      status: payload.status as WorkerStatus,
+      serviceRadius: payload.serviceRadius,
+      location: payload.location,
+    });
 
-    onError: (err: any) => {
-      const message =
-        err?.response?.data?.message || 
-        err?.message ||                
-        "Update failed";
+    // ✅ MARK AS ONBOARDED
+    store.updateUserProfile({
+      isOnboarded: true,
+    });
 
-      toast.error(message);
-    },
-  });
+    toast.success("Worker updated successfully");
+
+    // ✅ Continue onboarding flow
+    navigate("/services/documents");
+  },
+
+  onError: (err: any) => {
+    const message =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Update failed";
+
+    toast.error(message);
+  },
+});
 };
 
   return (

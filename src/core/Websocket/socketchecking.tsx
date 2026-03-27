@@ -16,6 +16,7 @@ import { CommonModal } from "@/components/common/CommonModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/context/ThemeContext";
+import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 
 type Props = {
   open: boolean;
@@ -111,93 +112,135 @@ export default function SocketBookingsModal({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {bookings.map((booking) => {
-            const accepting =
-              isPending && selectedBooking === booking._id;
+        {bookings.map((booking) => {
+  const accepting =
+  isPending && selectedBooking === booking._id;
 
-            return (
-              <div
-                key={booking._id}
-                className={`border rounded-xl p-4 shadow-sm ${
-                  dark
-                    ? "bg-gray-800 border-gray-700"
-                    : "bg-white border-gray-200"
-                }`}
-              >
-                {/* Title */}
-                <div className="flex justify-between items-start gap-2">
-                  <h3 className="font-semibold text-base break-words">
-                    {booking.service?.name}
-                  </h3>
-                  <Badge>{booking.status}</Badge>
-                </div>
+// ✅ Extract lat/lng from GeoPoint
+let lat: number | null = null;
+let lng: number | null = null;
 
-                <p className="text-xs text-gray-500 mb-2 break-words">
-                  {booking.serviceTier?.displayName}
-                </p>
+const loc = booking.location as GeoPoint | string | undefined;
 
-                {/* Info */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex gap-2">
-                    <User className="h-4 w-4 mt-0.5 shrink-0" />
-                    <span className="break-words">
-                      {booking.customer?.fullName}
-                    </span>
-                  </div>
+try {
+  if (typeof loc === "string") {
+    // format: "lat,lng"
+    const [latVal, lngVal] = loc.split(",").map(Number);
+    lat = latVal;
+    lng = lngVal;
+  } else if (loc?.type === "Point") {
+    // ✅ YOUR FORMAT: [lat, lng]
+    const [latVal, lngVal] = loc.coordinates;
+    lat = latVal;
+    lng = lngVal;
+  }
+} catch (err) {
+  console.error("Invalid location format", err);
+}
 
-                  <div className="flex gap-2">
-                    <Phone className="h-4 w-4 mt-0.5 shrink-0" />
-                    <span>{booking.customer?.phone}</span>
-                  </div>
+  const handleDirections = () => {
+    if (!lat || !lng) return;
 
-                  <div className="flex gap-2">
-                    <DollarSign className="h-4 w-4 mt-0.5 shrink-0" />
-                    <span>SAR {booking.amount}</span>
-                  </div>
-                </div>
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, "_blank");
+  };
 
-                {/* Actions */}
-                {booking.status !== "WORKER_CANCELLED" && (
-                  <div className="flex flex-col gap-2 mt-4">
-                    <button
-                      disabled={accepting}
-                      onClick={() => {
-                        setSelectedBooking(booking._id);
+  return (
+    <div
+      key={booking._id}
+      className={`border rounded-xl p-4 shadow-sm flex flex-col justify-between ${
+        dark
+          ? "bg-gray-800 border-gray-700"
+          : "bg-white border-gray-200"
+      }`}
+    >
+      {/* 🔹 Title */}
+      <div className="flex justify-between items-start gap-2">
+        <h3 className="font-semibold text-base break-words">
+          {booking.service?.name}
+        </h3>
+        <Badge>{booking.status}</Badge>
+      </div>
 
-                        acceptBooking(
-                          {
-                            bookingId: booking._id,
-                            bookingStatus: "WORKER_ACCEPTED",
-                          },
-                          {
-                            onSuccess: () => {
-                              removeBooking(booking._id);
-                              onClose();
-                              onBookingAccepted?.();
-                            },
-                          }
-                        );
-                      }}
-                      className="w-full bg-green-500 text-white py-2 rounded-lg disabled:opacity-60"
-                    >
-                      {accepting ? (
-                        <Loader2 className="animate-spin mx-auto" />
-                      ) : (
-                        "Accept"
-                      )}
-                    </button>
+      <p className="text-xs text-gray-500 mb-2 break-words">
+        {booking.serviceTier?.displayName}
+      </p>
 
-                    <button
-                      onClick={() => removeBooking(booking._id)}
-                      className="w-full border border-gray-300 py-2 rounded-lg text-gray-700"
-                    >
-                      Ignore
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+      {/* 🔹 Info */}
+      <div className="space-y-2 text-sm">
+        <div className="flex gap-2">
+          <User className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>{booking.customer?.fullName}</span>
+        </div>
+
+        <div className="flex gap-2">
+          <Phone className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>{booking.customer?.phone}</span>
+        </div>
+
+        <div className="flex gap-2">
+          <DollarSign className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>SAR {booking.amount}</span>
+        </div>
+      </div>
+
+      {/* 🔹 ACTIONS */}
+      <div className="mt-4 space-y-2">
+        
+        {/* 📍 Get Directions */}
+        {lat && lng && (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleDirections}
+          >
+            📍 Get Directions
+          </Button>
+        )}
+
+        {/* Accept / Ignore */}
+        {booking.status !== "WORKER_CANCELLED" && (
+          <div className="flex flex-col gap-2">
+            <button
+              disabled={accepting}
+              onClick={() => {
+                setSelectedBooking(booking._id);
+
+                acceptBooking(
+                  {
+                    bookingId: booking._id,
+                    bookingStatus: "WORKER_ACCEPTED",
+                  },
+                  {
+                    onSuccess: () => {
+                      removeBooking(booking._id);
+                      onClose();
+                      onBookingAccepted?.();
+                    },
+                  }
+                );
+              }}
+              className="w-full bg-green-500 text-white py-2 rounded-lg disabled:opacity-60"
+            >
+              {accepting ? (
+                <Loader2 className="animate-spin mx-auto" />
+              ) : (
+                "Accept"
+              )}
+            </button>
+
+            <button
+              onClick={() => removeBooking(booking._id)}
+              className="w-full border border-gray-300 py-2 rounded-lg text-gray-700"
+            >
+              Ignore
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+})}
         </div>
       )}
     </CommonModal.Body>

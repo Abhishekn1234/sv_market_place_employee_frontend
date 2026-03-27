@@ -19,8 +19,8 @@ export function useDocumentsOnBoarding() {
   const navigate = useNavigate();
 
   return useMutation<
-    DocumentsOnboardingResponse, 
-    any,      
+    DocumentsOnboardingResponse,
+    any,
     DocumentsOnboarding
   >({
     mutationFn: (payload) => usecase.execute(payload),
@@ -31,9 +31,10 @@ export function useDocumentsOnBoarding() {
       const documents = response.user?.documents ?? [];
 
       if (documents.length > 0) {
-        useAuthStore
-          .getState()
-          .updateUserProfile({ documents });
+        useAuthStore.getState().updateUserProfile({
+          documents,
+          // isOnboarded: true, // ✅ ADD THIS
+        });
       }
 
       queryClient.setQueryData(["profile"], (old: any) => ({
@@ -42,6 +43,8 @@ export function useDocumentsOnBoarding() {
       }));
 
       toast.success("Documents uploaded successfully");
+
+      // ✅ FINAL NAVIGATION AFTER FULL ONBOARDING
       navigate("/");
     },
 

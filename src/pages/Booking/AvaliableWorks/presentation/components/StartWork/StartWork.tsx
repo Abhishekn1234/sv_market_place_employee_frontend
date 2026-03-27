@@ -12,9 +12,10 @@ type Props = {
   work: Work;
   open: boolean;
   onClose: () => void;
+   onWorkStarted?: () => void;
 };
 
-export default function StartWork({ work, open, onClose }: Props) {
+export default function StartWork({ work, open, onClose,onWorkStarted }: Props) {
   const [otp, setOtp] = useState("");
   const startWorkMutation = useStartWork();
 
@@ -40,6 +41,7 @@ export default function StartWork({ work, open, onClose }: Props) {
         onSuccess: () => {
           toast.success("Work Started");
           onClose();
+          onWorkStarted?.();
         },
         onError: (err: any) => {
           toast.error(err?.message || "Failed to start work");

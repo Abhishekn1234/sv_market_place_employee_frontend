@@ -19,16 +19,18 @@ export default function AvailableWorkPage() {
 
   const [workList, setWorkList] = useState<any[]>([]);
   const [selectedWork, setSelectedWork] = useState<any>(null);
-  const [modalType, setModalType] = useState<"start" | "complete" | "verify" | null>(null);
+  const [modalType, setModalType] = useState<
+    "start" | "complete" | "verify" | null
+  >(null);
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
 
-  // Initialize work list
+  /* ---------------- INIT WORK LIST ---------------- */
   useEffect(() => {
     setWorkList(assignedWorks || []);
   }, [assignedWorks]);
 
-  // Timer effect
+  /* ---------------- TIMER LOGIC (FIXED) ---------------- */
   useEffect(() => {
     const interval = setInterval(() => {
       const updated: Record<string, string> = {};
@@ -39,11 +41,19 @@ export default function AvailableWorkPage() {
 
         const isInProgress =
           ["STARTED", "IN_PROGRESS"].includes(workStatus) &&
-          !["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(bookingStatus);
+          !["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(
+            bookingStatus
+          );
 
         if (!isInProgress) return;
 
-        const startedAt = w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
+        // ✅ FIX: safe fallback
+        const startedAt =
+          w.workStartedAt ||
+          w.startedAt ||
+          w.booking?.workStartedAt ||
+          (workStatus === "STARTED" ? new Date().toISOString() : null);
+
         if (!startedAt) return;
 
         const startedTime = new Date(startedAt).getTime();
@@ -52,12 +62,21 @@ export default function AvailableWorkPage() {
 
         if (elapsed < 0) elapsed = 0;
 
-        // Max allowed duration
+        // Max duration
         let maxDuration = Infinity;
         if (w.booking?.pricingMode === "HOURLY") {
-          maxDuration = (w.booking?.schedule?.estimatedHours ?? 0) * 60 * 60 * 1000;
+          maxDuration =
+            (w.booking?.schedule?.estimatedHours ?? 0) *
+            60 *
+            60 *
+            1000;
         } else if (w.booking?.pricingMode === "PER_DAY") {
-          maxDuration = (w.booking?.schedule?.estimatedDays ?? 0) * 24 * 60 * 60 * 1000;
+          maxDuration =
+            (w.booking?.schedule?.estimatedDays ?? 0) *
+            24 *
+            60 *
+            60 *
+            1000;
         }
 
         if (elapsed > maxDuration) elapsed = maxDuration;
@@ -66,16 +85,19 @@ export default function AvailableWorkPage() {
         const m = Math.floor((elapsed % 3600000) / 60000);
         const s = Math.floor((elapsed % 60000) / 1000);
 
-        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(
+          2,
+          "0"
+        )}:${String(s).padStart(2, "0")}`;
       });
 
       setTimers(updated);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [workList]);
+  }, [JSON.stringify(workList)]); // ✅ FIXED DEPENDENCY
 
-  // Update work function
+  /* ---------------- UPDATE WORK (FIXED) ---------------- */
   const updateWork = (updated: any) => {
     setWorkList((prev) =>
       prev.map((w) =>
@@ -83,17 +105,24 @@ export default function AvailableWorkPage() {
           ? {
               ...w,
               ...updated,
-              workStartedAt:
-                ["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(updated.status?.toUpperCase())
-                  ? null
-                  : w.workStartedAt,
+              workStartedAt: [
+                "COMPLETED",
+                "CANCELLED",
+                "WORK_COMPLETED_PENDING",
+              ].includes(updated.status?.toUpperCase())
+                ? null
+                : updated.workStartedAt ?? w.workStartedAt, // ✅ FIX
             }
           : w
       )
     );
 
-    // Stop timer immediately
-    if (["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(updated.status?.toUpperCase() ?? "")) {
+    // Stop timer instantly
+    if (
+      ["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(
+        updated.status?.toUpperCase() ?? ""
+      )
+    ) {
       setTimers((prev) => {
         const copy = { ...prev };
         delete copy[updated._id];
@@ -102,17 +131,20 @@ export default function AvailableWorkPage() {
     }
   };
 
-  // Start work handler (after OTP verification)
+  /* ---------------- START WORK ---------------- */
   const handleStartWork = (work: any) => {
     const now = new Date().toISOString();
+
     updateWork({
       ...work,
       status: "STARTED",
-      workStartedAt: now,
+      workStartedAt: now, // ✅ critical
     });
+
     openModal(work, "start");
   };
 
+  /* ---------------- MODAL HANDLERS ---------------- */
   const openModal = (work: any, type: any) => {
     setSelectedWork({ ...work, bookingId: work.booking?._id });
     setModalType(type);
@@ -123,6 +155,7 @@ export default function AvailableWorkPage() {
     setModalType(null);
   };
 
+  /* ---------------- UI ---------------- */
   return (
     <CommonCard
       title={translations?.sidebar.availableWork || "Available Work"}
@@ -133,11 +166,12 @@ export default function AvailableWorkPage() {
         workList={workList}
         categories={categories}
         timers={timers}
-        onStart={handleStartWork} // Start work & timer
+        onStart={handleStartWork}
         onComplete={(w: any) => openModal(w, "complete")}
         onVerify={(w: any) => openModal(w, "verify")}
         onCancel={setCancelConfirmWork}
       />
+
       <WorkModals
         selectedWork={selectedWork}
         modalType={modalType}
@@ -146,7 +180,7 @@ export default function AvailableWorkPage() {
         cancelConfirmWork={cancelConfirmWork}
         setCancelConfirmWork={setCancelConfirmWork}
         cancelMutation={cancelMutation}
-        timers={timers} // Pass timers for elapsed time
+        timers={timers}
       />
     </CommonCard>
   );

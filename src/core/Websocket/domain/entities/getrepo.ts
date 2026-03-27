@@ -1,3 +1,4 @@
+import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
 
 export type GetBooking = {
@@ -5,7 +6,7 @@ export type GetBooking = {
   status: WorkerStatus;
   amount: number;
   currency?: string;
-
+  location?:GeoPoint
   bookingType?: "INSTANT" | "SCHEDULED";
   pricingMode?: "HOURLY" | "FIXED";
   distance?: number;

@@ -1,13 +1,10 @@
-
 import { getStatusColor, getStatusIcon } from "@/pages/History/WorkHistory/presentation/utils/workhistory";
 import { formatDateTime } from "../../helpers/formatdatetime";
 import {
- 
   Calendar,
   User,
   Phone,
   DollarSign,
- 
   Wrench,
   BadgeCheck,
   Mail,
@@ -15,12 +12,12 @@ import {
 
 import type { Work } from "../../../domain/entities/work";
 import { ActionButtons } from "./actionbuttonspageassignedwork";
+
 type WorkCardProps = {
   work: Work;
   cancellingId: string | null;
   isCancelling: boolean;
   handleCancel: (id?: string) => void;
-  handleStartWork: (work: Work) => void;
   dark: boolean;
   navigate: (path: string) => void;
   onClose: () => void;
@@ -31,7 +28,6 @@ export const WorkCard = ({
   cancellingId,
   isCancelling,
   handleCancel,
-  handleStartWork,
   dark,
   navigate,
   onClose,
@@ -63,36 +59,31 @@ export const WorkCard = ({
         </div>
       </div>
 
-      {/* 📱 MOBILE VIEW (compact) */}
+      {/* 📱 MOBILE VIEW */}
       <div className="sm:hidden space-y-3">
-        {/* Service */}
         <div className="flex items-center gap-2 text-sm">
           <Wrench className="h-4 w-4" />
           <span className="truncate">{work.service?.name}</span>
         </div>
 
-        {/* Customer */}
         <div className="flex items-center gap-2 text-sm">
           <User className="h-4 w-4" />
           <span className="truncate">{work.customer?.fullName}</span>
         </div>
 
-        {/* Amount */}
         <div className="flex items-center gap-2 text-sm font-semibold text-green-600">
           <DollarSign className="h-4 w-4" />
           SAR {work.booking?.amount}
         </div>
 
-        {/* Date */}
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <Calendar className="h-4 w-4" />
           {formatDateTime(work.assignedAt)}
         </div>
       </div>
 
-      {/* 💻 DESKTOP VIEW (full details) */}
+      {/* 💻 DESKTOP VIEW */}
       <div className="hidden sm:block space-y-5">
-        {/* Service Details */}
         <div
           className={`border rounded-xl p-4 ${
             dark ? "bg-gray-900 border-gray-600" : "bg-blue-50"
@@ -110,23 +101,19 @@ export const WorkCard = ({
           </p>
         </div>
 
-        {/* Assigned At */}
         <div>
           <label className="text-sm flex gap-2 text-gray-500">
             <Calendar className="h-4 w-4" /> Assigned At
           </label>
           <div
             className={`mt-1 p-3 rounded-xl border ${
-              dark
-                ? "bg-gray-900 border-gray-600"
-                : "bg-gray-50"
+              dark ? "bg-gray-900 border-gray-600" : "bg-gray-50"
             }`}
           >
             {formatDateTime(work.assignedAt)}
           </div>
         </div>
 
-        {/* Customer Info */}
         <div
           className={`border rounded-xl p-4 ${
             dark ? "bg-gray-900 border-gray-600" : "bg-purple-50"
@@ -143,7 +130,6 @@ export const WorkCard = ({
           </p>
         </div>
 
-        {/* Payment */}
         <div
           className={`border rounded-xl p-4 ${
             dark ? "bg-gray-900 border-gray-600" : "bg-green-50"
@@ -165,7 +151,6 @@ export const WorkCard = ({
           cancellingId={cancellingId}
           isCancelling={isCancelling}
           handleCancel={handleCancel}
-          handleStartWork={handleStartWork}
           dark={dark}
           navigate={navigate}
           onClose={onClose}

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/core/store/auth";
+import { getOnboardingStatus } from "@/pages/Servicesettings/presentation/helpers/documentstatus";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<Login>({
@@ -42,20 +43,32 @@ const handleSubmit = (e: React.FormEvent) => {
   }
 
   loginMutate(formData, {
-    onSuccess: (data) => {
-      console.log("Login success:", data);
+   onSuccess: (data) => {
+  setTokens(data.accessToken, data.refreshToken);
 
-   
-      setTokens(data.accessToken, data.refreshToken);
+  if (data.user) {
+    const status = getOnboardingStatus(data.user);
 
-      
-      if (data.user) {
-        setAuth(data.user);
-      }
+    setAuth({
+      ...data.user,
+      onboardingStatus: status,
+      isOnboarded: status === "COMPLETED",
+    });
 
-      toast.success("Login successfully");
+    // ✅ NAVIGATION BASED ON STATUS
+    if (status === "COMPLETED") {
+      navigate("/");
+    } else if (status === "REJECTED") {
+      navigate("/services/documents");
+    } else if (status === "PENDING") {
+      navigate("/"); // or waiting screen
+    } else {
       navigate("/services/employee");
-    },
+    }
+  }
+
+  toast.success("Login successfully");
+},
 
     onError: (error: any) => {
       const message =

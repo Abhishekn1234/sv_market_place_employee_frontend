@@ -25,7 +25,7 @@ export class AvailableBookingImpl implements AvailableBookingRepo {
   serviceType: item.service?.name ?? "-",
   serviceTier: item.serviceTier?.displayName,
   startDate: item.schedule?.startDateTime,
-
+ 
   service: item.service
     ? {
         _id: item.service._id,

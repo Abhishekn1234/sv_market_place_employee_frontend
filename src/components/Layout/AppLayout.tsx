@@ -64,35 +64,38 @@ export default function AppLayout() {
     };
   }, [accessToken]);
 
-  // ✅ Modal logic
-  useEffect(() => {
-    if (isLoading) return;
+  const workerStatus = useAuthStore((s) => s.user?.worker?.status);
+      const isWorkerOnline = workerStatus === "ONLINE";
+      useEffect(() => {
+        if (isLoading) return;
 
-    if (!isSocketConnected) {
-      setLiveBookingsOpen(false);
-      return;
-    }
+        // Only show modals if socket is connected and worker is online
+        if (!isSocketConnected || !isWorkerOnline) {
+          setLiveBookingsOpen(false);
+          setAssignedOpen(false);
+          return;
+        }
 
-    const worksArray = Array.isArray(assignedWorks)
-      ? assignedWorks
-      : assignedWorks
-      ? [assignedWorks]
-      : [];
+        const worksArray = Array.isArray(assignedWorks)
+          ? assignedWorks
+          : assignedWorks
+          ? [assignedWorks]
+          : [];
 
-    const hasAssigned = worksArray.some((b: GetBooking) =>
-      ["IN_PROGRESS", "WORKER_ACCEPTED", "STARTED", "ASSIGNED", "REQUESTED"].includes(
-        b.status as string
-      )
-    );
+        const hasAssigned = worksArray.some((b: GetBooking) =>
+          ["IN_PROGRESS", "WORKER_ACCEPTED", "STARTED", "ASSIGNED", "REQUESTED"].includes(
+            b.status as string
+          )
+        );
 
-    if (hasAssigned) {
-      setAssignedOpen(true);
-      setLiveBookingsOpen(false);
-    } else {
-      setAssignedOpen(false);
-      setLiveBookingsOpen(true);
-    }
-  }, [isLoading, assignedWorks, isSocketConnected]);
+        if (hasAssigned) {
+          setAssignedOpen(true);
+          setLiveBookingsOpen(false);
+        } else {
+          setAssignedOpen(false);
+          setLiveBookingsOpen(true);
+        }
+      }, [isLoading, assignedWorks, isSocketConnected, isWorkerOnline]);
 
   // UI stuff
   useEffect(() => {

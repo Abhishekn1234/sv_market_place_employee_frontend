@@ -8,4 +8,5 @@ export type ApiDocument = {
   fileType: string;
   createdAt: string;
   updatedAt: string;
+   status?: "PENDING" | "APPROVED" | "REJECTED";
 };

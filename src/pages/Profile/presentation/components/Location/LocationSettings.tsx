@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useLocationContext } from "@/context/LocationContext";
@@ -6,7 +8,11 @@ import { useServiceTier } from "@/pages/Servicesettings/presentation/hooks/useSe
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
 import { useServiceSettings } from "@/pages/Servicesettings/presentation/hooks/useServicesettings";
 import { useAuthStore } from "@/core/store/auth";
-import { initLeafletIcons, normalize, reverseGeocode } from "@/components/common/CommonMap";
+import {
+  initLeafletIcons,
+  normalize,
+  reverseGeocode,
+} from "@/components/common/CommonMap";
 
 import EmployeeDetails from "./EmployeeDetails";
 import LocationModal from "./LocationModal";
@@ -30,142 +36,112 @@ export default function LocationSettings({ setActiveTab }: Props) {
 
   const user = useAuthStore((state) => state.user);
 
-  const getEmployeeStatus = () => {
-    const status = user?.worker?.status;
-    return status === "ONLINE" ? "ONLINE" : "OFFLINE";
-  };
-
-  const hasAllRequiredDocuments = () => {
-    const documents = user?.documents;
-
-    if (!Array.isArray(documents)) return false;
-
-    const requiredDocs = ["idProof", "addressProof", "photoProof"];
-
-    return requiredDocs.every((docType) =>
-      documents.some((doc) => doc.documentType === docType)
-    );
-  };
-
-  const [status, setStatus] = useState(getEmployeeStatus());
+  // ✅ STATES
+  const [status, setStatus] = useState("OFFLINE");
   const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [tempLocation, setTempLocation] = useState<[number, number] | null>(null);
   const [locationName, setLocationName] = useState("");
   const [radius, setRadius] = useState(1000);
   const [modalOpen, setModalOpen] = useState(false);
-
-  const [locationMode, setLocationMode] = useState<"CURRENT" | "MANUAL">("CURRENT");
+  const [locationMode, setLocationMode] = useState<"CURRENT" | "MANUAL">(
+    "CURRENT"
+  );
 
   // ---------------- INIT ----------------
-  useEffect(() => {
-    const init = async () => {
-      if (!user) return;
+ useEffect(() => {
+  if (!user) return;
 
-      setStatus(user.worker?.status ?? "OFFLINE");
-      setRadius(user.worker?.serviceRadius ?? 500);
-      setSelectedTiers(user.worker?.serviceTierIds ?? []);
-      setSelectedCategories(user.worker?.categoryIds ?? []);
+  setStatus(user.worker?.status ?? "OFFLINE");
+  setRadius(user.worker?.serviceRadius ?? 500);
 
-      if (user.location?.coordinates?.length === 2) {
-        const [lng, lat] = user.location.coordinates;
+  setSelectedTiers((user.worker?.serviceTierIds ?? []).map(String));
+  setSelectedCategories((user.worker?.categoryIds ?? []).map(String));
 
-        const nLat = normalize(lat);
-        const nLng = normalize(lng);
+  const coords = user.worker?.location?.coordinates;
 
-        setTempLocation([nLat, nLng]);
+  if (coords?.length === 2 && coords[0] !== 0 && coords[1] !== 0) {
+    const [lng, lat] = coords;
 
-        // important → saved location should be manual
-        setLocationMode("MANUAL");
+    const nLat = normalize(lat);
+    const nLng = normalize(lng);
 
-        const placeName = await reverseGeocode(nLat, nLng);
-        setLocationName(placeName);
-      }
-    };
+    setTempLocation([nLat, nLng]);
+    setLocationMode("MANUAL");
 
-    init();
-  }, [user]);
+    reverseGeocode(nLat, nLng).then(setLocationName);
+  }
+}, [user]); // ✅ FIXED
 
   // ---------------- CURRENT LOCATION ----------------
   useEffect(() => {
-    if (!currentLocation) return;
-    if (locationMode !== "CURRENT") return;
-    if (!modalOpen) return; // prevent override unless editing
+    if (!currentLocation || locationMode !== "CURRENT" || !modalOpen) return;
 
     const lat = normalize(currentLocation.lat);
     const lng = normalize(currentLocation.lng);
 
     setTempLocation([lat, lng]);
-
     reverseGeocode(lat, lng).then(setLocationName);
   }, [currentLocation, locationMode, modalOpen]);
 
   // ---------------- SAVE ----------------
   const saveChanges = () => {
-  if (!tempLocation) return;
+    if (!tempLocation) return;
 
-  const [lat, lng] = tempLocation;
+    const [lat, lng] = tempLocation;
 
-  const MAX_RADIUS_KM = 15;
+    const MAX_RADIUS_KM = 15;
+    if (radius / 1000 > MAX_RADIUS_KM) {
+      toast.error(`Service radius cannot exceed ${MAX_RADIUS_KM} km`);
+      return;
+    }
 
-  // Check radius limit
-  if (radius / 1000 > MAX_RADIUS_KM) {
-    toast.error(`Service radius cannot exceed ${MAX_RADIUS_KM} km`);
-    return; // Prevent saving
-  }
+    const payload: WorkerPayload = {
+      status,
+      serviceTierIds: selectedTiers,
+      categoryIds: selectedCategories,
+      serviceRadius: radius,
+      location: { type: "Point", coordinates: [lng, lat] },
+    };
 
-  const payload: WorkerPayload = {
-    status: status,
-    serviceTierIds: selectedTiers,
-    categoryIds: selectedCategories,
-    serviceRadius: radius,
-    location: { type: "Point", coordinates: [lng, lat] },
+    serviceSettingsMutation.mutate(payload, {
+      onSuccess: () => {
+        // ✅ Sync Zustand store
+        useAuthStore.getState().updateWorker({
+          serviceTierIds: selectedTiers,
+          categoryIds: selectedCategories,
+          serviceRadius: radius,
+          location: { type: "Point", coordinates: [lng, lat] },
+        });
+
+        toast.success("Updated successfully");
+        setModalOpen(false);
+        setActiveTab("location");
+      },
+      onError: () => toast.error("Update failed"),
+    });
   };
 
-  serviceSettingsMutation.mutate(payload, {
-    onSuccess: () => {
-      useAuthStore.getState().updateWorker({
-        serviceTierIds: selectedTiers,
-        categoryIds: selectedCategories,
-        serviceRadius: radius,
-        location: { type: "Point", coordinates: [lng, lat] },
-      });
-
-      setLocationMode("MANUAL");
-
-      toast.success("Updated successfully");
-      setModalOpen(false);
-      setActiveTab("location");
-    },
-    onError: () => toast.error("Update failed"),
-  });
-};
+  // ---------------- LOADING STATES ----------------
+  if (!serviceTiers || !serviceCategories) {
+    return <div className="p-6">Loading services...</div>;
+  }
 
   if (!tempLocation) return null;
 
+  // ---------------- UI ----------------
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <EmployeeDetails
+          <EmployeeDetails
+        user={user}   
         status={status}
         locationName={locationName}
         serviceTiers={serviceTiers}
         serviceCategories={serviceCategories}
         selectedTiers={selectedTiers}
         selectedCategories={selectedCategories}
-        onEdit={() => {
-          if (!hasAllRequiredDocuments()) {
-            toast.error(
-              "Please upload ID Proof, Address Proof and Photo before editing location"
-            );
-            return;
-          }
-
-          
-          setLocationMode("MANUAL");
-          setModalOpen(true);
-        }}
+        onEdit={() => setModalOpen(true)}
       />
-
       {modalOpen && (
         <LocationModal
           tempLocation={tempLocation}
@@ -176,12 +152,15 @@ export default function LocationSettings({ setActiveTab }: Props) {
           setLocationName={setLocationName}
           radius={radius}
           setRadius={setRadius}
+
+          // ✅ IMPORTANT (for selection UI)
           serviceTiers={serviceTiers}
           serviceCategories={serviceCategories}
           selectedTiers={selectedTiers}
           setSelectedTiers={setSelectedTiers}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
+
           saveChanges={saveChanges}
           onClose={() => setModalOpen(false)}
         />
