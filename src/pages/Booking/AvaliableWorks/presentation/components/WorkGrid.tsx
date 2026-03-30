@@ -100,11 +100,11 @@ export default function WorkGrid({
               </h3>
 
               <p className="text-gray-600 truncate">
-                👤 {w.customer?.fullName}
+                Customer: {w.customer?.fullName}
               </p>
 
               <p className="text-gray-500 text-xs line-clamp-2">
-                📍 {locations[w._id] || "Fetching location..."}
+                Location: {locations[w._id] || "Fetching location..."}
               </p>
 
               <p className="text-xs text-gray-500">
@@ -116,11 +116,11 @@ export default function WorkGrid({
               </p>
 
               <p className="text-xs font-medium text-green-600">
-                {amount} {w.booking?.currency}
+               Worker Pool Amount: {amount} {w.booking?.currency}
               </p>
 
               <p className="text-xs text-gray-500">
-                {w.booking?.pricingMode}
+               Price Mode: {w.booking?.pricingMode}
               </p>
 
               <p className="text-xs font-medium">

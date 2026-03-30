@@ -6,7 +6,6 @@ import { VerifyWorkUsecase } from "../../domain/usecase/VerifyWorkUsecase";
 import type { verifyotp } from "../../domain/entities/verifyotp";
 import type { Work } from "../../domain/entities/work";
 import { toast } from "react-toastify";
-
 export function useVerifyOtp() {
   const queryClient = useQueryClient();
   const repo = new VerifyOtpCompleteImpl();
@@ -16,16 +15,24 @@ export function useVerifyOtp() {
     mutationFn: (data: verifyotp) => usecase.execute(data),
 
     onSuccess: (updatedWork) => {
-      queryClient.setQueryData<Work[]>(["work-history"], (oldData) => {
-        if (!oldData) return [updatedWork];
 
-        
-        return oldData.map((work) =>
-          work._id === updatedWork._id ? updatedWork : work
-        );
-      });
+      
+                queryClient.setQueryData<Work[]>(["assigned-works"], (oldData) => {
+            if (!oldData) return [];
 
-      queryClient.invalidateQueries({ queryKey: ["work-history"] });
+            // ✅ FORCE ARRAY SAFETY
+            const safeData = Array.isArray(oldData) ? oldData : [oldData];
+
+            return safeData.map((work) =>
+              work._id === updatedWork._id ? updatedWork : work
+            );
+          });
+
+      // // ✅ Optional but recommended
+      // queryClient.invalidateQueries({
+      //   queryKey: ["assigned-works"],
+      //   exact: false,
+      // });
 
       toast.success("OTP verified successfully");
     },

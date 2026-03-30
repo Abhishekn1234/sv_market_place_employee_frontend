@@ -1,9 +1,11 @@
+"use client";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import MapPicker from "./LocationPicker";
 import ServiceSelector from "./ServiceSelector";
 import { useLanguage } from "@/context/LanguageContext";
-import { toast } from "react-toastify"; // ✅ make sure react-toastify is installed
+import { toast } from "react-toastify";
 
 export default function LocationModal({
   tempLocation,
@@ -21,19 +23,35 @@ export default function LocationModal({
   setSelectedCategories,
   saveChanges,
   onClose,
+
+  // ✅ NEW PROPS
+  onUseCurrentLocation,
+  onManualLocation,
 }: any) {
   const { translations } = useLanguage();
   const edits = translations.profile;
 
+  /* ---------------- RADIUS ---------------- */
   const handleRadiusChange = (valueKm: number) => {
-    if (valueKm > 15) {
-      toast.error("Radius cannot exceed 15 km");
-      setRadius(15000); // maximum allowed radius in meters
+    if (valueKm > 45) {
+      toast.error("Radius cannot exceed 45 km"); // ✅ fixed message
+      setRadius(45000);
     } else if (valueKm < 0) {
       setRadius(0);
     } else {
       setRadius(valueKm * 1000);
     }
+  };
+
+  /* ---------------- MODE CHANGE ---------------- */
+  const handleModeChange = (mode: "CURRENT" | "MANUAL") => {
+    setLocationMode(mode);
+
+    if (mode === "CURRENT") {
+      onUseCurrentLocation(); // ✅ trigger GPS fetch
+    }
+
+    // ❗ MANUAL handled via map click, no immediate action needed
   };
 
   return (
@@ -47,9 +65,13 @@ export default function LocationModal({
               <input
                 type="radio"
                 checked={locationMode === mode}
-                onChange={() => setLocationMode(mode)}
+                onChange={() =>
+                  handleModeChange(mode as "CURRENT" | "MANUAL")
+                }
               />
-              {mode === "CURRENT" ? "Current Location" : "Manual Location"}
+              {mode === "CURRENT"
+                ? "Current Location"
+                : "Manual Location"}
             </label>
           ))}
         </div>
@@ -59,12 +81,17 @@ export default function LocationModal({
       <MapPicker
         tempLocation={tempLocation}
         locationMode={locationMode}
-        setTempLocation={setTempLocation}
+        setTempLocation={(coords: [number, number]) => {
+          setTempLocation(coords);
+
+          // ✅ If user clicks map → switch to manual
+          onManualLocation(coords[0], coords[1]);
+        }}
         setLocationName={setLocationName}
         radius={radius}
       />
 
-      {/* Radius Input */}
+      {/* Radius */}
       <div>
         <Label>Service Radius (km)</Label>
         <input
@@ -75,7 +102,7 @@ export default function LocationModal({
         />
       </div>
 
-      {/* Service Categories */}
+      {/* Categories */}
       <ServiceSelector
         label="Service Categories"
         items={serviceCategories}
@@ -84,7 +111,7 @@ export default function LocationModal({
         activeClass="bg-green-600 text-white"
       />
 
-      {/* Service Tiers */}
+      {/* Tiers */}
       <ServiceSelector
         label="Service Tiers"
         items={serviceTiers}
@@ -94,9 +121,11 @@ export default function LocationModal({
         displayKey="displayName"
       />
 
-      {/* Action Buttons */}
+      {/* Actions */}
       <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={onClose}>{edits.cancel}</Button>
+        <Button variant="outline" onClick={onClose}>
+          {edits.cancel}
+        </Button>
         <Button onClick={saveChanges}>{edits.update}</Button>
       </div>
     </div>

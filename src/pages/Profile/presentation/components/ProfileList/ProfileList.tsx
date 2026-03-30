@@ -46,16 +46,16 @@ export default function ProfileList() {
 
   if (!profile) return null;
 
-  const REQUIRED_DOCS = ["idProof", "addressProof", "photoProof"];
+const REQUIRED_DOCS = ["idproof", "addressproof", "photoproof"];
 
-  const canEdit =
-    profile.documents &&
-    REQUIRED_DOCS.every((type) =>
-      profile.documents.some(
-        (doc: any) => doc.documentType === type && doc.filePath
-      )
-    );
+const canEdit =
+  profile.kycStatus === "pending" &&
+  profile.documents &&
+  profile.documents.some((doc: any) => {
+    const docType = doc.documentType?.toLowerCase();
 
+    return REQUIRED_DOCS.includes(docType) && doc.filePath;
+  });
   const handleSave = async () => {
     const data = new FormData();
     data.append("fullName", formData.fullName);

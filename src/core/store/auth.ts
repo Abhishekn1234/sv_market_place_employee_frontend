@@ -9,7 +9,7 @@ import { getOnboardingStatus, type OnboardingStatus } from "@/pages/Servicesetti
 
 /* ----------------------------- Helpers ----------------------------- */
 
-const mapStatus = (status: string | number): WorkerStatus => {
+export const mapStatus = (status: string | number): WorkerStatus => {
   switch (status) {
     case "ONLINE":
     case 1:
@@ -38,7 +38,7 @@ export interface EmployeeUser {
 
   preferredTheme?: "light" | "dark";
   preferredLanguage?: "EN" | "AR" | "HI";
-
+   
   profileImage?: string;
   profilePictureUrl?: string;
   profilePicturePublicId?: string;
@@ -57,6 +57,9 @@ interface AuthState {
   refreshToken: string | null;
   user: EmployeeUser | null;
   isAuthenticated: boolean;
+  hydrated: boolean; // ✅ ADD THIS
+  setHydrated: () => void;
+
 
   /* Core */
   setAuth: (user: EmployeeUser) => void;
@@ -84,20 +87,41 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       user: null,
       isAuthenticated: false,
+       hydrated: false, // ✅
+
+    setHydrated: () => set({ hydrated: true }),
 
       /* ------------------ SET USER ------------------ */
-      setAuth: (user) => {
-        const status = getOnboardingStatus(user);
+     setAuth: (incomingUser) => {
+  const existingUser = get().user;
 
-        set({
-          user: {
-            ...user,
-            onboardingStatus: status,
-            isOnboarded: status === "COMPLETED",
-          },
-          isAuthenticated: true,
-        });
-      },
+  const incomingLocation = incomingUser?.worker?.location;
+
+  const finalUser: EmployeeUser = {
+    ...incomingUser,
+
+    worker: {
+      ...(existingUser?.worker || {}),
+      ...(incomingUser.worker || {}),
+
+      // ✅ KEEP OLD LOCATION IF MISSING
+      location:
+        incomingLocation ??
+        existingUser?.worker?.location,
+    },
+  };
+
+  const status = getOnboardingStatus(finalUser);
+
+  set({
+    user: {
+      ...finalUser,
+      onboardingStatus: status,
+      isOnboarded: status === "COMPLETED",
+    },
+    isAuthenticated: true,
+  });
+},
 
       /* ------------------ SET TOKENS ------------------ */
       setTokens: (accessToken, refreshToken) =>
@@ -108,17 +132,16 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       /* ------------------ LOGOUT ------------------ */
-     logout: () => {
-  set({
-    accessToken: null,
-    refreshToken: null,
-    user: null,
-    isAuthenticated: false,
-  });
+              logout: () => {
+            set({
+              accessToken: null,
+              refreshToken: null,
+              user: null,
+              isAuthenticated: false,
+            });
 
-  // ✅ CLEAR persisted storage completely
-  localStorage.removeItem("employee-auth-storage");
-},
+            localStorage.clear(); // or removeItem is fine if only one
+          },
 
       /* ------------------ UPDATE PROFILE ------------------ */
       updateUserProfile: (payload) => {
@@ -208,6 +231,10 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
   name: "employee-auth-storage",
+
+  onRehydrateStorage: () => (state) => {
+    state?.setHydrated(); // ✅ VERY IMPORTANT
+  },
 }
   )
 );

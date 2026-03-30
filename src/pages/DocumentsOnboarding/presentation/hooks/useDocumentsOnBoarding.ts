@@ -25,28 +25,37 @@ export function useDocumentsOnBoarding() {
   >({
     mutationFn: (payload) => usecase.execute(payload),
 
-    onSuccess: (response) => {
-      console.log(response);
+   onSuccess: (response) => {
+  console.log(response);
 
-      const documents = response.user?.documents ?? [];
+  const documents = response.user?.documents ?? [];
 
-      if (documents.length > 0) {
-        useAuthStore.getState().updateUserProfile({
-          documents,
-          // isOnboarded: true, // ✅ ADD THIS
-        });
-      }
+  // ✅ Get kycStatus (user level OR derive from documents)
+  const kycStatus =
+    response.user?.kycStatus ??
+    (documents.every((d: any) => d.kycStatus === "APPROVED")
+      ? "APPROVED"
+      : documents.some((d: any) => d.kycStatus === "REJECTED")
+      ? "REJECTED"
+      : "PENDING");
 
-      queryClient.setQueryData(["profile"], (old: any) => ({
-        ...old,
-        documents,
-      }));
+  // ✅ Update Zustand properly
+  useAuthStore.getState().updateUserProfile({
+    documents,
+    kycStatus, // 🔥 IMPORTANT
+  });
 
-      toast.success("Documents uploaded successfully");
+  // ✅ Sync React Query cache
+  queryClient.setQueryData(["profile"], (old: any) => ({
+    ...old,
+    documents,
+    kycStatus, // 🔥 IMPORTANT
+  }));
 
-      // ✅ FINAL NAVIGATION AFTER FULL ONBOARDING
-      navigate("/");
-    },
+  toast.success("Documents uploaded successfully");
+
+  navigate("/");
+},
 
     onError: (err: any) => {
       const message =

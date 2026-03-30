@@ -117,7 +117,7 @@ export default function AvailableWorkPage() {
       )
     );
 
-    // Stop timer instantly
+   
     if (
       ["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(
         updated.status?.toUpperCase() ?? ""

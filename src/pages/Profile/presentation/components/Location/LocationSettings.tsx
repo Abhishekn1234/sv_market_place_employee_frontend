@@ -18,15 +18,10 @@ import EmployeeDetails from "./EmployeeDetails";
 import LocationModal from "./LocationModal";
 
 import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/servicesettings";
-import type { TabType } from "@/pages/Profile/domain/entities/tabtype";
 
 initLeafletIcons();
 
-interface Props {
-  setActiveTab: (tab: TabType) => void;
-}
-
-export default function LocationSettings({ setActiveTab }: Props) {
+export default function LocationSettings({ setActiveTab }: any) {
   useDynamicLocation();
 
   const { currentLocation } = useLocationContext();
@@ -34,9 +29,8 @@ export default function LocationSettings({ setActiveTab }: Props) {
   const { data: serviceCategories } = useServiceCategory();
   const serviceSettingsMutation = useServiceSettings();
 
-  const user = useAuthStore((state) => state.user);
+  const { user, hydrated } = useAuthStore();
 
-  // ✅ STATES
   const [status, setStatus] = useState("OFFLINE");
   const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -44,53 +38,80 @@ export default function LocationSettings({ setActiveTab }: Props) {
   const [locationName, setLocationName] = useState("");
   const [radius, setRadius] = useState(1000);
   const [modalOpen, setModalOpen] = useState(false);
-  const [locationMode, setLocationMode] = useState<"CURRENT" | "MANUAL">(
-    "CURRENT"
-  );
 
-  // ---------------- INIT ----------------
- useEffect(() => {
-  if (!user) return;
+  // ✅ IMPORTANT: default MANUAL (from backend)
+  const [locationMode, setLocationMode] = useState<"CURRENT" | "MANUAL">("MANUAL");
 
-  setStatus(user.worker?.status ?? "OFFLINE");
-  setRadius(user.worker?.serviceRadius ?? 500);
-
-  setSelectedTiers((user.worker?.serviceTierIds ?? []).map(String));
-  setSelectedCategories((user.worker?.categoryIds ?? []).map(String));
-
-  const coords = user.worker?.location?.coordinates;
-
-  if (coords?.length === 2 && coords[0] !== 0 && coords[1] !== 0) {
-    const [lng, lat] = coords;
-
-    const nLat = normalize(lat);
-    const nLng = normalize(lng);
-
-    setTempLocation([nLat, nLng]);
-    setLocationMode("MANUAL");
-
-    reverseGeocode(nLat, nLng).then(setLocationName);
-  }
-}, [user]); // ✅ FIXED
-
-  // ---------------- CURRENT LOCATION ----------------
+  /* ---------------- INIT FROM BACKEND ---------------- */
   useEffect(() => {
-    if (!currentLocation || locationMode !== "CURRENT" || !modalOpen) return;
+    if (!user) return;
+
+    setStatus(user.worker?.status ?? "OFFLINE");
+    setRadius(user.worker?.serviceRadius ?? 500);
+
+    setSelectedTiers((user.worker?.serviceTierIds ?? []).map(String));
+    setSelectedCategories((user.worker?.categoryIds ?? []).map(String));
+
+    const coords = user.worker?.location?.coordinates;
+
+    if (coords?.length === 2) {
+      const [lng, lat] = coords; // ✅ GeoJSON format
+
+      const nLat = normalize(lat);
+      const nLng = normalize(lng);
+
+      setTempLocation([nLat, nLng]);
+      setLocationMode("MANUAL"); // ✅ always from backend
+
+      reverseGeocode(nLat, nLng).then(setLocationName);
+    }
+  }, [user]);
+
+  /* ---------------- HANDLERS (ONLY USER ACTION) ---------------- */
+
+  // ✅ When user selects CURRENT LOCATION
+  const handleUseCurrentLocation = () => {
+    if (!currentLocation) {
+      toast.error("Unable to fetch current location");
+      return;
+    }
 
     const lat = normalize(currentLocation.lat);
     const lng = normalize(currentLocation.lng);
 
+    setLocationMode("CURRENT");
     setTempLocation([lat, lng]);
-    reverseGeocode(lat, lng).then(setLocationName);
-  }, [currentLocation, locationMode, modalOpen]);
 
-  // ---------------- SAVE ----------------
+    reverseGeocode(lat, lng).then(setLocationName);
+
+    localStorage.setItem("locationMode", "CURRENT"); // optional
+  };
+
+  // ✅ When user selects MANUAL LOCATION (map click)
+  const handleManualLocation = (lat: number, lng: number) => {
+    const nLat = normalize(lat);
+    const nLng = normalize(lng);
+
+    setLocationMode("MANUAL");
+    setTempLocation([nLat, nLng]);
+
+    reverseGeocode(nLat, nLng).then(setLocationName);
+
+    localStorage.setItem("locationMode", "MANUAL"); // optional
+  };
+
+  /* ---------------- SAVE ---------------- */
   const saveChanges = () => {
     if (!tempLocation) return;
 
     const [lat, lng] = tempLocation;
 
-    const MAX_RADIUS_KM = 15;
+    if (lat === 0 && lng === 0) {
+      toast.error("Please select a valid location");
+      return;
+    }
+
+    const MAX_RADIUS_KM = 45;
     if (radius / 1000 > MAX_RADIUS_KM) {
       toast.error(`Service radius cannot exceed ${MAX_RADIUS_KM} km`);
       return;
@@ -101,18 +122,15 @@ export default function LocationSettings({ setActiveTab }: Props) {
       serviceTierIds: selectedTiers,
       categoryIds: selectedCategories,
       serviceRadius: radius,
-      location: { type: "Point", coordinates: [lng, lat] },
+      location: {
+        type: "Point",
+        coordinates: [lng, lat], // ✅ convert back to GeoJSON
+      },
     };
 
     serviceSettingsMutation.mutate(payload, {
       onSuccess: () => {
-        // ✅ Sync Zustand store
-        useAuthStore.getState().updateWorker({
-          serviceTierIds: selectedTiers,
-          categoryIds: selectedCategories,
-          serviceRadius: radius,
-          location: { type: "Point", coordinates: [lng, lat] },
-        });
+        useAuthStore.getState().updateWorker(payload);
 
         toast.success("Updated successfully");
         setModalOpen(false);
@@ -122,18 +140,15 @@ export default function LocationSettings({ setActiveTab }: Props) {
     });
   };
 
-  // ---------------- LOADING STATES ----------------
-  if (!serviceTiers || !serviceCategories) {
-    return <div className="p-6">Loading services...</div>;
-  }
+  /* ---------------- UI ---------------- */
 
-  if (!tempLocation) return null;
+  if (!hydrated) return <div className="p-6">Loading...</div>;
+  if (!tempLocation) return <div className="p-6">Select location...</div>;
 
-  // ---------------- UI ----------------
   return (
     <div className="max-w-3xl mx-auto p-6">
-          <EmployeeDetails
-        user={user}   
+      <EmployeeDetails
+        user={user}
         status={status}
         locationName={locationName}
         serviceTiers={serviceTiers}
@@ -142,6 +157,7 @@ export default function LocationSettings({ setActiveTab }: Props) {
         selectedCategories={selectedCategories}
         onEdit={() => setModalOpen(true)}
       />
+
       {modalOpen && (
         <LocationModal
           tempLocation={tempLocation}
@@ -152,17 +168,18 @@ export default function LocationSettings({ setActiveTab }: Props) {
           setLocationName={setLocationName}
           radius={radius}
           setRadius={setRadius}
-
-          // ✅ IMPORTANT (for selection UI)
           serviceTiers={serviceTiers}
           serviceCategories={serviceCategories}
           selectedTiers={selectedTiers}
           setSelectedTiers={setSelectedTiers}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
-
           saveChanges={saveChanges}
           onClose={() => setModalOpen(false)}
+
+          // ✅ PASS HANDLERS
+          onUseCurrentLocation={handleUseCurrentLocation}
+          onManualLocation={handleManualLocation}
         />
       )}
     </div>

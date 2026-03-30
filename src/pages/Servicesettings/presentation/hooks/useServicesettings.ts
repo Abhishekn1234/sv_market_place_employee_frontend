@@ -12,6 +12,7 @@ export function useServiceSettings() {
 
   return useMutation({
     mutationFn: (data: WorkerPayload) => usecase.execute(data),
+  
     onSuccess(data) {
       toast.success("Service Settings Updated");
       queryClient.setQueryData(["profile"], data);

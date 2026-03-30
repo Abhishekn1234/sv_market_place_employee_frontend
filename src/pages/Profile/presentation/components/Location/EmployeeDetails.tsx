@@ -18,21 +18,23 @@ export default function EmployeeDetails({
   const edits = translations.profile;
 
   // ✅ Check documents
-  const hasAllRequiredDocuments = () => {
-    const documents = user?.documents;
+  const hasAnyRequiredDocument = () => {
+  const documents = user?.documents;
 
-    if (!Array.isArray(documents)) return false;
+  if (!Array.isArray(documents)) return false;
 
-    const requiredDocs = ["idProof", "addressProof", "photoProof"];
+  const requiredDocs = ["idproof", "addressproof", "photoproof"];
 
-    return requiredDocs.every((docType) =>
-      documents.some((doc: any) => doc.documentType === docType)
-    );
-  };
+  return documents.some((doc: any) => {
+    const docType = doc.documentType?.toLowerCase();
+
+    return requiredDocs.includes(docType) && doc.filePath;
+  });
+};
 
   // ✅ Final permission
   const canEdit =
-    user?.kycStatus === "pending" && hasAllRequiredDocuments();
+  user?.kycStatus === "pending" && hasAnyRequiredDocument();
 
   // ✅ Toast on hover (only if disabled)
   const handleHover = () => {

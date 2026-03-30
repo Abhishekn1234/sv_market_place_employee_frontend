@@ -13,19 +13,32 @@ export const getOnboardingStatus = (user: any): OnboardingStatus => {
 
   if (!worker) return "NOT_STARTED";
 
+  // ✅ Step 1: Check basic setup
   if (!worker.categoryIds?.length || !worker.serviceTierIds?.length) {
     return "IN_PROGRESS";
   }
 
+  // ✅ Step 2: No documents uploaded
   if (!documents.length) {
     return "IN_PROGRESS";
   }
 
-  const hasRejected = documents.some((d: any) => d.status === "REJECTED");
+  // ✅ Normalize status (kycStatus OR status)
+  const getStatus = (doc: any) =>
+    (doc.kycStatus || doc.status || "").toUpperCase();
+
+  // ❌ If any rejected
+  const hasRejected = documents.some(
+    (d: any) => getStatus(d) === "REJECTED"
+  );
   if (hasRejected) return "REJECTED";
 
-  const allApproved = documents.every((d: any) => d.status === "APPROVED");
+  // ✅ If all approved
+  const allApproved = documents.every(
+    (d: any) => getStatus(d) === "APPROVED"
+  );
   if (allApproved) return "COMPLETED";
 
+  // ⏳ Otherwise pending
   return "PENDING";
 };

@@ -47,24 +47,19 @@ const handleSubmit = (e: React.FormEvent) => {
   setTokens(data.accessToken, data.refreshToken);
 
   if (data.user) {
-    const status = getOnboardingStatus(data.user);
+    setAuth(data.user); // ✅ ONLY THIS
+  }
 
-    setAuth({
-      ...data.user,
-      onboardingStatus: status,
-      isOnboarded: status === "COMPLETED",
-    });
+  const status = getOnboardingStatus(data.user);
 
-    // ✅ NAVIGATION BASED ON STATUS
-    if (status === "COMPLETED") {
-      navigate("/");
-    } else if (status === "REJECTED") {
-      navigate("/services/documents");
-    } else if (status === "PENDING") {
-      navigate("/"); // or waiting screen
-    } else {
-      navigate("/services/employee");
-    }
+  if (status === "COMPLETED") {
+    navigate("/");
+  } else if (status === "REJECTED") {
+    navigate("/services/documents");
+  } else if (status === "PENDING") {
+    navigate("/");
+  } else {
+    navigate("/services/employee");
   }
 
   toast.success("Login successfully");

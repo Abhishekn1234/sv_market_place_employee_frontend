@@ -31,7 +31,7 @@ export default function SocketBookingsModal({
   onBookingAccepted,
     isConnected,
 }: Props) {
-  const { bookings, removeBooking } = useAvailableBookings();
+  const { bookings, removeBooking,fetchBookings,addBooking } = useAvailableBookings();
   const { mutate: acceptBooking, isPending } = useAccept();
 
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
@@ -40,26 +40,26 @@ export default function SocketBookingsModal({
   const { theme } = useTheme();
   const dark = theme === "dark";
 
-  useEffect(() => {
-    if (!socket) return;
+ useEffect(() => {
+  if (!socket) return;
 
-    const handleNewBooking = (data: any) => {
-      console.log("📦 New booking:", data);
-    };
+  const handleNewBooking = (data: any) => {
+    console.log("📦 New booking:", data);
 
-    socket.on("new-booking", handleNewBooking);
-
-    return () => {
-      socket.off("new-booking", handleNewBooking);
-    };
-  }, []);
-
-  const handleReload = () => {
-    if (!socket?.connected) {
-      socket?.connect();
-    }
-    console.log("🔄 Reload triggered");
+    // ✅ ADD instantly to UI
+    addBooking(data);
   };
+
+  socket.on("new-booking", handleNewBooking);
+
+  return () => {
+    socket.off("new-booking", handleNewBooking);
+  };
+}, [addBooking]);
+
+  const handleReload = async () => {
+  await fetchBookings(); 
+};
 
   return (
    <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>

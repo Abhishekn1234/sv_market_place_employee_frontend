@@ -2,7 +2,7 @@ import api from "@/api/api";
 import { baseURL } from "@/api/apiConfig";
 import type { WorkerPayload } from "../../domain/entities/servicesettings";
 import type { ServiceSettingRepo } from "../../domain/repositories/servicesettingsrepo";
-import { useAuthStore, type EmployeeUser } from "@/core/store/auth";
+import { useAuthStore} from "@/core/store/auth";
 
 export class ServiceSettingsRepoimpl implements ServiceSettingRepo {
   async updatesettings(data: WorkerPayload): Promise<WorkerPayload> {
@@ -16,11 +16,15 @@ export class ServiceSettingsRepoimpl implements ServiceSettingRepo {
       );
 
     
-      const updateUserProfile =
-        useAuthStore.getState().updateUserProfile;
-       const partialuser=response.data as Partial<EmployeeUser>;
-      updateUserProfile(partialuser);
+      const updateWorker = useAuthStore.getState().updateWorker;
 
+updateWorker({
+  status: response.data.status,
+  serviceTierIds: response.data.serviceTierIds,
+  categoryIds: response.data.categoryIds,
+  serviceRadius: response.data.serviceRadius,
+  location: response.data.location,
+});
       return response.data;
     } catch (error) {
       console.error("Update settings failed", error);

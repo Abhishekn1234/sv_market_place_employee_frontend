@@ -5,6 +5,7 @@ export interface Worker {
   categoryIds?: string[];
   serviceTierIds?: string[];
   location?: GeoPoint;
+  locationMode?: "CURRENT" | "MANUAL";
   status?: WorkerStatus;
   serviceRadius?:number;
 }
