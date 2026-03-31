@@ -148,7 +148,15 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
               if (!mode || !schedule) return "—";
 
               if (mode === "HOURLY" && schedule.estimatedHours != null) {
-                return `Duration: ${schedule.estimatedHours} hrs`;
+                if(schedule.estimatedHours < 1) {
+                  const minutes = Math.round(schedule.estimatedHours * 60);
+                  return `Duration: ${minutes} min${minutes > 1 ? "s" : ""}`;
+                }if(schedule.estimatedHours > 1 && schedule.estimatedHours < 24) {
+                  return `Duration: ${schedule.estimatedHours} hr${schedule.estimatedHours > 1 ? "s" : ""}`;
+                }if(schedule.estimatedHours === 1){
+                  return `Duration: ${schedule.estimatedHours} hr`;
+                }
+               
               } else if (mode === "PER_DAY" && schedule.estimatedDays != null) {
                 return `Days:${schedule.estimatedDays} days`;
               }

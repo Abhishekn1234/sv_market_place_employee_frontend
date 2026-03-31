@@ -72,7 +72,15 @@ export function useBookingColumns({
     let timeDisplay = "—";
 
     if (mode === "HOURLY" && schedule?.estimatedHours != null) {
-      timeDisplay = `${schedule.estimatedHours} hrs`;
+      if(schedule.estimatedHours < 1) {
+        const minutes = Math.round(schedule.estimatedHours * 60);
+        timeDisplay = `${minutes} mins`;
+      }if(schedule.estimatedHours > 1 && schedule.estimatedHours < 24) {
+        timeDisplay = `${schedule.estimatedHours} hrs` ;
+      }if(schedule.estimatedHours == 1){
+        timeDisplay = `${schedule.estimatedHours} hr` ;
+      }
+      
     } else if (mode === "PER_DAY" && schedule?.estimatedDays != null) {
       timeDisplay = `${schedule.estimatedDays} days`;
     }

@@ -96,8 +96,16 @@ const formatSmartDate = (
       return `${duration} / day`;
     }
 
+    if(duration < 1) {
+      const minutes = Math.round(duration * 60);
+      return `${minutes} min${minutes > 1 ? "s" : ""}`;
+    }
+    if(duration > 1 && duration < 24) {
+      return `${duration} hr${duration > 1 ? "s" : ""}`;
+    }if(duration === 1){
+      return `${duration} hr`;
+    }
    
-    return `${duration} hr${duration > 1 ? "s" : ""}`;
   };
 
   return {
