@@ -22,10 +22,13 @@ export default function AppLayout() {
   const [assignedOpen, setAssignedOpen] = useState(false);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
 
+  // 🔥 NEW: socket trigger for realtime UI update
+  const [socketTrigger, setSocketTrigger] = useState(0);
+
   const { assignedWorks, isLoading } = useAssign(true);
   const { accessToken } = useAuthStore();
 
-  // ✅ Initialize socket ONLY when token exists
+  // ✅ Initialize socket
   useEffect(() => {
     if (!accessToken) return;
 
@@ -35,9 +38,11 @@ export default function AppLayout() {
       s.connect();
     }
   }, [accessToken]);
+
   const location = useLocation();
   const isAvailableWorkPage = location.pathname.startsWith("/availableWork");
-  // ✅ Global socket connection tracking
+
+  // ✅ Track socket connection
   useEffect(() => {
     if (!socket) return;
 
@@ -64,40 +69,63 @@ export default function AppLayout() {
     };
   }, [accessToken]);
 
+  // 🔥 NEW: listen for realtime bookings
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewBooking = (data: any) => {
+      console.log("🔥 New booking in AppLayout", data);
+
+      // trigger UI update
+      setSocketTrigger((prev) => prev + 1);
+
+      // open modal instantly
+      setLiveBookingsOpen(true);
+      setAssignedOpen(false);
+    };
+
+    socket.on("new-booking", handleNewBooking);
+
+    return () => {
+      socket.off("new-booking", handleNewBooking);
+    };
+  }, []);
+
   const workerStatus = useAuthStore((s) => s.user?.worker?.status);
-      const isWorkerOnline = workerStatus === "ONLINE";
-      useEffect(() => {
-        if (isLoading) return;
+  const isWorkerOnline = workerStatus === "ONLINE";
 
-        // Only show modals if socket is connected and worker is online
-        if (!isSocketConnected || !isWorkerOnline) {
-          setLiveBookingsOpen(false);
-          setAssignedOpen(false);
-          return;
-        }
+  // ✅ Modal switching logic
+  useEffect(() => {
+    if (isLoading) return;
 
-        const worksArray = Array.isArray(assignedWorks)
-          ? assignedWorks
-          : assignedWorks
-          ? [assignedWorks]
-          : [];
+    if (!isSocketConnected || !isWorkerOnline) {
+      setLiveBookingsOpen(false);
+      setAssignedOpen(false);
+      return;
+    }
 
-        const hasAssigned = worksArray.some((b: GetBooking) =>
-          ["IN_PROGRESS", "WORKER_ACCEPTED", "STARTED", "ASSIGNED", "REQUESTED"].includes(
-            b.status as string
-          )
-        );
+    const worksArray = Array.isArray(assignedWorks)
+      ? assignedWorks
+      : assignedWorks
+      ? [assignedWorks]
+      : [];
 
-        if (hasAssigned) {
-          setAssignedOpen(true);
-          setLiveBookingsOpen(false);
-        } else {
-          setAssignedOpen(false);
-          setLiveBookingsOpen(true);
-        }
-      }, [isLoading, assignedWorks, isSocketConnected, isWorkerOnline]);
+    const hasAssigned = worksArray.some((b: GetBooking) =>
+      ["IN_PROGRESS", "WORKER_ACCEPTED", "STARTED", "ASSIGNED", "REQUESTED"].includes(
+        b.status as string
+      )
+    );
 
-  // UI stuff
+    if (hasAssigned) {
+      setAssignedOpen(true);
+      setLiveBookingsOpen(false);
+    } else {
+      setAssignedOpen(false);
+      setLiveBookingsOpen(true);
+    }
+  }, [isLoading, assignedWorks, isSocketConnected, isWorkerOnline, socketTrigger]);
+
+  // UI resize
   useEffect(() => {
     const onResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", onResize);
@@ -148,34 +176,26 @@ export default function AppLayout() {
         </main>
       </div>
 
-      {/* 🚨 Global Socket Status
-      {!isSocketConnected && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded">
-          Socket Disconnected
-        </div>
-      )} */}
-
-      {/* ✅ Modal Switching */}
-      {/* ✅ Modal Switching with route control */}
-    {!isAvailableWorkPage && (
-      assignedOpen ? (
-        <AssignedWorkModal
-          open={assignedOpen}
-          onClose={() => setAssignedOpen(false)}
-          onCancelSuccess={() => {
-            setAssignedOpen(false);
-            setLiveBookingsOpen(true);
-          }}
-        />
-      ) : (
-        <SocketBookingsModal
-          open={liveBookingsOpen}
-          onClose={() => setLiveBookingsOpen(false)}
-          onBookingAccepted={handleBookingAccepted}
-          isConnected={isSocketConnected}
-        />
-      )
-    )}
+      {/* ✅ Modal switching */}
+      {!isAvailableWorkPage && (
+        assignedOpen ? (
+          <AssignedWorkModal
+            open={assignedOpen}
+            onClose={() => setAssignedOpen(false)}
+            onCancelSuccess={() => {
+              setAssignedOpen(false);
+              setLiveBookingsOpen(true);
+            }}
+          />
+        ) : (
+          <SocketBookingsModal
+            open={liveBookingsOpen}
+            onClose={() => setLiveBookingsOpen(false)}
+            onBookingAccepted={handleBookingAccepted}
+            isConnected={isSocketConnected}
+          />
+        )
+      )}
     </div>
   );
 }

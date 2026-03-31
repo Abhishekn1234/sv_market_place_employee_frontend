@@ -230,7 +230,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-  name: "employee-auth-storage",
+  name: "auth-storage",
 
   onRehydrateStorage: () => (state) => {
     state?.setHydrated(); // ✅ VERY IMPORTANT

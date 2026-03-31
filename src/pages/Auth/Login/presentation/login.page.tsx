@@ -47,7 +47,15 @@ const handleSubmit = (e: React.FormEvent) => {
   setTokens(data.accessToken, data.refreshToken);
 
   if (data.user) {
-    setAuth(data.user); // ✅ ONLY THIS
+    const updatedUser = {
+      ...data.user,
+      worker: {
+        ...data.user.worker,
+        status: "OFFLINE", // ✅ force offline
+      },
+    };
+
+    setAuth(updatedUser); // ✅ use updated user
   }
 
   const status = getOnboardingStatus(data.user);
