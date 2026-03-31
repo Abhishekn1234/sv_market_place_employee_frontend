@@ -40,24 +40,16 @@ const queryClient = useQueryClient();
   },
   {
     onSuccess: (updatedWork) => {
-     
-      queryClient.setQueryData(["assigned-works"], (oldData: any) => {
-        if (!oldData) return [updatedWork]; 
-        
-        return oldData.map((w: any) =>
-          (w.bookingId ?? w.booking?._id) ===
-          (updatedWork.bookingId ?? updatedWork.booking?._id)
-            ? updatedWork
-            : w
-        );
-      });
+  queryClient.setQueryData(["assigned-works"], (oldData: any) => {
+    if (!oldData) return oldData; // keep as no data
+    return oldData.map((work: any) =>
+      work.bookingId === updatedWork.bookingId ? updatedWork : work
+    );
+  });
 
-      
-      onSuccess(updatedWork);
-
-     
-      onClose();
-    },
+  onSuccess(updatedWork);
+  onClose();
+},
   }
 );
   };
