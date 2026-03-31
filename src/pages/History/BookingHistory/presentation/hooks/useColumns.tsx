@@ -10,6 +10,7 @@ import { useStringUtils } from "./useStringutils";
 
 import type { BookingHistory } from "../../domain/entities/bookinghistory";
 import type { BookingStatus } from "../../../../Booking/AvailableBooking/domain/entities/bookingstatus";
+import { formatBookingDurationText } from "../utils/formatduration";
 
 type Params = {
   expandedBooking: string | null;
@@ -66,28 +67,10 @@ export function useBookingColumns({
   header: tableHeaders.time,
   className: cellClass,
   render: (b) => {
-    const mode = b.booking?.pricingMode;
-    const schedule = b.booking?.schedule;
-
-    let timeDisplay = "—";
-
-    if (mode === "HOURLY" && schedule?.estimatedHours != null) {
-      if(schedule.estimatedHours < 1) {
-        const minutes = Math.round(schedule.estimatedHours * 60);
-        timeDisplay = `${minutes} mins`;
-      }if(schedule.estimatedHours > 1 && schedule.estimatedHours < 24) {
-        timeDisplay = `${schedule.estimatedHours} hrs` ;
-      }if(schedule.estimatedHours == 1){
-        timeDisplay = `${schedule.estimatedHours} hr` ;
-      }
-      
-    } else if (mode === "PER_DAY" && schedule?.estimatedDays != null) {
-      timeDisplay = `${schedule.estimatedDays} days`;
-    }
-
-    return <span dir="ltr">{timeDisplay}</span>;
-  },
-},{
+  const timeDisplay = formatBookingDurationText(b.booking || {});
+  return <span dir="ltr">{timeDisplay}</span>;
+    },
+    },{
   key: "payment",
   header: tableHeaders.payment,
   className: cellClass,

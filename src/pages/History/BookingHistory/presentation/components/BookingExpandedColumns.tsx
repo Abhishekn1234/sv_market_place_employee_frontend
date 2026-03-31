@@ -18,6 +18,7 @@ import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/se
 
 import type { BookingHistory } from "../../domain/entities/bookinghistory";
 import { useStringUtils } from "../hooks/useStringutils";
+import { formatBookingDurationText } from "../utils/formatduration";
 
 type Props = {
   booking: BookingHistory;
@@ -139,32 +140,9 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
         </div>
 
         <div className="flex gap-2">
-          <TimerIcon className="h-4 w-4" />
-          <span>
-            {(() => {
-              const mode = booking.booking?.pricingMode;
-              const schedule = booking.booking?.schedule;
-
-              if (!mode || !schedule) return "—";
-
-              if (mode === "HOURLY" && schedule.estimatedHours != null) {
-                if(schedule.estimatedHours < 1) {
-                  const minutes = Math.round(schedule.estimatedHours * 60);
-                  return `Duration: ${minutes} min${minutes > 1 ? "s" : ""}`;
-                }if(schedule.estimatedHours > 1 && schedule.estimatedHours < 24) {
-                  return `Duration: ${schedule.estimatedHours} hr${schedule.estimatedHours > 1 ? "s" : ""}`;
-                }if(schedule.estimatedHours === 1){
-                  return `Duration: ${schedule.estimatedHours} hr`;
-                }
-               
-              } else if (mode === "PER_DAY" && schedule.estimatedDays != null) {
-                return `Days:${schedule.estimatedDays} days`;
-              }
-
-              return "—";
-            })()}
-          </span>
-        </div>
+            <TimerIcon className="h-4 w-4" />
+            <span>{formatBookingDurationText(booking.booking)}</span>
+          </div>
 
       
       <div className="flex flex-col gap-2">
