@@ -48,11 +48,10 @@ export default function AvailableWorkPage() {
         if (!isInProgress) return;
 
         // ✅ FIX: safe fallback
-        const startedAt =
-          w.workStartedAt ||
-          w.startedAt ||
-          w.booking?.workStartedAt ||
-          (workStatus === "STARTED" ? new Date().toISOString() : null);
+     const startedAt =
+  w.workStartedAt ||
+  w.startedAt ||
+  w.booking?.workStartedAt;
 
         if (!startedAt) return;
 
@@ -132,17 +131,9 @@ export default function AvailableWorkPage() {
   };
 
   /* ---------------- START WORK ---------------- */
-  const handleStartWork = (work: any) => {
-    const now = new Date().toISOString();
-
-    updateWork({
-      ...work,
-      status: "STARTED",
-      workStartedAt: now, // ✅ critical
-    });
-
-    openModal(work, "start");
-  };
+ const handleStartWork = async (work: any) => {
+  openModal(work, "start"); // just open modal
+};
 
   /* ---------------- MODAL HANDLERS ---------------- */
   const openModal = (work: any, type: any) => {

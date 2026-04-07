@@ -12,43 +12,50 @@ type Props = {
   work: Work;
   open: boolean;
   onClose: () => void;
-   onWorkStarted?: () => void;
+   onWorkStarted?: (updatedWork: any) => void;
 };
 
 export default function StartWork({ work, open, onClose,onWorkStarted }: Props) {
   const [otp, setOtp] = useState("");
   const startWorkMutation = useStartWork();
 
-  const handleConfirm = () => {
-    const otpStr = otp.toString();
-    if (otpStr.length !== 6) {
-      alert("Please enter a valid 6-digit OTP");
-      return;
-    }
+ const handleConfirm = () => {
+  const otpStr = otp.toString();
 
-    // ✅ Use bookingId from work (root level)
-    if (!work.bookingId) {
-      alert("Booking ID not found");
-      return;
-    }
+  if (otpStr.length !== 6) {
+    alert("Please enter a valid 6-digit OTP");
+    return;
+  }
 
-    startWorkMutation.mutate(
-      {
-        bookingId: work.bookingId, // ✅ correct field
-        otp: otpStr,
+  if (!work.bookingId) {
+    alert("Booking ID not found");
+    return;
+  }
+
+  startWorkMutation.mutate(
+    {
+      bookingId: work.bookingId,
+      otp: otpStr,
+    },
+    {
+      onSuccess: (data) => {
+        toast.success("Work Started");
+
+        // ✅ Send correct updated work
+        onWorkStarted?.({
+          ...work,
+          status: "STARTED",
+          workStartedAt: data?.workStartedAt, // ✅ MUST come from backend
+        });
+
+        onClose();
       },
-      {
-        onSuccess: () => {
-          toast.success("Work Started");
-          onClose();
-          onWorkStarted?.();
-        },
-        onError: (err: any) => {
-          toast.error(err?.message || "Failed to start work");
-        },
-      }
-    );
-  };
+      onError: (err: any) => {
+        toast.error(err?.message || "Failed to start work");
+      },
+    }
+  );
+};
 
   return (
     <CommonModal open={open} onOpenChange={onClose}>

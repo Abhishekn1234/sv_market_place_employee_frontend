@@ -37,6 +37,7 @@ export interface Booking {
   notes?: string;
   assignedAt?:string |Date;
   startedAt?:string;
+  workStartedAt?:string;
 }
 
 export interface BookingResponse{
