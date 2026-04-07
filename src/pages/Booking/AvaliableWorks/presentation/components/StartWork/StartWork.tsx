@@ -45,7 +45,7 @@ export default function StartWork({ work, open, onClose,onWorkStarted }: Props) 
         onWorkStarted?.({
           ...work,
           status: "STARTED",
-          workStartedAt: data?.workStartedAt, // ✅ MUST come from backend
+          workStartedAt: data?.startedAt, 
         });
 
         onClose();

@@ -23,13 +23,13 @@ export default function WorkModals({
   return (
     <>
       {modalType === "start" && selectedWork && (
-        <StartWork
-  open
-  work={selectedWork}
-  onClose={closeModal}
-  onWorkStarted={(updatedWork: any) => updateWork(updatedWork)} // ✅ FIX
-/>
-      )}
+              <StartWork
+                open
+                work={selectedWork}
+                onClose={closeModal}
+                onWorkStarted={(updatedWork) => updateWork(updatedWork)} // ✅ FIX
+              />
+            )}
 
       {modalType === "complete" && selectedWork && (
         <CompleteWork open work={selectedWork} onClose={closeModal} onSuccess={updateWork} />
