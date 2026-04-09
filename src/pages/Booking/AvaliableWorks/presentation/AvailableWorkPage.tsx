@@ -30,7 +30,7 @@ export default function AvailableWorkPage() {
     setWorkList(assignedWorks || []);
   }, [assignedWorks]);
 
-  /* ---------------- TIMER LOGIC (FIXED) ---------------- */
+  /* ---------------- TIMER LOGIC ---------------- */
   useEffect(() => {
     const interval = setInterval(() => {
       const updated: Record<string, string> = {};
@@ -47,11 +47,10 @@ export default function AvailableWorkPage() {
 
         if (!isInProgress) return;
 
-        // ✅ FIX: safe fallback
-     const startedAt =
-  w.workStartedAt ||
-  w.startedAt ||
-  w.booking?.workStartedAt;
+        const startedAt =
+          w.workStartedAt ||
+          w.startedAt ||
+          w.booking?.workStartedAt;
 
         if (!startedAt) return;
 
@@ -61,8 +60,8 @@ export default function AvailableWorkPage() {
 
         if (elapsed < 0) elapsed = 0;
 
-        // Max duration
         let maxDuration = Infinity;
+
         if (w.booking?.pricingMode === "HOURLY") {
           maxDuration =
             (w.booking?.schedule?.estimatedHours ?? 0) *
@@ -84,19 +83,18 @@ export default function AvailableWorkPage() {
         const m = Math.floor((elapsed % 3600000) / 60000);
         const s = Math.floor((elapsed % 60000) / 1000);
 
-        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(
-          2,
-          "0"
-        )}:${String(s).padStart(2, "0")}`;
+        updated[w._id] = `${String(h).padStart(2, "0")}:${String(
+          m
+        ).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
       });
 
       setTimers(updated);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [JSON.stringify(workList)]); // ✅ FIXED DEPENDENCY
+  }, [workList]); // ✅ FIXED
 
-  /* ---------------- UPDATE WORK (FIXED) ---------------- */
+  /* ---------------- UPDATE WORK ---------------- */
   const updateWork = (updated: any) => {
     setWorkList((prev) =>
       prev.map((w) =>
@@ -110,13 +108,12 @@ export default function AvailableWorkPage() {
                 "WORK_COMPLETED_PENDING",
               ].includes(updated.status?.toUpperCase())
                 ? null
-                : updated.workStartedAt ?? w.workStartedAt, // ✅ FIX
+                : updated.workStartedAt ?? w.workStartedAt,
             }
           : w
       )
     );
 
-   
     if (
       ["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(
         updated.status?.toUpperCase() ?? ""
@@ -130,10 +127,17 @@ export default function AvailableWorkPage() {
     }
   };
 
-  /* ---------------- START WORK ---------------- */
- const handleStartWork = async (work: any) => {
-  openModal(work, "start"); // just open modal
-};
+  /* ---------------- START WORK (🔥 FIXED) ---------------- */
+  const handleStartWork = (work: any) => {
+    // ✅ Optimistic update → timer starts immediately
+    updateWork({
+      _id: work._id,
+      status: "STARTED",
+      workStartedAt: new Date().toISOString(),
+    });
+
+    openModal(work, "start");
+  };
 
   /* ---------------- MODAL HANDLERS ---------------- */
   const openModal = (work: any, type: any) => {
