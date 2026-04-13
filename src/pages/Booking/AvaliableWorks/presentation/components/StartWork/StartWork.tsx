@@ -43,10 +43,14 @@ export default function StartWork({ work, open, onClose,onWorkStarted }: Props) 
 
         // ✅ Send correct updated work
         onWorkStarted?.({
-          ...work,
-          status: "STARTED",
-          workStartedAt: data?.startedAt, 
-        });
+              ...work,
+              status: "IN_PROGRESS",
+              workStartedAt: data?.startedAt,
+              booking: {
+                ...work.booking,
+                status: "IN_PROGRESS", // 🔥 CRITICAL
+              },
+            });
 
         onClose();
       },
@@ -84,7 +88,23 @@ export default function StartWork({ work, open, onClose,onWorkStarted }: Props) 
         </CommonModal.Body>
 
         <CommonModal.Footer>
-          <Button variant="outline" onClick={onClose}>
+        <Button
+            variant="outline"
+            onClick={() => {
+              
+              onWorkStarted?.({
+                ...work,
+                status: "WORKER_ACCEPTED",
+                workStartedAt: null,
+                booking: {
+                  ...work.booking,
+                  status: "WORKER_ACCEPTED",
+                },
+              });
+
+              onClose();
+            }}
+          >
             Cancel
           </Button>
           <Button

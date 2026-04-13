@@ -152,7 +152,7 @@ export default function WorkGrid({
 
               {/* 🔹 Work Actions */}
               <div className="flex gap-2">
-                {workStatus === "ASSIGNED" && (
+                {["ASSIGNED", "WORKER_ACCEPTED"].includes(workStatus) && (
                   <>
                     <Button
                       className="flex-1"

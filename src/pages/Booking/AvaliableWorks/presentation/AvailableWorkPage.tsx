@@ -27,8 +27,21 @@ export default function AvailableWorkPage() {
 
   /* ---------------- INIT WORK LIST ---------------- */
   useEffect(() => {
-    setWorkList(assignedWorks || []);
-  }, [assignedWorks]);
+  if (!assignedWorks) return;
+
+  setWorkList((prev) => {
+    return assignedWorks.map((newWork: any) => {
+      const existing = prev.find((w) => w._id === newWork._id);
+
+      return existing
+        ? {
+            ...newWork,
+            ...existing, // ✅ keep optimistic updates
+          }
+        : newWork;
+    });
+  });
+}, [assignedWorks]);
 
   /* ---------------- TIMER LOGIC ---------------- */
   useEffect(() => {
@@ -96,43 +109,35 @@ export default function AvailableWorkPage() {
 
   /* ---------------- UPDATE WORK ---------------- */
   const updateWork = (updated: any) => {
-    setWorkList((prev) =>
-      prev.map((w) =>
-        w._id === updated._id
-          ? {
-              ...w,
-              ...updated,
-              workStartedAt: [
-                "COMPLETED",
-                "CANCELLED",
-                "WORK_COMPLETED_PENDING",
-              ].includes(updated.status?.toUpperCase())
-                ? null
-                : updated.workStartedAt ?? w.workStartedAt,
-            }
-          : w
-      )
-    );
-
-    if (
-      ["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(
-        updated.status?.toUpperCase() ?? ""
-      )
-    ) {
-      setTimers((prev) => {
-        const copy = { ...prev };
-        delete copy[updated._id];
-        return copy;
-      });
-    }
-  };
+  setWorkList((prev) =>
+    prev.map((w) =>
+      w._id === updated._id
+        ? {
+            ...w,
+            ...updated,
+            booking: {
+              ...w.booking,
+              ...updated.booking, 
+            },
+            workStartedAt: [
+              "COMPLETED",
+              "CANCELLED",
+              "WORK_COMPLETED_PENDING",
+            ].includes(updated.status?.toUpperCase())
+              ? null
+              : updated.workStartedAt ?? w.workStartedAt,
+          }
+        : w
+    )
+  );
+};
 
   /* ---------------- START WORK (🔥 FIXED) ---------------- */
   const handleStartWork = (work: any) => {
     // ✅ Optimistic update → timer starts immediately
     updateWork({
       _id: work._id,
-      status: "STARTED",
+      status: "IN_PROGRESS",
       workStartedAt: new Date().toISOString(),
     });
 
