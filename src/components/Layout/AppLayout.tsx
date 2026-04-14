@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import AppSidebar from "@/components/Layout/AppSidebar";
@@ -7,7 +9,10 @@ import SocketBookingsModal from "@/core/Websocket/socketchecking";
 import AssignedWorkModal from "@/pages/Booking/AvaliableWorks/presentation/components/AssignedWork/assignedwork.page";
 import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
 import type { GetBooking } from "@/core/Websocket/domain/entities/getrepo";
-import { initializeSocket, socket } from "@/core/Websocket/presentation/components/socket";
+import {
+  initializeSocket,
+  getSocket,
+} from "@/core/Websocket/presentation/components/socket";
 import { useAuthStore } from "@/core/store/auth";
 
 export default function AppLayout() {
@@ -22,46 +27,34 @@ export default function AppLayout() {
   const [assignedOpen, setAssignedOpen] = useState(false);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
 
-  // 🔥 NEW: socket trigger for realtime UI update
   const [socketTrigger, setSocketTrigger] = useState(0);
 
   const { assignedWorks, isLoading } = useAssign(true);
   const { accessToken } = useAuthStore();
 
-  // ✅ Initialize socket
-  useEffect(() => {
-    if (!accessToken) return;
-
-    const s = initializeSocket(accessToken);
-
-    if (!s.connected) {
-      s.connect();
-    }
-  }, [accessToken]);
-
   const location = useLocation();
   const isAvailableWorkPage = location.pathname.startsWith("/availableWork");
 
-  // ✅ Track socket connection
+  const workerStatus = useAuthStore((s) => s.user?.worker?.status);
+  const isWorkerOnline = workerStatus === "ONLINE";
+
+  // =========================
+  // 1. SOCKET INIT + CONNECT
+  // =========================
   useEffect(() => {
-    if (!socket) return;
+    if (!accessToken) return;
 
-    const handleConnect = () => {
-      console.log("✅ Socket Connected");
-      setIsSocketConnected(true);
-    };
+    const socket = initializeSocket(accessToken);
 
-    const handleDisconnect = () => {
-      console.log("❌ Socket Disconnected");
-      setIsSocketConnected(false);
-    };
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    const handleConnect = () => setIsSocketConnected(true);
+    const handleDisconnect = () => setIsSocketConnected(false);
 
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
-
-    if (socket.connected) {
-      setIsSocketConnected(true);
-    }
 
     return () => {
       socket.off("connect", handleConnect);
@@ -69,17 +62,17 @@ export default function AppLayout() {
     };
   }, [accessToken]);
 
-  // 🔥 NEW: listen for realtime bookings
+  // =========================
+  // 2. NEW BOOKING LISTENER
+  // =========================
   useEffect(() => {
+    const socket = getSocket();
     if (!socket) return;
 
     const handleNewBooking = (data: any) => {
       console.log("🔥 New booking in AppLayout", data);
 
-      // trigger UI update
       setSocketTrigger((prev) => prev + 1);
-
-      // open modal instantly
       setLiveBookingsOpen(true);
       setAssignedOpen(false);
     };
@@ -89,12 +82,11 @@ export default function AppLayout() {
     return () => {
       socket.off("new-booking", handleNewBooking);
     };
-  }, []);
+  }, [isSocketConnected]);
 
-  const workerStatus = useAuthStore((s) => s.user?.worker?.status);
-  const isWorkerOnline = workerStatus === "ONLINE";
-
-  // ✅ Modal switching logic
+  // =========================
+  // 3. MODAL SWITCHING LOGIC
+  // =========================
   useEffect(() => {
     if (isLoading) return;
 
@@ -125,7 +117,9 @@ export default function AppLayout() {
     }
   }, [isLoading, assignedWorks, isSocketConnected, isWorkerOnline, socketTrigger]);
 
-  // UI resize
+  // =========================
+  // 4. UI RESPONSIVE
+  // =========================
   useEffect(() => {
     const onResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", onResize);
@@ -154,6 +148,9 @@ export default function AppLayout() {
     setAssignedOpen(true);
   };
 
+  // =========================
+  // 5. UI
+  // =========================
   return (
     <div className={`flex min-h-screen ${isRTL ? "flex-row-reverse" : ""}`}>
       <AppSidebar
@@ -176,9 +173,9 @@ export default function AppLayout() {
         </main>
       </div>
 
-      {/* ✅ Modal switching */}
-      {!isAvailableWorkPage && (
-        assignedOpen ? (
+      {/* MODALS */}
+      {!isAvailableWorkPage &&
+        (assignedOpen ? (
           <AssignedWorkModal
             open={assignedOpen}
             onClose={() => setAssignedOpen(false)}
@@ -194,8 +191,7 @@ export default function AppLayout() {
             onBookingAccepted={handleBookingAccepted}
             isConnected={isSocketConnected}
           />
-        )
-      )}
+        ))}
     </div>
   );
 }

@@ -8,7 +8,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-import {  socket } from "./presentation/components/socket";
+import {  getSocket } from "./presentation/components/socket";
 import { useAvailableBookings } from "./presentation/hooks/useGet";
 import { useAccept } from "./presentation/hooks/useAccept";
 
@@ -39,14 +39,13 @@ export default function SocketBookingsModal({
 
   const { theme } = useTheme();
   const dark = theme === "dark";
-
- useEffect(() => {
+useEffect(() => {
+  const socket = getSocket();
   if (!socket) return;
 
   const handleNewBooking = (data: any) => {
     console.log("📦 New booking:", data);
 
-    // ✅ ADD instantly to UI
     addBooking(data);
   };
 
