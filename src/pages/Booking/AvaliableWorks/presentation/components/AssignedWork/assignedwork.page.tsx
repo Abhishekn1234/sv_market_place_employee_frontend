@@ -6,7 +6,7 @@ import { useCancel } from "../../hooks/useCancel";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { AlertCircle, X, Loader2, Package } from "lucide-react";
+import {  X, Loader2,  } from "lucide-react";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
 import { WorkCard } from "./assignedworkpagecard";
@@ -23,12 +23,15 @@ export default function AssignedWorkModal({
   onCancelSuccess,
 }: Props) {
   const { assignedWorks, isLoading, isError, error } = useAssign(open);
-  const [cancellingId, setCancellingId] = useState<string | null>(null);
   const { mutate: cancelWork, isPending: isCancelling } = useCancel();
 
   const { theme } = useTheme();
   const dark = theme === "dark";
   const navigate = useNavigate();
+
+  const [cancelingWorkId, setCancelingWorkId] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const works = Array.isArray(assignedWorks)
     ? assignedWorks
@@ -36,136 +39,160 @@ export default function AssignedWorkModal({
     ? [assignedWorks]
     : [];
 
-  /* ---------------- CANCEL ---------------- */
+  /* ---------------- OPEN CANCEL MODAL ---------------- */
   const handleCancel = (bookingId?: string) => {
-    if (!bookingId) return toast.error("Booking ID not found");
-    if (!window.confirm("Are you sure you want to cancel this booking?"))
+    if (!bookingId) {
+      toast.error("Booking ID not found");
       return;
+    }
 
-    setCancellingId(bookingId);
-    cancelWork(bookingId, {
-      onSuccess: () => onCancelSuccess?.(),
-      onSettled: () => setCancellingId(null),
-    });
+    setCancelingWorkId(bookingId);
+    setCancelReason("");
+    setShowCancelModal(true);
+  };
+
+  /* ---------------- CONFIRM CANCEL ---------------- */
+  const confirmCancel = () => {
+    if (!cancelingWorkId) return;
+
+    if (!cancelReason.trim()) {
+      toast.error("Please enter cancel reason");
+      return;
+    }
+
+    cancelWork(
+      {
+        bookingId: cancelingWorkId,
+        cancelReason,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Booking cancelled successfully");
+          onCancelSuccess?.();
+          setShowCancelModal(false);
+          setCancelReason("");
+          setCancelingWorkId(null);
+        },
+        onError: (err: any) => {
+          toast.error(err?.message || "Failed to cancel booking");
+        },
+        onSettled: () => {
+          setCancelingWorkId(null);
+        },
+      }
+    );
   };
 
   return (
-    <>
-      <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
-        <CommonModal.Content
-          className={`w-full h-[100dvh] sm:h-auto sm:max-w-3xl max-h-[100dvh] sm:max-h-[90vh] flex flex-col overflow-hidden rounded-none sm:rounded-2xl
-          ${dark ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"}`}
-        >
-          {/* HEADER */}
-          <CommonModal.Header
-            className={`sticky top-0 z-10 backdrop-blur-sm border-b px-4 sm:px-6 py-4 flex justify-between items-center
-            ${
-              dark
-                ? "bg-gray-900/90 border-gray-700"
-                : "bg-white/90 border-gray-200"
-            }`}
-          >
-            <div className="min-w-0">
-              <h2 className="text-lg sm:text-2xl font-bold">
-                Assigned Works
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-500">
-                Your accepted service bookings
-              </p>
+    <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
+      <CommonModal.Content
+        className={`w-full h-[100dvh] sm:h-auto sm:max-w-3xl max-h-[100dvh] sm:max-h-[90vh] flex flex-col overflow-hidden rounded-none sm:rounded-2xl
+        ${dark ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"}`}
+      >
+        {/* HEADER */}
+        <CommonModal.Header className="sticky top-0 z-10 border-b px-4 py-4 flex justify-between items-center">
+          <div>
+            <h2 className="text-lg sm:text-2xl font-bold">
+              Assigned Works
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500">
+              Your accepted service bookings
+            </p>
+          </div>
+
+          <Button onClick={onClose}>
+            <X />
+          </Button>
+        </CommonModal.Header>
+
+        {/* BODY */}
+        <CommonModal.Body className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+
+          {/* LOADING */}
+          {isLoading && (
+            <div className="flex flex-col items-center">
+              <Loader2 className="animate-spin" />
+              Loading...
             </div>
+          )}
 
-            <Button
-              onClick={onClose}
-              className={`p-2 rounded-lg sm:rounded-xl ${
-                dark
-                  ? "bg-gray-800 text-gray-300"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              <X className="h-5 w-5 sm:h-6 sm:w-6" />
-            </Button>
-          </CommonModal.Header>
+          {/* ERROR */}
+          {isError && (
+            <div className="text-red-500 text-center">
+              {error instanceof Error ? error.message : "Error"}
+            </div>
+          )}
 
-          {/* BODY */}
-          <CommonModal.Body className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4 sm:space-y-6">
-            {isLoading && (
-              <div className="flex flex-col items-center justify-center h-full">
-                <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 animate-spin text-blue-600" />
-                <p className="mt-3 text-sm text-gray-500">
-                  Loading assigned works...
-                </p>
-              </div>
-            )}
+          {/* EMPTY */}
+          {!isLoading && !isError && works.length === 0 && (
+            <div className="text-center text-gray-500">
+              No assigned work
+            </div>
+          )}
 
-            {isError && (
-              <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                <AlertCircle className="h-8 w-8 sm:h-10 sm:w-10 text-red-500" />
-                <p className="mt-3 font-semibold">
-                  Failed to load work
-                </p>
-                <p className="text-xs sm:text-sm text-red-500 break-words">
-                  {error instanceof Error
-                    ? error.message
-                    : "Unknown error"}
-                </p>
-              </div>
-            )}
+          {/* LIST */}
+          {works.map((work) => (
+            <WorkCard
+              key={work._id}
+              work={work}
+              dark={dark}
+              navigate={navigate}
+           
+              onCancel={handleCancel}
+              isCancelling={isCancelling}
+              cancelingWorkId={cancelingWorkId}
+            />
+          ))}
+        </CommonModal.Body>
 
-            {!isLoading && !isError && works.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full">
-                <Package className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
-                <p className="mt-3 text-sm font-semibold text-gray-500">
-                  No assigned work
-                </p>
-              </div>
-            )}
-
-            {!isLoading &&
-              !isError &&
-              works.map((work) => (
-                <WorkCard
-                  key={work._id}
-                  work={work}
-                  cancellingId={cancellingId}
-                  isCancelling={isCancelling}
-                  handleCancel={handleCancel}
-                  dark={dark}
-                  navigate={navigate}
-                  onClose={onClose}
-                />
-              ))}
-          </CommonModal.Body>
-
-          {/* FOOTER */}
-          <CommonModal.Footer
-            className={`sticky bottom-0 border-t px-4 sm:px-6 py-3 flex justify-between
-            ${
-              dark
-                ? "bg-gray-900 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
+        {/* FOOTER */}
+        <CommonModal.Footer className="flex justify-between border-t px-4 py-3">
+          <Button
+            onClick={() => {
+              onClose();
+              navigate("/availableWork");
+            }}
           >
-            {/* ✅ Open Work Button */}
-            <Button
-              onClick={() => {
-                onClose();
-                navigate("/availableWork");
-              }}
-              className="px-6 py-2 rounded-lg sm:rounded-xl font-medium bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Open Work
-            </Button>
+            Open Work
+          </Button>
 
-            {/* Close Button */}
-            <Button
-              onClick={onClose}
-              className="px-6 py-2 rounded-lg sm:rounded-xl font-medium"
-            >
-              Close
-            </Button>
-          </CommonModal.Footer>
-        </CommonModal.Content>
-      </CommonModal>
-    </>
+          <Button onClick={onClose}>Close</Button>
+        </CommonModal.Footer>
+
+        {/* CANCEL MODAL */}
+        {showCancelModal && (
+          <CommonModal open={showCancelModal} onOpenChange={setShowCancelModal}>
+            <CommonModal.Content className="p-6 max-w-md">
+              <h2 className="text-lg font-bold mb-3">
+                Cancel Booking
+              </h2>
+
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Enter cancel reason..."
+                className="w-full border rounded-lg p-3 min-h-[120px]"
+              />
+
+              <div className="flex justify-end gap-3 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCancelModal(false)}
+                >
+                  Close
+                </Button>
+
+                <Button
+                  onClick={confirmCancel}
+                  className="bg-red-600 text-white"
+                >
+                  Confirm Cancel
+                </Button>
+              </div>
+            </CommonModal.Content>
+          </CommonModal>
+        )}
+      </CommonModal.Content>
+    </CommonModal>
   );
 }

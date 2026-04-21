@@ -15,22 +15,20 @@ import { ActionButtons } from "./actionbuttonspageassignedwork";
 
 type WorkCardProps = {
   work: Work;
-  cancellingId: string | null;
-  isCancelling: boolean;
-  handleCancel: (id?: string) => void;
   dark: boolean;
   navigate: (path: string) => void;
-  onClose: () => void;
+  onCancel: (bookingId?: string) => void;
+  isCancelling?: boolean;
+  cancelingWorkId?: string | null;
 };
 
 export const WorkCard = ({
   work,
-  cancellingId,
-  isCancelling,
-  handleCancel,
   dark,
   navigate,
-  onClose,
+  onCancel,
+  isCancelling,
+  cancelingWorkId,
 }: WorkCardProps) => {
   return (
     <div
@@ -48,7 +46,7 @@ export const WorkCard = ({
         </div>
 
         <div
-          className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl border text-xs sm:text-sm ${getStatusColor(
+          className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg border text-xs sm:text-sm ${getStatusColor(
             work.status
           )}`}
         >
@@ -148,12 +146,11 @@ export const WorkCard = ({
       <div className="pt-2">
         <ActionButtons
           work={work}
-          cancellingId={cancellingId}
-          isCancelling={isCancelling}
-          handleCancel={handleCancel}
           dark={dark}
           navigate={navigate}
-          onClose={onClose}
+          onCancel={onCancel}
+          isCancelling={isCancelling}
+          cancelingWorkId={cancelingWorkId}
         />
       </div>
     </div>

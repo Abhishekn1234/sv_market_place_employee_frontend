@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CommonCard } from "@/components/common/CommonCard";
 import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
 import { useLanguage } from "@/context/LanguageContext";
@@ -18,207 +18,155 @@ export default function AvailableWorkPage() {
   const cancelMutation = useCancel();
 
   const isRTL = language === "AR";
+  const { accessToken } = useAuthStore();
 
   const [workList, setWorkList] = useState<any[]>([]);
   const [selectedWork, setSelectedWork] = useState<any>(null);
   const [modalType, setModalType] = useState<
     "start" | "complete" | "verify" | null
   >(null);
+
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
-  const {accessToken}=useAuthStore();
+
+  // ---------------- NORMALIZE ----------------
+  const normalizeWork = (data: any) => {
+    const status = (data.status || "").toUpperCase();
+
+    return {
+      ...data,
+      status,
+      workStartedAt:
+        ["COMPLETED", "CANCELLED"].includes(status)
+          ? null
+          : data.workStartedAt,
+    };
+  };
+
+  // ---------------- UPDATE WORK (MAIN STATE ENGINE) ----------------
+  const updateWork = useCallback((updated: any) => {
+    setWorkList((prev) => {
+      const status = updated.status?.toUpperCase();
+
+      // ❌ REMOVE ON CANCEL
+      if (["CANCELLED", "WORKER_CANCELLED"].includes(status)) {
+        return prev.filter((w) => w._id !== updated._id);
+      }
+
+      return prev.map((w) =>
+        w._id === updated._id
+          ? {
+              ...w,
+              ...updated,
+              booking: {
+                ...w.booking,
+                ...updated.booking,
+              },
+            }
+          : w
+      );
+    });
+  }, []);
+
+  // ---------------- SOCKET ----------------
   useEffect(() => {
     if (!accessToken) return;
-  const socket = initializeSocket("/workers/assigned-updates", accessToken);
 
-  socket.connect();
+    const socket = initializeSocket("/workers/assigned-updates", accessToken);
+    socket.connect();
 
-  const handleEvent = (payload: any) => {
-    const event = payload?.event;
-    const data = payload?.data;
+    const handler = (payload: any) => {
+      const event = payload?.event;
+      const data = payload?.data;
 
-    if (!event || !data?._id) return;
+      if (!event || !data?._id) return;
 
-    switch (event) {
-      case "booking.worker.accepted":
-        updateWork(data);
-        break;
+      switch (event) {
+        case "booking.worker.accepted":
+        case "booking.worker.rejected":
+        case "booking.work.started":
+        case "booking.work.completed-by-worker":
+        case "booking.completion.confirmed":
+        case "booking.dispute.created":
+        case "booking.dispute.responded":
+        case "booking.dispute.resolved":
+          updateWork(normalizeWork(data));
+          break;
 
-      case "booking.worker.rejected":
-        setWorkList((prev) =>
-          prev.filter((w) => w._id !== data._id)
-        );
-        break;
+        default:
+          console.log("Unhandled event:", event);
+      }
+    };
 
-      case "booking.work.started":
-        updateWork({
-          ...data,
-          status: "IN_PROGRESS",
-          workStartedAt: data.workStartedAt || new Date().toISOString(),
-        });
-        break;
+    socket.on("booking.events", handler);
 
-      case "booking.work.completed-by-worker":
-        updateWork({
-          ...data,
-          status: "WORK_COMPLETED_PENDING",
-        });
-        break;
+    return () => {
+      socket.off("booking.events", handler);
+      socket.disconnect();
+    };
+  }, [accessToken, updateWork]);
 
-      case "booking.completion.confirmed":
-        updateWork({
-          ...data,
-          status: "COMPLETED",
-        });
-        break;
-
-      case "booking.dispute.created":
-      case "booking.dispute.responded":
-      case "booking.dispute.resolved":
-        updateWork(data);
-        break;
-
-      default:
-        console.log("Unhandled event:", event);
-    }
-  };
-
-  socket.on("booking.events", handleEvent);
-
-  return () => {
-    socket.off("booking.events", handleEvent);
-    socket.disconnect();
-  };
-}, [accessToken]);
-
-  /* ---------------- INIT WORK LIST ---------------- */
+  // ---------------- INIT LIST ----------------
   useEffect(() => {
-  if (!assignedWorks) return;
+    if (!assignedWorks) return;
+    setWorkList(assignedWorks);
+  }, [assignedWorks]);
 
-  setWorkList((prev) => {
-    return assignedWorks.map((newWork: any) => {
-      const existing = prev.find((w) => w._id === newWork._id);
-
-      return existing
-        ? {
-            ...newWork,
-            ...existing, // ✅ keep optimistic updates
-          }
-        : newWork;
-    });
-  });
-}, [assignedWorks]);
-
-  /* ---------------- TIMER LOGIC ---------------- */
+  // ---------------- TIMER ----------------
   useEffect(() => {
     const interval = setInterval(() => {
       const updated: Record<string, string> = {};
 
       workList.forEach((w) => {
-        const workStatus = w.status?.toUpperCase();
-        const bookingStatus = w.booking?.status?.toUpperCase();
+        const status = w.status?.toUpperCase();
 
-        const isInProgress =
-          ["STARTED", "IN_PROGRESS"].includes(workStatus) &&
-          !["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(
-            bookingStatus
-          );
+        const isRunning =
+          ["STARTED", "IN_PROGRESS"].includes(status) &&
+          !["COMPLETED", "CANCELLED"].includes(status);
 
-        if (!isInProgress) return;
+        if (!isRunning) return;
 
         const startedAt =
-          w.workStartedAt ||
-          w.startedAt ||
-          w.booking?.workStartedAt;
+          w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
 
         if (!startedAt) return;
 
-        const startedTime = new Date(startedAt).getTime();
-        const now = Date.now();
-        let elapsed = now - startedTime;
+        const start = new Date(startedAt).getTime();
+        let diff = Date.now() - start;
 
-        if (elapsed < 0) elapsed = 0;
+        const max =
+          w.booking?.pricingMode === "HOURLY"
+            ? (w.booking?.schedule?.estimatedHours ?? 0) * 3600000
+            : (w.booking?.schedule?.estimatedDays ?? 0) * 24 * 3600000;
 
-        let maxDuration = Infinity;
+        if (max && diff > max) diff = max;
 
-        if (w.booking?.pricingMode === "HOURLY") {
-          maxDuration =
-            (w.booking?.schedule?.estimatedHours ?? 0) *
-            60 *
-            60 *
-            1000;
-        } else if (w.booking?.pricingMode === "PER_DAY") {
-          maxDuration =
-            (w.booking?.schedule?.estimatedDays ?? 0) *
-            24 *
-            60 *
-            60 *
-            1000;
-        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
 
-        if (elapsed > maxDuration) elapsed = maxDuration;
-
-        const h = Math.floor(elapsed / 3600000);
-        const m = Math.floor((elapsed % 3600000) / 60000);
-        const s = Math.floor((elapsed % 60000) / 1000);
-
-        updated[w._id] = `${String(h).padStart(2, "0")}:${String(
-          m
-        ).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        updated[w._id] =
+          `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
       });
 
       setTimers(updated);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [workList]); // ✅ FIXED
+  }, [workList]);
 
-  /* ---------------- UPDATE WORK ---------------- */
-  const updateWork = (updated: any) => {
-  setWorkList((prev) => {
-    const status = updated.status?.toUpperCase();
-
-    // 🔥 handle all cancel cases
-    if (["CANCELLED", "WORKER_CANCELLED"].includes(status)) {
-      return prev.filter((w) => w._id !== updated._id);
-    }
-
-    return prev.map((w) =>
-      w._id === updated._id
-        ? {
-            ...w,
-            ...updated,
-            booking: {
-              ...w.booking,
-              ...updated.booking,
-            },
-            workStartedAt: [
-              "COMPLETED",
-              "WORKER_CANCELLED",
-              "CANCELLED",
-              "WORK_COMPLETED_PENDING",
-            ].includes(status)
-              ? null
-              : updated.workStartedAt ?? w.workStartedAt,
-          }
-        : w
-    );
-  });
-};
-
-  /* ---------------- START WORK (🔥 FIXED) ---------------- */
+  // ---------------- MODALS ----------------
   const handleStartWork = (work: any) => {
-    // ✅ Optimistic update → timer starts immediately
     updateWork({
       _id: work._id,
       status: "IN_PROGRESS",
       workStartedAt: new Date().toISOString(),
     });
 
-    openModal(work, "start");
+    setSelectedWork(work);
+    setModalType("start");
   };
 
-  /* ---------------- MODAL HANDLERS ---------------- */
   const openModal = (work: any, type: any) => {
     setSelectedWork({ ...work, bookingId: work.booking?._id });
     setModalType(type);
@@ -229,7 +177,7 @@ export default function AvailableWorkPage() {
     setModalType(null);
   };
 
-  /* ---------------- UI ---------------- */
+  // ---------------- UI ----------------
   return (
     <CommonCard
       title={translations?.sidebar.availableWork || "Available Work"}

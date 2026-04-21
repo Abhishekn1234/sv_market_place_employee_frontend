@@ -29,7 +29,7 @@ export function useWorkColumns({
 }: Props): TableColumn<Work>[] {
   const { translations, t } = useLanguage();
   const [locations, setLocations] = useState<Record<string, string>>({});
-  const { mutate: cancelWorkMutation } = useCancel();
+
   const { theme } = useTheme();
   const WorkHistory = translations.workHistory.tableHeaders;
 
@@ -214,6 +214,38 @@ export function useWorkColumns({
         </span>
       );
     }
+    const [openCancel, setOpenCancel] = useState(false);
+    const [reason, setReason] = useState("");
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+
+    const cancelWorkMutation = useCancel();
+
+    const handleCancelClick = () => {
+      if (!selectedId) return;
+
+      if (!reason.trim()) {
+        toast.error("Cancel reason required");
+        return;
+      }
+
+      cancelWorkMutation.mutate(
+        {
+          bookingId: selectedId,
+          cancelReason: reason,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Cancelled successfully");
+            setOpenCancel(false);
+            setReason("");
+            setSelectedId(null);
+          },
+          onError: (err: any) => {
+            toast.error(err?.message || "Cancel failed");
+          },
+        }
+      );
+    };
 
     // ✅ WORK_COMPLETED_PENDING → Show ONLY Verify OTP
     if (bookingStatus === "WORK_COMPLETED_PENDING") {
@@ -254,19 +286,44 @@ export function useWorkColumns({
         </Button>
 
         <Button
-          size="sm"
-          variant="destructive"
-          onClick={() => {
-            if (!w.booking?.id) {
-              toast.error("Booking not found");
-              return;
-            }
-            cancelWorkMutation(w.booking.id);
-          }}
-        >
-          {t("workHistory.actions.cancel")}
-        </Button>
+                size="sm"
+                variant="destructive"
+                onClick={() => {
+                  setSelectedId(w.booking?.id);
+                  setOpenCancel(true);
+                }}
+              >
+                {t("workHistory.actions.cancel")}
+              </Button>
+                {openCancel && selectedId === w.booking?.id && (
+          <div className="p-3 border rounded bg-gray-50 dark:bg-gray-900">
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Enter cancel reason..."
+              className="w-full border p-2 rounded mb-2"
+            />
+
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleCancelClick}>
+                Confirm
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setOpenCancel(false);
+                  setReason("");
+                }}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+      
     );
   },
 }
