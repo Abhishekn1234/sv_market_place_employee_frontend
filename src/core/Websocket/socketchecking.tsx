@@ -12,6 +12,8 @@ import { useBookingSocket } from "./presentation/utils/socketlogic";
 import { parseLocation } from "./presentation/utils/locationparser";
 import { BookingCard } from "./presentation/components/BookingCard";
 import { X } from "lucide-react";
+import { getSocket } from "./presentation/components/socket";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   open: boolean;
@@ -32,26 +34,35 @@ export default function SocketBookingsModal({
   const navigate = useNavigate();
   const { theme } = useTheme();
   const dark = theme === "dark";
-
+  const queryClient = useQueryClient();
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
 
  useBookingSocket();
 
   const handleAccept = (id: string) => {
-    setSelectedBooking(id);
+  setSelectedBooking(id);
 
-    acceptBooking(
-      { bookingId: id, bookingStatus: "WORKER_ACCEPTED" },
-      {
-        onSuccess: () => {
-          removeBooking(id);
-          onClose();
-          onBookingAccepted?.();
-          navigate("/availableWork");
-        },
-      }
-    );
-  };
+  acceptBooking(
+    { bookingId: id, bookingStatus: "WORKER_ACCEPTED" },
+    {
+      onSuccess: () => {
+        // 1. instant UI update (remove from list immediately)
+        queryClient.setQueryData(["availableBookings"], (old: any = []) =>
+          old.filter((b: any) => b._id !== id)
+        );
+
+        // 2. optional: notify other devices via socket
+        const socket = getSocket("/workers/requests");
+        socket?.emit("booking.worker.accepted", { bookingId: id });
+
+        // 3. UI actions
+        onClose();
+        onBookingAccepted?.();
+        navigate("/availableWork");
+      },
+    }
+  );
+};
 
   const handleReload = () => refetch();
 

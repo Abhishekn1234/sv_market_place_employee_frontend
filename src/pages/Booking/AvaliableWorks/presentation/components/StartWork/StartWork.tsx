@@ -38,20 +38,22 @@ export default function StartWork({ work, open, onClose,onWorkStarted }: Props) 
       otp: otpStr,
     },
     {
-      onSuccess: (data) => {
+      onSuccess: (_data) => {
+        // toast.success("Work Started");
+
+        // // ✅ Send correct updated work
+        // // onWorkStarted?.({
+        // //       ...work,
+        // //       status: "IN_PROGRESS",
+        // //       workStartedAt: data?.startedAt,
+        // //       booking: {
+        // //         ...work.booking,
+        // //         status: "IN_PROGRESS", // 🔥 CRITICAL
+        // //       },
+        // //     });
+
+        // onClose();
         toast.success("Work Started");
-
-        // ✅ Send correct updated work
-        onWorkStarted?.({
-              ...work,
-              status: "IN_PROGRESS",
-              workStartedAt: data?.startedAt,
-              booking: {
-                ...work.booking,
-                status: "IN_PROGRESS", // 🔥 CRITICAL
-              },
-            });
-
         onClose();
       },
       onError: (err: any) => {

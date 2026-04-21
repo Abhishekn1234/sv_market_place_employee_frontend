@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { StartWorkRepoImpl } from "../../data/repositories/StartWorkRepoImpl";
 import { StartWorkUsecase } from "../../domain/usecase/StartWorkUsecase";
 import type { Startworkrequest } from "../../domain/entities/startwork";
@@ -6,39 +6,17 @@ import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/b
 import { toast } from "react-toastify";
 
 export const useStartWork = () => {
-  const queryClient = useQueryClient();
-
   const repo = new StartWorkRepoImpl();
   const usecase = new StartWorkUsecase(repo);
 
   return useMutation<Booking, any, Startworkrequest>({
     mutationKey: ["startWork"],
 
-    mutationFn: (request: Startworkrequest) =>
-      usecase.execute(request),
+    mutationFn: (request) => usecase.execute(request),
 
-    onSuccess: (updatedBooking, variables) => {
+    onSuccess: () => {
+      // ONLY UI feedback
       toast.success("Work started successfully");
-      console.log(updatedBooking);
-
-    
-      queryClient.setQueryData(["work-history"], (oldData: any) => {
-        if (!oldData) return oldData;
-
-        return oldData.map((work: any) => {
-          if (work.booking?._id === variables.bookingId) {
-            return {
-              ...work,
-              status: "STARTED",
-              booking: {
-                ...work.booking,
-                status: "IN_PROGRESS",
-              },
-            };
-          }
-          return work;
-        });
-      });
     },
 
     onError: (error: any) => {

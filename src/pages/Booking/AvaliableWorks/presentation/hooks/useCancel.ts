@@ -17,8 +17,13 @@ export function useCancel(_addBooking?: (booking: GetBooking) => void) {
     onSuccess: (cancelledBooking) => {
   queryClient.setQueryData<GetBooking[]>(
     ["assigned-works"],
-    (old = []) =>
-      old.filter((b) => b._id !== cancelledBooking._id) // ✅ REMOVE
+    (old) => {
+      const safeOld = Array.isArray(old) ? old : [];
+
+      return safeOld.filter(
+        (b) => b._id !== cancelledBooking._id
+      );
+    }
   );
 
   toast.success("Booking cancelled successfully");

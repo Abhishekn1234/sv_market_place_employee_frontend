@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { CommonCard } from "@/components/common/CommonCard";
 import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
 import { useLanguage } from "@/context/LanguageContext";
@@ -8,8 +8,8 @@ import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/u
 import { useCancel } from "./hooks/useCancel";
 import WorkGrid from "./components/WorkGrid";
 import WorkModals from "./components/WorkModals";
-import { initializeSocket } from "@/core/Websocket/presentation/components/socket";
-import { useAuthStore } from "@/core/store/auth";
+import { useBookingSocket } from "@/core/Websocket/presentation/utils/socketlogic";
+// import { useAuthStore } from "@/core/store/auth";
 
 export default function AvailableWorkPage() {
   const { assignedWorks } = useAssign();
@@ -18,144 +18,106 @@ export default function AvailableWorkPage() {
   const cancelMutation = useCancel();
 
   const isRTL = language === "AR";
-  const { accessToken } = useAuthStore();
 
   const [workList, setWorkList] = useState<any[]>([]);
   const [selectedWork, setSelectedWork] = useState<any>(null);
   const [modalType, setModalType] = useState<
     "start" | "complete" | "verify" | null
   >(null);
-
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
 
-  // ---------------- NORMALIZE ----------------
-  const normalizeWork = (data: any) => {
-    const status = (data.status || "").toUpperCase();
+  const workRef = useRef<any[]>([]);
+  workRef.current = workList;
 
-    return {
-      ...data,
-      status,
-      workStartedAt:
-        ["COMPLETED", "CANCELLED"].includes(status)
-          ? null
-          : data.workStartedAt,
-    };
-  };
-
-  // ---------------- UPDATE WORK (MAIN STATE ENGINE) ----------------
-  const updateWork = useCallback((updated: any) => {
-    setWorkList((prev) => {
-      const status = updated.status?.toUpperCase();
-
-      // ❌ REMOVE ON CANCEL
-      if (["CANCELLED", "WORKER_CANCELLED"].includes(status)) {
-        return prev.filter((w) => w._id !== updated._id);
-      }
-
-      return prev.map((w) =>
-        w._id === updated._id
-          ? {
-              ...w,
-              ...updated,
-              booking: {
-                ...w.booking,
-                ...updated.booking,
-              },
-            }
-          : w
-      );
-    });
-  }, []);
-
-  // ---------------- SOCKET ----------------
-  useEffect(() => {
-    if (!accessToken) return;
-
-    const socket = initializeSocket("/workers/assigned-updates", accessToken);
-    socket.connect();
-
-    const handler = (payload: any) => {
-      const event = payload?.event;
-      const data = payload?.data;
-
-      if (!event || !data?._id) return;
-
-      switch (event) {
-        case "booking.worker.accepted":
-        case "booking.worker.rejected":
-        case "booking.work.started":
-        case "booking.work.completed-by-worker":
-        case "booking.completion.confirmed":
-        case "booking.dispute.created":
-        case "booking.dispute.responded":
-        case "booking.dispute.resolved":
-          updateWork(normalizeWork(data));
-          break;
-
-        default:
-          console.log("Unhandled event:", event);
-      }
-    };
-
-    socket.on("booking.events", handler);
-
-    return () => {
-      socket.off("booking.events", handler);
-      socket.disconnect();
-    };
-  }, [accessToken, updateWork]);
-
-  // ---------------- INIT LIST ----------------
+  /* ---------------- INIT WORK LIST ---------------- */
   useEffect(() => {
     if (!assignedWorks) return;
-    setWorkList(assignedWorks);
-  }, [assignedWorks]);
 
-  // ---------------- TIMER ----------------
+    setWorkList((prev) =>
+      assignedWorks.map((newWork: any) => {
+        const existing = prev.find((w) => w._id === newWork._id);
+
+        return existing
+          ? {
+              ...newWork,
+              ...existing,
+            }
+          : newWork;
+      })
+    );
+  }, [assignedWorks]);
+  
+ useBookingSocket();
+  /* ---------------- TIMER LOGIC ---------------- */
   useEffect(() => {
     const interval = setInterval(() => {
       const updated: Record<string, string> = {};
 
-      workList.forEach((w) => {
-        const status = w.status?.toUpperCase();
+      workRef.current.forEach((w) => {
+        const workStatus = w.status?.toUpperCase();
+        const bookingStatus = w.booking?.status?.toUpperCase();
 
-        const isRunning =
-          ["STARTED", "IN_PROGRESS"].includes(status) &&
-          !["COMPLETED", "CANCELLED"].includes(status);
+        const isInProgress =
+          ["STARTED", "IN_PROGRESS"].includes(workStatus) &&
+          !["COMPLETED", "CANCELLED", "WORK_COMPLETED_PENDING"].includes(
+            bookingStatus
+          );
 
-        if (!isRunning) return;
+        if (!isInProgress) return;
 
         const startedAt =
           w.workStartedAt || w.startedAt || w.booking?.workStartedAt;
 
         if (!startedAt) return;
 
-        const start = new Date(startedAt).getTime();
-        let diff = Date.now() - start;
+        const elapsed = Math.max(
+          0,
+          Date.now() - new Date(startedAt).getTime()
+        );
 
-        const max =
-          w.booking?.pricingMode === "HOURLY"
-            ? (w.booking?.schedule?.estimatedHours ?? 0) * 3600000
-            : (w.booking?.schedule?.estimatedDays ?? 0) * 24 * 3600000;
-
-        if (max && diff > max) diff = max;
-
-        const h = Math.floor(diff / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
+        const h = Math.floor(elapsed / 3600000);
+        const m = Math.floor((elapsed % 3600000) / 60000);
+        const s = Math.floor((elapsed % 60000) / 1000);
 
         updated[w._id] =
-          `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+          `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(
+            s
+          ).padStart(2, "0")}`;
       });
 
       setTimers(updated);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [workList]);
+  }, []);
 
-  // ---------------- MODALS ----------------
+  /* ---------------- UPDATE WORK ---------------- */
+  const updateWork = useCallback((updated: any) => {
+    setWorkList((prev) =>
+      prev.map((w) => {
+        if (w._id !== updated._id) return w;
+
+        return {
+          ...w,
+          ...updated,
+          booking: {
+            ...w.booking,
+            ...updated.booking,
+          },
+          workStartedAt: [
+            "COMPLETED",
+            "CANCELLED",
+            "WORK_COMPLETED_PENDING",
+          ].includes(updated.status?.toUpperCase())
+            ? null
+            : updated.workStartedAt ?? w.workStartedAt,
+        };
+      })
+    );
+  }, []);
+
+  /* ---------------- START WORK ---------------- */
   const handleStartWork = (work: any) => {
     updateWork({
       _id: work._id,
@@ -163,10 +125,10 @@ export default function AvailableWorkPage() {
       workStartedAt: new Date().toISOString(),
     });
 
-    setSelectedWork(work);
-    setModalType("start");
+    openModal(work, "start");
   };
 
+  /* ---------------- MODAL HANDLERS ---------------- */
   const openModal = (work: any, type: any) => {
     setSelectedWork({ ...work, bookingId: work.booking?._id });
     setModalType(type);
@@ -177,7 +139,7 @@ export default function AvailableWorkPage() {
     setModalType(null);
   };
 
-  // ---------------- UI ----------------
+  /* ---------------- UI ---------------- */
   return (
     <CommonCard
       title={translations?.sidebar.availableWork || "Available Work"}
