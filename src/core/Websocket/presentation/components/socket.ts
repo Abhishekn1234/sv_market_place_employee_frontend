@@ -1,11 +1,17 @@
 import { io, Socket } from "socket.io-client";
 import { baseURL } from "@/api/apiConfig";
 
-let socket: Socket | null = null;
+const sockets: Record<string, Socket> = {};
 
-export const initializeSocket = (token?: string) => {
-  if (!socket) {
-    socket = io(`${baseURL}/workers`, {
+/**
+ * Initialize or return existing socket for a namespace
+ */
+export const initializeSocket = (
+  namespace: "/workers/requests" | "/workers/assigned-updates",
+  token?: string
+) => {
+  if (!sockets[namespace]) {
+    sockets[namespace] = io(`${baseURL}${namespace}`, {
       transports: ["websocket"],
       autoConnect: false,
       reconnection: true,
@@ -13,9 +19,14 @@ export const initializeSocket = (token?: string) => {
     });
   }
 
-  return socket;
+  return sockets[namespace];
 };
 
-export const getSocket = () => {
-  return socket;
+/**
+ * Get already created socket
+ */
+export const getSocket = (
+  namespace: "/workers/requests" | "/workers/assigned-updates"
+) => {
+  return sockets[namespace];
 };

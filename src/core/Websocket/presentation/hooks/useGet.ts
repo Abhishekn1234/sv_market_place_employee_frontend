@@ -1,73 +1,51 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import type { GetBooking } from "../../domain/entities/getrepo";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BookingRepositoryImpl } from "../../data/repositories/GetRepoImpl";
 import { GetAvailableBookingsUseCase } from "../../domain/usecase/GetWorkUsecase";
 
 export function useAvailableBookings() {
-  const [bookings, setBookings] = useState<GetBooking[]>([]);
-  const idsRef = useRef<Set<string>>(new Set());
+  const queryClient = useQueryClient();
 
-  const repoRef = useRef(new BookingRepositoryImpl());
-  const usecaseRef = useRef(
-    new GetAvailableBookingsUseCase(repoRef.current)
-  );
+  const repo = new BookingRepositoryImpl();
+  const usecase = new GetAvailableBookingsUseCase(repo);
 
-  // ✅ REUSABLE FETCH
-  const fetchBookings = useCallback(async () => {
-    try {
-      const res = await usecaseRef.current.execute();
+  // ✅ FETCH BOOKINGS
+  const { data = [], isLoading, refetch } = useQuery({
+    queryKey: ["availableBookings"],
+    queryFn: async () => {
+      const res = await usecase.execute();
+      return res.data;
+    },
+  });
 
-      idsRef.current.clear();
-
-      res.data.forEach((b) => idsRef.current.add(b._id));
-
-      setBookings(res.data);
-    } catch (err) {
-      console.error("Failed to fetch bookings", err);
-    }
-  }, []);
-
-  // ✅ INITIAL LOAD
-  useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
-
+  // ✅ REMOVE
   const removeBooking = (id: string) => {
-    idsRef.current.delete(id);
-    setBookings((prev) => prev.filter((b) => b._id !== id));
-  };
-
-  const addBooking = (booking: GetBooking) => {
-    setBookings((prev) => {
-      const exists = prev.find((b) => b._id === booking._id);
-
-      if (exists) {
-        return prev.map((b) =>
-          b._id === booking._id ? { ...b, ...booking } : b
-        );
-      } else {
-        idsRef.current.add(booking._id);
-        return [booking, ...prev];
-      }
-    });
-  };
-
-  const updateBooking = (
-    id: string,
-    updatedFields: Partial<GetBooking>
-  ) => {
-    setBookings((prev) =>
-      prev.map((b) =>
-        b._id === id ? { ...b, ...updatedFields } : b
-      )
+    queryClient.setQueryData(["availableBookings"], (old: any = []) =>
+      old.filter((b: any) => b._id !== id)
     );
   };
 
+  // ✅ ADD / UPDATE (used by socket)
+  const addBooking = (booking: any) => {
+    queryClient.setQueryData(["availableBookings"], (old: any = []) => {
+      if (!Array.isArray(old)) return [booking];
+
+      const exists = old.find((b: any) => b._id === booking._id);
+
+      if (exists) {
+        return old.map((b: any) =>
+          b._id === booking._id ? { ...b, ...booking } : b
+        );
+      }
+
+      return [booking, ...old];
+    });
+  };
+
   return {
-    bookings,
+    bookings: data,
+    isLoading,
+    refetch,
     removeBooking,
     addBooking,
-    updateBooking,
-    fetchBookings, // ✅ IMPORTANT
   };
 }

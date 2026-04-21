@@ -4,8 +4,12 @@ import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/worke
 export interface Worker {
   categoryIds?: string[];
   serviceTierIds?: string[];
-  location?: GeoPoint;
-  locationMode?: "CURRENT" | "MANUAL";
+
   status?: WorkerStatus;
-  serviceRadius?:number;
+
+  location?: GeoPoint;
+
+  locationMode?: "CURRENT" | "MANUAL"; // optional (not in API but ok for UI)
+
+  serviceRadius?: number;
 }

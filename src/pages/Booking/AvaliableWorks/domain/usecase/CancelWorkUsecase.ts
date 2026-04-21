@@ -1,3 +1,4 @@
+import type { CancelWork } from "../entities/cancelwork";
 import type { CancelWorkRepo } from "../repositories/cancelworkrepo";
 
 export class CancelWorkUsecase{
@@ -5,7 +6,7 @@ export class CancelWorkUsecase{
     constructor(cancelworkrepo:CancelWorkRepo){
         this.cancelworkrepo=cancelworkrepo;
     }
-    async execute(bookingId:string){
-        return await this.cancelworkrepo.cancelWork(bookingId);
+    async execute(data:CancelWork){
+        return await this.cancelworkrepo.cancelWork(data);
     }
 }

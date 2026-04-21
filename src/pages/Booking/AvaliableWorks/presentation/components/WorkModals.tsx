@@ -3,6 +3,7 @@ import CompleteWork from "@/pages/Booking/AvaliableWorks/presentation/components
 import VerifyOtpModal from "@/pages/Booking/AvaliableWorks/presentation/components/VerifyOtpModal/VerifyOtpModal";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
+import type { GetBooking } from "@/core/Websocket/domain/entities/getrepo";
 
 export default function WorkModals({
   selectedWork,
@@ -14,11 +15,25 @@ export default function WorkModals({
   cancelMutation,
 }: any) {
   const handleCancelYes = () => {
-    cancelMutation.mutate(cancelConfirmWork.bookingId, {
-      onSuccess: updateWork,
+  if (!cancelConfirmWork?.bookingId) return;
+
+  cancelMutation.mutate(
+    {
+      bookingId: cancelConfirmWork.bookingId,
+      cancelReason: cancelConfirmWork.cancelledReason,
+    },
+    {
+      onSuccess: (data:GetBooking) => {
+        
+        updateWork({
+          ...data,
+          status: "WORKER_CANCELLED",
+        });
+      },
       onSettled: () => setCancelConfirmWork(null),
-    });
-  };
+    }
+  );
+};
 
   return (
     <>
@@ -48,6 +63,27 @@ export default function WorkModals({
 
             <CommonModal.Body>
               Cancel work for {cancelConfirmWork.customer?.fullName}?
+
+              <div className="mt-4">
+                <label htmlFor="reason" className="block text-sm font-medium mb-1">
+                  Reason for cancellation
+                </label>
+               <textarea
+  id="reason"
+  rows={3}
+  value={cancelConfirmWork?.cancelledReason || ""}
+  onChange={(e) =>
+    setCancelConfirmWork((prev: any) => ({
+      ...prev,
+      cancelledReason: e.target.value,
+    }))
+  }
+  placeholder="Enter reason for cancellation..."
+  className="w-full p-3 text-sm border border-gray-300 rounded-lg shadow-sm resize-none
+             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+             transition"
+/>
+              </div>
             </CommonModal.Body>
 
             <CommonModal.Footer>

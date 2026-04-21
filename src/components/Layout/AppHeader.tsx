@@ -60,8 +60,8 @@ export default function AppHeader({
   const isRTL = language === "AR";
 
   const isOnline = workerStatus === "ONLINE";
-  const canToggle =
-    workerStatus === "ONLINE" || workerStatus === "OFFLINE";
+  // const canToggle =
+  //   workerStatus === "ONLINE" || workerStatus === "OFFLINE";
 
 const handleToggle = (checked: boolean) => {
   updateStatus(checked);
@@ -99,36 +99,25 @@ const handleToggle = (checked: boolean) => {
 
       <div className="flex items-center gap-4">
         {/* 🔹 Worker Status */}
-        {workerStatus && (
-          <div
-            className={`flex items-center gap-3 ${
-              isRTL ? "flex-row-reverse" : ""
-            }`}
-          >
-            {canToggle ? (
-              <>
-                <Switch
-                  checked={isOnline}
-                  onCheckedChange={handleToggle}
-                  disabled={loading}
-                />
-                <span
-                  className={`text-sm font-medium ${
-                    isOnline ? "text-green-600" : "text-gray-500"
-                  }`}
-                >
-                  {isOnline
-                    ? homeTranslations.online
-                    : homeTranslations.offline}
-                </span>
-              </>
-            ) : (
-              <span className="text-sm font-semibold text-orange-600">
-                {workerStatus.replace("_", " ")}
-              </span>
-            )}
-          </div>
-        )}
+       <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+  <Switch
+    checked={isOnline}
+    onCheckedChange={handleToggle}
+    disabled={loading || !workerStatus} // disable until loaded
+  />
+
+  <span
+    className={`text-sm font-medium ${
+      isOnline ? "text-green-600" : "text-gray-500"
+    }`}
+  >
+    {workerStatus
+      ? isOnline
+        ? homeTranslations.online
+        : homeTranslations.offline
+      : "Loading..."}
+  </span>
+</div>
 
         {/* 🔹 Theme Toggle */}
         <Button variant="ghost" onClick={toggleTheme} className="p-2">

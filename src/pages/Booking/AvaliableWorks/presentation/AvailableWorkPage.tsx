@@ -8,6 +8,8 @@ import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/u
 import { useCancel } from "./hooks/useCancel";
 import WorkGrid from "./components/WorkGrid";
 import WorkModals from "./components/WorkModals";
+import { initializeSocket } from "@/core/Websocket/presentation/components/socket";
+import { useAuthStore } from "@/core/store/auth";
 
 export default function AvailableWorkPage() {
   const { assignedWorks } = useAssign();
@@ -24,6 +26,70 @@ export default function AvailableWorkPage() {
   >(null);
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
+  const {accessToken}=useAuthStore();
+  useEffect(() => {
+    if (!accessToken) return;
+  const socket = initializeSocket("/workers/assigned-updates", accessToken);
+
+  socket.connect();
+
+  const handleEvent = (payload: any) => {
+    const event = payload?.event;
+    const data = payload?.data;
+
+    if (!event || !data?._id) return;
+
+    switch (event) {
+      case "booking.worker.accepted":
+        updateWork(data);
+        break;
+
+      case "booking.worker.rejected":
+        setWorkList((prev) =>
+          prev.filter((w) => w._id !== data._id)
+        );
+        break;
+
+      case "booking.work.started":
+        updateWork({
+          ...data,
+          status: "IN_PROGRESS",
+          workStartedAt: data.workStartedAt || new Date().toISOString(),
+        });
+        break;
+
+      case "booking.work.completed-by-worker":
+        updateWork({
+          ...data,
+          status: "WORK_COMPLETED_PENDING",
+        });
+        break;
+
+      case "booking.completion.confirmed":
+        updateWork({
+          ...data,
+          status: "COMPLETED",
+        });
+        break;
+
+      case "booking.dispute.created":
+      case "booking.dispute.responded":
+      case "booking.dispute.resolved":
+        updateWork(data);
+        break;
+
+      default:
+        console.log("Unhandled event:", event);
+    }
+  };
+
+  socket.on("booking.events", handleEvent);
+
+  return () => {
+    socket.off("booking.events", handleEvent);
+    socket.disconnect();
+  };
+}, [accessToken]);
 
   /* ---------------- INIT WORK LIST ---------------- */
   useEffect(() => {
@@ -109,27 +175,35 @@ export default function AvailableWorkPage() {
 
   /* ---------------- UPDATE WORK ---------------- */
   const updateWork = (updated: any) => {
-  setWorkList((prev) =>
-    prev.map((w) =>
+  setWorkList((prev) => {
+    const status = updated.status?.toUpperCase();
+
+    // 🔥 handle all cancel cases
+    if (["CANCELLED", "WORKER_CANCELLED"].includes(status)) {
+      return prev.filter((w) => w._id !== updated._id);
+    }
+
+    return prev.map((w) =>
       w._id === updated._id
         ? {
             ...w,
             ...updated,
             booking: {
               ...w.booking,
-              ...updated.booking, 
+              ...updated.booking,
             },
             workStartedAt: [
               "COMPLETED",
+              "WORKER_CANCELLED",
               "CANCELLED",
               "WORK_COMPLETED_PENDING",
-            ].includes(updated.status?.toUpperCase())
+            ].includes(status)
               ? null
               : updated.workStartedAt ?? w.workStartedAt,
           }
         : w
-    )
-  );
+    );
+  });
 };
 
   /* ---------------- START WORK (🔥 FIXED) ---------------- */
