@@ -10,9 +10,11 @@ export default function WorkModals({
   modalType,
   closeModal,
   updateWork,
+  upsertBooking,
   cancelConfirmWork,
   setCancelConfirmWork,
   cancelMutation,
+  onCompleteSuccess,
 }: any) {
   const handleCancelYes = () => {
   if (!cancelConfirmWork?.bookingId) return;
@@ -23,13 +25,12 @@ export default function WorkModals({
       cancelReason: cancelConfirmWork.cancelledReason,
     },
     {
-      onSuccess: (data:GetBooking) => {
-        
-        updateWork({
-          ...data,
-          status: "WORKER_CANCELLED",
-        });
-      },
+      onSuccess: (data: GetBooking) => {
+  upsertBooking({
+    ...data,
+    status: "WORKER_CANCELLED",
+  });
+},
       onSettled: () => setCancelConfirmWork(null),
     }
   );
@@ -42,12 +43,17 @@ export default function WorkModals({
                 open
                 work={selectedWork}
                 onClose={closeModal}
-                onWorkStarted={(updatedWork) => updateWork(updatedWork)} // ✅ FIX
+                onWorkStarted={(updatedWork) => upsertBooking(updatedWork)} // ✅ FIX
               />
             )}
 
       {modalType === "complete" && selectedWork && (
-        <CompleteWork open work={selectedWork} onClose={closeModal} onSuccess={updateWork} />
+       <CompleteWork
+  work={selectedWork}
+  open={modalType === "complete"}
+  onClose={closeModal}
+  onSuccess={onCompleteSuccess}   // 🔥 IMPORTANT FIX
+/>
       )}
 
       {modalType === "verify" && selectedWork && (

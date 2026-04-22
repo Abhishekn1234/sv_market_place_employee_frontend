@@ -46,7 +46,7 @@ export default function CompleteWork({ work, open, onClose, onSuccess }: Props) 
     workStartedAt: null,
   };
 
-  onSuccess(updatedWork);
+ onSuccess?.(updatedWork);
   toast.success("Work Completed Successfully!");
   onClose();
 },

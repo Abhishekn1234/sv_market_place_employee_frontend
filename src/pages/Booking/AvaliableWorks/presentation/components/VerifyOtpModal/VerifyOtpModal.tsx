@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 import type { Work } from "../../../domain/entities/work";
 import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
-import { useQueryClient } from "@tanstack/react-query";
+
+import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 
 type Props = {
   work: Work;
@@ -23,36 +24,34 @@ export default function VerifyOtpModal({
   const { t } = useLanguage();
   const [otp, setOtp] = useState("");
  
-const queryClient = useQueryClient();
+
   // ✅ Get mutation from hook
   const { mutate, isPending } = useVerifyOtp();
 
   if (!open) return null;
 
-  const handleVerify = () => {
-    if (!otp) return;
+ const { upsertBooking } = useBookingSocketStore((s) => s);
 
-   mutate(
-  {
-    bookingId: work.bookingId ?? work.booking?._id ?? "",
-    otp,
-    purpose: "WORK_COMPLETE",
-  },
-  {
-    onSuccess: (updatedWork) => {
-  queryClient.setQueryData(["assigned-works"], (oldData: any) => {
-    if (!oldData) return oldData; // keep as no data
-    return oldData.map((work: any) =>
-      work.bookingId === updatedWork.bookingId ? updatedWork : work
-    );
-  });
+const handleVerify = () => {
+  if (!otp) return;
 
-  onSuccess(updatedWork);
-  onClose();
-},
-  }
-);
-  };
+  mutate(
+    {
+      bookingId: work.bookingId ?? work.booking?._id ?? "",
+      otp,
+      purpose: "WORK_COMPLETE",
+    },
+    {
+      onSuccess: (updatedWork) => {
+        // 🔥 SINGLE SOURCE FIX
+        upsertBooking(updatedWork);
+
+        onSuccess?.(updatedWork);
+        onClose();
+      },
+    }
+  );
+};
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

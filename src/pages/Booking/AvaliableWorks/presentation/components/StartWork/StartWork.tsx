@@ -7,61 +7,74 @@ import { Input } from "@/components/ui/input";
 import type { Work } from "../../../domain/entities/work";
 import { useStartWork } from "../../hooks/useStartWork";
 import { toast } from "react-toastify";
+import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 
 type Props = {
   work: Work;
   open: boolean;
   onClose: () => void;
-   onWorkStarted?: (updatedWork: any) => void;
+  onWorkStarted?: (updatedWork: any) => void;
 };
 
-export default function StartWork({ work, open, onClose,onWorkStarted }: Props) {
+export default function StartWork({
+  work,
+  open,
+  onClose,
+  onWorkStarted,
+}: Props) {
   const [otp, setOtp] = useState("");
+
   const startWorkMutation = useStartWork();
 
- const handleConfirm = () => {
-  const otpStr = otp.toString();
+  const upsertBooking = useBookingSocketStore((s) => s.upsertBooking);
 
-  if (otpStr.length !== 6) {
-    alert("Please enter a valid 6-digit OTP");
-    return;
-  }
+  const handleConfirm = () => {
+    const otpStr = otp.toString();
 
-  if (!work.bookingId) {
-    alert("Booking ID not found");
-    return;
-  }
-
-  startWorkMutation.mutate(
-    {
-      bookingId: work.bookingId,
-      otp: otpStr,
-    },
-    {
-      onSuccess: (_data) => {
-        // toast.success("Work Started");
-
-        // // ✅ Send correct updated work
-        // // onWorkStarted?.({
-        // //       ...work,
-        // //       status: "IN_PROGRESS",
-        // //       workStartedAt: data?.startedAt,
-        // //       booking: {
-        // //         ...work.booking,
-        // //         status: "IN_PROGRESS", // 🔥 CRITICAL
-        // //       },
-        // //     });
-
-        // onClose();
-        toast.success("Work Started");
-        onClose();
-      },
-      onError: (err: any) => {
-        toast.error(err?.message || "Failed to start work");
-      },
+    if (otpStr.length !== 6) {
+      alert("Please enter a valid 6-digit OTP");
+      return;
     }
-  );
-};
+
+    if (!work.bookingId) {
+      alert("Booking ID not found");
+      return;
+    }
+
+    startWorkMutation.mutate(
+      {
+        bookingId: work.bookingId,
+        otp: otpStr,
+      },
+      {
+        onSuccess: (data: any) => {
+          toast.success("Work Started");
+
+          const updatedWork = {
+            ...work,
+            status: "IN_PROGRESS",
+            workStartedAt: data?.startedAt || new Date().toISOString(),
+            booking: {
+              ...work.booking,
+              status: "IN_PROGRESS",
+            },
+          };
+
+          // 🔥 IMPORTANT FIX 1: update global store
+          upsertBooking(updatedWork);
+
+          // 🔥 IMPORTANT FIX 2: notify parent (optional)
+          onWorkStarted?.(updatedWork);
+
+          onClose();
+        },
+
+        onError: (err: any) => {
+          toast.error(err?.message || "Failed to start work");
+        },
+      }
+    );
+  };
 
   return (
     <CommonModal open={open} onOpenChange={onClose}>
@@ -72,16 +85,17 @@ export default function StartWork({ work, open, onClose,onWorkStarted }: Props) 
 
         <CommonModal.Body className="space-y-4">
           <p>
-            Enter the 6-digit OTP to start the work for{" "}
-            <strong>{work.customer?.fullName || "Customer"}</strong> on{" "}
-            <strong>{work.service?.name || "Service"}</strong>.
+            Enter the 6-digit OTP to start work for{" "}
+            <strong>{work.customer?.fullName || "Customer"}</strong>
           </p>
 
           <div className="flex justify-center">
             <Input
               type="text"
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(e) =>
+                setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
               placeholder="Enter OTP"
               maxLength={6}
               className="text-center w-32 tracking-widest text-lg"
@@ -90,27 +104,11 @@ export default function StartWork({ work, open, onClose,onWorkStarted }: Props) 
         </CommonModal.Body>
 
         <CommonModal.Footer>
-        <Button
-            variant="outline"
-            onClick={() => {
-              
-              onWorkStarted?.({
-                ...work,
-                status: "WORKER_ACCEPTED",
-                workStartedAt: null,
-                booking: {
-                  ...work.booking,
-                  status: "WORKER_ACCEPTED",
-                },
-              });
-
-              onClose();
-            }}
-          >
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
+
           <Button
-            variant="default"
             onClick={handleConfirm}
             disabled={otp.length !== 6 || startWorkMutation.isPending}
           >

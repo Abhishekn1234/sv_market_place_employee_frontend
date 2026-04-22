@@ -18,7 +18,7 @@ export default function WorkGrid({
     workList?.forEach((w: any) => {
       if (locations[w._id]) return;
 
-      const loc = w.booking?.location;
+      const loc = w.location;
       if (!loc) return;
 
       let lat: number, lng: number;
@@ -59,20 +59,20 @@ export default function WorkGrid({
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {workList.map((w: any) => {
         const workStatus = w.status?.toUpperCase();
-        const bookingStatus = w.booking?.status?.toUpperCase();
+        const bookingStatus = w.status?.toUpperCase();
 
         const categoryName =
           categories?.find((c: any) => c._id === w.service?.category)
             ?.name || "N/A";
 
-        const poolAmount = w.booking?.workerPoolAmount ?? 0;
-        const workers = w.booking?.numberOfWorkers ?? 1;
+        const poolAmount = w.workerPoolAmount ?? 0;
+        const workers = w.numberOfWorkers ?? 1;
         const amount = (poolAmount / workers).toFixed(2);
 
         let lat: number | null = null;
         let lng: number | null = null;
 
-        const loc = w.booking?.location;
+        const loc = w.location;
         try {
           if (typeof loc === "string") {
             [lat, lng] = loc.split(",").map(Number);
@@ -120,7 +120,7 @@ export default function WorkGrid({
               </p>
 
               <p className="text-xs text-gray-500">
-               Price Mode: {w.booking?.pricingMode}
+               Price Mode: {w.pricingMode}
               </p>
 
               <p className="text-xs font-medium">
@@ -152,7 +152,7 @@ export default function WorkGrid({
 
               {/* 🔹 Work Actions */}
               <div className="flex gap-2">
-                {["ASSIGNED", "WORKER_ACCEPTED"].includes(workStatus) && (
+                {["REQUESTED","ASSIGNED", "WORKER_ACCEPTED"].includes(workStatus) && (
                   <>
                     <Button
                       className="flex-1"

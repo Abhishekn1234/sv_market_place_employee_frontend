@@ -1,164 +1,81 @@
+"use client";
+
 import { useEffect } from "react";
-import { getSocket } from "../components/socket";
-import { useQueryClient } from "@tanstack/react-query";
+import { getSocket, initializeSocket } from "../components/socket";
+import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 
 export function useBookingSocket() {
-  const queryClient = useQueryClient();
+  const { upsertBooking, removeBooking, setConnected } =
+    useBookingSocketStore();
 
   useEffect(() => {
-    const socket = getSocket("/workers/requests");
+    const socket =
+      getSocket("/workers/requests") ||
+      initializeSocket("/workers/requests");
 
-    if (!socket) {
-      console.warn("Socket not initialized");
-      return;
-    }
+    if (!socket) return;
 
-    console.log("📡 Booking socket active:", socket);
+    socket.connect();
 
-    // -----------------------------
-    // 🆕 NEW BOOKING
-    // -----------------------------
-    const newBookingHandler = (data: any) => {
-      const booking = data?.booking;
-      if (!booking?._id) return;
+    socket.on("connect", () => setConnected(true));
+    socket.on("disconnect", () => setConnected(false));
 
-      queryClient.setQueryData(["availableBookings"], (old: any = []) => {
-        if (!Array.isArray(old)) return [booking];
+    /* ✅ NORMALIZE SAFELY */
+    const normalize = (data: any) => data?.booking ?? data;
 
-        const exists = old.some((b: any) => b._id === booking._id);
-        if (exists) return old;
+    /* ✅ UPSERT */
+    const upsert = (data: any) => {
+      const booking = normalize(data);
 
-        return [booking, ...old];
+      if (!booking?._id) {
+        console.warn("❌ Invalid booking payload:", data);
+        return;
+      }
+
+      upsertBooking({
+        ...booking,
+        source: "socket",
       });
     };
 
-    // -----------------------------
-    // 🔄 UPDATE BOOKING
-    // -----------------------------
-    const bookingUpdatedHandler = (data: any) => {
-      const booking = data?.booking || data;
-      if (!booking?._id) return;
+    /* ❌ REMOVE */
+    const remove = (data: any) => {
+      const id = data?.bookingId || data?._id;
+      if (!id) return;
 
-      queryClient.setQueryData(["availableBookings"], (old: any = []) => {
-        if (!Array.isArray(old)) return old;
-
-        return old.map((b: any) =>
-          b._id === booking._id ? { ...b, ...booking } : b
-        );
-      });
+      removeBooking(id);
     };
 
-    // -----------------------------
-    // ❌ CANCELLED
-    // -----------------------------
-    const bookingCancelledHandler = (data: any) => {
-      const bookingId = data?.bookingId || data?.booking?._id;
+    /* ✅ EVENTS */
+    const eventsUpsert = [
+      "booking.created",
+      "booking.updated",
+      "booking.worker.accepted",
+      "booking.work.started",
+      "booking.work.completed-by-worker",
+      "booking.completion.confirmed",
+      "booking.dispute.created",
+      "booking.dispute.responded",
+      "booking.dispute.resolved",
+    ];
 
-      queryClient.setQueryData(["availableBookings"], (old: any = []) => {
-        if (!Array.isArray(old)) return old;
+    const eventsRemove = [
+      "booking.worker.rejected",
+      "booking.cancelled",
+    ];
 
-        return old.filter((b: any) => b._id !== bookingId);
-      });
-    };
+    /* REGISTER */
+    eventsUpsert.forEach((e) => socket.on(e, upsert));
+    eventsRemove.forEach((e) => socket.on(e, remove));
 
-    // -----------------------------
-    // 👷 ACCEPTED
-    // -----------------------------
-    const workerAcceptedHandler = (data: any) => {
-      const bookingId = data?.bookingId;
+    socket.onAny((event, data) => {
+      console.log("📡 SOCKET EVENT:", event, data);
+    });
 
-      queryClient.setQueryData(["availableBookings"], (old: any = []) => {
-        if (!Array.isArray(old)) return old;
-
-        return old.map((b: any) =>
-          b._id === bookingId
-            ? { ...b, status: "WORKER_ACCEPTED" }
-            : b
-        );
-      });
-    };
-
-    // -----------------------------
-    // 🚀 WORK STARTED (IMPORTANT)
-    // -----------------------------
-    const workStartedHandler = (data: any) => {
-      const bookingId = data?.bookingId || data?.booking?._id;
-
-      queryClient.setQueryData(["availableBookings"], (old: any = []) => {
-        if (!Array.isArray(old)) return old;
-
-        return old.map((b: any) =>
-          b._id === bookingId
-            ? {
-                ...b,
-                status: "IN_PROGRESS",
-                workStartedAt: data?.startedAt,
-              }
-            : b
-        );
-      });
-    };
-
-    // -----------------------------
-    // ❌ REJECTED
-    // -----------------------------
-    const workerRejectedHandler = (data: any) => {
-      const bookingId = data?.bookingId;
-
-      queryClient.setQueryData(["availableBookings"], (old: any = []) => {
-        if (!Array.isArray(old)) return old;
-
-        return old.filter((b: any) => b._id !== bookingId);
-      });
-    };
-
-    // -----------------------------
-    // ⚠️ DISPUTES
-    // -----------------------------
-    const disputeHandler = (data: any) => {
-      const bookingId = data?.bookingId;
-
-      queryClient.setQueryData(["availableBookings"], (old: any = []) => {
-        if (!Array.isArray(old)) return old;
-
-        return old.map((b: any) =>
-          b._id === bookingId ? { ...b, ...data } : b
-        );
-      });
-    };
-
-    // -----------------------------
-    // EVENTS
-    // -----------------------------
-    socket.on("booking.created", newBookingHandler);
-    socket.on("booking.updated", bookingUpdatedHandler);
-    socket.on("booking.cancelled", bookingCancelledHandler);
-
-    socket.on("booking.worker.accepted", workerAcceptedHandler);
-    socket.on("booking.worker.rejected", workerRejectedHandler);
-
-    socket.on("booking.work.started", workStartedHandler);
-
-    socket.on("booking.dispute.created", disputeHandler);
-    socket.on("booking.dispute.responded", disputeHandler);
-    socket.on("booking.dispute.resolved", disputeHandler);
-
-    // -----------------------------
-    // CLEANUP
-    // -----------------------------
     return () => {
-      socket.off("booking.created", newBookingHandler);
-      socket.off("booking.updated", bookingUpdatedHandler);
-      socket.off("booking.cancelled", bookingCancelledHandler);
-
-      socket.off("booking.worker.accepted", workerAcceptedHandler);
-      socket.off("booking.worker.rejected", workerRejectedHandler);
-
-      socket.off("booking.work.started", workStartedHandler);
-
-      socket.off("booking.dispute.created", disputeHandler);
-      socket.off("booking.dispute.responded", disputeHandler);
-      socket.off("booking.dispute.resolved", disputeHandler);
+      eventsUpsert.forEach((e) => socket.off(e, upsert));
+      eventsRemove.forEach((e) => socket.off(e, remove));
+      socket.disconnect();
     };
-  }, [queryClient]);
+  }, [upsertBooking, removeBooking, setConnected]);
 }
