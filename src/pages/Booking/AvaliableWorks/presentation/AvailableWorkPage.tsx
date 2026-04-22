@@ -20,6 +20,7 @@ export default function AvailableWorkPage() {
   const isRTL = language === "AR";
 
   const workList = useBookingSocketStore((s) => s.bookings);
+  
 
   const [selectedWork, setSelectedWork] = useState<any>(null);
   const [modalType, setModalType] = useState<
@@ -29,6 +30,10 @@ export default function AvailableWorkPage() {
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
 
   const [timers, setTimers] = useState<Record<string, string>>({});
+  const normalizeWork = (work: any) => ({
+  ...work,
+  bookingId: work.booking?._id || work.bookingId || work._id,
+});
 
   /* TIMER */
   useEffect(() => {
@@ -61,15 +66,13 @@ export default function AvailableWorkPage() {
   }, [workList]);
 
   const handleStartWork = (work: any) => {
-    setSelectedWork(work);
-    setModalType("start");
-  };
-
-  const openModal = (work: any, type: any) => {
-    const bookingId = work.booking?._id || work.bookingId;
-    setSelectedWork({ ...work, bookingId });
-    setModalType(type);
-  };
+  setSelectedWork(normalizeWork(work));
+  setModalType("start");
+};
+ const openModal = (work: any, type: any) => {
+  setSelectedWork(normalizeWork(work));
+  setModalType(type);
+};
 
   const closeModal = () => {
     setSelectedWork(null);

@@ -35,15 +35,16 @@ export default function StartWork({
       alert("Please enter a valid 6-digit OTP");
       return;
     }
+    const bookingId = work.bookingId || work.booking?._id || work._id;
 
-    if (!work.bookingId) {
-      alert("Booking ID not found");
-      return;
-    }
+  if (!bookingId) {
+  alert("Booking ID not found");
+  return;
+}
 
     startWorkMutation.mutate(
       {
-        bookingId: work.bookingId,
+        bookingId: bookingId,
         otp: otpStr,
       },
       {

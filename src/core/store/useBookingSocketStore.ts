@@ -9,36 +9,25 @@ type Store = {
   removeBooking: (id: string) => void;
 };
 
-export const useBookingSocketStore = create<Store>((set) => ({
+export const useBookingSocketStore = create<Store>((set, get) => ({
   bookings: [],
   connected: false,
 
   setConnected: (v) => set({ connected: v }),
 
-  upsertBooking: (booking) =>
-  set((state) => {
-    if (!booking?._id) return state;
+  upsertBooking: (booking) => {
+    const existing = get().bookings; // ✅ now valid
 
-    const index = state.bookings.findIndex(
-      (b) => b._id === booking._id
-    );
+    const index = existing.findIndex((b) => b._id === booking._id);
 
-    if (index === -1) {
-      return {
-        bookings: [booking, ...state.bookings],
-      };
+    if (index !== -1) {
+      const updated = [...existing];
+      updated[index] = { ...updated[index], ...booking };
+      set({ bookings: updated });
+    } else {
+      set({ bookings: [booking, ...existing] });
     }
-
-    const updated = [...state.bookings];
-
-    updated[index] = {
-      ...state.bookings[index], // always trust existing first
-      ...booking,               // then override
-      _id: state.bookings[index]._id, // 🔥 lock identity
-    };
-
-    return { bookings: updated };
-  }),
+  },
 
   removeBooking: (id) =>
     set((state) => ({

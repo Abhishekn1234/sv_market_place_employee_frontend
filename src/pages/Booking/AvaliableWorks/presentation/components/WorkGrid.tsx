@@ -46,6 +46,8 @@ export default function WorkGrid({
       } catch {}
     });
   }, [workList]);
+  const getStatus = (w: any) =>
+  (w.status ?? w.booking?.status ?? "").toUpperCase();
 
   if (!workList?.length) {
     return (
@@ -58,8 +60,7 @@ export default function WorkGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {workList.map((w: any) => {
-        const workStatus = w.status?.toUpperCase();
-        const bookingStatus = w.status?.toUpperCase();
+       const status = getStatus(w);
 
         const categoryName =
           categories?.find((c: any) => c._id === w.service?.category)
@@ -124,11 +125,11 @@ export default function WorkGrid({
               </p>
 
               <p className="text-xs font-medium">
-                Status: {bookingStatus}
+                Status: {status}
               </p>
 
-              {(workStatus === "STARTED" ||
-                workStatus === "IN_PROGRESS") &&
+              {(status=== "STARTED" ||
+                status === "IN_PROGRESS") &&
                 timers[w._id] && (
                   <p className="text-green-600 font-semibold text-sm">
                     ⏱ {timers[w._id]}
@@ -152,7 +153,7 @@ export default function WorkGrid({
 
               {/* 🔹 Work Actions */}
               <div className="flex gap-2">
-                {["REQUESTED","ASSIGNED", "WORKER_ACCEPTED"].includes(workStatus) && (
+                {["ASSIGNED", "WORKER_ACCEPTED"].includes(status) && (
                   <>
                     <Button
                       className="flex-1"
@@ -171,7 +172,7 @@ export default function WorkGrid({
                   </>
                 )}
 
-                {bookingStatus === "WORK_COMPLETED_PENDING" ? (
+                {status === "WORK_COMPLETED_PENDING" ? (
                   <Button
                     className="w-full"
                     onClick={() => onVerify(w)}
@@ -179,9 +180,9 @@ export default function WorkGrid({
                     Verify OTP
                   </Button>
                 ) : (
-                  (workStatus === "STARTED" ||
-                    workStatus === "IN_PROGRESS") &&
-                  bookingStatus !== "COMPLETED" && (
+                  (status === "STARTED" ||
+                    status === "IN_PROGRESS") &&
+                  status !== "COMPLETED" && (
                     <Button
                       className="w-full"
                       onClick={() =>

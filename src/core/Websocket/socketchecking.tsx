@@ -107,22 +107,27 @@ export default function SocketBookingsModal({
 
   /* ================= ACCEPT ================= */
   const handleAccept = (id: string) => {
-    setSelectedBooking(id);
+  setSelectedBooking(id);
 
-    acceptBooking(
-      { bookingId: id, bookingStatus: "WORKER_ACCEPTED" },
-      {
-       onSuccess: () => {
-  // 🚨 DO NOT mutate Zustand manually here
-  // socket will handle updates automatically
+  acceptBooking(
+    { bookingId: id, bookingStatus: "WORKER_ACCEPTED" },
+    {
+      onSuccess: () => {
+        // ✅ Optimistic / immediate UI update
+        upsertBooking({
+          _id: id,
+          bookingStatus: "WORKER_ACCEPTED",
+          status:"WORKER_ACCEPTED",
+          source: "local-update",
+        });
 
-  onClose();
-  onBookingAccepted?.();
-  navigate("/availableWork");
-}
-      }
-    );
-  };
+        onClose();
+        onBookingAccepted?.();
+        navigate("/availableWork");
+      },
+    }
+  );
+};
 
   /* ================= SAFETY CHECK (IMPORTANT FIX) ================= */
   if (!open) return null;
