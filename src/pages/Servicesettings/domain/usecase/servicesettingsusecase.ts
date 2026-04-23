@@ -1,4 +1,4 @@
-import type {  WorkerPayload } from "../entities/servicesettings";
+import type { WorkerPayload } from "../entities/workerpayload";
 import type { ServiceSettingRepo } from "../repositories/servicesettingsrepo";
 
 export class ServiceSettingsUseCase {

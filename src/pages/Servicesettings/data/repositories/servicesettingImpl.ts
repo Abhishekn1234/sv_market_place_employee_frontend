@@ -1,6 +1,6 @@
 import api from "@/api/api";
 import { baseURL } from "@/api/apiConfig";
-import type { WorkerPayload } from "../../domain/entities/servicesettings";
+import type { WorkerPayload } from "../../domain/entities/workerpayload";
 import type { ServiceSettingRepo } from "../../domain/repositories/servicesettingsrepo";
 import { useAuthStore} from "@/core/store/auth";
 

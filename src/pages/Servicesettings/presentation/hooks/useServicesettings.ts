@@ -1,7 +1,7 @@
 import { useMutation,  useQueryClient } from "@tanstack/react-query";
 import { ServiceSettingsRepoimpl } from "../../data/repositories/servicesettingImpl";
 import { ServiceSettingsUseCase } from "../../domain/usecase/servicesettingsusecase";
-import type {  WorkerPayload } from "../../domain/entities/servicesettings";
+import type { WorkerPayload } from "../../domain/entities/workerpayload";
 import { toast } from "react-toastify";
 
 

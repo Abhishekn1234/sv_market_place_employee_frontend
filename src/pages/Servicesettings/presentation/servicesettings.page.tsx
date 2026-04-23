@@ -9,7 +9,7 @@ import { useServiceTier } from "./hooks/useServiceTier";
 import { useServiceCategory } from "./hooks/useServiceCategory";
 
 import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
-import type { WorkerPayload } from "../domain/entities/servicesettings";
+import type { WorkerPayload } from "../domain/entities/workerpayload";
 import type { ServiceCategory } from "../domain/entities/servicecategory";
 import type { ServiceTier } from "../domain/entities/servicetier";
 
