@@ -11,6 +11,7 @@ import { useUpdateProfile } from "../../hooks/useUpdateProfile";
 import { useProfile } from "../../hooks/useProfile";
 import type { TabType } from "@/pages/Profile/domain/entities/tabtype";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuthStore } from "@/core/store/auth";
 
 type ProfileUpdateProps = {
   switchTab: (tab: TabType) => void;
@@ -18,6 +19,7 @@ type ProfileUpdateProps = {
 
 export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
   const { data: profile } = useProfile();
+  const {  setAuth } = useAuthStore.getState();
   const { mutateAsync, isPending } = useUpdateProfile();
   const { translations } = useLanguage();
   const update = translations.profile;
@@ -82,7 +84,7 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
     reader.readAsDataURL(file);
   };
 
- const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   try {
@@ -100,14 +102,28 @@ export default function ProfileUpdate({ switchTab }: ProfileUpdateProps) {
       }
     });
 
-    await mutateAsync(data);
+    // ✅ CALL API
+    const res = await mutateAsync(data);
+
+    // ✅ IMPORTANT: sync Zustand
+    const updatedUser = res?.user || res?.user || res;
+
+    if (updatedUser) {
+      // Option 1 (recommended): full replace with merge logic
+      setAuth(updatedUser);
+
+      // Option 2 (partial update)
+      // updateUserProfile(updatedUser);
+    }
+
     toast.success("Profile updated successfully!");
     switchTab("profile");
+
   } catch (err: any) {
     const message =
       err?.response?.data?.message ||
-      err?.message ||                 
-      "Failed to update profile";     
+      err?.message ||
+      "Failed to update profile";
 
     toast.error(message);
   }

@@ -4,26 +4,19 @@ import { useAuthStore } from "@/core/store/auth";
 
 const sockets: Record<string, Socket> = {};
 
-export const initializeSocket = (
-  namespace: "/workers/requests" | "/workers/assigned-updates"
-) => {
+export const getSocket = (namespace: string) => sockets[namespace];
+
+export const initializeSocket = (namespace: string) => {
+  if (sockets[namespace]) return sockets[namespace];
+
   const token = useAuthStore.getState().accessToken;
 
-  if (!sockets[namespace]) {
-    sockets[namespace] = io(`${baseURL}${namespace}`, {
-      transports: ["websocket"],
-      autoConnect: false,
-      reconnection: true,
-      auth: { token },
-    });
-  } else {
-    // 🔥 update token if changed
-    sockets[namespace].auth = { token };
-  }
+  const socket = io(`${baseURL}${namespace}`, {
+    auth: { token },
+    transports: ["websocket"],
+  });
 
-  return sockets[namespace];
+  sockets[namespace] = socket;
+
+  return socket;
 };
-
-export const getSocket = (
-  namespace: "/workers/requests" | "/workers/assigned-updates"
-) => sockets[namespace];

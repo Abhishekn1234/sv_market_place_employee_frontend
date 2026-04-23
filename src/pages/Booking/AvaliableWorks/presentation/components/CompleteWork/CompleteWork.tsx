@@ -23,36 +23,46 @@ export default function CompleteWork({ work, open, onClose, onSuccess }: Props) 
   const { mutate: completeWorkMutation, isPending: isLoading } = useCompleteWork();
 
   if (!open) return null;
-
+console.log(work);
   const handleConfirmClick = () => {
-    const bookingId = work.bookingId || work.booking?._id;
-    if (!bookingId) return;
+  const bookingId = work._id;
+  
 
-    const payload: CompleteWork = { bookingId, actualWorkHours, actualWorkDays };
+  if (!bookingId) {
+    toast.error("Booking ID missing");
+    return;
+  }
 
-    completeWorkMutation(payload, {
-     onSuccess: (updatedBooking) => {
-  const updatedWork: Work = {
-    ...work,
-    status: "WORK_COMPLETED_PENDING",
+  const payload: CompleteWork = {
+    bookingId,
+    actualWorkHours,
+    actualWorkDays,
+  };
 
-    // ✅ THIS IS THE FIX
-    booking: {
-      ...work.booking,
-      ...updatedBooking,
-      status: "WORK_COMPLETED_PENDING", // 🔥 ADD THIS
+  completeWorkMutation(payload, {
+    onSuccess: (updatedBooking) => {
+      const updatedWork: Work = {
+        ...work,
+        status: "WORK_COMPLETED_PENDING",
+        booking: {
+          ...(work.booking ?? {}),
+          ...(updatedBooking ?? {}),
+          status: "WORK_COMPLETED_PENDING",
+        },
+        workStartedAt: null,
+      };
+
+      onSuccess?.(updatedWork);
+
+      toast.success("Work Completed Successfully!");
+      onClose();
     },
 
-    workStartedAt: null,
-  };
-
- onSuccess?.(updatedWork);
-  toast.success("Work Completed Successfully!");
-  onClose();
-},
-      onError: (error) => console.error(error),
-    });
-  };
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to complete work");
+    },
+  });
+};
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -63,12 +73,12 @@ export default function CompleteWork({ work, open, onClose, onSuccess }: Props) 
           <p><strong>Service:</strong> {work.service?.name || "N/A"}</p>
           <p><strong>Customer:</strong> {work.customer?.fullName || "N/A"}</p>
           <p>
-            <strong>Scheduled Duration:</strong>{" "}
-            {work.booking.pricingMode === "HOURLY"
-              ? `${work.booking?.schedule?.estimatedHours ?? "-"} hour(s)`
-              : work.booking.pricingMode === "PER_DAY"
-              ? `${work.booking?.schedule?.estimatedDays ?? "-"} day(s)`
-              : "-"}
+          <strong>Scheduled Duration:</strong>{" "}
+{work.booking?.pricingMode === "HOURLY"
+  ? `${work.booking?.schedule?.estimatedHours ?? "-"} hour(s)`
+  : work.booking?.pricingMode === "PER_DAY"
+  ? `${work.booking?.schedule?.estimatedDays ?? "-"} day(s)`
+  : "-"}
           </p>
           <p>
               <strong>Worked Time:</strong>{" "}

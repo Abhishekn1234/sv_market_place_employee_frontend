@@ -1,0 +1,5 @@
+export const STOP_TIMER_STATUSES = [
+  "COMPLETED",
+  "VERIFIED",
+  "WORK_COMPLETED_PENDING",
+];

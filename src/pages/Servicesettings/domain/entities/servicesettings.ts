@@ -1,14 +1,8 @@
 import type { ApiDocument } from "@/pages/Profile/domain/entities/documents";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
-import type { WorkerStatus } from "./workerstatus";
+import type { WorkerPayload } from "./workerpayload";
 
-export interface WorkerPayload {
-  categoryIds?: string[];
-  serviceTierIds?: string[];
-  status: WorkerStatus;
-  location?: GeoPoint;  
- serviceRadius?:number;
-}
+
 
 
 export interface ServiceSettings {

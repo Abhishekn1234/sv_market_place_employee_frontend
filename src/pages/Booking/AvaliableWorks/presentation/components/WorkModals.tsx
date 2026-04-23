@@ -1,106 +1,121 @@
 import StartWork from "@/pages/Booking/AvaliableWorks/presentation/components/StartWork/StartWork";
 import CompleteWork from "@/pages/Booking/AvaliableWorks/presentation/components/CompleteWork/CompleteWork";
 import VerifyOtpModal from "@/pages/Booking/AvaliableWorks/presentation/components/VerifyOtpModal/VerifyOtpModal";
+
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
-import type { GetBooking } from "@/core/Websocket/domain/entities/getrepo";
+import { toast } from "react-toastify";
 
-export default function WorkModals({
-  selectedWork,
-  modalType,
-  closeModal,
-  updateWork,
-  upsertBooking,
-  cancelConfirmWork,
-  setCancelConfirmWork,
-  cancelMutation,
-  onCompleteSuccess,
-}: any) {
+import { getSocket, initializeSocket } from "@/core/Websocket/presentation/components/socket";
+
+export default function WorkModals(props: any) {
+  const {
+    selectedWork,
+    modalType,
+    closeModal,
+    cancelConfirmWork,
+    setCancelConfirmWork,
+    cancelMutation,
+    onCompleteSuccess,
+  } = props;
+
+  const socket =
+    getSocket("/workers/requests") ||
+    initializeSocket("/workers/requests");
+
+  /* ================= CANCEL ================= */
   const handleCancelYes = () => {
-  if (!cancelConfirmWork?.bookingId) return;
+    cancelMutation.mutate(
+      {
+        bookingId: cancelConfirmWork.bookingId,
+        cancelReason: cancelConfirmWork.cancelledReason,
+      },
+      {
+        onSuccess: (data: any) => {
+          const booking = data?.booking ?? data;
 
-  cancelMutation.mutate(
-    {
-      bookingId: cancelConfirmWork.bookingId,
-      cancelReason: cancelConfirmWork.cancelledReason,
-    },
-    {
-      onSuccess: (data: GetBooking) => {
-  upsertBooking({
-    ...data,
-    status: "WORKER_CANCELLED",
-  });
-},
-      onSettled: () => setCancelConfirmWork(null),
-    }
-  );
-};
+          socket.emit("booking.worker.cancelled", {
+            bookingId: booking._id,
+            status: "WORKER_CANCELLED",
+          });
+
+          toast.success("Cancelled");
+        },
+        onSettled: () => setCancelConfirmWork(null),
+      }
+    );
+  };
 
   return (
     <>
       {modalType === "start" && selectedWork && (
-              <StartWork
-                open
-                work={selectedWork}
-                onClose={closeModal}
-                onWorkStarted={(updatedWork) => upsertBooking(updatedWork)} // ✅ FIX
-              />
-            )}
+        <StartWork
+          open
+          work={selectedWork}
+          onClose={closeModal}
+          onWorkStarted={(updated) => {
+            socket.emit("booking.worker.started", {
+              bookingId: updated._id,
+              status: "IN_PROGRESS",
+              startedAt: updated.workStartedAt,
+            });
+          }}
+        />
+      )}
 
       {modalType === "complete" && selectedWork && (
-       <CompleteWork
-  work={selectedWork}
-  open={modalType === "complete"}
-  onClose={closeModal}
-  onSuccess={onCompleteSuccess}   // 🔥 IMPORTANT FIX
-/>
+        <CompleteWork
+          work={selectedWork}
+          open
+          onClose={closeModal}
+          onSuccess={(data) => {
+            socket.emit("booking.worker.completed", {
+            bookingId: selectedWork._id,
+            ...data,
+            status: "WORK_COMPLETED_PENDING", // ✅ ALWAYS LAST
+          });
+
+            onCompleteSuccess?.(data);
+          }}
+        />
       )}
 
       {modalType === "verify" && selectedWork && (
-        <VerifyOtpModal open work={selectedWork} onClose={closeModal} onSuccess={updateWork} />
+        <VerifyOtpModal
+          open
+          work={selectedWork}
+          onClose={closeModal}
+          onSuccess={(_data) => {
+            socket.emit("booking.worker.verified", {
+              bookingId: selectedWork._id,
+              status: "COMPLETED",
+              // ...data,
+            });
+          }}
+        />
       )}
 
       {cancelConfirmWork && (
         <CommonModal open onOpenChange={() => setCancelConfirmWork(null)}>
           <CommonModal.Content>
-            <CommonModal.Header>
-              <h3 className="text-lg font-semibold">Cancel Work</h3>
-            </CommonModal.Header>
+            <CommonModal.Header>Cancel Work</CommonModal.Header>
 
             <CommonModal.Body>
-              Cancel work for {cancelConfirmWork.customer?.fullName}?
-
-              <div className="mt-4">
-                <label htmlFor="reason" className="block text-sm font-medium mb-1">
-                  Reason for cancellation
-                </label>
-               <textarea
-  id="reason"
-  rows={3}
-  value={cancelConfirmWork?.cancelledReason || ""}
-  onChange={(e) =>
-    setCancelConfirmWork((prev: any) => ({
-      ...prev,
-      cancelledReason: e.target.value,
-    }))
-  }
-  placeholder="Enter reason for cancellation..."
-  className="w-full p-3 text-sm border border-gray-300 rounded-lg shadow-sm resize-none
-             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-             transition"
-/>
-              </div>
+              <textarea
+                value={cancelConfirmWork.cancelledReason || ""}
+                onChange={(e) =>
+                  setCancelConfirmWork((p: any) => ({
+                    ...p,
+                    cancelledReason: e.target.value,
+                  }))
+                }
+                className="w-full border p-2"
+              />
             </CommonModal.Body>
 
             <CommonModal.Footer>
               <Button onClick={() => setCancelConfirmWork(null)}>No</Button>
-              <Button
-                variant="destructive"
-                onClick={handleCancelYes}
-                disabled={cancelMutation.isPending}
-              >
-                {cancelMutation.isPending ? "Cancelling..." : "Yes"}
-              </Button>
+              <Button onClick={handleCancelYes}>Yes</Button>
             </CommonModal.Footer>
           </CommonModal.Content>
         </CommonModal>

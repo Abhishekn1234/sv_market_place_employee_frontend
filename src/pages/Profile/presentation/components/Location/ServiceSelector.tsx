@@ -7,16 +7,18 @@ export default function ServiceSelector({ label, items, selected, setSelected, a
       <Label>{label}</Label>
       <div className="flex flex-wrap gap-2 mt-2">
         {items?.map((item: any) => {
-          const active = selected.includes(item._id);
+         const active = selected.includes(String(item._id));
           return (
             <Button
               key={item._id}
               type="button"
-              onClick={() =>
-                setSelected((prev: string[]) =>
-                  active ? prev.filter((id) => id !== item._id) : [...prev, item._id]
-                )
-              }
+            onClick={() =>
+  setSelected((prev: string[]) =>
+    active
+      ? prev.filter((id) => String(id) !== String(item._id))
+      : [...prev, String(item._id)]
+  )
+}
               className={`px-3 py-1 rounded border text-sm transition ${active ? activeClass : "bg-white text-gray-700"}`}
             >
               {item[displayKey]}

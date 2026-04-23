@@ -11,9 +11,12 @@ export default function WorkGrid({
   onComplete,
   onVerify,
   onCancel,
+    onDownload,
+  onDispute,
 }: any) {
   const [locations, setLocations] = useState<Record<string, string>>({});
 
+  /* ================= LOCATION RESOLVE ================= */
   useEffect(() => {
     workList?.forEach((w: any) => {
       if (locations[w._id]) return;
@@ -46,8 +49,9 @@ export default function WorkGrid({
       } catch {}
     });
   }, [workList]);
-  const getStatus = (w: any) =>
-  (w.status ?? w.booking?.status ?? "").toUpperCase();
+
+  /* ================= SAFE STATUS ================= */
+
 
   if (!workList?.length) {
     return (
@@ -57,10 +61,16 @@ export default function WorkGrid({
     );
   }
 
+  /* ================= DEDUPE FIX ================= */
+  const seen = new Set();
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {workList.map((w: any) => {
-       const status = getStatus(w);
+        if (seen.has(w._id)) return null;
+        seen.add(w._id);
+
+        const status = w.status;
 
         const categoryName =
           categories?.find((c: any) => c._id === w.service?.category)
@@ -83,18 +93,11 @@ export default function WorkGrid({
           }
         } catch {}
 
-        const handleDirections = () => {
-          if (!lat || !lng) return;
-          const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-          window.open(url, "_blank");
-        };
-
         return (
           <CommonCard
             key={w._id}
             className="flex flex-col justify-between p-4 rounded-2xl shadow-sm hover:shadow-md transition"
           >
-            {/* 🔹 DETAILS */}
             <div className="space-y-2 text-sm">
               <h3 className="font-semibold text-base truncate">
                 {w.service?.name}
@@ -112,23 +115,19 @@ export default function WorkGrid({
                 Category: {categoryName}
               </p>
 
-              <p className="text-xs text-gray-500">
-                Tier: {w.serviceTier?.displayName}
-              </p>
-
               <p className="text-xs font-medium text-green-600">
-               Worker Pool Amount: {amount} {w.booking?.currency}
+                Worker Pool Amount: {amount} {w.booking?.currency}
               </p>
 
               <p className="text-xs text-gray-500">
-               Price Mode: {w.pricingMode}
+                Price Mode: {w.pricingMode}
               </p>
 
               <p className="text-xs font-medium">
                 Status: {status}
               </p>
 
-              {(status=== "STARTED" ||
+              {(status === "STARTED" ||
                 status === "IN_PROGRESS") &&
                 timers[w._id] && (
                   <p className="text-green-600 font-semibold text-sm">
@@ -137,28 +136,25 @@ export default function WorkGrid({
                 )}
             </div>
 
-            {/* 🔹 ACTIONS */}
             <div className="mt-4 space-y-2">
-              
-              {/* 📍 Directions Button */}
               {lat && lng && (
                 <Button
                   variant="outline"
-                  onClick={handleDirections}
+                  onClick={() =>
+                    window.open(
+                      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+                    )
+                  }
                   className="w-full"
                 >
                   📍 Get Directions
                 </Button>
               )}
 
-              {/* 🔹 Work Actions */}
               <div className="flex gap-2">
                 {["ASSIGNED", "WORKER_ACCEPTED"].includes(status) && (
                   <>
-                    <Button
-                      className="flex-1"
-                      onClick={() => onStart(w)}
-                    >
+                    <Button className="flex-1" onClick={() => onStart(w)}>
                       Start
                     </Button>
 
@@ -188,8 +184,7 @@ export default function WorkGrid({
                       onClick={() =>
                         onComplete({
                           ...w,
-                          elapsedTime:
-                            timers[w._id] || "00:00:00",
+                          elapsedTime: timers[w._id] || "00:00:00",
                         })
                       }
                     >
@@ -197,6 +192,29 @@ export default function WorkGrid({
                     </Button>
                   )
                 )}
+                {status==="INVOICE_GENERATED" && (
+                  <>
+                   <div className="flex gap-2 mt-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => onDownload(w)}
+                  >
+                    ⬇ Download
+                  </Button>
+
+                 
+                </div>
+                  </>
+                )}
+                 <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => onDispute(w)}
+                  >
+                    ⚠ Dispute
+                  </Button>
+              
               </div>
             </div>
           </CommonCard>

@@ -11,39 +11,55 @@ export default function EmployeeDetails({
   serviceCategories,
   selectedTiers = [],
   selectedCategories = [],
-  user, // ✅ pass user
+  user,
   onEdit,
 }: any) {
   const { translations } = useLanguage();
   const edits = translations.profile;
 
-  // ✅ Check documents
+  /* ---------------- DOCUMENT CHECK ---------------- */
+
   const hasAnyRequiredDocument = () => {
-  const documents = user?.documents;
+    const documents = user?.documents;
 
-  if (!Array.isArray(documents)) return false;
+    if (!Array.isArray(documents)) return false;
 
-  const requiredDocs = ["idproof", "addressproof", "photoproof"];
+    const requiredDocs = new Set([
+      "idproof",
+      "addressproof",
+      "photoproof",
+    ]);
 
-  return documents.some((doc: any) => {
-    const docType = doc.documentType?.toLowerCase();
+    return documents.some((doc: any) => {
+      const type = (doc.documentType || "").toLowerCase();
+      return requiredDocs.has(type) && !!doc.filePath;
+    });
+  };
 
-    return requiredDocs.includes(docType) && doc.filePath;
-  });
-};
+  /* ---------------- EDIT PERMISSION ---------------- */
 
-  // ✅ Final permission
   const canEdit =
-  user?.kycStatus === "pending" && hasAnyRequiredDocument();
+    user?.kycStatus === "pending" && hasAnyRequiredDocument();
 
-  // ✅ Toast on hover (only if disabled)
+  /* ---------------- TOAST CONTROL (avoid spam) ---------------- */
+
+  let toastShown = false;
+
   const handleHover = () => {
-    if (!canEdit) {
+    if (!canEdit && !toastShown) {
+      toastShown = true;
+
       toast.info(
         "You cannot edit service details until KYC documents are submitted and approved"
       );
+
+      setTimeout(() => {
+        toastShown = false;
+      }, 3000);
     }
   };
+
+  /* ---------------- UI ---------------- */
 
   return (
     <>

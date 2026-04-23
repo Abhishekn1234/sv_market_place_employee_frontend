@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import type { Work } from "../../../domain/entities/work";
 import { useStartWork } from "../../hooks/useStartWork";
 import { toast } from "react-toastify";
-import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+
+import { getSocket, initializeSocket } from "@/core/Websocket/presentation/components/socket";
 
 type Props = {
   work: Work;
@@ -26,8 +27,6 @@ export default function StartWork({
 
   const startWorkMutation = useStartWork();
 
-  const upsertBooking = useBookingSocketStore((s) => s.upsertBooking);
-
   const handleConfirm = () => {
     const otpStr = otp.toString();
 
@@ -35,38 +34,38 @@ export default function StartWork({
       alert("Please enter a valid 6-digit OTP");
       return;
     }
+
     const bookingId = work.bookingId || work.booking?._id || work._id;
 
-  if (!bookingId) {
-  alert("Booking ID not found");
-  return;
-}
+    if (!bookingId) {
+      alert("Booking ID not found");
+      return;
+    }
 
     startWorkMutation.mutate(
-      {
-        bookingId: bookingId,
-        otp: otpStr,
-      },
+      { bookingId, otp: otpStr },
       {
         onSuccess: (data: any) => {
           toast.success("Work Started");
+
+          const socket =
+            getSocket("/workers/requests") ||
+            initializeSocket("/workers/requests");
+
+          // 🔥 EMIT SOCKET EVENT (THIS IS KEY)
+          socket.emit("booking.worker.started", {
+            bookingId,
+            status: "IN_PROGRESS",
+            startedAt: data?.startedAt || new Date().toISOString(),
+          });
 
           const updatedWork = {
             ...work,
             status: "IN_PROGRESS",
             workStartedAt: data?.startedAt || new Date().toISOString(),
-            booking: {
-              ...work.booking,
-              status: "IN_PROGRESS",
-            },
           };
 
-          // 🔥 IMPORTANT FIX 1: update global store
-          upsertBooking(updatedWork);
-
-          // 🔥 IMPORTANT FIX 2: notify parent (optional)
           onWorkStarted?.(updatedWork);
-
           onClose();
         },
 
@@ -92,7 +91,6 @@ export default function StartWork({
 
           <div className="flex justify-center">
             <Input
-              type="text"
               value={otp}
               onChange={(e) =>
                 setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))

@@ -4,7 +4,8 @@ import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/worke
 export interface Worker {
   categoryIds?: string[];
   serviceTierIds?: string[];
-
+  categories?:string[];
+  serviceTiers?:string[];
   status?: WorkerStatus;
 
   location?: GeoPoint;

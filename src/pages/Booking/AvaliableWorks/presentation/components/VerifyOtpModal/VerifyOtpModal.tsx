@@ -7,6 +7,7 @@ import type { Work } from "../../../domain/entities/work";
 import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
 
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+import { downloadInvoicePdf } from "../../helpers/downloadinvoicepdffunction";
 
 type Props = {
   work: Work;
@@ -30,25 +31,31 @@ export default function VerifyOtpModal({
 
   if (!open) return null;
 
- const { upsertBooking } = useBookingSocketStore((s) => s);
+ const { upsertAssigned } = useBookingSocketStore((s) => s);
 
 const handleVerify = () => {
   if (!otp) return;
 
   mutate(
     {
-      bookingId: work.bookingId ?? work.booking?._id ?? "",
+      bookingId: work._id,
       otp,
       purpose: "WORK_COMPLETE",
     },
     {
-      onSuccess: (updatedWork) => {
-        // 🔥 SINGLE SOURCE FIX
-        upsertBooking(updatedWork);
+      onSuccess: (res) => {
+  const updatedWork = res?.booking ?? res;
+  const invoice = res?.invoice;
 
-        onSuccess?.(updatedWork);
-        onClose();
-      },
+  upsertAssigned(updatedWork);
+
+  if (invoice) {
+    downloadInvoicePdf(invoice, updatedWork);
+  }
+
+  onSuccess?.(res);
+  onClose();
+}
     }
   );
 };

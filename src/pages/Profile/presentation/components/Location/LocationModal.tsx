@@ -78,18 +78,16 @@ export default function LocationModal({
       </div>
 
       {/* Map Picker */}
-      <MapPicker
-        tempLocation={tempLocation}
-        locationMode={locationMode}
-        setTempLocation={(coords: [number, number]) => {
-          setTempLocation(coords);
-
-          // ✅ If user clicks map → switch to manual
-          onManualLocation(coords[0], coords[1]);
-        }}
-        setLocationName={setLocationName}
-        radius={radius}
-      />
+    <MapPicker
+  tempLocation={tempLocation}
+  locationMode={locationMode}
+  setTempLocation={(coords) => {
+    setTempLocation(coords);
+    onManualLocation(coords[0], coords[1]);
+  }}
+  setLocationName={setLocationName}
+  radius={radius}
+/>
 
       {/* Radius */}
       <div>

@@ -3,6 +3,7 @@ import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/enti
 
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
+import type { Invoice } from "./invoice";
 
 export interface Work {
   _id: string; 
@@ -15,6 +16,7 @@ export interface Work {
   booking: Booking
   service?:ServiceCategory
   serviceTier?:ServiceTier
+  invoice?:Invoice;
   customer?: {
     _id: string;
     fullName: string; 

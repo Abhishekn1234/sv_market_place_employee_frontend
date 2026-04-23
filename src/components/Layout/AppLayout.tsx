@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import AppSidebar from "@/components/Layout/AppSidebar";
@@ -10,36 +10,34 @@ import { useLanguage } from "@/context/LanguageContext";
 import SocketBookingsModal from "@/core/Websocket/socketchecking";
 
 import { useAuthStore } from "@/core/store/auth";
-import { useInitSockets } from "@/core/Websocket/presentation/hooks/socketinitliazation";
-import { useBookingSocket } from "@/core/Websocket/presentation/utils/socketlogic";
-
+import { useBookingSocket } from "@/core/Websocket/presentation/utils/useBookingsocket";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 
 export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mini, setMini] = useState(false);
 
-  // ✅ SSR-safe window width
   const [windowWidth, setWindowWidth] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth : 1024
   );
 
-  // ✅ modal should NOT open by default
   const [modalOpen, setModalOpen] = useState(false);
+  const [lastAcceptedAt, setLastAcceptedAt] = useState<number | null>(null);
 
   const { language } = useLanguage();
   const isRTL = language === "AR";
 
   const { user } = useAuthStore();
-  const workerStatus = user?.worker?.status;
-  const isWorkerOnline = workerStatus === "ONLINE";
+  const isWorkerOnline = user?.worker?.status === "ONLINE";
 
-  /* ================= SOCKET INIT ================= */
-  useInitSockets();
+  /* ================= SOCKET ================= */
   useBookingSocket();
 
   /* ================= STORE ================= */
-  const { bookings, connected } = useBookingSocketStore();
+  const requestBookings = useBookingSocketStore((s) => s.requestBookings);
+  const connected = useBookingSocketStore((s) => s.connected);
+
+  const lastSeenRef = useRef<string | null>(null);
 
   /* ================= RESPONSIVE ================= */
   useEffect(() => {
@@ -48,14 +46,24 @@ export default function AppLayout() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  /* ================= AUTO OPEN MODAL ================= */
+  /* ================= MODAL TRIGGER ================= */
   useEffect(() => {
-    if (connected && isWorkerOnline && bookings.length > 0) {
+    if (!connected || !isWorkerOnline) return;
+    if (!requestBookings.length) return;
+
+    // 🔥 cooldown after accept (prevents spam modal)
+    if (lastAcceptedAt && Date.now() - lastAcceptedAt < 4000) return;
+
+    const latest = requestBookings.at(0)?._id;
+    if (!latest) return;
+
+    if (lastSeenRef.current !== latest) {
+      lastSeenRef.current = latest;
       setModalOpen(true);
     }
-  }, [connected, isWorkerOnline, bookings.length]);
+  }, [connected, isWorkerOnline, requestBookings, lastAcceptedAt]);
 
-  /* ================= LAYOUT OFFSET ================= */
+  /* ================= LAYOUT ================= */
   const contentOffset =
     windowWidth >= 1024
       ? mini
@@ -91,10 +99,14 @@ export default function AppLayout() {
         </main>
       </div>
 
-      {/* ================= LIVE BOOKINGS MODAL ================= */}
+      {/* ================= MODAL ================= */}
       <SocketBookingsModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
+        onBookingAccepted={() => {
+          setModalOpen(false);
+          setLastAcceptedAt(Date.now()); // 🔥 cooldown instead of permanent disable
+        }}
       />
     </div>
   );

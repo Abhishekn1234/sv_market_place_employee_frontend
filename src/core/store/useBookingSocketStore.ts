@@ -1,36 +1,59 @@
 import { create } from "zustand";
 
-type Store = {
-  bookings: any[];
+type Booking = any;
+
+type State = {
+  requestBookings: Booking[];
+  assignedBookings: Booking[];
   connected: boolean;
 
   setConnected: (v: boolean) => void;
-  upsertBooking: (b: any) => void;
-  removeBooking: (id: string) => void;
+
+  upsertRequest: (b: Booking) => void;
+  removeRequest: (id: string) => void;
+
+  upsertAssigned: (b: Booking) => void;
+  removeAssigned: (id: string) => void;
 };
 
-export const useBookingSocketStore = create<Store>((set, get) => ({
-  bookings: [],
+const getId = (b: any) => b._id || b.bookingId;
+
+export const useBookingSocketStore = create<State>((set, get) => ({
+  requestBookings: [],
+  assignedBookings: [],
   connected: false,
 
   setConnected: (v) => set({ connected: v }),
 
-  upsertBooking: (booking) => {
-    const existing = get().bookings; // ✅ now valid
+  upsertRequest: (b) => {
+    const id = getId(b);
+    const exists = get().requestBookings.find((x) => getId(x) === id);
 
-    const index = existing.findIndex((b) => b._id === booking._id);
-
-    if (index !== -1) {
-      const updated = [...existing];
-      updated[index] = { ...updated[index], ...booking };
-      set({ bookings: updated });
-    } else {
-      set({ bookings: [booking, ...existing] });
-    }
+    set({
+      requestBookings: exists
+        ? get().requestBookings.map((x) => (getId(x) === id ? { ...x, ...b } : x))
+        : [b, ...get().requestBookings],
+    });
   },
 
-  removeBooking: (id) =>
-    set((state) => ({
-      bookings: state.bookings.filter((b) => b._id !== id),
-    })),
+  removeRequest: (id) =>
+    set({
+      requestBookings: get().requestBookings.filter((x) => getId(x) !== id),
+    }),
+
+  upsertAssigned: (b) => {
+    const id = getId(b);
+    const exists = get().assignedBookings.find((x) => getId(x) === id);
+
+    set({
+      assignedBookings: exists
+        ? get().assignedBookings.map((x) => (getId(x) === id ? { ...x, ...b } : x))
+        : [b, ...get().assignedBookings],
+    });
+  },
+
+  removeAssigned: (id) =>
+    set({
+      assignedBookings: get().assignedBookings.filter((x) => getId(x) !== id),
+    }),
 }));
