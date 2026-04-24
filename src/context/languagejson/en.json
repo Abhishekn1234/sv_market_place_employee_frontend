@@ -449,12 +449,24 @@
     "arabic": "Arabic",
     "hindi": "Hindi"
   },
+  "disputepage":{
+    "title": "Disputes",
+    "description": "Manage and respond to user disputes",
+    "bookingId": "Booking ID",
+    "user": "User",
+    "reason": "Reason",
+    "status": "Status",
+    "action": "Action",
+    "respond": "Respond",
+    "noData": "No disputes found"
+  },
 "sidebar": {
   "home":"Home",
   "history": "History",
   "bookingHistory": "Booking History",
   "transactionHistory": "Transaction History",
   "workHistory": "Work History",
+  "disputes":"Disputes",
 
   "activity": "Activity",
   "recentActivity": "Recent Activity",

@@ -26,28 +26,62 @@ export function useBookingSocket() {
   } = useBookingSocketStore();
 
   useEffect(() => {
+    console.log("[Socket] Hook initialized");
+
     const requestSocket = initializeSocket("/workers/requests");
     const assignedSocket = initializeSocket("/workers/assigned-updates");
+
+    console.log("[Socket] Initializing sockets...", {
+      request: requestSocket?.id,
+      assigned: assignedSocket?.id,
+    });
 
     requestSocket.connect();
     assignedSocket.connect();
 
     /* ================= CONNECTION ================= */
-    requestSocket.on("connect", () => setConnected(true));
-    requestSocket.on("disconnect", () => setConnected(false));
+    requestSocket.on("connect", () => {
+      console.log("[Socket] Request connected:", requestSocket.id);
+      setConnected(true);
+    });
+
+    requestSocket.on("disconnect", (reason: any) => {
+      console.log("[Socket] Request disconnected:", reason);
+      setConnected(false);
+    });
+
+    assignedSocket.on("connect", () => {
+      console.log("[Socket] Assigned connected:", assignedSocket.id);
+    });
+
+    assignedSocket.on("disconnect", (reason: any) => {
+      console.log("[Socket] Assigned disconnected:", reason);
+    });
 
     /* ================= REQUEST EVENTS ================= */
     const onRequestUpsert = (data: any) => {
-      const b = normalize(data);
-      if (!b) return;
+      console.log("[Socket][Request Upsert Event]", data);
 
+      const b = normalize(data);
+      if (!b) {
+        console.log("[Socket][Request Upsert] Invalid payload");
+        return;
+      }
+
+      console.log("[Socket][Request Upsert Normalized]", b);
       upsertRequest(b);
     };
 
     const onRequestRemove = (data: any) => {
-      const id = data?.bookingId || data?._id;
-      if (!id) return;
+      console.log("[Socket][Request Remove Event]", data);
 
+      const id = data?.bookingId || data?._id;
+      if (!id) {
+        console.log("[Socket][Request Remove] Missing ID");
+        return;
+      }
+
+      console.log("[Socket][Request Remove ID]", id);
       removeRequest(String(id));
     };
 
@@ -57,16 +91,28 @@ export function useBookingSocket() {
 
     /* ================= ASSIGNED EVENTS ================= */
     const onAssigned = (data: any) => {
-      const b = normalize(data);
-      if (!b) return;
+      console.log("[Socket][Assigned Upsert Event]", data);
 
+      const b = normalize(data);
+      if (!b) {
+        console.log("[Socket][Assigned Upsert] Invalid payload");
+        return;
+      }
+
+      console.log("[Socket][Assigned Upsert Normalized]", b);
       upsertAssigned(b);
     };
 
     const onRemoveAssigned = (data: any) => {
-      const id = data?.bookingId || data?._id;
-      if (!id) return;
+      console.log("[Socket][Assigned Remove Event]", data);
 
+      const id = data?.bookingId || data?._id;
+      if (!id) {
+        console.log("[Socket][Assigned Remove] Missing ID");
+        return;
+      }
+
+      console.log("[Socket][Assigned Remove ID]", id);
       removeAssigned(String(id));
     };
 
@@ -78,11 +124,24 @@ export function useBookingSocket() {
     assignedSocket.on("booking.completion.confirmed", onAssigned);
 
     /* ================= DISPUTE ================= */
-    assignedSocket.on("booking.dispute.created", onAssigned);
-    assignedSocket.on("booking.dispute.responded", onAssigned);
-    assignedSocket.on("booking.dispute.resolved", onAssigned);
+    assignedSocket.on("booking.dispute.created", (d) => {
+      console.log("[Socket][Dispute Created]", d);
+      onAssigned(d);
+    });
+
+    assignedSocket.on("booking.dispute.responded", (d) => {
+      console.log("[Socket][Dispute Responded]", d);
+      onAssigned(d);
+    });
+
+    assignedSocket.on("booking.dispute.resolved", (d) => {
+      console.log("[Socket][Dispute Resolved]", d);
+      onAssigned(d);
+    });
 
     return () => {
+      console.log("[Socket] Cleaning up sockets");
+
       requestSocket.disconnect();
       assignedSocket.disconnect();
     };

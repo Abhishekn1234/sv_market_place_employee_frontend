@@ -3,17 +3,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
+import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
 import type { Work } from "../../../domain/entities/work";
 import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
-
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
-import { downloadInvoicePdf } from "../../helpers/downloadinvoicepdffunction";
 
 type Props = {
   work: Work;
   open: boolean;
   onClose: () => void;
-  onSuccess: (updatedWork: Work) => void;
+  onSuccess: (updatedWork: Work | Booking) => void;
 };
 
 export default function VerifyOtpModal({
@@ -24,41 +23,33 @@ export default function VerifyOtpModal({
 }: Props) {
   const { t } = useLanguage();
   const [otp, setOtp] = useState("");
- 
 
-  // ✅ Get mutation from hook
   const { mutate, isPending } = useVerifyOtp();
 
   if (!open) return null;
 
- const { upsertAssigned } = useBookingSocketStore((s) => s);
+  const { upsertAssigned } = useBookingSocketStore((s) => s);
 
-const handleVerify = () => {
-  if (!otp) return;
+  const handleVerify = () => {
+    if (!otp) return;
 
-  mutate(
-    {
-      bookingId: work._id,
-      otp,
-      purpose: "WORK_COMPLETE",
-    },
-    {
-      onSuccess: (res) => {
-  const updatedWork = res?.booking ?? res;
-  const invoice = res?.invoice;
+    mutate(
+      {
+        bookingId: work._id,
+        otp,
+        purpose: "WORK_COMPLETE",
+      },
+      {
+        onSuccess: (res) => {
+          const updatedWork = res?.booking ?? res;
 
-  upsertAssigned(updatedWork);
-
-  if (invoice) {
-    downloadInvoicePdf(invoice, updatedWork);
-  }
-
-  onSuccess?.(res);
-  onClose();
-}
-    }
-  );
-};
+          upsertAssigned(updatedWork);
+          onSuccess?.(updatedWork);
+          onClose();
+        },
+      }
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

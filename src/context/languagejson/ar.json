@@ -447,10 +447,22 @@
     "arabic": "العربية",
     "hindi": "الهندية"
   },
+  "disputepage":{
+    "title": "النزاعات",
+    "description": "إدارة والرد على نزاعات المستخدمين",
+    "bookingId": "معرف الحجز",
+    "user": "المستخدم",
+    "reason": "السبب",
+    "status": "الحالة",
+    "action": "الإجراء",
+    "respond": "رد",
+    "noData": "لا توجد نزاعات"
+  }, 
   
  "sidebar": {
 "home": "الرئيسية",
   "history": "السجل",
+  "disputes":"النزاعات",
   "bookingHistory": "سجل الحجوزات",
   "transactionHistory": "سجل المعاملات",
   "workHistory": "سجل الأعمال",

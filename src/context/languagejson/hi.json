@@ -405,12 +405,24 @@
   "logout": "लॉगआउट",
   "signOut": "लॉग आउट"
 },
+"disputepage":{
+   "title": "विवाद",
+    "description": "उपयोगकर्ता विवादों को प्रबंधित और उत्तर दें",
+    "bookingId": "बुकिंग आईडी",
+    "user": "उपयोगकर्ता",
+    "reason": "कारण",
+    "status": "स्थिति",
+    "action": "कार्य",
+    "respond": "उत्तर दें",
+    "noData": "कोई विवाद नहीं मिला"
+},
 "sidebar": {
     "home": "होम",
   "history": "इतिहास",
   "bookingHistory": "बुकिंग इतिहास",
   "transactionHistory": "लेन-देन इतिहास",
   "workHistory": "कार्य इतिहास",
+  "disputes":"विवादों",
 
   "activity": "गतिविधि",
   "recentActivity": "हाल की गतिविधि",

@@ -11,8 +11,8 @@ export default function WorkGrid({
   onComplete,
   onVerify,
   onCancel,
-    onDownload,
-  onDispute,
+  
+  
 }: any) {
   const [locations, setLocations] = useState<Record<string, string>>({});
 
@@ -136,87 +136,63 @@ export default function WorkGrid({
                 )}
             </div>
 
-            <div className="mt-4 space-y-2">
-              {lat && lng && (
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    window.open(
-                      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
-                    )
-                  }
-                  className="w-full"
-                >
-                  📍 Get Directions
-                </Button>
-              )}
+         <div className="mt-4 space-y-2">
+  {lat && lng && (
+    <Button
+      variant="outline"
+      onClick={() =>
+        window.open(
+          `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+        )
+      }
+      className="w-full"
+    >
+      📍 Get Directions
+    </Button>
+  )}
 
-              <div className="flex gap-2">
-                {["ASSIGNED", "WORKER_ACCEPTED"].includes(status) && (
-                  <>
-                    <Button className="flex-1" onClick={() => onStart(w)}>
-                      Start
-                    </Button>
+  {/* Primary actions */}
+  <div className="flex gap-2">
+    {["ASSIGNED", "WORKER_ACCEPTED"].includes(status) && (
+      <>
+        <Button className="flex-1" onClick={() => onStart(w)}>
+          Start
+        </Button>
 
-                    <Button
-                      variant="destructive"
-                      className="flex-1"
-                      onClick={() => onCancel(w)}
-                    >
-                      Cancel
-                    </Button>
-                  </>
-                )}
+        <Button
+          variant="destructive"
+          className="flex-1"
+          onClick={() => onCancel(w)}
+        >
+          Cancel
+        </Button>
+      </>
+    )}
 
-                {status === "WORK_COMPLETED_PENDING" ? (
-                  <Button
-                    className="w-full"
-                    onClick={() => onVerify(w)}
-                  >
-                    Verify OTP
-                  </Button>
-                ) : (
-                  (status === "STARTED" ||
-                    status === "IN_PROGRESS") &&
-                  status !== "COMPLETED" && (
-                    <Button
-                      className="w-full"
-                      onClick={() =>
-                        onComplete({
-                          ...w,
-                          elapsedTime: timers[w._id] || "00:00:00",
-                        })
-                      }
-                    >
-                      Complete
-                    </Button>
-                  )
-                )}
-                {status==="INVOICE_GENERATED" && (
-                  <>
-                   <div className="flex gap-2 mt-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => onDownload(w)}
-                  >
-                    ⬇ Download
-                  </Button>
+    {status === "WORK_COMPLETED_PENDING" && (
+      <Button className="w-full" onClick={() => onVerify(w)}>
+        Verify OTP
+      </Button>
+    )}
 
-                 
-                </div>
-                  </>
-                )}
-                 <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => onDispute(w)}
-                  >
-                    ⚠ Dispute
-                  </Button>
-              
-              </div>
-            </div>
+    {(status === "STARTED" || status === "IN_PROGRESS") &&
+      status !== "COMPLETED" && (
+        <Button
+          className="w-full"
+          onClick={() =>
+            onComplete({
+              ...w,
+              elapsedTime: timers[w._id] || "00:00:00",
+            })
+          }
+        >
+          Complete
+        </Button>
+      )}
+  </div>
+
+ 
+  </div>
           </CommonCard>
         );
       })}

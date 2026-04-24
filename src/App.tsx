@@ -31,6 +31,7 @@ import VerifyMobilePage from './pages/Auth/MobileVerification/presentation/Verif
 import { SendOtpEmailPage } from './pages/Auth/EmailVerification/presentation/SendOtpEmailPage';
 import { VerifyOtpEmailPage } from './pages/Auth/EmailVerification/presentation/components/VerificationOtpEmail';
 import SendOtpMobilePage from './pages/Auth/MobileVerification/presentation/components/SendOtpMobilePage';
+import Disputespage from './pages/Disputes/presentation/Disputes.page';
 function AppContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
@@ -78,7 +79,7 @@ return (
           <Route index element={<HomePage />} />
           <Route path="settings/profile" element={<ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} />} />
           <Route path="history/booking" element={<BookingHistory />} />
-          
+           <Route path='/disputes' element={<Disputespage/>}/>
           <Route path="history/transaction" element={<TransactionHistory />} />
           <Route path="history/work" element={<WorkingHistory />} />
           <Route path="activity/recent" element={<RecentActivity />} />

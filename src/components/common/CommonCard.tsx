@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import {
   Card,
@@ -5,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -14,9 +17,11 @@ interface CommonCardProps {
   children?: ReactNode;
   value?: string | number;
   label?: string;
-  description?: string;
+  description?: string | ReactNode;
+  footer?: ReactNode;
   className?: string;
   contentClassName?: string;
+  isRTL?: boolean;
 }
 
 export function CommonCard({
@@ -26,16 +31,24 @@ export function CommonCard({
   description,
   label,
   value,
+  footer,
   className,
   contentClassName,
+  isRTL = false,
 }: CommonCardProps) {
+  // ✅ single source of truth for alignment
+  const alignClass =
+    headerAlign === "right" || isRTL ? "text-right" : "text-left";
+
   return (
     <Card className={cn("mb-4 sm:mb-6", className)}>
+      
+      {/* 🔹 Header */}
       {(title || description) && (
         <CardHeader
           className={cn(
             "px-4 py-3 sm:px-6 sm:py-4",
-            headerAlign === "right" ? "text-right" : "text-left"
+            alignClass
           )}
         >
           {title && (
@@ -51,10 +64,12 @@ export function CommonCard({
         </CardHeader>
       )}
 
+      {/* 🔹 Label + Value */}
       {(label || value) && (
         <CardContent
           className={cn(
             "px-4 pt-2 sm:px-6 sm:pt-4",
+            alignClass,
             contentClassName
           )}
         >
@@ -71,15 +86,29 @@ export function CommonCard({
         </CardContent>
       )}
 
+      {/* 🔹 Children */}
       {children && (
         <CardContent
           className={cn(
             "px-4 pb-4 sm:px-6 sm:pb-6",
+            alignClass,
             contentClassName
           )}
         >
           {children}
         </CardContent>
+      )}
+
+      {/* 🔹 Footer */}
+      {footer && (
+        <CardFooter
+          className={cn(
+            "px-4 pb-4 sm:px-6 sm:pb-6",
+            alignClass
+          )}
+        >
+          {footer}
+        </CardFooter>
       )}
     </Card>
   );

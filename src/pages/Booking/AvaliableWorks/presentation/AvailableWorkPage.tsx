@@ -26,25 +26,39 @@ export default function AvailableWorkPage() {
 
   const isRTL = language === "AR";
 
-  /* ================= ZUSTAND SOURCE OF TRUTH ================= */
+  /* ================= ZUSTAND ================= */
   const assignedBookings = useBookingSocketStore(
     (s) => s.assignedBookings
   );
+  const removeAssigned = useBookingSocketStore((s) => s.removeAssigned);
 
+  /* ================= STATE ================= */
   const [selectedWork, setSelectedWork] = useState<any>(null);
   const [modalType, setModalType] =
-    useState<"start" | "complete" | "verify" | null>(null);
+    useState<"start" | "complete" | "verify" | "dispute" | null>(null);
 
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
 
   /* ================= DERIVED ================= */
   const workList = useMemo(() => {
-    return assignedBookings.map((b: any) => ({
-      ...b,
-      _id: b._id || b.bookingId,
-      status: (b.status || "").toUpperCase(),
-    }));
+    const map = new Map();
+
+    assignedBookings.forEach((b: any) => {
+      const id = b._id || b.bookingId;
+      if (!id) return;
+
+      const existing = map.get(id);
+
+      map.set(id, {
+        ...(existing || {}),
+        ...b,
+        _id: id,
+        status: (b.status || existing?.status || "").toUpperCase(),
+      });
+    });
+
+    return Array.from(map.values());
   }, [assignedBookings]);
 
   /* ================= TIMER ================= */
@@ -66,10 +80,10 @@ export default function AvailableWorkPage() {
         const m = Math.floor((elapsed % 3600000) / 60000);
         const s = Math.floor((elapsed % 60000) / 1000);
 
-        updated[w._id] =
-          `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(
-            s
-          ).padStart(2, "0")}`;
+        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(
+          2,
+          "0"
+        )}:${String(s).padStart(2, "0")}`;
       });
 
       setTimers(updated);
@@ -78,7 +92,7 @@ export default function AvailableWorkPage() {
     return () => clearInterval(interval);
   }, [workList]);
 
-  /* ================= UI HANDLERS ================= */
+  /* ================= HANDLERS ================= */
   const handleStartWork = (work: any) => {
     setSelectedWork(work);
     setModalType("start");
@@ -118,6 +132,11 @@ export default function AvailableWorkPage() {
         setCancelConfirmWork={setCancelConfirmWork}
         cancelMutation={cancelMutation}
         timers={timers}
+
+        /* 🔥 INSTANT REMOVE FROM GRID */
+        onCancelSuccess={(updatedBooking: any) => {
+          removeAssigned(updatedBooking._id);
+        }}
       />
     </CommonCard>
   );

@@ -28,21 +28,24 @@ export default function SocketBookingsModal({
   );
 
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
-
+  const removeRequestBooking = useBookingSocketStore(
+  (s) => s.removeRequest
+);
   const handleAccept = (id: string) => {
     setSelectedBooking(id);
 
     acceptBooking(
       { bookingId: id, bookingStatus: "WORKER_ACCEPTED" },
       {
-        onSuccess: () => {
-          // ❌ NO SOCKET EMIT HERE (backend handles it)
-          setTimeout(() => {
-            onClose();
-            onBookingAccepted?.();
-            navigate("/availableWork");
-          }, 100);
-        },
+      onSuccess: () => {
+         removeRequestBooking(id);
+
+        setTimeout(() => {
+          onClose();
+          onBookingAccepted?.();
+          navigate("/availableWork");
+        }, 100);
+      }
       }
     );
   };
