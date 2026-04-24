@@ -1,10 +1,11 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CompleteWorkRepoImpl } from "../../data/repositories/CompleteWorkRepoImpl";
 import { CompleteWorkUsecase } from "../../domain/usecase/CompleteWorkUsecase";
 import { toast } from "react-toastify";
 
 import type { CompleteWork } from "../../domain/entities/completework";
 import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
+import { ASSIGNED_WORKS_KEY } from "./useAssign";
 
 type UseCompleteWorkOptions = {
   onSuccess?: (data: Booking) => void;
@@ -14,6 +15,7 @@ type UseCompleteWorkOptions = {
 export function useCompleteWork(
   { onSuccess, onError }: UseCompleteWorkOptions = {}
 ) {
+  const queryClient = useQueryClient();
   const repo = new CompleteWorkRepoImpl();
   const usecase = new CompleteWorkUsecase(repo);
 
@@ -21,11 +23,24 @@ export function useCompleteWork(
     mutationFn: (data: CompleteWork) => usecase.execute(data),
     mutationKey: ["complete-work"],
 
-    onSuccess: (data) => {
-      console.log("Work completed successfully:", data);
+    onSuccess: (completedBooking) => {
+      // Update the assigned works cache to reflect the status change
+      queryClient.setQueryData<Booking[]>(
+        ASSIGNED_WORKS_KEY,
+        (old) => {
+          const safeOld = Array.isArray(old) ? old : [];
+          return safeOld.map((booking) =>
+            booking._id === completedBooking._id
+              ? { ...booking, ...completedBooking, status: completedBooking.status || booking.status }
+              : booking
+          );
+        }
+      );
+
+      console.log("Work completed successfully:", completedBooking);
       toast.success("Work completed successfully");
 
-      if (onSuccess) onSuccess(data);
+      if (onSuccess) onSuccess(completedBooking);
     },
 
     onError: (error: any) => {

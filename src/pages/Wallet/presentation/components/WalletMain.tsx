@@ -9,12 +9,14 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import type { Transaction } from "../../domain/entities/transaction";
+import type { WalletSummary } from "../../domain/entities/wallet";
 
 type Props = {
   transactions: Transaction[];
   totalBalance: number;
   totalCredit: number;
   totalDebit: number;
+  wallet?: WalletSummary;
 };
 
 export function WalletMain({
@@ -22,15 +24,21 @@ export function WalletMain({
   totalBalance,
   totalCredit,
   totalDebit,
+  wallet,
 }: Props) {
   const { translations, language } = useLanguage();
   const walletT = translations.wallet;
   const isRTL = language === "AR";
+  const currencyLabel = wallet?.currency ?? "USD";
+  const formattedBalance = `${totalBalance.toLocaleString()} ${currencyLabel}`;
+  const updatedAt = wallet?.updatedAt
+    ? new Date(wallet.updatedAt).toLocaleString()
+    : null;
 
   return (
     <div className="lg:col-span-2 space-y-4 sm:space-y-6">
       {/* Balance Card */}
-      <CommonCard className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl">
+      <CommonCard className="bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-xl">
         <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div>
@@ -38,14 +46,21 @@ export function WalletMain({
                 {walletT.totalBalance}
               </p>
               <p className="text-2xl sm:text-4xl font-bold mt-1 sm:mt-2 break-all">
-                ${totalBalance.toLocaleString()}
+                ${formattedBalance}
               </p>
 
-              <div className="flex items-center mt-2 gap-2">
-                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="text-blue-100 text-sm">
-                  {walletT.monthlyGrowth}
-                </span>
+              <div className="flex flex-col gap-2 mt-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-blue-100 text-sm">
+                    {walletT.monthlyGrowth}
+                  </span>
+                </div>
+                {updatedAt && (
+                  <span className="text-blue-100 text-xs sm:text-sm">
+                    Updated: {updatedAt}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -135,7 +150,7 @@ export function WalletMain({
                   )}
 
                   <div>
-                    <p className="font-medium break-words">
+                    <p className="font-medium wrap-break-word">
                       {txn.description}
                     </p>
                     <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500">

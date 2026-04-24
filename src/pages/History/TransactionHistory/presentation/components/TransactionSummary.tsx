@@ -1,5 +1,7 @@
+"use client";
+
 import { DollarSign, Calendar, Filter } from "lucide-react";
-import { mockTransactions } from "../data/transactiondata";
+import { useWalletTransactions } from "@/pages/Wallet/presentation/hooks/useWalletTransactions";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
 import { CommonCard } from "@/components/common/CommonCard";
@@ -7,16 +9,24 @@ import { CommonCard } from "@/components/common/CommonCard";
 export default function TransactionSummary() {
   const { translations, language } = useLanguage();
   const { theme } = useTheme();
+  const { data, isLoading } = useWalletTransactions();
+
+  const transactions = data?.data ?? [];
   const isRTL = language === "AR";
 
   const stats = translations.transactionHistory.stats;
 
-  const totalPaid = mockTransactions
-    .filter((t) => t.status === "completed")
+  // ✅ Calculations
+  const totalPaid = transactions
+    .filter((t) => t.type === "CREDIT")
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const pendingAmount = mockTransactions
-    .filter((t) => t.status === "pending")
+  const totalSpent = transactions
+    .filter((t) => t.type === "DEBIT")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const pendingAmount = transactions
+    .filter((t) => t.source === "BOOKING_PAYMENT")
     .reduce((sum, t) => sum + t.amount, 0);
 
   const formatCurrency = (amount: number) =>
@@ -29,29 +39,41 @@ export default function TransactionSummary() {
     <div
       className={`
         grid gap-4
-        sm:grid-cols-2 lg:grid-cols-3
+        sm:grid-cols-2 lg:grid-cols-4
         ${isRTL ? "direction-rtl" : ""}
       `}
     >
+      {/* Total Paid */}
       <SummaryCard
         title={stats.totalPaid}
-        value={formatCurrency(totalPaid)}
+        value={isLoading ? "..." : formatCurrency(totalPaid)}
         subtitle={stats.completedTransactions}
         icon={<DollarSign className="w-4 h-4 text-green-600" />}
         theme={theme}
       />
 
+      {/* Total Spent */}
+      <SummaryCard
+        title={stats.totalSpent ?? "Total Spent"}
+        value={isLoading ? "..." : formatCurrency(totalSpent)}
+        subtitle={stats.spentTransactions ?? "Debited transactions"}
+        icon={<DollarSign className="w-4 h-4 text-red-600" />}
+        theme={theme}
+      />
+
+      {/* Pending */}
       <SummaryCard
         title={stats.pendingPayments}
-        value={formatCurrency(pendingAmount)}
+        value={isLoading ? "..." : formatCurrency(pendingAmount)}
         subtitle={stats.pendingTransactions}
         icon={<Calendar className="w-4 h-4 text-yellow-600" />}
         theme={theme}
       />
 
+      {/* Total Count */}
       <SummaryCard
         title={stats.allTime}
-        value={mockTransactions.length}
+        value={isLoading ? "..." : transactions.length}
         subtitle={stats.totalTransactions}
         icon={<Filter className="w-4 h-4 text-blue-600" />}
         theme={theme}
@@ -65,7 +87,6 @@ function SummaryCard({
   value,
   subtitle,
   icon,
-  theme,
 }: {
   title: string;
   value: string | number;
@@ -75,7 +96,7 @@ function SummaryCard({
 }) {
   const { language } = useLanguage();
   const isRTL = language === "AR";
-  console.log(theme);
+
   return (
     <CommonCard>
       <div

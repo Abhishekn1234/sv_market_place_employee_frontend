@@ -1,12 +1,14 @@
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import type { Transaction } from "../../domain/entities/transaction";
+import type { WalletSummary } from "../../domain/entities/wallet";
 
 type Props = {
   transactions: Transaction[];
   totalBalance: number;
   totalCredit: number;
   totalDebit: number;
+  wallet?: WalletSummary;
 };
 
 export function WalletSidebar({
@@ -14,10 +16,12 @@ export function WalletSidebar({
   totalBalance,
   totalCredit,
   totalDebit,
+  wallet,
 }: Props) {
   const { translations, language } = useLanguage();
   const walletT = translations.wallet;
   const isRTL = language === "AR";
+  const currencyLabel = wallet?.currency ?? "USD";
   console.log(isRTL);
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -39,7 +43,7 @@ export function WalletSidebar({
             <div className="flex justify-between gap-3">
               <span>{walletT.avgTransaction}</span>
               <span className="font-medium whitespace-nowrap tabular-nums">
-                $
+                {currencyLabel}
                 {transactions.length
                   ? Math.round(
                       (totalCredit + totalDebit) / transactions.length
@@ -51,7 +55,7 @@ export function WalletSidebar({
             <div className="flex justify-between gap-3">
               <span>{walletT.largestIncome}</span>
               <span className="text-green-600 font-medium whitespace-nowrap tabular-nums">
-                $
+                {currencyLabel}
                 {Math.max(
                   0,
                   ...transactions
@@ -64,7 +68,7 @@ export function WalletSidebar({
             <div className="flex justify-between gap-3">
               <span>{walletT.largestExpense}</span>
               <span className="text-rose-600 font-medium whitespace-nowrap tabular-nums">
-                $
+                {currencyLabel}
                 {Math.max(
                   0,
                   ...transactions
@@ -88,7 +92,7 @@ export function WalletSidebar({
             <div className="flex justify-between gap-3">
               <span>{walletT.availableBalance}</span>
               <span className="font-medium whitespace-nowrap tabular-nums">
-                ${totalBalance.toLocaleString()}
+                {currencyLabel}{totalBalance.toLocaleString()}
               </span>
             </div>
 

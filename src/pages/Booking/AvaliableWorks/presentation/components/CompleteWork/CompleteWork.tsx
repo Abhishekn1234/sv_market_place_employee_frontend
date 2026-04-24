@@ -74,11 +74,11 @@ console.log(work);
           <p><strong>Customer:</strong> {work.customer?.fullName || "N/A"}</p>
           <p>
           <strong>Scheduled Duration:</strong>{" "}
-{work.booking?.pricingMode === "HOURLY"
-  ? `${work.booking?.schedule?.estimatedHours ?? "-"} hour(s)`
-  : work.booking?.pricingMode === "PER_DAY"
-  ? `${work.booking?.schedule?.estimatedDays ?? "-"} day(s)`
-  : "-"}
+        {work.booking?.pricingMode === "HOURLY"
+          ? `${work.booking?.schedule?.estimatedHours ?? "-"} hour(s)`
+          : work.booking?.pricingMode === "PER_DAY"
+          ? `${work.booking?.schedule?.estimatedDays ?? "-"} day(s)`
+          : "-"}
           </p>
           <p>
               <strong>Worked Time:</strong>{" "}

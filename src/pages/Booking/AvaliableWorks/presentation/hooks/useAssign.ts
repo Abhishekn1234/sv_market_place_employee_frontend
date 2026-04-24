@@ -12,11 +12,13 @@ export function useAssign(open: boolean = true) {
     queryKey: ASSIGNED_WORKS_KEY,
     queryFn: async () => {
       const res = await usecase.execute();
+      // Ensure we always return an array
       return Array.isArray(res) ? res : res ? [res] : [];
     },
     enabled: open,
     staleTime: 30_000,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // Enable refetch on window focus for real-time updates
+    refetchInterval: 60_000, // Refetch every minute to keep data fresh
   });
 
   return {

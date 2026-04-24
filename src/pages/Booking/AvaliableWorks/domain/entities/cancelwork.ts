@@ -1,6 +1,6 @@
 
 
-export type CancelType =
+export type CancelReasonType =
   | "BOOKED_WRONG_SERVICE"
   | "BOOKED_BY_MISTAKE"
   | "SCHEDULE_CHANGED"
@@ -11,11 +11,11 @@ export type CancelType =
 export type CancelWork =
   | {
       bookingId: string;
-      cancelType: Exclude<CancelType, "OTHER">;
+      cancelReasonType: Exclude<CancelReasonType, "OTHER">;
       cancelReason?: never;
     }
   | {
       bookingId: string;
-      cancelType: "OTHER";
+      cancelReasonType: "OTHER";
       cancelReason: string;
     };

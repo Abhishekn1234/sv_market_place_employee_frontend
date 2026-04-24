@@ -82,7 +82,8 @@
       "totalBookings": "إجمالي الحجوزات",
       "completed": "مكتملة",
       "totalEarnings": "إجمالي الأرباح",
-      "upcoming": "القادمة"
+      "upcoming": "القادمة",
+      "totalSpent":"إجمالي الإنفاق"
     },
 
     "tableHeaders": {
@@ -228,7 +229,9 @@
       "totalTransactions": "إجمالي المعاملات",
       "completedTransactions": "معاملات مكتملة",
       "pendingTransactions": "معاملات معلقة",
-      "allTime": "جميع المعاملات"
+      "allTime": "جميع المعاملات",
+      "totalSpent":"إجمالي الإنفاق",
+      "spentTransactions":"المعاملات المنفقة"
     },
 
     "filters": {
@@ -472,6 +475,7 @@
     "ongoingServices": "الخدمات الجارية",
   "activity": "النشاط",
   "availableWork": "العمل المتاح",
+  "currentWork":"العمل الحالي",
   "recentActivity": "النشاط الأخير",
   "pastActivity": "النشاط السابق",
 

@@ -11,6 +11,7 @@ import WorkGrid from "./components/WorkGrid";
 import WorkModals from "./components/WorkModals";
 
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+import type { Booking } from "../../AvailableBooking/domain/entities/booking";
 
 const FINAL_STATUSES = [
   "COMPLETED",
@@ -23,43 +24,43 @@ export default function AvailableWorkPage() {
   const { language } = useLanguage();
   const { data: categories } = useServiceCategory();
   const cancelMutation = useCancel();
-
+ 
   const isRTL = language === "AR";
 
-  /* ================= ZUSTAND ================= */
+  /* ================= ZUSTAND SOURCE OF TRUTH ================= */
   const assignedBookings = useBookingSocketStore(
     (s) => s.assignedBookings
   );
-  const removeAssigned = useBookingSocketStore((s) => s.removeAssigned);
 
-  /* ================= STATE ================= */
+   const upsertAssigned = useBookingSocketStore((s) => s.upsertAssigned);
   const [selectedWork, setSelectedWork] = useState<any>(null);
   const [modalType, setModalType] =
-    useState<"start" | "complete" | "verify" | "dispute" | null>(null);
+    useState<"start" | "complete" | "verify" |"dispute"| null>(null);
 
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
 
   /* ================= DERIVED ================= */
   const workList = useMemo(() => {
-    const map = new Map();
+  const map = new Map();
 
-    assignedBookings.forEach((b: any) => {
-      const id = b._id || b.bookingId;
-      if (!id) return;
+  assignedBookings.forEach((b: any) => {
+    const id = b._id || b.bookingId;
 
-      const existing = map.get(id);
+    if (!id) return;
 
-      map.set(id, {
-        ...(existing || {}),
-        ...b,
-        _id: id,
-        status: (b.status || existing?.status || "").toUpperCase(),
-      });
+    const existing = map.get(id);
+
+    map.set(id, {
+      ...(existing || {}),
+      ...b,
+      _id: id,
+      status: (b.status || existing?.status || "").toUpperCase(),
     });
+  });
 
-    return Array.from(map.values());
-  }, [assignedBookings]);
+  return Array.from(map.values());
+}, [assignedBookings]);
 
   /* ================= TIMER ================= */
   useEffect(() => {
@@ -80,10 +81,10 @@ export default function AvailableWorkPage() {
         const m = Math.floor((elapsed % 3600000) / 60000);
         const s = Math.floor((elapsed % 60000) / 1000);
 
-        updated[w._id] = `${String(h).padStart(2, "0")}:${String(m).padStart(
-          2,
-          "0"
-        )}:${String(s).padStart(2, "0")}`;
+        updated[w._id] =
+          `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(
+            s
+          ).padStart(2, "0")}`;
       });
 
       setTimers(updated);
@@ -92,7 +93,7 @@ export default function AvailableWorkPage() {
     return () => clearInterval(interval);
   }, [workList]);
 
-  /* ================= HANDLERS ================= */
+  /* ================= UI HANDLERS ================= */
   const handleStartWork = (work: any) => {
     setSelectedWork(work);
     setModalType("start");
@@ -107,6 +108,8 @@ export default function AvailableWorkPage() {
     setSelectedWork(null);
     setModalType(null);
   };
+ 
+
 
   return (
     <CommonCard
@@ -114,7 +117,7 @@ export default function AvailableWorkPage() {
       className="mt-6"
       headerAlign={isRTL ? "right" : "left"}
     >
-      <WorkGrid
+          <WorkGrid
         workList={workList}
         categories={categories}
         timers={timers}
@@ -122,8 +125,9 @@ export default function AvailableWorkPage() {
         onComplete={(w: any) => openModal(w, "complete")}
         onVerify={(w: any) => openModal(w, "verify")}
         onCancel={setCancelConfirmWork}
+        
+      
       />
-
       <WorkModals
         selectedWork={selectedWork}
         modalType={modalType}
@@ -132,11 +136,9 @@ export default function AvailableWorkPage() {
         setCancelConfirmWork={setCancelConfirmWork}
         cancelMutation={cancelMutation}
         timers={timers}
-
-        /* 🔥 INSTANT REMOVE FROM GRID */
-        onCancelSuccess={(updatedBooking: any) => {
-          removeAssigned(updatedBooking._id);
-        }}
+         onCancelSuccess={(updatedBooking:Booking) => {
+  upsertAssigned(updatedBooking);
+}}
       />
     </CommonCard>
   );

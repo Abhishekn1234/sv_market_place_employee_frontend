@@ -6,21 +6,23 @@ interface Props {
   transactions: Transaction[];
   currentPage: number;
   onPageChange: (page: number) => void;
+  totalPages?: number;
 }
 
 export default function TransactionTable({
   transactions,
   currentPage,
   onPageChange,
+  totalPages = 1,
+
 }: Props) {
   const { language, translations } = useLanguage();
   const isRTL = language === "AR";
 
   const table = translations.transactionHistory.table;
 
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(transactions.length / itemsPerPage);
-  const start = (currentPage - 1) * itemsPerPage;
+  // Use API pagination instead of client-side pagination
+  const displayTransactions = transactions;
 
   const columns: TableColumn<Transaction>[] = [
     { key: "id", header: table.transactionId },
@@ -41,15 +43,15 @@ export default function TransactionTable({
   ];
 
   return (
-    <CommonTable
-      columns={columns}
-      data={transactions.slice(start, start + itemsPerPage)}
-      keyExtractor={(row) => row.id}
-      isRTL={isRTL}
-      currentPage={currentPage}
-      totalPages={totalPages}
-      onPageChange={onPageChange}
-      emptyMessage={table.empty}
-    />
+   <CommonTable
+  columns={columns}
+  data={displayTransactions}
+  keyExtractor={(row) => row.id}
+  isRTL={isRTL}
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onPageChange={onPageChange}
+  emptyMessage={table.empty}
+/>
   );
 }

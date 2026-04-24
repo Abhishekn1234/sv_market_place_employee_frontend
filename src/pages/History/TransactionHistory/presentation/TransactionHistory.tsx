@@ -3,12 +3,13 @@
 import { useState, useMemo } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { mockTransactions } from "./data/transactiondata";
+import { useWalletTransactions } from "@/pages/Wallet/presentation/hooks/useWalletTransactions";
 import TransactionFilters from "./components/TransactionFilters";
 import TransactionSummary from "./components/TransactionSummary";
 import TransactionTable from "./components/TransactionTable";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import type { Transaction } from "../domain/entities/transaction";
 
 export default function TransactionHistory() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,9 +22,34 @@ export default function TransactionHistory() {
 
   const page = translations.transactionHistory;
 
+  // Use real API with pagination
+  const { data: transactionsResponse, isLoading, isError } = useWalletTransactions({
+    page: currentPage,
+    limit: 10,
+    sort: "createdAt:desc",
+    search: searchTerm || undefined,
+  });
+
+  // Transform API transactions to component format
+  const transformedTransactions: Transaction[] = useMemo(() => {
+    if (!transactionsResponse?.data) return [];
+
+    return transactionsResponse.data.map((txn) => ({
+      id: txn.id,
+      date: new Date(txn.createdAt).toLocaleDateString(),
+      amount: txn.amount,
+      type: txn.source.replace(/_/g, ' ').toLowerCase(),
+      status: 'completed' as const, // API doesn't provide status, assume completed
+      paymentMethod: txn.type === 'CREDIT' ? 'Wallet Credit' : 'Wallet Debit',
+      description: txn.note || txn.source.replace(/_/g, ' '),
+    }));
+  }, [transactionsResponse]);
+
+  // Client-side filtering for additional filters
   const filteredTransactions = useMemo(() => {
-    return mockTransactions.filter((tx) => {
+    return transformedTransactions.filter((tx) => {
       const matchesSearch =
+        !searchTerm ||
         tx.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         tx.type.toLowerCase().includes(searchTerm.toLowerCase());
@@ -33,7 +59,7 @@ export default function TransactionHistory() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [searchTerm, statusFilter]);
+  }, [transformedTransactions, searchTerm, statusFilter]);
 
   return (
     <div className="min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-8">
@@ -65,23 +91,44 @@ export default function TransactionHistory() {
           </Button>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-8">
+            <div className="text-sm text-gray-500">Loading transactions...</div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {isError && (
+          <div className="text-center py-8">
+            <div className="text-sm text-rose-500">
+              Failed to load transactions. Please try again.
+            </div>
+          </div>
+        )}
+
         {/* SUMMARY */}
-        <TransactionSummary />
+        {!isLoading && !isError && <TransactionSummary />}
 
         {/* FILTERS */}
-        <TransactionFilters
-          searchTerm={searchTerm}
-          statusFilter={statusFilter}
-          onSearchChange={setSearchTerm}
-          onStatusChange={setStatusFilter}
-        />
+        {!isLoading && !isError && (
+          <TransactionFilters
+            searchTerm={searchTerm}
+            statusFilter={statusFilter}
+            onSearchChange={setSearchTerm}
+            onStatusChange={setStatusFilter}
+          />
+        )}
 
         {/* TABLE */}
-        <TransactionTable
-          transactions={filteredTransactions}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-        />
+        {!isLoading && !isError && (
+          <TransactionTable
+            transactions={filteredTransactions}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            totalPages={transactionsResponse?.pagination?.totalPages || 1}
+          />
+        )}
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ export default function WorkGrid({
   
 }: any) {
   const [locations, setLocations] = useState<Record<string, string>>({});
-
+  console.log(workList)
   /* ================= LOCATION RESOLVE ================= */
   useEffect(() => {
     workList?.forEach((w: any) => {

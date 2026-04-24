@@ -26,7 +26,6 @@ export default function WorkModals(props: any) {
     setCancelConfirmWork,
     cancelMutation,
     onCompleteSuccess,
-    //  onCancelSuccess,
   } = props;
 
   /* ================= SOCKET ================= */
@@ -38,40 +37,28 @@ export default function WorkModals(props: any) {
   const [disputeWork, setDisputeWork] = useState<any>(null);
 
   /* ================= CANCEL ================= */
- const handleCancelYes = () => {
-  const optimisticBooking = {
-    ...cancelConfirmWork,
-    status: "WORKER_CANCELLED",
-    cancelReason: cancelConfirmWork.cancelledReason,
+  const handleCancelYes = () => {
+    cancelMutation.mutate(
+      {
+       bookingId: cancelConfirmWork._id,
+        cancelReason: cancelConfirmWork.cancelledReason,
+        cancelReasonType:cancelConfirmWork.cancelType
+      },
+      {
+        onSuccess: (data: any) => {
+          const booking = data?.booking ?? data;
+
+          socket.emit("booking.worker.cancelled", {
+            bookingId: booking._id,
+            status: "WORKER_CANCELLED",
+          });
+
+          toast.success("Cancelled");
+        },
+        onSettled: () => setCancelConfirmWork(null),
+      }
+    );
   };
-
-  // 🔥 instant UI update
-  props.onCancelSuccess?.(optimisticBooking);
-
-  cancelMutation.mutate(
-    {
-      bookingId: cancelConfirmWork._id,
-      cancelReason: cancelConfirmWork.cancelledReason,
-      cancelType: cancelConfirmWork.cancelType, // ✅ FIXED
-    },
-    {
-      onSuccess: (data: any) => {
-        const booking = data?.booking ?? data;
-
-        socket.emit("booking.worker.cancelled", {
-          bookingId: booking._id,
-          status: "WORKER_CANCELLED",
-        });
-
-        toast.success("Cancelled");
-      },
-      onError: () => {
-        toast.error("Cancel failed ❌");
-      },
-      onSettled: () => setCancelConfirmWork(null),
-    }
-  );
-};
 
   return (
     <>

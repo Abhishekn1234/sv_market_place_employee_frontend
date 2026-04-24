@@ -231,7 +231,7 @@ export function useWorkColumns({
       cancelWorkMutation.mutate(
         {
           bookingId: selectedId,
-          cancelType: "OTHER",
+          cancelReasonType: "OTHER",
           cancelReason: reason,
         },
         {

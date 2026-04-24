@@ -96,6 +96,11 @@ export default function AppSidebar({
         title: t("sidebar.availableWork"),
         href: "/availableWork",
       },
+      {
+        id:"current Work",
+        title:t('sidebar.currentWork'),
+        href:"/currentWork"
+      }
       
     ],
   },

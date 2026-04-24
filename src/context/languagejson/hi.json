@@ -170,7 +170,8 @@
     "totalActivities": "कुल गतिविधियाँ",
     "completed": "पूर्ण",
     "pending": "लंबित",
-    "totalEarnings": "कुल कमाई"
+    "totalEarnings": "कुल कमाई",
+    "totalSpent":"कुल खर्च"
   },
 
   "status": {
@@ -212,7 +213,9 @@
     "totalTransactions": "कुल लेन-देन",
     "completedTransactions": "पूर्ण लेन-देन",
     "pendingTransactions": "लंबित लेन-देन",
-    "allTime": "सभी समय के लेन-देन"
+    "allTime": "सभी समय के लेन-देन",
+    "totalSpent":"कुल खर्च",
+    "spentTransactions":"व्यतीत लेनदेन"
   },
 
   "filters": {
@@ -433,6 +436,7 @@
     "ongoingServices": "चल रही सेवाएँ",
   "settings": "सेटिंग्स",
   "availableWork": "उपलब्ध कार्य",
+  "currentWork":"वर्तमान कार्य",
   "profileSettings": "प्रोफ़ाइल सेटिंग्स",
   "wallet": "वॉलेट",
   "logout": "लॉग आउट",
