@@ -59,7 +59,7 @@ export function WalletSidebar({
                 {Math.max(
                   0,
                   ...transactions
-                    .filter((t) => t.type === "credit")
+                    .filter((t) => t.type === "CREDIT")
                     .map((t) => t.amount)
                 )}
               </span>
@@ -82,7 +82,7 @@ export function WalletSidebar({
       </CommonCard>
 
       {/* Wallet Insights */}
-      <CommonCard className="bg-gradient-to-r from-purple-600 to-violet-600 text-white">
+      <CommonCard className=" text-black">
         <div className="p-4 sm:p-6">
           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
             {walletT.walletInsights}

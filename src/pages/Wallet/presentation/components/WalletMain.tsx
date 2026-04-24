@@ -38,29 +38,37 @@ export function WalletMain({
   return (
     <div className="lg:col-span-2 space-y-4 sm:space-y-6">
       {/* Balance Card */}
-      <CommonCard className="bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-xl">
+      <CommonCard className=" text-black ">
         <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div>
-              <p className="text-blue-100 text-sm">
+              <p className="text-sm">
                 {walletT.totalBalance}
               </p>
               <p className="text-2xl sm:text-4xl font-bold mt-1 sm:mt-2 break-all">
-                ${formattedBalance}
+               {formattedBalance}
               </p>
 
               <div className="flex flex-col gap-2 mt-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-blue-100 text-sm">
+                  <span className="text-black text-sm">
                     {walletT.monthlyGrowth}
                   </span>
                 </div>
-                {updatedAt && (
-                  <span className="text-blue-100 text-xs sm:text-sm">
-                    Updated: {updatedAt}
-                  </span>
-                )}
+               {updatedAt && (
+              <span className="text-black text-xs sm:text-sm">
+                Updated:{" "}
+                {new Date(updatedAt).toLocaleString("en-US", {
+                  month: "short",
+                  year: "numeric",
+                  day:"2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+              </span>
+            )}
               </div>
             </div>
 
@@ -69,20 +77,20 @@ export function WalletMain({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4 sm:mt-6">
             <div className="bg-white/10 rounded-xl p-3 sm:p-4">
-              <p className="text-blue-100 text-xs sm:text-sm">
+              <p className="text-black text-xs sm:text-sm">
                 {walletT.income}
               </p>
-              <p className="text-lg sm:text-xl font-semibold text-green-300 break-all">
-                ${totalCredit.toLocaleString()}
+              <p className="text-lg sm:text-xl font-semibold text-black break-all">
+                {totalCredit.toLocaleString()}
               </p>
             </div>
 
             <div className="bg-white/10 rounded-xl p-3 sm:p-4">
-              <p className="text-blue-100 text-xs sm:text-sm">
+              <p className="text-black text-xs sm:text-sm">
                 {walletT.expenses}
               </p>
-              <p className="text-lg sm:text-xl font-semibold text-rose-300 break-all">
-                ${totalDebit.toLocaleString()}
+              <p className="text-lg sm:text-xl font-semibold text-black break-all">
+                {totalDebit.toLocaleString()}
               </p>
             </div>
           </div>
@@ -172,8 +180,7 @@ export function WalletMain({
                         : "text-rose-600"
                     }`}
                   >
-                    {txn.type === "credit" ? "+" : "-"}$
-                    {txn.amount.toLocaleString()}
+                    {txn.type === "credit" ? "+" : "-"}SAR {txn.amount.toLocaleString()}
                   </p>
                   <span className="text-xs">
                     {txn.type === "credit"
