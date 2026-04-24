@@ -63,6 +63,7 @@ export default function AssignedWorkModal({
     cancelWork(
       {
         bookingId: cancelingWorkId,
+        cancelType: "OTHER",
         cancelReason,
       },
       {

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
-import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
 import type { Work } from "../../../domain/entities/work";
 import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
@@ -12,7 +11,7 @@ type Props = {
   work: Work;
   open: boolean;
   onClose: () => void;
-  onSuccess: (updatedWork: Work | Booking) => void;
+  onSuccess: (updatedWork: Work) => void;
 };
 
 export default function VerifyOtpModal({
@@ -41,7 +40,7 @@ export default function VerifyOtpModal({
       },
       {
         onSuccess: (res) => {
-          const updatedWork = res?.booking ?? res;
+          const updatedWork = (res?.booking ?? res) as unknown as Work;
 
           upsertAssigned(updatedWork);
           onSuccess?.(updatedWork);
