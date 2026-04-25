@@ -11,9 +11,12 @@ export function useProfile() {
     queryKey: ["profile"],
     queryFn: () => usecase.execute(),
 
-    staleTime: Infinity, 
-    gcTime: 1000 * 60 * 30, 
-    refetchOnWindowFocus: false,
+    staleTime: 0, // 🔥 important
+    gcTime: 1000 * 60 * 30,
+
+    refetchOnMount: "always", // 🔥 MUST
+    refetchOnWindowFocus: true, // optional but good
+
     retry: 1,
   });
 }
