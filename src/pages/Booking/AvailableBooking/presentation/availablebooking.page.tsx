@@ -136,8 +136,7 @@ export default function AvailableBookingPage() {
                           : "-"}
                       </p>
                     </div>
-                    const coords = getLatLng(booking.location);
-
+                  
                       {coords && (
                         <button
                           onClick={() =>
