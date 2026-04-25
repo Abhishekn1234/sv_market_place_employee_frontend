@@ -5,11 +5,13 @@ import {
   TrendingUp,
   Calendar,
   Receipt,
+  Loader2,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import type { Transaction } from "../../domain/entities/transaction";
 import type { WalletSummary } from "../../domain/entities/wallet";
+import { useState } from "react";
 
 type Props = {
   transactions: Transaction[];
@@ -34,7 +36,17 @@ export function WalletMain({
   const updatedAt = wallet?.updatedAt
     ? new Date(wallet.updatedAt).toLocaleString()
     : null;
+  const [visibleCount, setVisibleCount] = useState(5);
+const [loadingMore, setLoadingMore] = useState(false);
+const visibleTransactions = transactions.slice(0, visibleCount);
+const handleLoadMore = () => {
+  setLoadingMore(true);
 
+  setTimeout(() => {
+    setVisibleCount((prev) => prev + 5);
+    setLoadingMore(false);
+  }, 800); // simulate API delay
+};
   return (
     <div className="lg:col-span-2 space-y-4 sm:space-y-6">
       {/* Balance Card */}
@@ -129,21 +141,18 @@ export function WalletMain({
       </CommonCard>
 
       {/* Recent Transactions */}
-      <CommonCard>
+    <CommonCard>
         <div className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
-            <h3 className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
+          
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
               <Receipt className="w-5 h-5" />
               {walletT.recentTransactions}
             </h3>
-
-            <button className="text-blue-600 text-sm self-start sm:self-auto">
-              {walletT.viewAll} →
-            </button>
           </div>
 
           <div className="space-y-3 sm:space-y-4">
-            {transactions.map((txn) => (
+            {visibleTransactions.map((txn: any) => (
               <div
                 key={txn.id}
                 className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border rounded-xl ${
@@ -158,21 +167,17 @@ export function WalletMain({
                   )}
 
                   <div>
-                    <p className="font-medium wrap-break-word">
+                    <p className="font-medium break-words">
                       {txn.description}
                     </p>
-                    <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500">
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
                       <Calendar className="w-4 h-4" />
                       {txn.date}
                     </div>
                   </div>
                 </div>
 
-                <div
-                  className={`${
-                    isRTL ? "text-left" : "text-right"
-                  }`}
-                >
+                <div className={isRTL ? "text-left" : "text-right"}>
                   <p
                     className={`font-bold ${
                       txn.type === "credit"
@@ -180,17 +185,33 @@ export function WalletMain({
                         : "text-rose-600"
                     }`}
                   >
-                    {txn.type === "credit" ? "+" : "-"}SAR {txn.amount.toLocaleString()}
+                    {txn.type === "credit" ? "+" : "-"}SAR{" "}
+                    {txn.amount.toLocaleString()}
                   </p>
-                  <span className="text-xs">
-                    {txn.type === "credit"
-                      ? walletT.credit
-                      : walletT.debit}
-                  </span>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* LOAD MORE BUTTON */}
+          {visibleCount < transactions.length && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full disabled:opacity-60"
+              >
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  "Load More"
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </CommonCard>
     </div>

@@ -85,9 +85,9 @@ export default function SocketBookingsModal({
                     dark={dark}
                     accepting={isPending && selectedBooking === b._id}
                     onAccept={() => handleAccept(b._id)}
-                    onDirections={() =>
+                   onDirections={() =>
                       window.open(
-                        `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+                        `https://www.google.com/maps/dir/?api=1&destination=${Number(lat)},${Number(lng)}`
                       )
                     }
                   />
