@@ -19,7 +19,7 @@ type Props = {
 export default function CompleteWork({ work, open, onClose, onSuccess }: Props) {
   const [actualWorkHours, setActualWorkHours] = useState<number | undefined>();
   const [actualWorkDays, setActualWorkDays] = useState<number | undefined>();
-
+  console.log(setActualWorkDays,setActualWorkHours);
   const { mutate: completeWorkMutation, isPending: isLoading } = useCompleteWork();
 
   if (!open) return null;
@@ -72,14 +72,7 @@ console.log(work);
         <div className="space-y-2 text-sm mb-4">
           <p><strong>Service:</strong> {work.service?.name || "N/A"}</p>
           <p><strong>Customer:</strong> {work.customer?.fullName || "N/A"}</p>
-          <p>
-          <strong>Scheduled Duration:</strong>{" "}
-        {work.booking?.pricingMode === "HOURLY"
-          ? `${work.booking?.schedule?.estimatedHours ?? "-"} hour(s)`
-          : work.booking?.pricingMode === "PER_DAY"
-          ? `${work.booking?.schedule?.estimatedDays ?? "-"} day(s)`
-          : "-"}
-          </p>
+         
           <p>
               <strong>Worked Time:</strong>{" "}
               {work.elapsedTime
@@ -97,7 +90,7 @@ console.log(work);
             </p>
         </div>
 
-        <div className="space-y-3 mb-4">
+        {/* <div className="space-y-3 mb-4">
           <div>
             <label className="block text-sm font-medium mb-1">Actual Work Hours</label>
             <input
@@ -122,7 +115,7 @@ console.log(work);
               disabled
             />
           </div>
-        </div>
+        </div> */}
 
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>Close</Button>

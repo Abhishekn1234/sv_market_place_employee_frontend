@@ -17,9 +17,15 @@ export function useServiceSettings() {
       toast.success("Service Settings Updated");
       queryClient.setQueryData(["profile"], data);
     },
-    onError(err: any) {
-      toast.error(err.message);
-      console.log(err);
-    },
+   onError(err: any) {
+          const message =
+            err?.response?.data?.message ||
+            err?.response?.data?.error ||
+            err?.message ||
+            "Request failed";
+
+          toast.error(message);
+          console.log(err);
+        },
   });
 }

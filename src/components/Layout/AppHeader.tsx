@@ -19,6 +19,7 @@ import { Switch } from "../ui/switch";
 
 import { useWorkerStatus } from "@/pages/Home/presentation/hooks/useWorkerStatus";
 import { useAuthStore } from "@/core/store/auth";
+import { useProfile } from "@/pages/Profile/presentation/hooks/useProfile";
 
 
 const languages = [
@@ -48,8 +49,10 @@ export default function AppHeader({
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
   // ✅ Select only what we need (better re-render control)
-  const fullName = useAuthStore((s) => s.user?.fullName);
-  const profileImage = useAuthStore((s) => s.user?.profilePictureUrl);
+  const { data: profile } = useProfile();
+ 
+ const fullName = profile?.fullName ?? "User";
+ const profileImage = profile?.profilePictureUrl;
   const workerStatus = useAuthStore((s) => s.user?.worker?.status);
   const logout = useAuthStore((s) => s.logout);
 

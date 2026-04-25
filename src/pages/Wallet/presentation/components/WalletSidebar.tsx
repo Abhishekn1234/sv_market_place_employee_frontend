@@ -18,11 +18,30 @@ export function WalletSidebar({
   totalDebit,
   wallet,
 }: Props) {
+  console.log(transactions);
   const { translations, language } = useLanguage();
   const walletT = translations.wallet;
   const isRTL = language === "AR";
   const currencyLabel = wallet?.currency ?? "USD";
   console.log(isRTL);
+  const now = new Date();
+
+const startOfToday = new Date(now);
+startOfToday.setHours(0, 0, 0, 0);
+
+const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+// TODAY transactions
+const todayTransactions = transactions.filter((tx: any) => {
+  const date = new Date(tx.date);
+  return date >= startOfToday && date <= now;
+});
+
+// MONTH transactions
+const monthTransactions = transactions.filter((tx: any) => {
+  const date = new Date(tx.date);
+  return date >= startOfMonth && date <= now;
+});
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Monthly Summary */}
@@ -96,14 +115,18 @@ export function WalletSidebar({
               </span>
             </div>
 
-            <div className="flex justify-between gap-3">
-              <span>{walletT.monthlyGrowth}</span>
-              <span className="font-medium whitespace-nowrap">+12.5%</span>
+                      <div className="flex justify-between gap-3">
+              <span>{walletT.transactionsToday}</span>
+              <span className="font-medium whitespace-nowrap">
+                {todayTransactions.length}
+              </span>
             </div>
 
             <div className="flex justify-between gap-3">
-              <span>{walletT.transactionsToday}</span>
-              <span className="font-medium whitespace-nowrap">2</span>
+              <span>{walletT.monthlyGrowth}</span>
+              <span className="font-medium whitespace-nowrap">
+                {monthTransactions.length}
+              </span>
             </div>
           </div>
         </div>

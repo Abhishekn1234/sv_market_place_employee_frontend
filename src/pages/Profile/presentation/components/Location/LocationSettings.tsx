@@ -177,9 +177,16 @@ const handleManualLocation = (lat: number, lng: number) => {
   setActiveTab("location");
 },
 
-    onError: () => {
-      toast.error("Update failed");
-    },
+    onError: (err: any) => {
+  const message =
+    err?.response?.data?.message ||
+    err?.response?.data?.error ||
+    err?.message ||
+    "Update failed";
+
+  toast.error(message);
+  console.error(err);
+},
   });
 };
 

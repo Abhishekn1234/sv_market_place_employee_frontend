@@ -19,6 +19,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { toast } from "react-toastify";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuthStore } from "@/core/store/auth";
+import { useProfile } from "@/pages/Profile/presentation/hooks/useProfile";
 
 
 interface AppSidebarProps {
@@ -44,9 +45,10 @@ export default function AppSidebar({
 
   const { user, logout } = useAuthStore();
 
- 
-  const fullName = user?.fullName ?? "User";
-  const profileImage = user?.profilePictureUrl;
+ const { data: profile } = useProfile();
+
+const fullName = profile?.fullName ?? "User";
+const profileImage = profile?.profilePictureUrl;
  console.log(user);
   const handleLogout = () => {
     logout();
@@ -92,15 +94,15 @@ export default function AppSidebar({
         href: "/availableBooking",
       },
       {
-        id: "available Work",
-        title: t("sidebar.availableWork"),
+        id: "assigned Work",
+        title: t("sidebar.assignedWork"),
         href: "/availableWork",
       },
-      {
-        id:"current Work",
-        title:t('sidebar.currentWork'),
-        href:"/currentWork"
-      }
+      // {
+      //   id:"current Work",
+      //   title:t('sidebar.currentWork'),
+      //   href:"/currentWork"
+      // }
       
     ],
   },

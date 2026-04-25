@@ -4,6 +4,7 @@ import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/enti
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 import type { Invoice } from "./invoice";
+import type { PricingTier } from "@/pages/Booking/AvailableBooking/domain/entities/pricingtier.types";
 
 export interface Work {
   _id: string; 
@@ -14,6 +15,7 @@ export interface Work {
    elapsedTime?:string;
   workElapsedTime?: string;
   booking: Booking
+  pricingMode?:PricingTier
   service?:ServiceCategory
   serviceTier?:ServiceTier
   invoice?:Invoice;

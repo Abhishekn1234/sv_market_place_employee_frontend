@@ -6,6 +6,7 @@ import { CommonCard } from "@/components/common/CommonCard";
 import { useLanguage } from "@/context/LanguageContext";
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
 import { useCancel } from "./hooks/useCancel";
+import { useAssign } from "./hooks/useAssign";
 
 import WorkGrid from "./components/WorkGrid";
 import WorkModals from "./components/WorkModals";
@@ -21,46 +22,52 @@ const FINAL_STATUSES = [
 ];
 
 export default function AvailableWorkPage() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { data: categories } = useServiceCategory();
   const cancelMutation = useCancel();
- 
+  const { assignedWorks: assignedFromApi, isLoading } = useAssign();
+
   const isRTL = language === "AR";
 
-  /* ================= ZUSTAND SOURCE OF TRUTH ================= */
-  const assignedBookings = useBookingSocketStore(
+  /* ================= ZUSTAND (SOCKET) ================= */
+  const socketBookings = useBookingSocketStore(
     (s) => s.assignedBookings
   );
 
-   const upsertAssigned = useBookingSocketStore((s) => s.upsertAssigned);
+  const upsertAssigned = useBookingSocketStore((s) => s.upsertAssigned);
+
+  /* ================= STATE ================= */
   const [selectedWork, setSelectedWork] = useState<any>(null);
   const [modalType, setModalType] =
-    useState<"start" | "complete" | "verify" |"dispute"| null>(null);
+    useState<"start" | "complete" | "verify" | "dispute" | null>(null);
 
   const [cancelConfirmWork, setCancelConfirmWork] = useState<any>(null);
   const [timers, setTimers] = useState<Record<string, string>>({});
 
-  /* ================= DERIVED ================= */
+  /* ================= SOURCE OF TRUTH (FALLBACK LOGIC) ================= */
+  const assignedBookings =
+    socketBookings.length > 0 ? socketBookings : assignedFromApi ?? [];
+
+  /* ================= DERIVED WORK LIST ================= */
   const workList = useMemo(() => {
-  const map = new Map();
+    const map = new Map();
 
-  assignedBookings.forEach((b: any) => {
-    const id = b._id || b.bookingId;
+    assignedBookings.forEach((b: any) => {
+      const id = b._id || b.bookingId;
+      if (!id) return;
 
-    if (!id) return;
+      const existing = map.get(id);
 
-    const existing = map.get(id);
-
-    map.set(id, {
-      ...(existing || {}),
-      ...b,
-      _id: id,
-      status: (b.status || existing?.status || "").toUpperCase(),
+      map.set(id, {
+        ...(existing || {}),
+        ...b,
+        _id: id,
+        status: (b.status || existing?.status || "").toUpperCase(),
+      });
     });
-  });
 
-  return Array.from(map.values());
-}, [assignedBookings]);
+    return Array.from(map.values());
+  }, [assignedBookings]);
 
   /* ================= TIMER ================= */
   useEffect(() => {
@@ -93,7 +100,7 @@ export default function AvailableWorkPage() {
     return () => clearInterval(interval);
   }, [workList]);
 
-  /* ================= UI HANDLERS ================= */
+  /* ================= HANDLERS ================= */
   const handleStartWork = (work: any) => {
     setSelectedWork(work);
     setModalType("start");
@@ -108,16 +115,26 @@ export default function AvailableWorkPage() {
     setSelectedWork(null);
     setModalType(null);
   };
- 
 
+  /* ================= LOADING FALLBACK ================= */
+  if (socketBookings.length === 0 && isLoading) {
+    return (
+      <CommonCard title={t("sidebar.assignedWork")} className="mt-6">
+        <div className="py-10 text-center text-gray-500">
+          Loading assigned work...
+        </div>
+      </CommonCard>
+    );
+  }
 
   return (
     <CommonCard
-      title="Available Work"
+      title={t("sidebar.assignedWork")}
       className="mt-6"
       headerAlign={isRTL ? "right" : "left"}
     >
-          <WorkGrid
+      {/* GRID */}
+      <WorkGrid
         workList={workList}
         categories={categories}
         timers={timers}
@@ -125,9 +142,9 @@ export default function AvailableWorkPage() {
         onComplete={(w: any) => openModal(w, "complete")}
         onVerify={(w: any) => openModal(w, "verify")}
         onCancel={setCancelConfirmWork}
-        
-      
       />
+
+      {/* MODALS */}
       <WorkModals
         selectedWork={selectedWork}
         modalType={modalType}
@@ -136,9 +153,9 @@ export default function AvailableWorkPage() {
         setCancelConfirmWork={setCancelConfirmWork}
         cancelMutation={cancelMutation}
         timers={timers}
-         onCancelSuccess={(updatedBooking:Booking) => {
-  upsertAssigned(updatedBooking);
-}}
+        onCancelSuccess={(updatedBooking: Booking) => {
+          upsertAssigned(updatedBooking);
+        }}
       />
     </CommonCard>
   );

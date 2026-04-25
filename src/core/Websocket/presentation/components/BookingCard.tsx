@@ -46,15 +46,15 @@ export function BookingCard({
       {/* Pricing Info */}
       <div className="text-sm space-y-1 border-t pt-2">
         <p>
-          <span className="font-medium">Worker Amount:</span>{" "}
+          <span className="font-medium">Your Amount:</span>{" "}
           SAR {booking.workerPoolAmount ?? 0}
         </p>
-        <p>
+        {/* <p>
           <span className="font-medium">Total Amount:</span>{" "}
           <span className="font-semibold">
             SAR {booking.amount ?? 0}
           </span>
-        </p>
+        </p> */}
       </div>
 
       {/* Directions */}

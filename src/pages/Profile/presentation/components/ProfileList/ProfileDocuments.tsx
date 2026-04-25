@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CommonCard } from "@/components/common/CommonCard";
 import { useRef } from "react";
-
 import { FilePreviewWithName } from "../../../presentation/components/FilePreview/FilePreviewwithName";
+import { useTheme } from "@/context/ThemeContext";
 
 type Props = {
   isEditing: boolean;
@@ -21,16 +21,12 @@ export function ProfileDocuments({
   onFileChange,
 }: Props) {
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const { theme } = useTheme();
 
   return (
     <CommonCard
       title="Documents"
-      contentClassName="
-        grid grid-cols-1 
-        sm:grid-cols-2 
-        lg:grid-cols-3
-        gap-4 sm:gap-5 md:gap-6 lg:gap-8
-      "
+      contentClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-8"
     >
       {fileFields.map(({ label, key }) => {
         const fileUrl = fileUrls[key];
@@ -39,27 +35,40 @@ export function ProfileDocuments({
         return (
           <div
             key={key}
-            className="
+            className={`
               relative
               border rounded-lg
               p-3 sm:p-4 md:p-5
               flex flex-col items-center justify-between
-              bg-white shadow-sm
+              shadow-sm
               min-h-[220px] sm:min-h-[260px] md:min-h-[300px]
-            "
+              ${
+                theme === "dark"
+                  ? "bg-gray-900 border-gray-700"
+                  : "bg-white border-gray-200"
+              }
+            `}
           >
             {/* Title */}
-            <p className="text-sm sm:text-base font-medium mb-2 text-center">
+            <p
+              className={`text-sm sm:text-base font-medium mb-2 text-center ${
+                theme === "dark" ? "text-white" : "text-gray-900"
+              }`}
+            >
               {label}
             </p>
 
             {/* Preview */}
-            {(file || fileUrl) ? (
+            {file || fileUrl ? (
               <div className="flex-1 w-full flex items-center justify-center overflow-hidden">
                 <FilePreviewWithName file={file} url={fileUrl} />
               </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-xs sm:text-sm text-gray-400">
+              <div
+                className={`flex-1 flex items-center justify-center text-xs sm:text-sm ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-400"
+                }`}
+              >
                 No file uploaded
               </div>
             )}

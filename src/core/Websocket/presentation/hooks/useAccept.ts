@@ -22,9 +22,15 @@ export function useAccept() {
           });
         },
 
-    onError(err: any) {
-      toast.error("Failed to accept work");
-      console.error(err);
-    },
+   onError(err: any) {
+  const message =
+    err?.response?.data?.message ||
+    err?.response?.data?.error ||
+    err?.message ||
+    "Failed to accept work";
+
+  toast.error(message);
+  console.error(err);
+},
   });
 }

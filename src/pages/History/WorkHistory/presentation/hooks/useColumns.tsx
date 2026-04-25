@@ -241,9 +241,16 @@ export function useWorkColumns({
             setReason("");
             setSelectedId(null);
           },
-          onError: (err: any) => {
-            toast.error(err?.message || "Cancel failed");
-          },
+         onError: (err: any) => {
+  const message =
+    err?.response?.data?.message ||
+    err?.response?.data?.error ||
+    err?.message ||
+    "Cancel failed";
+
+  toast.error(message);
+  console.error(err);
+},
         }
       );
     };

@@ -480,6 +480,7 @@
     "ongoingServices": "Ongoing Services",
     "availableWork":"Available Work",
     "currentWork":"Current Work",
+    "assignedWork":"Assigned Work",
 
   "settings": "Settings",
   "profileSettings": "Profile Settings",
