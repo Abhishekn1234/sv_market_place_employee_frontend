@@ -47,7 +47,7 @@ export default function AppSidebar({
  
   const fullName = user?.fullName ?? "User";
   const profileImage = user?.profilePictureUrl;
-
+ console.log(user);
   const handleLogout = () => {
     logout();
     toast.success(t("common.logoutSuccess"));

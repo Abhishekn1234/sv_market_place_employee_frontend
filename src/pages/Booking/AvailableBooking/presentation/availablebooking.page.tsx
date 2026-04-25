@@ -25,6 +25,20 @@ export default function AvailableBookingPage() {
     if (!categories) return {};
     return Object.fromEntries(categories.map((c) => [c._id, c.name]));
   }, [categories]);
+  const getLatLng = (location?: {
+  type: "Point";
+  coordinates: number[];
+}) => {
+  if (!location?.coordinates || location.coordinates.length < 2) {
+    return null;
+  }
+
+  const [lng, lat] = location.coordinates;
+
+  return { lat, lng };
+};
+
+
 
   const visibleBookings = showAll ? bookings : bookings.slice(0, 8);
   const totalPages = Math.ceil(visibleBookings.length / limit);
@@ -77,11 +91,12 @@ export default function AvailableBookingPage() {
 
         {/* BOOKINGS GRID */}
         {bookings.length > 0 && (
+         
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {paginated.map((booking) => {
                 const status = booking.status?.trim()?.toUpperCase();
-
+                 const coords = getLatLng(booking.location);
                 return (
                   <CommonCard
                     key={booking._id}
@@ -121,7 +136,21 @@ export default function AvailableBookingPage() {
                           : "-"}
                       </p>
                     </div>
+                    const coords = getLatLng(booking.location);
 
+                      {coords && (
+                        <button
+                          onClick={() =>
+                            window.open(
+                              `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`,
+                              "_blank"
+                            )
+                          }
+                          className="w-full border mt-2 py-2 rounded"
+                        >
+                          📍 Get Directions
+                        </button>
+                      )}
                     {/* ACTIONS */}
                     {status !== "WORKER_CANCELLED" ? (
                       <div className="flex gap-2 pt-4">
