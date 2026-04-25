@@ -8,9 +8,10 @@ import { ProfileInfo } from "./ProfileInfo";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function ProfileList() {
-  const { data: profile } = useProfile();
+  const { data: profile, isLoading } = useProfile();
   const { mutateAsync, isPending } = useUpdateProfile();
   const queryClient = useQueryClient();
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ fullName: "", address: "" });
   const [files, setFiles] = useState<Record<string, File | undefined>>({});
@@ -45,52 +46,65 @@ export default function ProfileList() {
     });
   }, [profile]);
 
-  if (!profile) return null;
+  // ✅ LOADER
+  if (isLoading) {
+    return (
+      <div className="w-full flex justify-center items-center py-20">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-const REQUIRED_DOCS = ["idproof", "addressproof", "photoproof"];
+  // ✅ EMPTY STATE
+  if (!profile) {
+    return (
+      <div className="text-center py-10 text-gray-500">
+        No profile data found
+      </div>
+    );
+  }
 
-const canEdit =
-  profile.kycStatus === "pending" &&
-  profile.documents &&
-  profile.documents.some((doc: any) => {
-    const docType = doc.documentType?.toLowerCase();
+  const REQUIRED_DOCS = ["idproof", "addressproof", "photoproof"];
 
-    return REQUIRED_DOCS.includes(docType) && doc.filePath;
-  });
- const handleSave = async () => {
-  const data = new FormData();
-  data.append("fullName", formData.fullName);
-  data.append("address", formData.address);
+  const canEdit =
+    profile.kycStatus === "pending" &&
+    profile.documents &&
+    profile.documents.some((doc: any) => {
+      const docType = doc.documentType?.toLowerCase();
+      return REQUIRED_DOCS.includes(docType) && doc.filePath;
+    });
 
-  Object.entries(files).forEach(([k, v]) => {
-    if (v) data.append(k, v);
-  });
+  const handleSave = async () => {
+    const data = new FormData();
+    data.append("fullName", formData.fullName);
+    data.append("address", formData.address);
 
-  const res = await mutateAsync(data);
+    Object.entries(files).forEach(([k, v]) => {
+      if (v) data.append(k, v);
+    });
 
-  // ✅ 1. INSTANT UI UPDATE (no reload)
-  queryClient.setQueryData(["profile"], (old: any) => {
-    if (!old) return old;
+    const res = await mutateAsync(data);
 
-    return {
-      ...old,
+    // ✅ INSTANT UI UPDATE
+    queryClient.setQueryData(["profile"], (old: any) => {
+      if (!old) return old;
 
-      // ✅ update fields you edited
-      fullName: formData.fullName,
-      address: formData.address,
+      return {
+        ...old,
+        fullName: formData.fullName,
+        address: formData.address,
+        documents: res?.user.documents ?? old.documents,
+        profilePictureUrl:
+          res?.user.profilePictureUrl ?? old.profilePictureUrl,
+      };
+    });
 
-      // ✅ IMPORTANT: update documents + image if backend returns
-      documents: res?.user.documents ?? old.documents,
-      profilePictureUrl: res?.user.profilePictureUrl ?? old.profilePictureUrl,
-    };
-  });
+    // ✅ SAFE REFETCH
+    queryClient.invalidateQueries({ queryKey: ["profile"] });
 
-  // ✅ 2. SAFE REFETCH (ensures backend truth)
-  queryClient.invalidateQueries({ queryKey: ["profile"] });
-
-  toast.success("Profile updated");
-  setIsEditing(false);
-};
+    toast.success("Profile updated");
+    setIsEditing(false);
+  };
 
   return (
     <div
