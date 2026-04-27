@@ -10,12 +10,10 @@ import DisputeModal from "./DisputeModal/DisputeModal";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
-
-import {
-  getSocket,
-  initializeSocket,
-} from "@/core/Websocket/presentation/components/socket";
 import { Textarea } from "@/components/ui/textarea";
+
+
+import { useAssignedEmitter } from "@/core/Websocket/presentation/utils/useAssignemitter";
 
 export default function WorkModals(props: any) {
   const {
@@ -28,10 +26,14 @@ export default function WorkModals(props: any) {
     onCompleteSuccess,
   } = props;
 
-  /* ================= SOCKET ================= */
-  const socket =
-    getSocket("/workers/requests") ||
-    initializeSocket("/workers/requests");
+  /* ================= SOCKET ACTIONS ================= */
+  const {
+    emitStart,
+    emitComplete,
+    emitVerify,
+    emitCancel,
+    emitDispute,
+  } = useAssignedEmitter();
 
   /* ================= STATE ================= */
   const [disputeWork, setDisputeWork] = useState<any>(null);
@@ -40,15 +42,15 @@ export default function WorkModals(props: any) {
   const handleCancelYes = () => {
     cancelMutation.mutate(
       {
-       bookingId: cancelConfirmWork._id,
+        bookingId: cancelConfirmWork._id,
         cancelReason: cancelConfirmWork.cancelledReason,
-        cancelReasonType:cancelConfirmWork.cancelType
+        cancelReasonType: cancelConfirmWork.cancelType,
       },
       {
         onSuccess: (data: any) => {
           const booking = data?.booking ?? data;
 
-          socket.emit("booking.worker.cancelled", {
+          emitCancel({
             bookingId: booking._id,
             status: "WORKER_CANCELLED",
           });
@@ -69,7 +71,7 @@ export default function WorkModals(props: any) {
           work={selectedWork}
           onClose={closeModal}
           onWorkStarted={(updated) => {
-            socket.emit("booking.worker.started", {
+            emitStart({
               bookingId: updated._id,
               status: "IN_PROGRESS",
               startedAt: updated.workStartedAt,
@@ -85,7 +87,7 @@ export default function WorkModals(props: any) {
           open
           onClose={closeModal}
           onSuccess={(data) => {
-            socket.emit("booking.worker.completed", {
+            emitComplete({
               bookingId: selectedWork._id,
               ...data,
               status: "WORK_COMPLETED_PENDING",
@@ -103,7 +105,7 @@ export default function WorkModals(props: any) {
           work={selectedWork}
           onClose={closeModal}
           onSuccess={(data: any) => {
-            socket.on("booking.worker.verified", {
+            emitVerify({
               bookingId: selectedWork._id,
               status: "COMPLETED",
               ...data,
@@ -118,7 +120,7 @@ export default function WorkModals(props: any) {
         work={disputeWork}
         onClose={() => setDisputeWork(null)}
         onSubmit={(data: any) => {
-          socket.emit("booking.worker.dispute", {
+          emitDispute({
             bookingId: disputeWork._id,
             reason: data.reason,
             status: "DISPUTE_CREATED",
@@ -130,67 +132,63 @@ export default function WorkModals(props: any) {
 
       {/* ================= CANCEL MODAL ================= */}
       {cancelConfirmWork && (
-  <CommonModal open onOpenChange={() => setCancelConfirmWork(null)}>
-    <CommonModal.Content>
-      <CommonModal.Header>Cancel Work</CommonModal.Header>
+        <CommonModal open onOpenChange={() => setCancelConfirmWork(null)}>
+          <CommonModal.Content>
+            <CommonModal.Header>Cancel Work</CommonModal.Header>
 
-      <CommonModal.Body>
-        {/* 🔽 Cancel Type Dropdown */}
-        <select
-          value={cancelConfirmWork.cancelType || ""}
-          onChange={(e) =>
-            setCancelConfirmWork((p: any) => ({
-              ...p,
-              cancelType: e.target.value,
-              cancelledReason: "", // reset when changing type
-            }))
-          }
-          className="w-full border p-2 mb-3 rounded"
-        >
-          <option value="" disabled>
-            Select reason
-          </option>
-          <option value="BOOKED_WRONG_SERVICE">Booked wrong service</option>
-          <option value="BOOKED_BY_MISTAKE">Booked by mistake</option>
-          <option value="SCHEDULE_CHANGED">Schedule changed</option>
-          <option value="PRICE_TOO_HIGH">Price too high</option>
-          <option value="SERVICE_NO_LONGER_NEEDED">
-            Service no longer needed
-          </option>
-          <option value="OTHER">Other</option>
-        </select>
+            <CommonModal.Body>
+              <select
+                value={cancelConfirmWork.cancelType || ""}
+                onChange={(e) =>
+                  setCancelConfirmWork((p: any) => ({
+                    ...p,
+                    cancelType: e.target.value,
+                    cancelledReason: "",
+                  }))
+                }
+                className="w-full border p-2 mb-3 rounded"
+              >
+                <option value="" disabled>
+                  Select reason
+                </option>
+                <option value="BOOKED_WRONG_SERVICE">Booked wrong service</option>
+                <option value="BOOKED_BY_MISTAKE">Booked by mistake</option>
+                <option value="SCHEDULE_CHANGED">Schedule changed</option>
+                <option value="PRICE_TOO_HIGH">Price too high</option>
+                <option value="SERVICE_NO_LONGER_NEEDED">
+                  Service no longer needed
+                </option>
+                <option value="OTHER">Other</option>
+              </select>
 
-        {/* 🏷️ Selected Badge */}
-        {cancelConfirmWork.cancelType && (
-          <div className="mb-3">
-            <span className="inline-block px-3 py-1 text-sm bg-gray-200 rounded-full">
-              {cancelConfirmWork.cancelType.replaceAll("_", " ")}
-            </span>
-          </div>
-        )}
+              {cancelConfirmWork.cancelType && (
+                <div className="mb-3">
+                  <span className="inline-block px-3 py-1 text-sm bg-gray-200 rounded-full">
+                    {cancelConfirmWork.cancelType.replaceAll("_", " ")}
+                  </span>
+                </div>
+              )}
 
-       
-          <Textarea
-            value={cancelConfirmWork.cancelledReason || ""}
-            onChange={(e) =>
-              setCancelConfirmWork((p: any) => ({
-                ...p,
-                cancelledReason: e.target.value,
-              }))
-            }
-            placeholder="Enter reason..."
-            className="w-full border p-2"
-          />
-        
-      </CommonModal.Body>
+              <Textarea
+                value={cancelConfirmWork.cancelledReason || ""}
+                onChange={(e) =>
+                  setCancelConfirmWork((p: any) => ({
+                    ...p,
+                    cancelledReason: e.target.value,
+                  }))
+                }
+                placeholder="Enter reason..."
+                className="w-full border p-2"
+              />
+            </CommonModal.Body>
 
-      <CommonModal.Footer>
-        <Button onClick={() => setCancelConfirmWork(null)}>No</Button>
-        <Button onClick={handleCancelYes}>Yes</Button>
-      </CommonModal.Footer>
-    </CommonModal.Content>
-  </CommonModal>
-)}
+            <CommonModal.Footer>
+              <Button onClick={() => setCancelConfirmWork(null)}>No</Button>
+              <Button onClick={handleCancelYes}>Yes</Button>
+            </CommonModal.Footer>
+          </CommonModal.Content>
+        </CommonModal>
+      )}
     </>
   );
 }

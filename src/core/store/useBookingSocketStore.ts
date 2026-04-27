@@ -42,16 +42,17 @@ export const useBookingSocketStore = create<State>((set, get) => ({
     }),
 
   upsertAssigned: (b) => {
-    const id = getId(b);
-    const exists = get().assignedBookings.find((x) => getId(x) === id);
+  const id = getId(b);
+  const list = get().assignedBookings;
 
-    set({
-      assignedBookings: exists
-        ? get().assignedBookings.map((x) => (getId(x) === id ? { ...x, ...b } : x))
-        : [b, ...get().assignedBookings],
-    });
-  },
+  const exists = list.find((x) => getId(x) === id);
 
+  const updated = exists
+    ? list.map((x) => (getId(x) === id ? { ...x, ...b } : x))
+    : [b, ...list];
+
+  set({ assignedBookings: [...updated] }); // 👈 IMPORTANT new reference
+},
   removeAssigned: (id) =>
     set({
       assignedBookings: get().assignedBookings.filter((x) => getId(x) !== id),

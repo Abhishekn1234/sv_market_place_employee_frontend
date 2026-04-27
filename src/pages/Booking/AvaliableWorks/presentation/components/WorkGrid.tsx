@@ -22,7 +22,7 @@ export default function WorkGrid({
       status: (w.status ?? "").toUpperCase(),
     }));
   }, [workList]);
-  console.log(normalizedWorkList);
+  // console.log(normalizedWorkList);
 
   /* ================= LOCATION RESOLVE ================= */
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function WorkGrid({
         let lat: number | null = null;
         let lng: number | null = null;
 
-        const loc = w.location;
+        const loc = w.location ??w.booking.location??w.booking.coordinates;
         try {
           if (typeof loc === "string") {
             [lat, lng] = loc.split(",").map(Number);
@@ -100,6 +100,7 @@ export default function WorkGrid({
             lng = loc?.coordinates?.[0];
           }
         } catch {}
+        // console.log("WORK LOCATION:", w.id, { lat, lng, location: w.location, booking: w.booking?.location });
 
         return (
           <CommonCard
@@ -144,7 +145,7 @@ export default function WorkGrid({
             </div>
 
             <div className="mt-4 space-y-2">
-              {lat && lng && (
+              {lat != null && lng != null && (
                 <Button
                   variant="outline"
                   onClick={() =>

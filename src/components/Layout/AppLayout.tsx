@@ -12,6 +12,7 @@ import SocketBookingsModal from "@/core/Websocket/socketchecking";
 import { useAuthStore } from "@/core/store/auth";
 import { useBookingSocket } from "@/core/Websocket/presentation/utils/useBookingsocket";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+// import { useWorkerWorkSocket } from "@/core/Websocket/presentation/utils/useAssignsocket";
 
 export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -32,6 +33,7 @@ export default function AppLayout() {
 
   /* ================= SOCKET ================= */
   useBookingSocket();
+  // useWorkerWorkSocket();
 
   /* ================= STORE ================= */
   const requestBookings = useBookingSocketStore((s) => s.requestBookings);

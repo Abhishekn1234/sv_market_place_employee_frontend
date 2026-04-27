@@ -103,11 +103,17 @@ const handleToggle = (checked: boolean) => {
       <div className="flex items-center gap-4">
         {/* 🔹 Worker Status */}
        <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-  <Switch
-    checked={isOnline}
-    onCheckedChange={handleToggle}
-    disabled={loading || !workerStatus} // disable until loaded
-  />
+        <Switch
+          checked={isOnline}
+          onCheckedChange={handleToggle}
+          disabled={loading || !workerStatus}
+          className="
+            data-[state=checked]:bg-green-500
+            data-[state=unchecked]:bg-gray-300
+            border border-gray-400
+            shadow-sm
+          "
+        />
 
   <span
     className={`text-sm font-medium ${

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {  useNavigate } from "react-router-dom";
 import {
-  FolderOpen,
+  // FolderOpen,
   History,
   Settings,
   Bell,
@@ -106,15 +106,15 @@ const profileImage = profile?.profilePictureUrl;
       
     ],
   },
-    {
-      id: "activity",
-      title: t("sidebar.activity"),
-      icon: FolderOpen,
-      subLinks: [
-        { id: "recent", title: t("sidebar.recentActivity"), href: "/activity/recent" },
-        { id: "past", title: t("sidebar.pastActivity"), href: "/activity/past" },
-      ],
-    },
+    // {
+    //   id: "activity",
+    //   title: t("sidebar.activity"),
+    //   icon: FolderOpen,
+    //   subLinks: [
+    //     { id: "recent", title: t("sidebar.recentActivity"), href: "/activity/recent" },
+    //     { id: "past", title: t("sidebar.pastActivity"), href: "/activity/past" },
+    //   ],
+    // },
     
     {
       id: "settings",
