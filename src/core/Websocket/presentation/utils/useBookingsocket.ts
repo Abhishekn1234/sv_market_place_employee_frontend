@@ -28,120 +28,101 @@ export function useBookingSocket() {
   useEffect(() => {
     console.log("[Socket] Hook initialized");
 
-    const requestSocket = initializeSocket("/workers/requests");
-    const assignedSocket = initializeSocket("/workers/assigned-updates");
+    /* ================= REQUEST SOCKET ================= */
+    const setupRequestSocket = () => {
+      const socket = initializeSocket("/workers/requests");
 
-    console.log("[Socket] Initializing sockets...", {
-      request: requestSocket?.id,
-      assigned: assignedSocket?.id,
-    });
+      socket.connect();
 
-    requestSocket.connect();
-    assignedSocket.connect();
+      socket.on("connect", () => {
+        console.log("[Socket] Request connected:", socket.id);
+        setConnected(true);
+      });
 
-    /* ================= CONNECTION ================= */
-    requestSocket.on("connect", () => {
-      console.log("[Socket] Request connected:", requestSocket.id);
-      setConnected(true);
-    });
+      socket.on("disconnect", (reason: any) => {
+        console.log("[Socket] Request disconnected:", reason);
+        setConnected(false);
+      });
 
-    requestSocket.on("disconnect", (reason: any) => {
-      console.log("[Socket] Request disconnected:", reason);
-      setConnected(false);
-    });
+      const onUpsert = (data: any) => {
+        console.log("[Socket][Request Upsert]", data);
 
-    assignedSocket.on("connect", () => {
-      console.log("[Socket] Assigned connected:", assignedSocket.id);
-    });
+        const b = normalize(data);
+        if (!b) return;
 
-    assignedSocket.on("disconnect", (reason: any) => {
-      console.log("[Socket] Assigned disconnected:", reason);
-    });
+        upsertRequest(b);
+      };
 
-    /* ================= REQUEST EVENTS ================= */
-    const onRequestUpsert = (data: any) => {
-      console.log("[Socket][Request Upsert Event]", data);
+      const onRemove = (data: any) => {
+        console.log("[Socket][Request Remove]", data);
 
-      const b = normalize(data);
-      if (!b) {
-        console.log("[Socket][Request Upsert] Invalid payload");
-        return;
-      }
+        const id = data?.bookingId || data?._id;
+        if (!id) return;
 
-      console.log("[Socket][Request Upsert Normalized]", b);
-      upsertRequest(b);
+        removeRequest(String(id));
+      };
+
+      socket.on("booking.created", onUpsert);
+      socket.on("booking.updated", onUpsert);
+      socket.on("booking.worker.rejected", onRemove);
+
+      return socket;
     };
 
-    const onRequestRemove = (data: any) => {
-      console.log("[Socket][Request Remove Event]", data);
+    /* ================= ASSIGNED SOCKET ================= */
+    const setupAssignedSocket = () => {
+      const socket = initializeSocket("/workers/assigned-updates");
 
-      const id = data?.bookingId || data?._id;
-      if (!id) {
-        console.log("[Socket][Request Remove] Missing ID");
-        return;
-      }
+      socket.connect();
 
-      console.log("[Socket][Request Remove ID]", id);
-      removeRequest(String(id));
+      socket.on("connect", () => {
+        console.log("[Socket] Assigned connected:", socket.id);
+      });
+
+      socket.on("disconnect", (reason: any) => {
+        console.log("[Socket] Assigned disconnected:", reason);
+      });
+
+      const onUpsert = (data: any) => {
+        console.log("[Socket][Assigned Upsert]", data);
+
+        const b = normalize(data);
+        if (!b) return;
+
+        upsertAssigned(b);
+      };
+
+      const onRemove = (data: any) => {
+        console.log("[Socket][Assigned Remove]", data);
+
+        const id = data?.bookingId || data?._id;
+        if (!id) return;
+
+        removeAssigned(String(id));
+      };
+
+      socket.on("booking.worker.accepted", onUpsert);
+      socket.on("booking.worker.rejected", onRemove);
+
+      socket.on("booking.work.started", onUpsert);
+      socket.on("booking.work.completed-by-worker", onUpsert);
+      socket.on("booking.completion.confirmed", onUpsert);
+
+      socket.on("booking.dispute.created", onUpsert);
+      socket.on("booking.dispute.responded", onUpsert);
+      socket.on("booking.dispute.resolved", onUpsert);
+
+      return socket;
     };
 
-    requestSocket.on("booking.created", onRequestUpsert);
-    requestSocket.on("booking.updated", onRequestUpsert);
-    requestSocket.on("booking.worker.rejected", onRequestRemove);
+    /* ================= INIT BOTH ================= */
+    const requestSocket = setupRequestSocket();
+    const assignedSocket = setupAssignedSocket();
 
-    /* ================= ASSIGNED EVENTS ================= */
-    const onAssigned = (data: any) => {
-      console.log("[Socket][Assigned Upsert Event]", data);
-
-      const b = normalize(data);
-      if (!b) {
-        console.log("[Socket][Assigned Upsert] Invalid payload");
-        return;
-      }
-
-      console.log("[Socket][Assigned Upsert Normalized]", b);
-      upsertAssigned(b);
-    };
-
-    const onRemoveAssigned = (data: any) => {
-      console.log("[Socket][Assigned Remove Event]", data);
-
-      const id = data?.bookingId || data?._id;
-      if (!id) {
-        console.log("[Socket][Assigned Remove] Missing ID");
-        return;
-      }
-
-      console.log("[Socket][Assigned Remove ID]", id);
-      removeAssigned(String(id));
-    };
-
-    assignedSocket.on("booking.worker.accepted", onAssigned);
-    assignedSocket.on("booking.worker.rejected", onRemoveAssigned);
-
-    assignedSocket.on("booking.work.started", onAssigned);
-    assignedSocket.on("booking.work.completed-by-worker", onAssigned);
-    assignedSocket.on("booking.completion.confirmed", onAssigned);
-
-    /* ================= DISPUTE ================= */
-    assignedSocket.on("booking.dispute.created", (d) => {
-      console.log("[Socket][Dispute Created]", d);
-      onAssigned(d);
-    });
-
-    assignedSocket.on("booking.dispute.responded", (d) => {
-      console.log("[Socket][Dispute Responded]", d);
-      onAssigned(d);
-    });
-
-    assignedSocket.on("booking.dispute.resolved", (d) => {
-      console.log("[Socket][Dispute Resolved]", d);
-      onAssigned(d);
-    });
+    console.log("[Socket] Both sockets initialized");
 
     return () => {
       console.log("[Socket] Cleaning up sockets");
-
       requestSocket.disconnect();
       assignedSocket.disconnect();
     };
