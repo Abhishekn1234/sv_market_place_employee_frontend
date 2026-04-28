@@ -23,9 +23,9 @@ export default function CompleteWork({ work, open, onClose, onSuccess }: Props) 
   const { mutate: completeWorkMutation, isPending: isLoading } = useCompleteWork();
 
   if (!open) return null;
-console.log(work);
+// console.log(work);
   const handleConfirmClick = () => {
-  const bookingId = work._id;
+  const bookingId = work.bookingId ?? work?.booking?._id ?? work?._id;
   
 
   if (!bookingId) {

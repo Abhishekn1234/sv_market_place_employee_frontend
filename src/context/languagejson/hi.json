@@ -26,7 +26,7 @@
   "completedProjects": "पूर्ण किए गए प्रोजेक्ट्स",
   "pendingProjects": "लंबित प्रोजेक्ट्स",
   "monthlyRevenue": "मासिक आय",
-  "totalRevenue": "कुल आय",
+  
   "earnings": "कमाई",
   "expenses": "खर्च",
   "profit": "लाभ",
@@ -41,6 +41,13 @@
   "viewReports": "रिपोर्ट देखें",
   "analytics": "विश्लेषण",
   "performance": "प्रदर्शन",
+  "completed": "पूर्ण",
+  "pending": "लंबित",
+  "cancelled": "रद्द",
+  "totalRevenue": "कुल राजस्व",
+  "bookingStatus": "बुकिंग स्थिति",
+  "monthlyBookings": "मासिक बुकिंग",
+  "revenueTrend": "राजस्व प्रवृत्ति",
   "noData": "कोई डेटा उपलब्ध नहीं है"
 },
 

@@ -27,7 +27,7 @@
   "completedProjects": "Completed Projects",
   "pendingProjects": "Pending Projects",
   "monthlyRevenue": "Monthly Revenue",
-  "totalRevenue": "Total Revenue",
+  
   "earnings": "Earnings",
   "expenses": "Expenses",
   "profit": "Profit",
@@ -42,6 +42,13 @@
   "viewReports": "View Reports",
   "analytics": "Analytics",
   "performance": "Performance",
+  "completed": "Completed",
+  "pending": "Pending",
+  "cancelled": "Cancelled",
+  "totalRevenue": "Total Revenue",
+  "bookingStatus": "Booking Status",
+  "monthlyBookings": "Monthly Bookings",
+  "revenueTrend": "Revenue Trend",
   "noData": "No data available"
 },
 

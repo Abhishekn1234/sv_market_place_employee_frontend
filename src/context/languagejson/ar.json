@@ -42,6 +42,13 @@
   "viewReports": "عرض التقارير",
   "analytics": "التحليلات",
   "performance": "الأداء",
+  "completed": "مكتمل",
+  "pending": "قيد الانتظار",
+  "cancelled": "ملغى",
+  
+  "bookingStatus": "حالة الحجز",
+  "monthlyBookings": "الحجوزات الشهرية",
+  "revenueTrend": "اتجاه الإيرادات",
   "noData": "لا توجد بيانات متاحة"
 },
 

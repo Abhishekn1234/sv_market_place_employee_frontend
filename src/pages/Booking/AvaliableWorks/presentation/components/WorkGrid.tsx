@@ -13,16 +13,19 @@ export default function WorkGrid({
   onCancel,
 }: any) {
   const [locations, setLocations] = useState<Record<string, string>>({});
+  // console.log(workList);
 
   /* ================= NORMALIZED DATA ================= */
   const normalizedWorkList = useMemo(() => {
-    return (workList ?? []).map((w: any) => ({
-      ...w,
-      id: w._id ?? w.bookingId,
-      status: (w.status ?? "").toUpperCase(),
-    }));
-  }, [workList]);
-  console.log(normalizedWorkList);
+  return (workList ?? []).map((w: any) => ({
+    ...w,
+    id: w._id || w.booking?._id,
+    status: (w?.status || w?.booking?.status || "UNKNOWN")
+      .toString()
+      .trim()
+      .toUpperCase(),
+  }));
+}, [workList]);
 
   /* ================= LOCATION RESOLVE ================= */
   useEffect(() => {
@@ -34,21 +37,33 @@ export default function WorkGrid({
       const loc = w.location ?? w.booking?.location;
       if (!loc) return;
 
-      let lat: number, lng: number;
+      let lat: number | null = null;
+      let lng: number | null = null;
 
       try {
         if (typeof loc === "string") {
-          [lat, lng] = loc.split(",").map(Number);
+          const parts = loc.split(",").map(Number);
+          lat = parts[0];
+          lng = parts[1];
         } else {
           lat = loc?.coordinates?.[1];
           lng = loc?.coordinates?.[0];
         }
 
-        if (!lat || !lng) return;
+        if (
+          lat === null ||
+          lng === null ||
+          isNaN(lat) ||
+          isNaN(lng)
+        )
+          return;
 
         reverseGeocode(lat, lng)
           .then((addr) =>
-            setLocations((prev) => ({ ...prev, [w.id]: addr }))
+            setLocations((prev) => ({
+              ...prev,
+              [w.id]: addr,
+            }))
           )
           .catch(() =>
             setLocations((prev) => ({
@@ -56,9 +71,11 @@ export default function WorkGrid({
               [w.id]: `${lat}, ${lng}`,
             }))
           );
-      } catch {}
+      } catch (e) {
+        console.error("Location parse error", e);
+      }
     });
-  }, [normalizedWorkList]);
+  }, [normalizedWorkList, locations]);
 
   /* ================= EMPTY STATE ================= */
   if (!normalizedWorkList.length) {
@@ -79,33 +96,51 @@ export default function WorkGrid({
         seen.add(w.id);
 
         const status = w.status;
+        // console.log(w);
 
         const categoryName =
           categories?.find((c: any) => c._id === w.service?.category)
             ?.name || "N/A";
 
-        const poolAmount = w?.workerPoolAmount ?? w.booking?.workerPoolAmount;
-        const workers = w.booking?.numberOfWorkers??w?.numberOfWorkers;
-        const amount = (poolAmount / workers).toFixed(2);
+        const poolAmount =
+          w?.workerPoolAmount ?? w.booking?.workerPoolAmount;
+
+        const workers =
+          w.booking?.numberOfWorkers ?? w?.numberOfWorkers;
+
+        const amount =
+          workers && poolAmount
+            ? (poolAmount / workers).toFixed(2)
+            : "0.00";
 
         let lat: number | null = null;
         let lng: number | null = null;
 
-        const loc = w.location;
+        const loc = w.location ?? w.booking?.location;
+
         try {
           if (typeof loc === "string") {
-            [lat, lng] = loc.split(",").map(Number);
+            const parts = loc.split(",").map(Number);
+            lat = parts[0];
+            lng = parts[1];
           } else {
             lat = loc?.coordinates?.[1];
             lng = loc?.coordinates?.[0];
           }
         } catch {}
 
+        const hasValidCoords =
+          lat !== null &&
+          lng !== null &&
+          !isNaN(lat) &&
+          !isNaN(lng);
+
         return (
           <CommonCard
             key={w.id}
             className="flex flex-col justify-between p-4 rounded-2xl shadow-sm hover:shadow-md transition"
           >
+            {/* ================= INFO ================= */}
             <div className="space-y-2 text-sm">
               <h3 className="font-semibold text-base truncate">
                 {w.service?.name}
@@ -124,18 +159,20 @@ export default function WorkGrid({
               </p>
 
               <p className="text-xs font-medium text-green-600">
-                Worker Pool Amount: {amount} {w.booking?.currency}
+                Worker Pool Amount: {amount}{" "}
+                {w.booking?.currency}
               </p>
 
               <p className="text-xs text-gray-500">
-                Price Mode: {w.pricingMode?? w.booking?.pricingMode}
+                Price Mode:{" "}
+                {w.pricingMode ?? w.booking?.pricingMode}
               </p>
 
               <p className="text-xs font-medium">
                 Status: {status}
               </p>
 
-              {(status === "STARTED" || status === "IN_PROGRESS") &&
+              {["STARTED", "IN_PROGRESS"].includes(status) &&
                 timers[w.id] && (
                   <p className="text-green-600 font-semibold text-sm">
                     ⏱ {timers[w.id]}
@@ -143,8 +180,9 @@ export default function WorkGrid({
                 )}
             </div>
 
+            {/* ================= ACTIONS ================= */}
             <div className="mt-4 space-y-2">
-              {lat && lng && (
+              {hasValidCoords && (
                 <Button
                   variant="outline"
                   onClick={() =>
@@ -158,11 +196,13 @@ export default function WorkGrid({
                 </Button>
               )}
 
-              {/* ACTIONS */}
               <div className="flex gap-2">
                 {["ASSIGNED", "WORKER_ACCEPTED"].includes(status) && (
                   <>
-                    <Button className="flex-1" onClick={() => onStart(w)}>
+                    <Button
+                      className="flex-1"
+                      onClick={() => onStart(w)}
+                    >
                       Start
                     </Button>
 
@@ -177,25 +217,28 @@ export default function WorkGrid({
                 )}
 
                 {status === "WORK_COMPLETED_PENDING" && (
-                  <Button className="w-full" onClick={() => onVerify(w)}>
+                  <Button
+                    className="w-full"
+                    onClick={() => onVerify(w)}
+                  >
                     Verify OTP
                   </Button>
                 )}
 
-                {(status === "STARTED" || status === "IN_PROGRESS") &&
-                  status !== "COMPLETED" && (
-                    <Button
-                      className="w-full"
-                      onClick={() =>
-                        onComplete({
-                          ...w,
-                          elapsedTime: timers[w.id] || "00:00:00",
-                        })
-                      }
-                    >
-                      Complete
-                    </Button>
-                  )}
+                {["STARTED", "IN_PROGRESS"].includes(status) && (
+                  <Button
+                    className="w-full"
+                    onClick={() =>
+                      onComplete({
+                        ...w,
+                        elapsedTime:
+                          timers[w.id] || "00:00:00",
+                      })
+                    }
+                  >
+                    Complete
+                  </Button>
+                )}
               </div>
             </div>
           </CommonCard>
