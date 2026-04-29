@@ -46,7 +46,11 @@ export interface EmployeeUser {
   documents?: ApiDocument[];
   isVerified?: boolean;
   kycStatus?: string;
-
+  role?: {
+    _id?: string;
+    name?: string;
+    modules?:string[];
+  };
   worker?: Worker;
    isOnboarded?: boolean;
    onboardingStatus?: OnboardingStatus;

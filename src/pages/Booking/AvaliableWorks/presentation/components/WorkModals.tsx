@@ -35,12 +35,12 @@ export default function WorkModals(props: any) {
 
   /* ================= STATE ================= */
   const [disputeWork, setDisputeWork] = useState<any>(null);
-
+ console.log(cancelConfirmWork);
   /* ================= CANCEL ================= */
   const handleCancelYes = () => {
     cancelMutation.mutate(
       {
-       bookingId: cancelConfirmWork._id,
+       bookingId: cancelConfirmWork.bookingId,
         cancelReason: cancelConfirmWork.cancelledReason,
         cancelReasonType:cancelConfirmWork.cancelType
       },
