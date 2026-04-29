@@ -1,7 +1,7 @@
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js");
 
-// ✅ USE ONLY THIS PROJECT (same as your frontend)
+// 🔥 Firebase config (MUST MATCH FRONTEND PROJECT)
 firebase.initializeApp({
   apiKey: "AIzaSyChCuX9ZrzrZUmeSc7WO-3Nalq8t84Yjyo",
   authDomain: "sv-marketplace-46503.firebaseapp.com",
@@ -12,18 +12,41 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// ✅ Background notifications
-messaging.onBackgroundMessage((payload) => {
-  console.log("📩 Background:", payload);
 
-  self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body,
+// ============================
+// 📩 BACKGROUND MESSAGE
+// ============================
+messaging.onBackgroundMessage((payload) => {
+  console.log("📩 Background message:", payload);
+
+  const title =
+    payload?.notification?.title ||
+    payload?.data?.title ||
+    "New Notification";
+
+  const options = {
+    body:
+      payload?.notification?.body ||
+      payload?.data?.body ||
+      "",
+
     icon: "/logo.png",
-    data: payload.data,
-  });
+
+    data: {
+      url: payload?.data?.url || "/",
+    },
+
+    vibrate: [200, 100, 200],
+    requireInteraction: true,
+  };
+
+  self.registration.showNotification(title, options);
 });
 
-// ✅ Click handling
+
+// ============================
+// 🔔 CLICK HANDLING
+// ============================
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
@@ -31,17 +54,15 @@ self.addEventListener("notificationclick", (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
-      const hadWindow = clientsArr.some((windowClient) => {
-        if (windowClient.url.includes(url)) {
-          windowClient.focus();
-          return true;
+      // Try focus existing tab
+      for (const client of clientsArr) {
+        if (client.url.includes(url) && "focus" in client) {
+          return client.focus();
         }
-        return false;
-      });
-
-      if (!hadWindow) {
-        clients.openWindow(url);
       }
+
+      // Otherwise open new tab
+      return clients.openWindow(url);
     })
   );
 });
