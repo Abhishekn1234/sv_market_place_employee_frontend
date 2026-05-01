@@ -7,6 +7,7 @@ import { useAvailableBookings } from "@/core/Websocket/presentation/hooks/useGet
 import { useAccept } from "@/core/Websocket/presentation/hooks/useAccept";
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
 import { useNavigate } from "react-router-dom";
+import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 
 export default function AvailableBookingPage() {
   const { translations, language } = useLanguage();
@@ -15,6 +16,8 @@ export default function AvailableBookingPage() {
   const { data: categories } = useServiceCategory();
   const { bookings, removeBooking } = useAvailableBookings();
   const { mutate: acceptWork, isPending } = useAccept();
+  const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
+  const removeRequest = useBookingSocketStore((state) => state.removeRequest);
 
   const [showAll, setShowAll] = useState(false);
   const [page, setPage] = useState(1);
@@ -45,14 +48,26 @@ export default function AvailableBookingPage() {
   const start = (page - 1) * limit;
   const paginated = visibleBookings.slice(start, start + limit);
 
-  const handleAccept = (bookingId: string) => {
+  const handleAccept = (booking: any) => {
+    const bookingId = booking._id;
+
     acceptWork(
       {
         bookingId,
         bookingStatus: "WORKER_ACCEPTED",
       },
       {
-        onSuccess: () => {
+        onSuccess: (data: any) => {
+          const acceptedBooking = data?.booking ?? data;
+
+          upsertAssigned({
+            ...booking,
+            ...acceptedBooking,
+            _id: bookingId,
+            status: "WORKER_ACCEPTED",
+          });
+          removeRequest(bookingId);
+          removeBooking(bookingId);
           navigate("/availableWork");
         },
         onError: (err) => {
@@ -155,7 +170,7 @@ export default function AvailableBookingPage() {
                       <div className="flex gap-2 pt-4">
                         <button
                           disabled={isPending}
-                          onClick={() => handleAccept(booking._id)}
+                          onClick={() => handleAccept(booking)}
                           className="flex-1 bg-primary text-white py-2 rounded-lg text-sm disabled:opacity-50"
                         >
                           Accept

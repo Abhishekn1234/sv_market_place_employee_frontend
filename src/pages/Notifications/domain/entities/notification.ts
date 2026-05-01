@@ -1,10 +1,28 @@
-export type Notification = {
+export type NotificationType =
+  | "BOOKING_REQUEST"
+  | "BOOKING_UPDATE"
+  | "ADMIN_MESSAGE";
+
+export interface Notification {
   id: string;
   title: string;
-  description: string;
-  date: string;
-  read: boolean;
-  type: "success" | "error" | "warning" | "info";
-  category: "booking" | "payment" | "system" | "alert";
-  priority: "low" | "medium" | "high";
-};
+  message: string;
+  type: NotificationType;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface GetNotificationsParams {
+  page?: number;
+  limit?: number;
+  type?: NotificationType;
+  unreadOnly?: boolean;
+}
+
+export interface RegisterDeviceTokenPayload {
+  token: string;
+  platform: "ANDROID" | "IOS" | "WEB";
+  roleId: string;
+  deviceId: string;
+  appId: string;
+}

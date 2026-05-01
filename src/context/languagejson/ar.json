@@ -12,7 +12,9 @@
     "pending": "قيد الانتظار",
     "failed": "فشل",
     "hoursAgo": "منذ {{count}} ساعات",
-    "logoutSuccess":"تم تسجيل الخروج بنجاح"
+    "logoutSuccess":"تم تسجيل الخروج بنجاح",
+    "inputPlaceholder":"اكتب رسالة...",
+    "Close":"إغلاق"
   },
   "HomePage": {
   "dashboard": "لوحة التحكم",
@@ -42,6 +44,13 @@
   "viewReports": "عرض التقارير",
   "analytics": "التحليلات",
   "performance": "الأداء",
+  "completed": "مكتمل",
+  "pending": "قيد الانتظار",
+  "cancelled": "ملغى",
+  
+  "bookingStatus": "حالة الحجز",
+  "monthlyBookings": "الحجوزات الشهرية",
+  "revenueTrend": "اتجاه الإيرادات",
   "noData": "لا توجد بيانات متاحة"
 },
 
@@ -450,17 +459,21 @@
     "arabic": "العربية",
     "hindi": "الهندية"
   },
-  "disputepage":{
+  "disputepage": {
     "title": "النزاعات",
     "description": "إدارة والرد على نزاعات المستخدمين",
-    "bookingId": "معرف الحجز",
+    "bookingId": "معرّف الحجز",
     "user": "المستخدم",
     "reason": "السبب",
+    "descriptionField": "الوصف",
     "status": "الحالة",
-    "action": "الإجراء",
-    "respond": "رد",
-    "noData": "لا توجد نزاعات"
-  }, 
+    "response": "الرد",
+    "date": "التاريخ",
+    "actions": "الإجراءات",
+    "respond": "الرد",
+    "noResponse": "لا يوجد رد",
+    "noData": "لم يتم العثور على نزاعات"
+  },
   
  "sidebar": {
 "home": "الرئيسية",

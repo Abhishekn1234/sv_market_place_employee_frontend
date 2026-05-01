@@ -28,5 +28,11 @@ export type HomePageTranslations = {
   viewReports?: string;
   analytics?: string;
   performance?: string;
+  completed?: string;
+  pending?: string;
+  cancelled?: string;
+  bookingStatus?: string;
+  monthlyBookings?: string;
+  revenueTrend?: string;
   noData?: string;
 };

@@ -67,6 +67,14 @@ export function useStatusConfig(): Record<
     WORKER_ACCEPTED:{
       label:statusOptions.completed,
       color:"bg-blue-100"
+    },
+    WORKER_CANCELLED:{
+      label:statusOptions.cancelled,
+      color:"bg-red-100 text-red-700"
+    },
+    CUSTOMER_CANCELLED:{
+      label:statusOptions.cancelled,
+      color:"bg-red-100 text-red-700"
     }
   };
 }

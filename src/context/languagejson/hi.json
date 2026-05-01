@@ -12,7 +12,9 @@
     "pending": "लंबित",
     "failed": "विफल",
     "hoursAgo": "{{count}} घंटे पहले",
-    "logoutSuccess":"सफलतापूर्वक लॉग आउट हो गया"
+    "logoutSuccess":"सफलतापूर्वक लॉग आउट हो गया",
+    "inputPlaceholder": "संदेश लिखें...",
+    "Close": "बंद करें"
   },
   "HomePage": {
   "dashboard": "डैशबोर्ड",
@@ -26,7 +28,7 @@
   "completedProjects": "पूर्ण किए गए प्रोजेक्ट्स",
   "pendingProjects": "लंबित प्रोजेक्ट्स",
   "monthlyRevenue": "मासिक आय",
-  "totalRevenue": "कुल आय",
+  
   "earnings": "कमाई",
   "expenses": "खर्च",
   "profit": "लाभ",
@@ -41,6 +43,13 @@
   "viewReports": "रिपोर्ट देखें",
   "analytics": "विश्लेषण",
   "performance": "प्रदर्शन",
+  "completed": "पूर्ण",
+  "pending": "लंबित",
+  "cancelled": "रद्द",
+  "totalRevenue": "कुल राजस्व",
+  "bookingStatus": "बुकिंग स्थिति",
+  "monthlyBookings": "मासिक बुकिंग",
+  "revenueTrend": "राजस्व प्रवृत्ति",
   "noData": "कोई डेटा उपलब्ध नहीं है"
 },
 
@@ -408,17 +417,21 @@
   "logout": "लॉगआउट",
   "signOut": "लॉग आउट"
 },
-"disputepage":{
-   "title": "विवाद",
-    "description": "उपयोगकर्ता विवादों को प्रबंधित और उत्तर दें",
+ "disputepage": {
+    "title": "विवाद",
+    "description": "उपयोगकर्ता विवादों का प्रबंधन और जवाब दें",
     "bookingId": "बुकिंग आईडी",
     "user": "उपयोगकर्ता",
     "reason": "कारण",
+    "descriptionField": "विवरण",
     "status": "स्थिति",
-    "action": "कार्य",
+    "response": "प्रतिक्रिया",
+    "date": "तारीख",
+    "actions": "कार्रवाइयाँ",
     "respond": "उत्तर दें",
+    "noResponse": "कोई प्रतिक्रिया नहीं",
     "noData": "कोई विवाद नहीं मिला"
-},
+  },
 "sidebar": {
     "home": "होम",
   "history": "इतिहास",

@@ -4,7 +4,8 @@ export type Dispute = {
   raisedBy: "CUSTOMER" | "WORKER";
   reason: string;
   description: string;
-  status: "OPEN" | "RESOLVED" | "REJECTED";
+  status: "IN_REVIEW" | "RESOLVED" | "REJECTED" |"OPEN";
+  workerResponse?: string;
   createdAt: string;
   updatedAt: string;
 };

@@ -1,3 +1,5 @@
+import type { PricingTier } from "@/pages/Booking/AvailableBooking/domain/entities/pricingtier.types";
+
 export interface ServiceCategory{
     _id:string;
     name:string;
@@ -7,4 +9,5 @@ export interface ServiceCategory{
     createdAt?:Date;
     updatedAt?:Date;
     category?:string;
+    pricingTiers?:PricingTier[];
 }

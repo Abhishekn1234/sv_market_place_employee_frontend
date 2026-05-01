@@ -27,7 +27,9 @@ export interface Booking {
   currency?:string;
   service?:ServiceCategory | string;
   serviceTier?:ServiceTier | string;
+  serviceTierId?:ServiceTier|string;
   schedule?:Bookingschedule;
+  numberOfWorkers?:number;
   actualWorkers?:number;
   actualWorkHours?:number;
   actualDays?:number;

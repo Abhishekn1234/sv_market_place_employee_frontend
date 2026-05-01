@@ -1,74 +1,68 @@
 "use client";
 
-import { useState } from "react";
 import { useCompleteWork } from "../../hooks/useCompleteWork";
 import { Button } from "@/components/ui/button";
-import type { Work } from "../../../domain/entities/work";
-import type { CompleteWork } from "../../../domain/entities/completework";
+import type { CompleteWork as CompleteWorkPayload } from "../../../domain/entities/completework";
 import { toast } from "react-toastify";
-import { useAssignedEmitter } from "@/core/Websocket/presentation/utils/useAssignemitter";
+import {
+  elapsedMinutes,
+  getBookingId,
+} from "../../helpers/workPresentation.helpers";
+import type { DisplayWork } from "../../types/workPresentation.types";
+import type { Work } from "../../../domain/entities/work";
 
-type Props = {
-  work: Work;
+type Props<TWork extends DisplayWork | Work> = {
+  work: TWork;
   open: boolean;
   onClose: () => void;
-  onSuccess: (updatedWork: Work) => void;
+  onSuccess: (updatedWork: TWork) => void;
 };
 
-export default function CompleteWork({
+export default function CompleteWork<TWork extends DisplayWork | Work>({
   work,
   open,
   onClose,
   onSuccess,
-}: Props) {
-  const [actualWorkHours, setActualWorkHours] = useState<number | undefined>();
-  const [actualWorkDays, setActualWorkDays] = useState<number | undefined>();
- console.log(actualWorkDays,actualWorkHours,setActualWorkDays,setActualWorkHours);
+}: Props<TWork>) {
   const { mutate: completeWorkMutation, isPending: isLoading } =
     useCompleteWork();
-
-  const { emitComplete } = useAssignedEmitter();
 
   if (!open) return null;
 
   const handleConfirmClick = () => {
-    const bookingId = work._id;
+    const bookingId = getBookingId(work);
 
     if (!bookingId) {
       toast.error("Booking ID missing");
       return;
     }
 
-    const payload: CompleteWork = {
+    const payload: CompleteWorkPayload = {
       bookingId,
-      actualWorkHours,
-      actualWorkDays,
     };
 
     completeWorkMutation(payload, {
-      onSuccess: (response) => {
-        toast.success("Work Completed Successfully!");
-
-        // ✅ SOCKET EMIT (REAL-TIME UPDATE)
-       emitComplete({
-                  bookingId,
-                  ...response,
-                  status: "WORK_COMPLETED_PENDING",
-                });
-
-        // ✅ SIMPLE LOCAL UPDATE (NO DUPLICATION BUGS)
-        const updatedWork: Work = {
+      onSuccess: (updatedBooking) => {
+        const updatedWork = {
           ...work,
-          status: "WORK_COMPLETED_PENDING",
-        };
+          status: "WORK_COMPLETED_PENDING" as const,
+          booking: {
+            ...(work.booking ?? {}),
+            ...(updatedBooking ?? {}),
+            status: "WORK_COMPLETED_PENDING" as const,
+          },
+          workStartedAt: null,
+        } as TWork;
 
-        onSuccess?.(updatedWork);
-
+        onSuccess(updatedWork);
+        toast.success("Work Completed Successfully!");
         onClose();
       },
 
-      onError: (err: any) => {
-        toast.error(err?.message || "Failed to complete work");
+      onError: (err: unknown) => {
+        const message =
+          err instanceof Error ? err.message : "Failed to complete work";
+        toast.error(message);
       },
     });
   };
@@ -85,20 +79,8 @@ export default function CompleteWork({
           <p>
             <strong>Customer:</strong> {work.customer?.fullName || "N/A"}
           </p>
-
           <p>
-            <strong>Worked Time:</strong>{" "}
-            {work.elapsedTime
-              ? work.elapsedTime
-                  .split(":")
-                  .map(Number)
-                  .reduce((total, num, idx) => {
-                    if (idx === 0) return total + num * 60;
-                    if (idx === 1) return total + num;
-                    return total + num / 60;
-                  }, 0)
-                  .toFixed(0)
-              : 0}{" "}
+            <strong>Worked Time:</strong> {elapsedMinutes(work.elapsedTime)}{" "}
             minutes
           </p>
         </div>
@@ -107,7 +89,6 @@ export default function CompleteWork({
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Close
           </Button>
-
           <Button onClick={handleConfirmClick} disabled={isLoading}>
             {isLoading ? "Completing..." : "Confirm Complete"}
           </Button>

@@ -24,6 +24,7 @@ export default function SocketBookingsModal({
   const requestBookings = useBookingSocketStore((s) => s.requestBookings);
   console.log(requestBookings);
   const removeRequestBooking = useBookingSocketStore((s) => s.removeRequest);
+  const upsertAssignedBooking = useBookingSocketStore((s) => s.upsertAssigned);
 
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
 
@@ -48,13 +49,22 @@ export default function SocketBookingsModal({
     prevCount.current = currentCount;
   }, [requestBookings.length]);
 
-  const handleAccept = (id: string) => {
+  const handleAccept = (booking: any) => {
+    const id = booking._id;
     setSelectedBooking(id);
 
     acceptBooking(
       { bookingId: id, bookingStatus: "WORKER_ACCEPTED" },
       {
-        onSuccess: () => {
+        onSuccess: (data: any) => {
+          const acceptedBooking = data?.booking ?? data;
+
+          upsertAssignedBooking({
+            ...booking,
+            ...acceptedBooking,
+            _id: id,
+            status: "WORKER_ACCEPTED",
+          });
           removeRequestBooking(id);
 
           setTimeout(() => {
@@ -103,7 +113,7 @@ const normalizedBookings = requestBookings.map((b: any) => b.booking ?? b);
                     booking={b}
                     dark={dark}
                     accepting={isPending && selectedBooking === b._id}
-                    onAccept={() => handleAccept(b._id)}
+                    onAccept={() => handleAccept(b)}
                     onDirections={() =>
                       window.open(
                         `https://www.google.com/maps/dir/?api=1&destination=${Number(

@@ -31,8 +31,10 @@ import VerifyMobilePage from './pages/Auth/MobileVerification/presentation/Verif
 import { SendOtpEmailPage } from './pages/Auth/EmailVerification/presentation/SendOtpEmailPage';
 import { VerifyOtpEmailPage } from './pages/Auth/EmailVerification/presentation/components/VerificationOtpEmail';
 import SendOtpMobilePage from './pages/Auth/MobileVerification/presentation/components/SendOtpMobilePage';
-import Disputespage from './pages/Disputes/presentation/Disputes.page';
+import Disputespage from './pages/History/BookingHistory/presentation/components/Disputes.page';
 import CurrentWorkPage from './pages/CurrentWork/presentation/CurrentWorkPage';
+import { initOnMessage } from './components/firebase/notifications';
+import { useNotificationManager } from './pages/Notifications/presentation/hooks/useNotificationhandler';
 function AppContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
@@ -46,7 +48,18 @@ useEffect(() => {
       Notification.requestPermission();
     }
   }, []);
+ useNotificationManager();
 
+  useEffect(() => {
+    initOnMessage(); // 🔥 REQUIRED
+  }, []);
+
+  useEffect(() => {
+    navigator.serviceWorker
+      .register("/firebase-messaging-sw.js")
+      .then((reg) => console.log("✅ SW registered:", reg))
+      .catch(console.error);
+  }, []);
 useEffect(() => {
   const handler = (event: MessageEvent) => {
     const { type, payload } = event.data || {};

@@ -4,17 +4,18 @@ import { useState } from "react";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Work } from "../../../domain/entities/work";
 import { useStartWork } from "../../hooks/useStartWork";
 import { toast } from "react-toastify";
+import type { DisplayWork } from "../../types/workPresentation.types";
+import type { Work } from "../../../domain/entities/work";
 
 import { getSocket, initializeSocket } from "@/core/Websocket/presentation/components/socket";
 
 type Props = {
-  work: Work;
+  work: DisplayWork | Work;
   open: boolean;
   onClose: () => void;
-  onWorkStarted?: (updatedWork: any) => void;
+  onWorkStarted?: (updatedWork: DisplayWork | Work) => void;
 };
 
 export default function StartWork({
@@ -61,7 +62,7 @@ export default function StartWork({
 
           const updatedWork = {
             ...work,
-            status: "IN_PROGRESS",
+            status: "IN_PROGRESS" as const,
             workStartedAt: data?.startedAt || new Date().toISOString(),
           };
 

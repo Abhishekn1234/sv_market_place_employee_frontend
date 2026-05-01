@@ -16,14 +16,16 @@ type Params = {
   expandedBooking: string | null;
   toggleExpanded: (id: string) => void;
   onIgnore: (bookingId: string) => void;
+  onOpenDisputes: (bookingId: string) => void; 
 };
 
 export function useBookingColumns({
   expandedBooking,
   toggleExpanded,
   onIgnore,
+  onOpenDisputes
 }: Params): TableColumn<BookingHistory>[] {
-  const { translations } = useLanguage();
+  const { translations,t } = useLanguage();
   const tableHeaders = translations.bookingHistory.tableHeaders;
   const bookingActions = translations.bookingHistory.actions;
 
@@ -106,6 +108,14 @@ export function useBookingColumns({
             {bookingActions["View Details"]}
             {expandedBooking === b._id ? <ChevronUp /> : <ChevronDown />}
           </Button>
+           <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => onOpenDisputes(b._id)}
+                    className="cursor-pointer"
+                  >
+                    {t('sidebar.disputes')}
+                  </Button>
 
           {b.status === "requested" && (
             <>

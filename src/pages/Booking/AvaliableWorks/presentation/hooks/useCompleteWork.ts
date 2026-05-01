@@ -24,16 +24,31 @@ export function useCompleteWork(
     mutationKey: ["complete-work"],
 
     onSuccess: (completedBooking) => {
+      const completedId =
+        completedBooking?._id ||
+        (completedBooking as Booking & { bookingId?: string })?.bookingId ||
+        completedBooking?.id;
+
       // Update the assigned works cache to reflect the status change
       queryClient.setQueryData<Booking[]>(
         ASSIGNED_WORKS_KEY,
         (old) => {
           const safeOld = Array.isArray(old) ? old : [];
-          return safeOld.map((booking) =>
-            booking._id === completedBooking._id
-              ? { ...booking, ...completedBooking, status: completedBooking.status || booking.status }
-              : booking
-          );
+          return safeOld.map((booking) => {
+            const bookingId =
+              booking._id ||
+              (booking as Booking & { bookingId?: string })?.bookingId ||
+              booking.id;
+
+            return bookingId === completedId
+              ? {
+                  ...booking,
+                  ...completedBooking,
+                  status: "WORK_COMPLETED_PENDING",
+                  workStartedAt: undefined,
+                }
+              : booking;
+          });
         }
       );
 
