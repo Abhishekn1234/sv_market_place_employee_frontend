@@ -22,12 +22,13 @@ export default function SocketBookingsModal({
   const dark = theme === "dark";
 
   const requestBookings = useBookingSocketStore((s) => s.requestBookings);
+  console.log(requestBookings);
   const removeRequestBooking = useBookingSocketStore((s) => s.removeRequest);
   const upsertAssignedBooking = useBookingSocketStore((s) => s.upsertAssigned);
 
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
 
-  // 🔊 AUDIO SETUP
+  // 🔊 AUDIO
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevCount = useRef(0);
 
@@ -36,7 +37,6 @@ export default function SocketBookingsModal({
     audioRef.current.volume = 0.8;
   }, []);
 
-  // 🔔 PLAY SOUND ON NEW BOOKING
   useEffect(() => {
     const currentCount = requestBookings.length;
 
@@ -76,7 +76,7 @@ export default function SocketBookingsModal({
       }
     );
   };
-
+const normalizedBookings = requestBookings.map((b: any) => b.booking ?? b);
   if (!open) return null;
 
   return (
@@ -97,14 +97,14 @@ export default function SocketBookingsModal({
         <CommonModal.Body>
           <div className="p-4">
 
-            {requestBookings.length === 0 && (
+            {normalizedBookings.length === 0 && (
               <div className="text-center text-gray-500">
                 No live bookings
               </div>
             )}
 
             <div className="grid gap-4 sm:grid-cols-2">
-              {requestBookings.map((b: any) => {
+              {normalizedBookings.map((b: any) => {
                 const { lat, lng } = parseLocation(b.location);
 
                 return (
