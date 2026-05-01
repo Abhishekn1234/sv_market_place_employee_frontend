@@ -31,49 +31,45 @@ export const useBookingSocketStore = create<State>((set, get) => ({
 
     set({
       requestBookings: exists
-        ? get().requestBookings.map((x) => (getId(x) === id ? { ...x, ...b } : x))
+        ? get().requestBookings.map((x) =>
+            getId(x) === id ? { ...x, ...b } : x
+          )
         : [b, ...get().requestBookings],
     });
   },
 
   removeRequest: (id) =>
     set({
-      requestBookings: get().requestBookings.filter((x) => getId(x) !== id),
+      requestBookings: get().requestBookings.filter(
+        (x) => getId(x) !== id
+      ),
     }),
 
   upsertAssigned: (b) => {
-
     const id = getId(b);
     if (!id) return;
 
-    const exists = get().assignedBookings.find((x) => getId(x) === id);
+    const list = get().assignedBookings;
+    const exists = list.find((x) => getId(x) === id);
+
     const normalizedBooking = {
       ...b,
       _id: String(id),
     };
 
-    set({
-      assignedBookings: exists
-        ? get().assignedBookings.map((x) =>
-            getId(x) === id ? { ...x, ...normalizedBooking } : x
-          )
-        : [normalizedBooking, ...get().assignedBookings],
-    });
+    const updated = exists
+      ? list.map((x) =>
+          getId(x) === id ? { ...x, ...normalizedBooking } : x
+        )
+      : [normalizedBooking, ...list];
+
+    set({ assignedBookings: updated });
   },
-  const id = getId(b);
-  const list = get().assignedBookings;
 
-  const exists = list.find((x) => getId(x) === id);
-
-  const updated = exists
-    ? list.map((x) => (getId(x) === id ? { ...x, ...b } : x))
-    : [b, ...list];
-
-
-  set({ assignedBookings: [...updated] }); // 👈 IMPORTANT new reference
-},
   removeAssigned: (id) =>
     set({
-      assignedBookings: get().assignedBookings.filter((x) => getId(x) !== id),
+      assignedBookings: get().assignedBookings.filter(
+        (x) => getId(x) !== id
+      ),
     }),
 }));

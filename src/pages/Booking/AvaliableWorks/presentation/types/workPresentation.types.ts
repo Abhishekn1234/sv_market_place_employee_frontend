@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
-import type { CancelWork } from "../../domain/entities/cancelwork";
+import type { CancelReasonType, CancelWork } from "../../domain/entities/cancelwork";
 import type { Work } from "../../domain/entities/work";
 
 export type WorkStatus =
@@ -16,6 +16,7 @@ export type WorkStatus =
   | "WORKER_CANCELLED"
   | "WORKER_REJECTED"
   | "CUSTOMER_CANCELLED";
+
 
 export type WorkModalType = "start" | "complete" | "verify" | "dispute";
 
@@ -39,7 +40,7 @@ export type DisplayWork = Omit<Work, "status" | "location" | "booking"> & {
 };
 
 export type CancelableWork = DisplayWork & {
-  cancelType?: string;
+  cancelType?: CancelReasonType;
   cancelledReason?: string;
 };
 

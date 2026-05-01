@@ -1,63 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import StartWork from "@/pages/Booking/AvaliableWorks/presentation/components/StartWork/StartWork";
-import CompleteWork from "@/pages/Booking/AvaliableWorks/presentation/components/CompleteWork/CompleteWork";
-import VerifyOtpModal from "@/pages/Booking/AvaliableWorks/presentation/components/VerifyOtpModal/VerifyOtpModal";
+import StartWork from "./StartWork/StartWork";
+import CompleteWork from "./CompleteWork/CompleteWork";
+import VerifyOtpModal from "./VerifyOtpModal/VerifyOtpModal";
 import DisputeModal from "./DisputeModal/DisputeModal";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-toastify";
 
-import {
-  getSocket,
-  initializeSocket,
-} from "@/core/Websocket/presentation/components/socket";
+import { useAssignedEmitter } from "@/core/Websocket/presentation/utils/useAssignemitter";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import { getBookingId } from "../helpers/workPresentation.helpers";
-import type { CancelReasonType, CancelWork } from "../../domain/entities/cancelwork";
+
 import type {
   DisplayWork,
   WorkModalsProps,
+  
+  
 } from "../types/workPresentation.types";
-
-const CANCEL_REASONS: Array<{
-  label: string;
-  value: CancelReasonType;
-}> = [
-  { label: "Booked wrong service", value: "BOOKED_WRONG_SERVICE" },
-  { label: "Booked by mistake", value: "BOOKED_BY_MISTAKE" },
-  { label: "Schedule changed", value: "SCHEDULE_CHANGED" },
-  { label: "Price too high", value: "PRICE_TOO_HIGH" },
-  { label: "Service no longer needed", value: "SERVICE_NO_LONGER_NEEDED" },
-  { label: "Other", value: "OTHER" },
-];
-
-import { Textarea } from "@/components/ui/textarea";
+import type { Dispute } from "@/pages/History/BookingHistory/domain/entities/disputes";
+import type { CancelReasonType, CancelWork } from "../../domain/entities/cancelwork";
+// import { CancelWork } from "../../domain/entities/cancelwork";
+export const CANCEL_REASONS = [
+  "BOOKED_WRONG_SERVICE",
+  "BOOKED_BY_MISTAKE",
+  "SCHEDULE_CHANGED",
+  "PRICE_TOO_HIGH",
+  "SERVICE_NO_LONGER_NEEDED",
+  "OTHER",
+] as const;
 
 
-import { useAssignedEmitter } from "@/core/Websocket/presentation/utils/useAssignemitter";
-
-export default function WorkModals(props: any) {
-  const {
-    selectedWork,
-    modalType,
-    closeModal,
-    cancelConfirmWork,
-    setCancelConfirmWork,
-    cancelMutation,
-    onCompleteSuccess,
-  } = props;
-
-  /* ================= SOCKET ACTIONS ================= */
-  const {
-    emitStart,
-    emitComplete,
-    emitVerify,
-    emitCancel,
-    emitDispute,
-  } = useAssignedEmitter();
 
 export default function WorkModals({
   selectedWork,
@@ -69,69 +44,55 @@ export default function WorkModals({
   onCancelSuccess,
   onCompleteSuccess,
 }: WorkModalsProps) {
-  const socket =
-    getSocket("/workers/requests") || initializeSocket("/workers/requests");
-  const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
+  const { emitStart, emitComplete, emitVerify, emitCancel, emitDispute } =
+    useAssignedEmitter();
+
+  const upsertAssigned = useBookingSocketStore((s) => s.upsertAssigned);
   const [disputeWork, setDisputeWork] = useState<DisplayWork | null>(null);
 
-  const handleCancelYes = () => {
+  const handleCancel = () => {
+  if (!cancelConfirmWork) return;
 
-    if (!cancelConfirmWork?.cancelType) {
-      toast.error("Please select a cancellation reason");
-      return;
-    }
+  const bookingId = getBookingId(cancelConfirmWork);
 
-    const bookingId = getBookingId(cancelConfirmWork);
-    const payload = buildCancelPayload(
-      bookingId,
-      cancelConfirmWork.cancelType as CancelReasonType,
-      cancelConfirmWork.cancelledReason
 
-    cancelMutation.mutate(
-      {
-        bookingId: cancelConfirmWork._id,
-        cancelReason: cancelConfirmWork.cancelledReason,
-        cancelReasonType: cancelConfirmWork.cancelType,
-      },
-      {
-        onSuccess: (data: any) => {
-          const booking = data?.booking ?? data;
-
-          emitCancel({
-            bookingId: booking._id,
-            status: "WORKER_CANCELLED",
-          });
-
-          toast.success("Cancelled");
-        },
-        onSettled: () => setCancelConfirmWork(null),
+      const type: CancelReasonType | undefined = cancelConfirmWork.cancelType;
+      if (!type) {
+        toast.error("Please select a cancellation reason");
+        return;
       }
-  
-    );
+  if (type === "OTHER" && !cancelConfirmWork.cancelledReason) {
+    toast.error("Enter cancellation reason");
+    return;
+  }
 
-    if (!payload) {
-      toast.error("Please enter a cancellation reason");
-      return;
-    }
+  const payload: CancelWork =
+  type === "OTHER"
+    ? {
+        bookingId,
+        cancelReasonType: "OTHER",
+        cancelReason: cancelConfirmWork.cancelledReason!,
+      }
+    : {
+        bookingId,
+        cancelReasonType: type,
+      };
 
-    cancelMutation.mutate(payload, {
-      onSuccess: (data) => {
-        const booking = getBookingFromMutation(data);
+  cancelMutation.mutate(payload, {
+    onSuccess: (data: any) => {
+      const booking = data?.booking ?? data;
 
-        socket.emit("booking.worker.cancelled", {
-          bookingId,
-          status: "WORKER_CANCELLED",
-        });
+      emitCancel({
+        bookingId,
+        status: "WORKER_CANCELLED",
+      });
 
-        if (booking) {
-          onCancelSuccess?.(booking);
-        }
-
-        toast.success("Cancelled");
-      },
-      onSettled: () => setCancelConfirmWork(null),
-    });
-  };
+      onCancelSuccess?.(booking);
+      toast.success("Cancelled");
+    },
+    onSettled: () => setCancelConfirmWork(null),
+  });
+};
 
   return (
     <>
@@ -141,27 +102,17 @@ export default function WorkModals({
           work={selectedWork}
           onClose={closeModal}
           onWorkStarted={(updated) => {
+            const startedAt = new Date().toISOString();
 
-            const updatedStartedAt =
-              "startedAt" in updated ? updated.startedAt : undefined;
-            const startedAt =
-              updated.workStartedAt || updatedStartedAt || new Date().toISOString();
-            const updatedWork = {
+            upsertAssigned({
               ...selectedWork,
               ...updated,
               status: "IN_PROGRESS",
               workStartedAt: startedAt,
-              startedAt,
-            };
-
-            upsertAssigned(updatedWork);
-
-            socket.emit("booking.worker.started", {
-              bookingId: getBookingId(selectedWork),
+            });
 
             emitStart({
-              bookingId: updated._id,
-
+              bookingId: selectedWork._id,
               status: "IN_PROGRESS",
               startedAt,
             });
@@ -174,26 +125,6 @@ export default function WorkModals({
           work={selectedWork}
           open
           onClose={closeModal}
-
-          onSuccess={(updatedWork) => {
-            const completedWork: DisplayWork = {
-              ...selectedWork,
-              ...updatedWork,
-              status: "WORK_COMPLETED_PENDING" as const,
-              workStartedAt: null,
-              booking: selectedWork.booking
-                ? {
-                    ...selectedWork.booking,
-                    ...(updatedWork.booking ?? {}),
-                    id:
-                      selectedWork.booking.id ||
-                      selectedWork.booking._id ||
-                      selectedWork.id,
-                    status: "WORK_COMPLETED_PENDING" as const,
-                  }
-                : selectedWork.booking,
-            };
-              
           onSuccess={(data) => {
             emitComplete({
               bookingId: selectedWork._id,
@@ -201,15 +132,7 @@ export default function WorkModals({
               status: "WORK_COMPLETED_PENDING",
             });
 
-
-            upsertAssigned(completedWork);
-
-          socket.emit("booking.worker.completed", {
-                bookingId: getBookingId(selectedWork),
-                status: "WORK_COMPLETED_PENDING",
-              });
-
-            onCompleteSuccess?.(completedWork);
+            onCompleteSuccess?.(data);
           }}
         />
       )}
@@ -219,16 +142,9 @@ export default function WorkModals({
           open
           work={selectedWork}
           onClose={closeModal}
-
-          onSuccess={(updatedWork) => {
-            socket.emit("booking.worker.verified", {
-              bookingId: getBookingId(selectedWork),
-              ...updatedWork,
-
-          onSuccess={(data: any) => {
+          onSuccess={(_data) => {
             emitVerify({
               bookingId: selectedWork._id,
-
               status: "COMPLETED",
             });
           }}
@@ -239,17 +155,11 @@ export default function WorkModals({
         open={!!disputeWork}
         work={disputeWork}
         onClose={() => setDisputeWork(null)}
-
-        onSubmit={(data: { reason: string }) => {
+        onSubmit={(data:Dispute) => {
           if (!disputeWork) return;
 
-          socket.emit("booking.worker.dispute", {
-            bookingId: getBookingId(disputeWork),
-
-        onSubmit={(data: any) => {
           emitDispute({
             bookingId: disputeWork._id,
-
             reason: data.reason,
             status: "DISPUTE_CREATED",
           });
@@ -265,127 +175,49 @@ export default function WorkModals({
 
             <CommonModal.Body>
               <select
-                value={cancelConfirmWork.cancelType || ""}
+  value={cancelConfirmWork.cancelType ?? ""}
+  onChange={(e) => {
+    const value = e.target.value;
 
-                onChange={(event) =>
-                  setCancelConfirmWork((prev) =>
-                    prev
-                      ? {
-                          ...prev,
-                          cancelType: event.target.value,
-                          cancelledReason: "",
-                        }
-                      : prev
-                  )
-
-                onChange={(e) =>
-                  setCancelConfirmWork((p: any) => ({
-                    ...p,
-                    cancelType: e.target.value,
-                    cancelledReason: "",
-                  }))
-
-                }
-                className="w-full border p-2 mb-3 rounded"
-              >
-                <option value="" disabled>
-                  Select reason
-                </option>
-
-                {CANCEL_REASONS.map((reason) => (
-                  <option key={reason.value} value={reason.value}>
-                    {reason.label}
+    setCancelConfirmWork((p) =>
+      p
+        ? {
+            ...p,
+            cancelType: value === "" ? undefined : (value as CancelReasonType),
+          }
+        : p
+    );
+  }}
+  className="w-full border p-2 mb-3 rounded"
+>
+                <option value="">Select reason</option>
+                {CANCEL_REASONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
                   </option>
                 ))}
-
-                <option value="BOOKED_WRONG_SERVICE">Booked wrong service</option>
-                <option value="BOOKED_BY_MISTAKE">Booked by mistake</option>
-                <option value="SCHEDULE_CHANGED">Schedule changed</option>
-                <option value="PRICE_TOO_HIGH">Price too high</option>
-                <option value="SERVICE_NO_LONGER_NEEDED">
-                  Service no longer needed
-                </option>
-                <option value="OTHER">Other</option>
-
               </select>
-
-              {cancelConfirmWork.cancelType && (
-                <div className="mb-3">
-                  <span className="inline-block px-3 py-1 text-sm bg-gray-200 rounded-full">
-                    {cancelConfirmWork.cancelType.replaceAll("_", " ")}
-                  </span>
-                </div>
-              )}
 
               <Textarea
                 value={cancelConfirmWork.cancelledReason || ""}
-
-                onChange={(event) =>
-                  setCancelConfirmWork((prev) =>
-                    prev
-                      ? {
-                          ...prev,
-                          cancelledReason: event.target.value,
-                        }
-                      : prev
-                  )
-
                 onChange={(e) =>
-                  setCancelConfirmWork((p: any) => ({
-                    ...p,
-                    cancelledReason: e.target.value,
-                  }))
-
+                  setCancelConfirmWork((p) =>
+                    p ? { ...p, cancelledReason: e.target.value } : p
+                  )
                 }
                 placeholder="Enter reason..."
-                className="w-full border p-2"
               />
             </CommonModal.Body>
 
             <CommonModal.Footer>
-
-              <Button
-                variant="outline"
-                onClick={() => setCancelConfirmWork(null)}
-              >
+              <Button variant="outline" onClick={() => setCancelConfirmWork(null)}>
                 No
               </Button>
-              <Button
-                onClick={handleCancelYes}
-                disabled={cancelMutation.isPending}
-              >
-                {cancelMutation.isPending ? "Cancelling..." : "Yes"}
-              </Button>
-        
-              <Button onClick={() => setCancelConfirmWork(null)}>No</Button>
-              <Button onClick={handleCancelYes}>Yes</Button>
-
+              <Button onClick={handleCancel}>Yes</Button>
             </CommonModal.Footer>
           </CommonModal.Content>
         </CommonModal>
       )}
     </>
   );
-}
-
-function buildCancelPayload(
-  bookingId: string,
-  cancelReasonType: CancelReasonType,
-  cancelReason?: string
-): CancelWork | null {
-  if (cancelReasonType === "OTHER") {
-    const reason = cancelReason?.trim();
-    return reason ? { bookingId, cancelReasonType, cancelReason: reason } : null;
-  }
-
-  return { bookingId, cancelReasonType };
-}
-
-function getBookingFromMutation(data: unknown) {
-  if (!data || typeof data !== "object") return null;
-
-  const response = data as { booking?: unknown };
-  return (response.booking ?? data) as Parameters<
-    NonNullable<WorkModalsProps["onCancelSuccess"]>
-  >[0];
 }

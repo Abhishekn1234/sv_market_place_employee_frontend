@@ -28,9 +28,6 @@ export default function WorkGrid({
     );
   }, [workList]);
 
-  // console.log(normalizedWorkList);
-
-
   useEffect(() => {
     if (!normalizedWorkList.length) return;
 
@@ -68,7 +65,7 @@ export default function WorkGrid({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {normalizedWorkList.map((work) => {
+      {normalizedWorkList.map((work: any) => {
         if (renderedIds.has(work.id)) return null;
         renderedIds.add(work.id);
 
@@ -78,25 +75,30 @@ export default function WorkGrid({
 
         const coordinates = getWorkCoordinates(getWorkLocation(work));
 
+        // const poolAmount =
+        //   work?.workerPoolAmount ?? work?.booking?.workerPoolAmount ?? 0;
 
-        const poolAmount = w?.workerPoolAmount ?? w.booking?.workerPoolAmount;
-        const workers = w.booking?.numberOfWorkers??w?.numberOfWorkers;
-        const amount = (poolAmount / workers).toFixed(2);
+        // const workers =
+        //   work?.booking?.numberOfWorkers ?? work?.numberOfWorkers ?? 0;
+
+        // const amount = workers ? (poolAmount / workers).toFixed(2) : "0";
+
+        const loc =
+          work.location ??
+          work.booking?.location ??
+          work.booking?.coordinates;
 
         let lat: number | null = null;
         let lng: number | null = null;
 
-        const loc = w.location ??w.booking.location??w.booking.coordinates;
         try {
           if (typeof loc === "string") {
             [lat, lng] = loc.split(",").map(Number);
           } else {
-            lat = loc?.coordinates?.[1];
-            lng = loc?.coordinates?.[0];
+            lat = loc?.coordinates?.[1] ?? null;
+            lng = loc?.coordinates?.[0] ?? null;
           }
         } catch {}
-        // console.log("WORK LOCATION:", w.id, { lat, lng, location: w.location, booking: w.booking?.location });
-
 
         return (
           <CommonCard
@@ -116,7 +118,9 @@ export default function WorkGrid({
                 Location: {locations[work.id] || "Fetching location..."}
               </p>
 
-              <p className="text-xs text-gray-500">Category: {categoryName}</p>
+              <p className="text-xs text-gray-500">
+                Category: {categoryName}
+              </p>
 
               <p className="text-xs font-medium text-green-600">
                 Worker Pool Amount: {getWorkerAmount(work)}{" "}
@@ -124,7 +128,12 @@ export default function WorkGrid({
               </p>
 
               <p className="text-xs text-gray-500">
-                Price Mode: {String(work.pricingMode ?? work.booking?.pricingMode ?? "N/A")}
+                Price Mode:{" "}
+                {String(
+                  work.pricingMode ??
+                    work.booking?.pricingMode ??
+                    "N/A"
+                )}
               </p>
 
               <p className="text-xs font-medium">Status: {work.status}</p>
@@ -138,11 +147,7 @@ export default function WorkGrid({
             </div>
 
             <div className="mt-4 space-y-2">
-
-              {coordinates && (
-
-              {lat != null && lng != null && (
-
+              {coordinates && lat != null && lng != null && (
                 <Button
                   variant="outline"
                   onClick={() =>
