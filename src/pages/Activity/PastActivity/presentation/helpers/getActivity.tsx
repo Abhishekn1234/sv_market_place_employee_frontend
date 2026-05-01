@@ -69,6 +69,16 @@ const STATUS_VARIANTS: Record<
     label: "Worker Accepted",
   },
 
+  WORKER_CANCELLED: {
+    variant: "destructive",
+    label: "Worker Cancelled",
+  },
+
+  CUSTOMER_CANCELLED: {
+    variant: "destructive",
+    label: "Customer Cancelled",
+  },
+
   cancelled: { variant: "destructive", label: "Cancelled" },
 
  

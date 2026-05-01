@@ -17,6 +17,7 @@ import { BookingExpandedRow } from "./components/BookingExpandedColumns";
 import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";
 import type { BookingHistory } from "../domain/entities/bookinghistory";
 import { useDebounce } from "@/utils/usedebouncer";
+import DisputeModal from "./components/DisputesModal";
 
 export default function BookingHistory() {
   const { language, translations } = useLanguage();
@@ -57,7 +58,13 @@ export default function BookingHistory() {
 
   const normalize = (value?: string) => value?.toLowerCase().replace(/\s|-/g, "");
 
-  
+  const [openDisputeModal, setOpenDisputeModal] = useState(false);
+const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+
+const handleOpenDisputes = (bookingId: string) => {
+  setSelectedBookingId(bookingId);
+  setOpenDisputeModal(true);
+};
   const filteredBookings = useMemo(() => {
     return bookings.filter((b) => {
       const search = debouncedSearchTerm.toLowerCase();
@@ -98,6 +105,7 @@ export default function BookingHistory() {
     expandedBooking,
     toggleExpanded,
     onIgnore: handleIgnore,
+      onOpenDisputes: handleOpenDisputes,
   });
 
 
@@ -154,6 +162,11 @@ export default function BookingHistory() {
         expandedRowKey={expandedBooking}
         renderExpandedRow={(b) => <BookingExpandedRow booking={b} bookingCategories={categories} />}
       />
+      <DisputeModal
+          open={openDisputeModal}
+          bookingId={selectedBookingId}
+          onClose={() => setOpenDisputeModal(false)}
+        />
     </div>
   );
 }

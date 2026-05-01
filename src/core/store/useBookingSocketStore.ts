@@ -16,7 +16,7 @@ type State = {
   removeAssigned: (id: string) => void;
 };
 
-const getId = (b: any) => b._id || b.bookingId;
+const getId = (b: any) => b?._id || b?.bookingId || b?.booking?._id;
 
 export const useBookingSocketStore = create<State>((set, get) => ({
   requestBookings: [],
@@ -43,12 +43,20 @@ export const useBookingSocketStore = create<State>((set, get) => ({
 
   upsertAssigned: (b) => {
     const id = getId(b);
+    if (!id) return;
+
     const exists = get().assignedBookings.find((x) => getId(x) === id);
+    const normalizedBooking = {
+      ...b,
+      _id: String(id),
+    };
 
     set({
       assignedBookings: exists
-        ? get().assignedBookings.map((x) => (getId(x) === id ? { ...x, ...b } : x))
-        : [b, ...get().assignedBookings],
+        ? get().assignedBookings.map((x) =>
+            getId(x) === id ? { ...x, ...normalizedBooking } : x
+          )
+        : [normalizedBooking, ...get().assignedBookings],
     });
   },
 

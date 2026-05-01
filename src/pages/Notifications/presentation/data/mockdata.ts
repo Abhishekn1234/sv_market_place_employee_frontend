@@ -1,4 +1,38 @@
-
 import type { Notification } from "../../domain/entities/notification";
 
-export const data: Notification[] = [ { id: "1", title: "New Booking Assigned", description: "You have a new service booking today at 10:00 AM. Please confirm your availability.", date: "Just now", read: false, type: "info", category: "booking", priority: "high" }, { id: "2", title: "Payment Received", description: "Your payment of $150 has been completed and credited to your wallet.", date: "2 hours ago", read: true, type: "success", category: "payment", priority: "medium" }, { id: "3", title: "Booking Cancelled", description: "A booking scheduled for today has been cancelled by the client.", date: "4 hours ago", read: false, type: "error", category: "booking", priority: "high" }, { id: "4", title: "System Maintenance", description: "Scheduled maintenance will occur tomorrow from 2:00 AM to 4:00 AM.", date: "Yesterday", read: true, type: "warning", category: "system", priority: "low" }, { id: "5", title: "New Message Received", description: "You have received a new message from client #12345 regarding their booking.", date: "Yesterday", read: false, type: "info", category: "booking", priority: "medium" }, { id: "6", title: "Withdrawal Successful", description: "Your withdrawal request of $500 has been processed successfully.", date: "2 days ago", read: true, type: "success", category: "payment", priority: "medium" }, { id: "7", title: "Service Rating", description: "Client #7890 has rated your service with 5 stars. Great job!", date: "2 days ago", read: false, type: "success", category: "booking", priority: "low" }, { id: "8", title: "Profile Update Required", description: "Please update your profile information for verification.", date: "3 days ago", read: true, type: "warning", category: "system", priority: "medium" }, ]; 
+export const data: Notification[] = [
+  {
+    id: "1",
+    title: "New Booking Assigned",
+    message:
+      "You have a new service booking today at 10:00 AM. Please confirm your availability.",
+    createdAt: new Date().toISOString(),
+    isRead: false,
+    type: "BOOKING_REQUEST",
+  },
+  {
+    id: "2",
+    title: "Payment Received",
+    message: "Your payment has been completed and credited to your wallet.",
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    isRead: true,
+    type: "BOOKING_UPDATE",
+  },
+  {
+    id: "3",
+    title: "Booking Cancelled",
+    message: "A booking scheduled for today has been cancelled by the client.",
+    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    isRead: false,
+    type: "BOOKING_UPDATE",
+  },
+  {
+    id: "4",
+    title: "System Maintenance",
+    message:
+      "Scheduled maintenance will occur tomorrow from 2:00 AM to 4:00 AM.",
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    isRead: true,
+    type: "ADMIN_MESSAGE",
+  },
+];

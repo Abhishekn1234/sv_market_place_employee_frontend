@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { CommonModal } from "@/components/common/CommonModal";
 import { useLanguage } from "@/context/LanguageContext";
 
-import type { Dispute } from "../domain/entities/disputes";
-import { useGetDisputes } from "./hooks/useGetDispute";
-import { useRespondDisputes } from "./hooks/useRespondDispute";
+import type { Dispute } from "../../domain/entities/disputes";
+import { useGetDisputes } from "../hooks/useGetDispute";
+import { useRespondDisputes } from "../hooks/useRespondDispute";
+import { getDisputeStatusStyle } from "../utils/disputescolors";
 
 export default function Disputespage() {
   const { language, t } = useLanguage();
@@ -70,14 +71,10 @@ export default function Disputespage() {
       key: "status",
       header: t("disputepage.status"),
       render: (row) => (
-        <span
-          className={`px-2 py-1 rounded text-xs font-medium ${
-            row.status === "OPEN"
-              ? "bg-yellow-100 text-yellow-700"
-              : row.status === "RESOLVED"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
+                <span
+          className={`px-2 py-1 rounded text-xs font-medium ${getDisputeStatusStyle(
+            row.status
+          )}`}
         >
           {row.status}
         </span>
@@ -90,7 +87,8 @@ export default function Disputespage() {
         <Button
           size="sm"
           onClick={() => openModal(row)}
-          disabled={row.status !== "OPEN"}
+          // disabled={row.status == "OPEN"}\
+          disabled={row.status=="IN_REVIEW"}
         >
           Respond
         </Button>

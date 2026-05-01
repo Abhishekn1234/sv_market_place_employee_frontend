@@ -31,7 +31,7 @@ import VerifyMobilePage from './pages/Auth/MobileVerification/presentation/Verif
 import { SendOtpEmailPage } from './pages/Auth/EmailVerification/presentation/SendOtpEmailPage';
 import { VerifyOtpEmailPage } from './pages/Auth/EmailVerification/presentation/components/VerificationOtpEmail';
 import SendOtpMobilePage from './pages/Auth/MobileVerification/presentation/components/SendOtpMobilePage';
-import Disputespage from './pages/Disputes/presentation/Disputes.page';
+import Disputespage from './pages/History/BookingHistory/presentation/components/Disputes.page';
 import CurrentWorkPage from './pages/CurrentWork/presentation/CurrentWorkPage';
 import { initOnMessage } from './components/firebase/notifications';
 import { useNotificationManager } from './pages/Notifications/presentation/hooks/useNotificationhandler';

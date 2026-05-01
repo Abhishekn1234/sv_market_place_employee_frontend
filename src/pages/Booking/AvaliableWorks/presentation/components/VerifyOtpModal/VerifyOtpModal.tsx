@@ -3,58 +3,55 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
-import type { Work } from "../../../domain/entities/work";
 import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
-
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+import { normalizeAssignedWorks } from "../../helpers/workPresentation.helpers";
+import type { DisplayWork } from "../../types/workPresentation.types";
+import type { Work } from "../../../domain/entities/work";
 
-type Props = {
-  work: Work;
+type Props<TWork extends DisplayWork | Work> = {
+  work: TWork;
   open: boolean;
   onClose: () => void;
-  onSuccess: (updatedWork: Work) => void;
+  onSuccess: (updatedWork: TWork) => void;
 };
 
-export default function VerifyOtpModal({
+export default function VerifyOtpModal<TWork extends DisplayWork | Work>({
   work,
   open,
   onClose,
   onSuccess,
-}: Props) {
+}: Props<TWork>) {
   const { t } = useLanguage();
   const [otp, setOtp] = useState("");
- 
-
-  // ✅ Get mutation from hook
   const { mutate, isPending } = useVerifyOtp();
+  const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
 
   if (!open) return null;
 
-   const { upsertAssigned } = useBookingSocketStore((s) => s);
-
   const handleVerify = () => {
-  if (!otp) return;
+    if (!otp) return;
 
-  mutate(
-    {
-      bookingId: work._id,
-      otp,
-      purpose: "WORK_COMPLETE",
-    },
-    {
-      onSuccess: (res) => {
-        const updatedWork = res?.booking ?? res;
-      
-        upsertAssigned(updatedWork);
+    mutate(
+      {
+        bookingId: work._id,
+        otp,
+        purpose: "WORK_COMPLETE",
+      },
+      {
+        onSuccess: (res) => {
+          const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
 
-      
-
-        onSuccess?.(res);
-        onClose();
-      }
+          if (updatedWork) {
+            upsertAssigned(updatedWork);
+            onSuccess(updatedWork as TWork);
           }
-        );
-      };
+
+          onClose();
+        },
+      }
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -66,7 +63,7 @@ export default function VerifyOtpModal({
         <input
           type="text"
           value={otp}
-          onChange={(e) => setOtp(e.target.value)}
+          onChange={(event) => setOtp(event.target.value)}
           placeholder="Enter OTP"
           className="w-full border rounded-md p-2"
         />

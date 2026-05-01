@@ -12,7 +12,9 @@
     "pending": "Pending",
     "failed": "Failed",
     "hoursAgo": "{{count}} hours ago",
-    "logoutSuccess":"Logged out successfully"
+    "logoutSuccess":"Logged out successfully",
+     "inputPlaceholder": "Type an input",
+      "Close":"Close"
   },
   "HomePage": {
   "dashboard": "Dashboard",
@@ -459,15 +461,19 @@
     "arabic": "Arabic",
     "hindi": "Hindi"
   },
-  "disputepage":{
+ "disputepage": {
     "title": "Disputes",
     "description": "Manage and respond to user disputes",
     "bookingId": "Booking ID",
     "user": "User",
     "reason": "Reason",
+    "descriptionField": "Description",
     "status": "Status",
-    "action": "Action",
+    "response": "Response",
+    "date": "Date",
+    "actions": "Actions",
     "respond": "Respond",
+    "noResponse": "No response",
     "noData": "No disputes found"
   },
 "sidebar": {
