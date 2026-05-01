@@ -11,6 +11,7 @@ import {
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 
+
 type Props<TWork extends DisplayWork | Work> = {
   work: TWork;
   open: boolean;
