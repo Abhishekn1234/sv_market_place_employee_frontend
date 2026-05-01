@@ -1,8 +1,7 @@
-"use client";
-
 import { useEffect } from "react";
 import { initializeSocket } from "../components/socket";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+
 import { Socket } from "socket.io-client";
 import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
 
@@ -162,6 +161,51 @@ export function useBookingSocket() {
 
   useEffect(() => {
     console.log("[Socket] Hook initialized");
+=======
+import { normalizeBooking } from "./normalizeBooking";
+
+export function useBookingSocket() {
+  const { upsertRequest, removeRequest, setConnected } =
+    useBookingSocketStore();
+
+  useEffect(() => {
+    console.log("[Socket] Connecting /workers/requests");
+
+    const socket = initializeSocket("/workers/requests");
+    socket.connect();
+
+    socket.on("connect", () => {
+      console.log("[Socket] connected:", socket.id);
+      setConnected(true);
+    });
+
+    socket.on("disconnect", (reason: any) => {
+      console.log("[Socket] disconnected:", reason);
+      setConnected(false);
+    });
+
+    const onUpsert = (data: any) => {
+      console.log("[Socket] booking.created/updated:", data);
+
+      const b = normalizeBooking(data);
+      if (!b) return;
+
+      upsertRequest(b);
+    };
+
+    const onRemove = (data: any) => {
+      console.log("[Socket] booking removed:", data);
+
+      const id = data?.bookingId || data?._id;
+      if (!id) return;
+
+      removeRequest(String(id));
+    };
+
+    socket.on("booking.created", onUpsert);
+    socket.on("booking.updated", onUpsert);
+    socket.on("booking.worker.rejected", onRemove);
+
 
     setupRequestSocket({
   upsertRequest,
@@ -175,6 +219,7 @@ setupAssignedSocket({
   removeRequest,
 });
     return () => {
+
       console.log("[Socket] Cleaning up sockets");
       disconnectSockets();
     };
@@ -186,3 +231,10 @@ setupAssignedSocket({
     setConnected,
   ]);
 }
+
+      console.log("[Socket] disconnect cleanup");
+      socket.disconnect();
+    };
+  }, [upsertRequest, removeRequest, setConnected]);
+}
+

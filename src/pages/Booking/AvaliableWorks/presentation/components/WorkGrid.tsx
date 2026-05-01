@@ -28,6 +28,9 @@ export default function WorkGrid({
     );
   }, [workList]);
 
+  // console.log(normalizedWorkList);
+
+
   useEffect(() => {
     if (!normalizedWorkList.length) return;
 
@@ -72,7 +75,28 @@ export default function WorkGrid({
         const categoryName =
           categories.find((category) => category._id === work.service?.category)
             ?.name || "N/A";
+
         const coordinates = getWorkCoordinates(getWorkLocation(work));
+
+
+        const poolAmount = w?.workerPoolAmount ?? w.booking?.workerPoolAmount;
+        const workers = w.booking?.numberOfWorkers??w?.numberOfWorkers;
+        const amount = (poolAmount / workers).toFixed(2);
+
+        let lat: number | null = null;
+        let lng: number | null = null;
+
+        const loc = w.location ??w.booking.location??w.booking.coordinates;
+        try {
+          if (typeof loc === "string") {
+            [lat, lng] = loc.split(",").map(Number);
+          } else {
+            lat = loc?.coordinates?.[1];
+            lng = loc?.coordinates?.[0];
+          }
+        } catch {}
+        // console.log("WORK LOCATION:", w.id, { lat, lng, location: w.location, booking: w.booking?.location });
+
 
         return (
           <CommonCard
@@ -114,7 +138,11 @@ export default function WorkGrid({
             </div>
 
             <div className="mt-4 space-y-2">
+
               {coordinates && (
+
+              {lat != null && lng != null && (
+
                 <Button
                   variant="outline"
                   onClick={() =>
