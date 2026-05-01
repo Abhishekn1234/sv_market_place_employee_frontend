@@ -71,9 +71,6 @@ const handleSubmit = (e: React.FormEvent) => {
   else if (status === "IN_PROGRESS") {
     navigate("/");
 
-  }else if(status==="IN_PROGRESS"){
-    navigate('/');
-
   } else {
     navigate("/services/employee");
   }
