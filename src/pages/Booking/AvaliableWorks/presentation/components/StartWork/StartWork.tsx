@@ -10,6 +10,7 @@ import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 
 import { getSocket, initializeSocket } from "@/core/Websocket/presentation/components/socket";
+import { getBookingId } from "../../helpers/workPresentation.helpers";
 
 type Props = {
   work: DisplayWork | Work;
@@ -36,7 +37,7 @@ export default function StartWork({
       return;
     }
 
-    const bookingId = work.bookingId || work.booking?._id || work._id;
+     const bookingId = getBookingId(work);
 
     if (!bookingId) {
       alert("Booking ID not found");

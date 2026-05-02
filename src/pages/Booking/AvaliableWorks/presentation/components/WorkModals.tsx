@@ -102,54 +102,76 @@ export default function WorkModals({
           work={selectedWork}
           onClose={closeModal}
           onWorkStarted={(updated) => {
-            const startedAt = new Date().toISOString();
+          const bookingId = getBookingId(selectedWork);
+          const startedAt = new Date().toISOString();
 
-            upsertAssigned({
-              ...selectedWork,
-              ...updated,
-              status: "IN_PROGRESS",
-              workStartedAt: startedAt,
-            });
+          upsertAssigned({
+            ...selectedWork,
+            ...updated,
+            _id: bookingId,
+            bookingId,
+            status: "IN_PROGRESS",
+            workStartedAt: startedAt,
+          });
 
-            emitStart({
-              bookingId: selectedWork._id,
-              status: "IN_PROGRESS",
-              startedAt,
-            });
-          }}
+          emitStart({
+            bookingId,
+            status: "IN_PROGRESS",
+            startedAt,
+          });
+        }}
         />
       )}
 
-      {modalType === "complete" && selectedWork && (
-        <CompleteWork
-          work={selectedWork}
-          open
-          onClose={closeModal}
-          onSuccess={(data) => {
-            emitComplete({
-              bookingId: selectedWork._id,
-              ...data,
-              status: "WORK_COMPLETED_PENDING",
-            });
+              {modalType === "complete" && selectedWork && (
+          <CompleteWork
+            work={selectedWork}
+            open
+            onClose={closeModal}
+            onSuccess={(updatedWork) => {
+               const bookingId = getBookingId(selectedWork);
 
-            onCompleteSuccess?.(data);
-          }}
-        />
-      )}
+              upsertAssigned({
+                ...selectedWork,
+                ...updatedWork,
+                _id: bookingId,
+                bookingId,
+                status: "WORK_COMPLETED_PENDING",
+                workStartedAt: null,
+              });
 
-      {modalType === "verify" && selectedWork && (
-        <VerifyOtpModal
-          open
-          work={selectedWork}
-          onClose={closeModal}
-          onSuccess={(_data) => {
-            emitVerify({
-              bookingId: selectedWork._id,
-              status: "COMPLETED",
-            });
-          }}
-        />
-      )}
+              emitComplete({
+                bookingId,
+                status: "WORK_COMPLETED_PENDING",
+              });
+
+              onCompleteSuccess?.(updatedWork);
+            }}
+          />
+        )}
+
+              {modalType === "verify" && selectedWork && (
+          <VerifyOtpModal
+            open
+            work={selectedWork}
+            onClose={closeModal}
+            onSuccess={() => {
+               const bookingId = getBookingId(selectedWork);
+
+  upsertAssigned({
+    ...selectedWork,
+    _id: bookingId,
+    bookingId,
+    status: "COMPLETED",
+  });
+
+  emitVerify({
+    bookingId,
+    status: "COMPLETED",
+  });
+            }}
+          />
+        )}
 
       <DisputeModal
         open={!!disputeWork}

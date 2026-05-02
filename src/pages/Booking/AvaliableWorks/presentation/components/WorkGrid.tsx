@@ -1,9 +1,12 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { CommonCard } from "@/components/common/CommonCard";
 import { reverseGeocode } from "@/components/common/CommonMap";
 import { MapPin, Timer } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
+  getBookingId,
   getWorkCoordinates,
   getWorkLocation,
   getWorkerAmount,
@@ -22,17 +25,21 @@ export default function WorkGrid({
 }: WorkGridProps) {
   const [locations, setLocations] = useState<Record<string, string>>({});
 
+  // ✅ Normalize
   const normalizedWorkList = useMemo(() => {
     return normalizeAssignedWorks(workList).filter(
       (work) => work.status !== "UNKNOWN"
     );
   }, [workList]);
 
+  // ✅ Fetch location (FIXED with bookingId)
   useEffect(() => {
     if (!normalizedWorkList.length) return;
 
     normalizedWorkList.forEach((work) => {
-      if (!work.id || locations[work.id]) return;
+      const id = getBookingId(work); // ✅ ALWAYS USE THIS
+
+      if (!id || locations[id]) return;
 
       const coordinates = getWorkCoordinates(getWorkLocation(work));
       if (!coordinates) return;
@@ -41,13 +48,13 @@ export default function WorkGrid({
         .then((address) =>
           setLocations((prev) => ({
             ...prev,
-            [work.id]: address,
+            [id]: address,
           }))
         )
         .catch(() =>
           setLocations((prev) => ({
             ...prev,
-            [work.id]: `${coordinates.lat}, ${coordinates.lng}`,
+            [id]: `${coordinates.lat}, ${coordinates.lng}`,
           }))
         );
     });
@@ -66,43 +73,20 @@ export default function WorkGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {normalizedWorkList.map((work: any) => {
-        if (renderedIds.has(work.id)) return null;
-        renderedIds.add(work.id);
+        const id = getBookingId(work); // ✅ SINGLE SOURCE OF TRUTH
+
+        if (renderedIds.has(id)) return null;
+        renderedIds.add(id);
 
         const categoryName =
-          categories.find((category) => category._id === work.service?.category)
-            ?.name || "N/A";
+          categories.find((c) => c._id === work.service?.category)?.name ||
+          "N/A";
 
         const coordinates = getWorkCoordinates(getWorkLocation(work));
 
-        // const poolAmount =
-        //   work?.workerPoolAmount ?? work?.booking?.workerPoolAmount ?? 0;
-
-        // const workers =
-        //   work?.booking?.numberOfWorkers ?? work?.numberOfWorkers ?? 0;
-
-        // const amount = workers ? (poolAmount / workers).toFixed(2) : "0";
-
-        const loc =
-          work.location ??
-          work.booking?.location ??
-          work.booking?.coordinates;
-
-        let lat: number | null = null;
-        let lng: number | null = null;
-
-        try {
-          if (typeof loc === "string") {
-            [lat, lng] = loc.split(",").map(Number);
-          } else {
-            lat = loc?.coordinates?.[1] ?? null;
-            lng = loc?.coordinates?.[0] ?? null;
-          }
-        } catch {}
-
         return (
           <CommonCard
-            key={work.id}
+            key={id} // ✅ FIXED
             className="flex flex-col justify-between p-4 rounded-2xl shadow-sm hover:shadow-md transition"
           >
             <div className="space-y-2 text-sm">
@@ -115,7 +99,7 @@ export default function WorkGrid({
               </p>
 
               <p className="text-gray-500 text-xs line-clamp-2">
-                Location: {locations[work.id] || "Fetching location..."}
+                Location: {locations[id] || "Fetching location..."} {/* ✅ FIX */}
               </p>
 
               <p className="text-xs text-gray-500">
@@ -130,24 +114,23 @@ export default function WorkGrid({
               <p className="text-xs text-gray-500">
                 Price Mode:{" "}
                 {String(
-                  work.pricingMode ??
-                    work.booking?.pricingMode ??
-                    "N/A"
+                  work.pricingMode ?? work.booking?.pricingMode ?? "N/A"
                 )}
               </p>
 
               <p className="text-xs font-medium">Status: {work.status}</p>
 
-              {isActiveWork(work) && timers[work.id] && (
+              {/* ✅ TIMER FIX */}
+              {isActiveWork(work) && timers[id] && (
                 <p className="flex items-center gap-1 text-green-600 font-semibold text-sm">
-                  <Timer size={14} aria-hidden="true" />
-                  {timers[work.id]}
+                  <Timer size={14} />
+                  {timers[id]}
                 </p>
               )}
             </div>
 
             <div className="mt-4 space-y-2">
-              {coordinates && lat != null && lng != null && (
+              {coordinates && (
                 <Button
                   variant="outline"
                   onClick={() =>
@@ -157,7 +140,7 @@ export default function WorkGrid({
                   }
                   className="w-full"
                 >
-                  <MapPin size={16} aria-hidden="true" />
+                  <MapPin size={16} />
                   Get Directions
                 </Button>
               )}
@@ -185,13 +168,14 @@ export default function WorkGrid({
                   </Button>
                 )}
 
+                {/* ✅ COMPLETE FIX */}
                 {isActiveWork(work) && (
                   <Button
                     className="w-full"
                     onClick={() =>
                       onComplete({
                         ...work,
-                        elapsedTime: timers[work.id] || "00:00:00",
+                        elapsedTime: timers[id] || "00:00:00",
                       })
                     }
                   >
@@ -207,10 +191,12 @@ export default function WorkGrid({
   );
 }
 
+// ✅ unchanged
 function canStartOrCancel(work: DisplayWork) {
   return ["ASSIGNED", "WORKER_ACCEPTED"].includes(work.status);
 }
 
+// ✅ unchanged
 function isActiveWork(work: DisplayWork) {
   return ["STARTED", "IN_PROGRESS"].includes(work.status);
 }

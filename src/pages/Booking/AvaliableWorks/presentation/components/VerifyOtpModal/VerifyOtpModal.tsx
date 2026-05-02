@@ -25,8 +25,8 @@ export default function VerifyOtpModal<TWork extends DisplayWork | Work>({
   const { t } = useLanguage();
   const [otp, setOtp] = useState("");
   const { mutate, isPending } = useVerifyOtp();
-  const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
-
+  // const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
+ const removeAssigned = useBookingSocketStore((s) => s.removeAssigned);
   if (!open) return null;
 
   const handleVerify = () => {
@@ -40,15 +40,15 @@ export default function VerifyOtpModal<TWork extends DisplayWork | Work>({
       },
       {
         onSuccess: (res) => {
-          const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
+  const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
 
-          if (updatedWork) {
-            upsertAssigned(updatedWork);
-            onSuccess(updatedWork as TWork);
-          }
+  if (updatedWork) {
+    removeAssigned(updatedWork._id); // ✅ remove instead of update
+    onSuccess(updatedWork as TWork);
+  }
 
-          onClose();
-        },
+  onClose();
+},
       }
     );
   };

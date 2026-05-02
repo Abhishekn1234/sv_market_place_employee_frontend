@@ -5,6 +5,7 @@ import type {
   WorkStatus,
 } from "../types/workPresentation.types";
 
+// ✅ FINAL STATUSES
 export const FINAL_WORK_STATUSES: WorkStatus[] = [
   "COMPLETED",
   "WORK_COMPLETED_PENDING",
@@ -13,54 +14,90 @@ export const FINAL_WORK_STATUSES: WorkStatus[] = [
   "CUSTOMER_CANCELLED",
 ];
 
+// ✅ ALWAYS USE BOOKING ID
+export function getBookingId(work: {
+  bookingId?: string;
+  booking?: { _id?: string };
+  _id?: string;
+  id?: string;
+}): string {
+  return (
+    work.booking?._id ||
+    work.bookingId ||
+    work._id ||
+    work.id ||
+    ""
+  );
+}
+
+// ✅ STATUS NORMALIZER
 export function normalizeWorkStatus(status?: unknown): WorkStatus {
   const normalized = String(status ?? "UNKNOWN").trim().toUpperCase();
 
-  if (isWorkStatus(normalized)) {
-    return normalized;
+  if (
+    [
+      "UNKNOWN",
+      "ASSIGNED",
+      "WORKER_ACCEPTED",
+      "STARTED",
+      "IN_PROGRESS",
+      "WORK_COMPLETED_PENDING",
+      "COMPLETED",
+      "WORKER_CANCELLED",
+      "WORKER_REJECTED",
+      "CUSTOMER_CANCELLED",
+    ].includes(normalized)
+  ) {
+    return normalized as WorkStatus;
   }
 
   return "UNKNOWN";
 }
 
+// ✅ MAIN NORMALIZER (MOST IMPORTANT FIX)
 export function normalizeAssignedWorks(
   assignedBookings: Array<Partial<DisplayWork> | Partial<Booking>>
 ): DisplayWork[] {
-  const worksById = new Map<string, DisplayWork>();
+  const map = new Map<string, DisplayWork>();
 
-  assignedBookings.forEach((bookingLike) => {
-    const booking = bookingLike as Partial<DisplayWork>;
-    const nestedBooking = booking.booking;
-    const id = booking._id || booking.bookingId || nestedBooking?._id || nestedBooking?.id;
+  assignedBookings.forEach((item: any) => {
+    const booking = item.booking;
+    const id = booking?._id || item.bookingId || item._id;
 
     if (!id) return;
 
-    const existing = worksById.get(id);
-    const statusSource = booking.status || nestedBooking?.status || existing?.status;
+    const existing = map.get(id);
+
+    // ✅ FORCE BOOKING STATUS
+    const statusSource =
+      booking?.status ?? item.status ?? existing?.status;
 
     const startedAt =
-      booking.workStartedAt ||
-      booking.startedAt ||
-      nestedBooking?.workStartedAt ||
-      nestedBooking?.startedAt ||
-      existing?.workStartedAt ||
-      existing?.startedAt;
+      item.workStartedAt ||
+      item.startedAt ||
+      booking?.startedAt ||
+      existing?.workStartedAt;
 
-    worksById.set(id, {
+    map.set(id, {
       ...(existing ?? {}),
-      ...booking,
-      _id: id,
+      ...item,
+
+      _id: id, // ✅ CRITICAL
       id,
+
+      booking,
+
       status: normalizeWorkStatus(statusSource),
+
       workStartedAt: startedAt,
       startedAt,
-      booking: nestedBooking,
-    } as DisplayWork);
+    });
   });
 
-  return Array.from(worksById.values());
+  return Array.from(map.values());
 }
 
+// ✅ LOCATION HELPERS
 export function getWorkCoordinates(
   location?: WorkLocation | null
 ): { lat: number; lng: number } | null {
@@ -68,34 +105,21 @@ export function getWorkCoordinates(
 
   if (typeof location === "string") {
     const [lat, lng] = location.split(",").map(Number);
-    return isValidCoordinate(lat, lng) ? { lat, lng } : null;
+    if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+      return { lat, lng };
+    }
+    return null;
   }
 
-  const coordinates = location.coordinates;
-  if (!coordinates) return null;
+  const coords = location.coordinates;
+  if (!coords) return null;
 
-  const [lng, lat] = coordinates;
-  return isValidCoordinate(lat, lng) ? { lat, lng } : null;
-}
+  const [lng, lat] = coords;
+  if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+    return { lat, lng };
+  }
 
-export function getWorkLocation(work: DisplayWork): WorkLocation | undefined {
-  return work.location ?? work.booking?.location;
-}
-
-export function getBookingId(work: {
-  bookingId?: string;
-  booking?: { _id?: string };
-  _id?: string;
-  id?: string;
-}): string {
-  return work.bookingId || work.booking?._id || work._id || work.id || "";
-}
-
-export function getWorkerAmount(work: DisplayWork): string {
-  const poolAmount = work.workerPoolAmount ?? work.booking?.workerPoolAmount;
-  const workers = work.booking?.numberOfWorkers ?? work.numberOfWorkers;
-
-  return workers && poolAmount ? (poolAmount / workers).toFixed(2) : "0.00";
+  return null;
 }
 
 export function elapsedMinutes(elapsedTime?: string): string {
@@ -106,29 +130,21 @@ export function elapsedMinutes(elapsedTime?: string): string {
     .map(Number)
     .reduce((total, value, index) => {
       if (Number.isNaN(value)) return total;
-      if (index === 0) return total + value * 60;
-      if (index === 1) return total + value;
-      return total + value / 60;
+
+      if (index === 0) return total + value * 60; // hours → minutes
+      if (index === 1) return total + value;      // minutes
+      return total + value / 60;                  // seconds → minutes
     }, 0);
 
   return minutes.toFixed(0);
 }
-
-function isWorkStatus(status: string): status is WorkStatus {
-  return [
-    "UNKNOWN",
-    "ASSIGNED",
-    "WORKER_ACCEPTED",
-    "STARTED",
-    "IN_PROGRESS",
-    "WORK_COMPLETED_PENDING",
-    "COMPLETED",
-    "WORKER_CANCELLED",
-    "WORKER_REJECTED",
-    "CUSTOMER_CANCELLED",
-  ].includes(status);
+export function getWorkLocation(work: DisplayWork) {
+  return work.location ?? work.booking?.location;
 }
 
-function isValidCoordinate(lat?: number, lng?: number): lat is number {
-  return typeof lat === "number" && typeof lng === "number" && !Number.isNaN(lat) && !Number.isNaN(lng);
+export function getWorkerAmount(work: DisplayWork): string {
+  const pool = work.workerPoolAmount ?? work.booking?.workerPoolAmount;
+  const workers = work.booking?.numberOfWorkers ?? work.numberOfWorkers;
+
+  return workers && pool ? (pool / workers).toFixed(2) : "0.00";
 }

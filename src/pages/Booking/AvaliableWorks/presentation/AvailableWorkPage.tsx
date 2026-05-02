@@ -37,9 +37,33 @@ export default function AvailableWorkPage() {
     useState<CancelableWork | null>(null);
   const [timers, setTimers] = useState<WorkTimerMap>({});
 
-  const assignedBookings =
-    socketBookings.length > 0 ? socketBookings : assignedFromApi ?? [];
+ const assignedBookings = useMemo(() => {
+  const map = new Map<string, any>();
 
+  // ✅ API FIRST
+  (assignedFromApi ?? []).forEach((b) => {
+    const id = b.booking?._id || b._id;
+    map.set(id, b);
+  });
+
+  // ✅ SOCKET OVERRIDE (MERGED, NOT REPLACED)
+  socketBookings.forEach((b) => {
+    const id = b.booking?._id || b._id;
+
+    const existing = map.get(id);
+
+    map.set(id, {
+      ...existing,
+      ...b,
+      booking: {
+        ...existing?.booking,
+        ...b.booking,
+      },
+    });
+  });
+
+  return Array.from(map.values());
+}, [assignedFromApi, socketBookings]);
   const workList = useMemo(() => {
     return normalizeAssignedWorks(assignedBookings);
   }, [assignedBookings]);
