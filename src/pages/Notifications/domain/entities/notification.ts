@@ -4,7 +4,7 @@ export type NotificationType =
   | "ADMIN_MESSAGE";
 
 export interface Notification {
-  id: string;
+  id?: string;
   _id:string;
   title: string;
   message: string;
