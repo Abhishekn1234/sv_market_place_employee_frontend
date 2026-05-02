@@ -62,15 +62,15 @@ export function normalizeAssignedWorks(
 
   assignedBookings.forEach((item: any) => {
     const booking = item.booking;
-    const id = booking?._id || item.bookingId || item._id;
+ const id = getBookingId(item);
 
     if (!id) return;
 
     const existing = map.get(id);
 
     // ✅ FORCE BOOKING STATUS
-    const statusSource =
-      booking?.status ?? item.status ?? existing?.status;
+   const statusSource =
+  item.status ?? booking?.status ?? existing?.status;
 
     const startedAt =
       item.workStartedAt ||
