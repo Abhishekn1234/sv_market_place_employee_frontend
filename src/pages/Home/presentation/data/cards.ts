@@ -1,15 +1,14 @@
 import { useLanguage } from "@/context/LanguageContext";
 import type { BookingHistory } from "@/pages/History/BookingHistory/domain/entities/bookinghistory";
 import { useGetBookingHistory } from "@/pages/History/BookingHistory/presentation/hooks/useGetBookingHistory";
-import { data as notificationData } from "@/pages/Notifications/presentation/data/mockdata";
-
+import { useNotifications } from "@/pages/Notifications/presentation/hooks/useNotification";
 import { ClipboardList, Wrench, CreditCard, Bell } from "lucide-react";
 import { calculateMonthlyRevenue } from "../helpers/calculatemonthlyrevenue";
 
 export const useHomeCards = () => {
   const { translations } = useLanguage();
   const homeTranslations = translations.HomePage;
-
+ const { data: notificationData } = useNotifications();
   const { data: bookingHistory } = useGetBookingHistory();
 
   const bookings: BookingHistory[] = bookingHistory?.data ?? [];
@@ -46,7 +45,7 @@ export const useHomeCards = () => {
     },
     {
       title: homeTranslations.notifications,
-      value: notificationData.length,
+      value: notificationData?.pagination.totalItems,
       icon: Bell,
       bg: "bg-red-100",
       text: "text-red-600",
