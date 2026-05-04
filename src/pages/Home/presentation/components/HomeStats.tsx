@@ -231,7 +231,7 @@ export default function HomeStats() {
                   height={60}
                 />
 
-                <YAxis />
+                <YAxis  />
                 <Tooltip />
 
                 <Bar

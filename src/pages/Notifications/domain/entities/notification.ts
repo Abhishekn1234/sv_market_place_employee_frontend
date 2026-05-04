@@ -27,3 +27,14 @@ export interface RegisterDeviceTokenPayload {
   deviceId: string;
   appId: string;
 }
+
+export interface NotificationResponse {
+  data: Notification[];
+  pagination: {
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}

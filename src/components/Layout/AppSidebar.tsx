@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuthStore } from "@/core/store/auth";
 import { useProfile } from "@/pages/Profile/presentation/hooks/useProfile";
+import { useUnreadCount } from "@/pages/Notifications/presentation/hooks/useUnreadCount";
 
 
 interface AppSidebarProps {
@@ -46,7 +47,7 @@ export default function AppSidebar({
   const { user, logout } = useAuthStore();
 
  const { data: profile } = useProfile();
-
+const { data: unreadCount = 0 } = useUnreadCount();
 const fullName = profile?.fullName ?? "User";
 const profileImage = profile?.profilePictureUrl;
  console.log(user);
@@ -223,7 +224,24 @@ const profileImage = profile?.profilePictureUrl;
                   className="flex items-center w-full px-4 py-2 rounded-lg justify-between cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <item.icon className="h-5 w-5" />
+                  <div className="relative">
+  <item.icon className="h-5 w-5" />
+
+  {item.id === "notifications" && unreadCount > 0 && (
+    <span
+      className={`
+        absolute -top-2 -right-2
+        min-w-[18px] h-[18px]
+        px-1 flex items-center justify-center
+        text-[10px] font-bold rounded-full
+        bg-red-500 text-white
+        shadow-md
+      `}
+    >
+      {unreadCount > 99 ? "99+" : unreadCount}
+    </span>
+  )}
+</div>
                     {!mini && (
                       <span className="text-sm font-medium">
                         {item.title}

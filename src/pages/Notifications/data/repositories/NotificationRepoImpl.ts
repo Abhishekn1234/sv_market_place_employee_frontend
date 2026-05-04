@@ -1,15 +1,16 @@
 import type { INotificationRepository } from "../../domain/repositories/NotificationRepo";
 import type {
-  Notification,
+  // Notification,
   GetNotificationsParams,
   RegisterDeviceTokenPayload,
+  NotificationResponse,
 } from "../../domain/entities/notification";
 import api from "@/api/api"; // your axios instance
 
 export class NotificationRepositoryImpl implements INotificationRepository {
-  async getNotifications(params?: GetNotificationsParams): Promise<Notification[]> {
+  async getNotifications(params?: GetNotificationsParams): Promise<NotificationResponse> {
     const res = await api.get("/notifications", { params });
-    return res.data.data;
+    return res.data;
   }
 
   async getUnreadCount(): Promise<number> {

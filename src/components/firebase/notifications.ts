@@ -5,16 +5,20 @@ import { getFirebaseMessaging } from "./firebase";
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
+// 🔐 Get Token
 export const requestAndGetToken = async (): Promise<string | null> => {
   try {
     const messaging = await getFirebaseMessaging();
     if (!messaging) return null;
 
-    const permission = await Notification.requestPermission();
+    // ⚠️ Only request if not already granted
+    if (Notification.permission !== "granted") {
+      const permission = await Notification.requestPermission();
 
-    if (permission !== "granted") {
-      console.log("❌ Permission denied");
-      return null;
+      if (permission !== "granted") {
+        console.log("❌ Permission denied");
+        return null;
+      }
     }
 
     const token = await getToken(messaging, {
@@ -34,36 +38,32 @@ export const requestAndGetToken = async (): Promise<string | null> => {
   }
 };
 
-// ✅ Foreground notifications (FIXED)
+
+
+// 🔔 Foreground Notifications
 export const initOnMessage = async () => {
   const messaging = await getFirebaseMessaging();
   if (!messaging) return;
 
+  const audio = new Audio("/notification.wav");
+
   onMessage(messaging, (payload) => {
     console.log("📩 Foreground message:", payload);
 
-    // 🔥 Extract notification data safely
-    const title = payload?.notification?.title || "New Notification";
-    const body = payload?.notification?.body || "";
-    const icon = payload?.notification?.icon || "/icons/icon-192.png";
+    const title = payload?.notification?.title || "🔔 New Notification";
+    const url = payload?.data?.url || "/notifications";
 
-    // ✅ Show browser notification
-    if (Notification.permission === "granted") {
-      const notification = new Notification(title, {
-        body,
-        icon,
-        data: payload?.data, // pass custom data
-      });
+    // 🔊 SOUND ONLY (foreground UX)
+    audio.currentTime = 0;
+    audio.play().catch(() => {
+      console.log("🔇 Autoplay blocked");
+    });
 
-      // 🔁 Handle click
-      notification.onclick = (event) => {
-        event.preventDefault();
-
-        const url = payload?.data?.url || "/notifications";
-
-        window.focus();
-        window.location.href = url;
-      };
-    }
+    // OPTIONAL: show in-app event (toast, badge, etc.)
+    window.dispatchEvent(
+      new CustomEvent("in-app-notification", {
+        detail: { title, url },
+      })
+    );
   });
 };

@@ -1,7 +1,6 @@
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js");
 
-// 🔥 Firebase config (MUST MATCH FRONTEND PROJECT)
 firebase.initializeApp({
   apiKey: "AIzaSyChCuX9ZrzrZUmeSc7WO-3Nalq8t84Yjyo",
   authDomain: "sv-marketplace-46503.firebaseapp.com",
@@ -12,57 +11,61 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-
-// ============================
-// 📩 BACKGROUND MESSAGE
-// ============================
+// 📩 Background Notification
 messaging.onBackgroundMessage((payload) => {
-  console.log("📩 Background message:", payload);
-
   const title =
     payload?.notification?.title ||
     payload?.data?.title ||
     "New Notification";
 
-  const options = {
-    body:
-      payload?.notification?.body ||
-      payload?.data?.body ||
-      "",
+  const body =
+    payload?.notification?.body ||
+    payload?.data?.body ||
+    "You have a new update";
 
+  const url = payload?.data?.url || "/notifications";
+
+  self.registration.showNotification(title, {
+    body,
     icon: "/logo.png",
-
-    data: {
-      url: payload?.data?.url || "/",
-    },
-
+    actions: [
+      {
+        action: "open",
+        title: "Open",
+      },
+    ],
+    data: { url },
     vibrate: [200, 100, 200],
     requireInteraction: true,
-  };
-
-  self.registration.showNotification(title, options);
+  });
 });
 
-
-// ============================
-// 🔔 CLICK HANDLING
-// ============================
+// 🔔 CLICK HANDLING (IMPORTANT FIX)
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const url = event.notification?.data?.url || "/";
+  const url = event.notification.data?.url || "/notifications";
 
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
-      // Try focus existing tab
-      for (const client of clientsArr) {
-        if (client.url.includes(url) && "focus" in client) {
-          return client.focus();
+    (async () => {
+      const clientsArr = await clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+
+      // If "Open" button clicked
+      if (event.action === "open") {
+        for (const client of clientsArr) {
+          if (client.url.includes(url) && "focus" in client) {
+            return client.focus();
+          }
         }
+
+        return clients.openWindow(url);
       }
 
-      // Otherwise open new tab
+      // Default click anywhere on notification
       return clients.openWindow(url);
-    })
+    })()
   );
 });

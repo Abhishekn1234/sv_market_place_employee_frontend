@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/context/ThemeContext";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function NotificationItem({
   notification,
@@ -25,6 +27,8 @@ export default function NotificationItem({
 }) {
   const { theme } = useTheme();
 
+  const isDisabled = notification.isRead;
+ const {translations}=useLanguage();
   const getTypeIcon = (type: Notification["type"]) => {
     switch (type) {
       case "BOOKING_REQUEST":
@@ -64,80 +68,56 @@ export default function NotificationItem({
   const message =
     notification.message || notificationsTranslations.defaultMessage;
 
-  const getBorderColor = () => {
-    if (isSelected) {
-      return theme === "dark"
-        ? "border-blue-500 ring-2 ring-blue-500/30"
-        : "border-blue-500 ring-2 ring-blue-500/30";
-    }
-    return notification.isRead
-      ? theme === "dark"
-        ? "border-gray-700"
-        : "border-gray-200"
-      : "border-blue-200";
-  };
-
-  const getBgColor = () => {
-    if (isSelected) {
-      return theme === "dark" ? "bg-gray-800" : "bg-blue-50";
-    }
-    if (theme === "dark") {
-      return notification.isRead ? "bg-gray-800" : "bg-gray-900";
-    }
-    return notification.isRead ? "bg-white" : "bg-blue-50/30";
-  };
-
-  const handleClick = () => {
-    if (onSelect) {
-      onSelect(notification._id);
-    }
-  };
-
   return (
     <div
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      className={`flex items-center justify-between gap-4 p-4 sm:p-5 transition rounded-lg border-2 cursor-pointer hover:opacity-90 ${getBorderColor()} ${getBgColor()}`}
+      onClick={() => {
+        if (!isDisabled) onSelect?.(notification._id);
+      }}
+      className={`flex items-center justify-between gap-4 p-4 rounded-lg border-2 transition
+        ${isSelected ? "border-blue-500 ring-2 ring-blue-500/30" : ""}
+        ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+      `}
     >
       {/* LEFT */}
-      <div className="flex items-center gap-4 flex-1 min-w-0">
-        <div className={`p-3 rounded-xl border shrink-0 ${getTypeColor(notification.type)}`}>
+      <div className="flex items-center gap-3 flex-1">
+
+        <Checkbox
+          checked={isSelected}
+          disabled={isDisabled}
+          onCheckedChange={() => {
+            if (!isDisabled) onSelect?.(notification._id);
+          }}
+          onClick={(e) => e.stopPropagation()}
+        />
+
+        <div className={`p-3 rounded-xl border ${getTypeColor(notification.type)}`}>
           {getTypeIcon(notification.type)}
         </div>
 
-        <div className="min-w-0">
-          <h3 className={`font-semibold truncate ${
-            theme === "dark" ? "text-gray-100" : "text-gray-900"
-          }`}>
+        <div>
+          <h3 className={`${theme === "dark" ? "text-gray-100" : "text-gray-900"} font-semibold`}>
             {title}
           </h3>
-
-          <p className={`text-sm truncate ${
-            theme === "dark" ? "text-gray-400" : "text-gray-600"
-          }`}>
+          <p className={`${theme === "dark" ? "text-gray-400" : "text-gray-600"} text-sm`}>
             {message}
           </p>
         </div>
       </div>
 
       {/* RIGHT */}
-      <div className="flex items-center justify-end shrink-0 gap-2">
-        
-        {/* READ BUTTON (ONLY WHEN SELECTED) */}
-        {isSelected && !notification.isRead && (
+      <div className="flex gap-2">
+        {!notification.isRead && isSelected && (
           <Button
             onClick={(e) => {
               e.stopPropagation();
               markAsRead(notification._id);
             }}
-            className="rounded-md px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white"
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white"
           >
-            Read
+            {translations.notifications.read}
           </Button>
         )}
 
-        {/* DEFAULT ICON BUTTON */}
         {!notification.isRead && !isSelected && (
           <Button
             onClick={(e) => {
