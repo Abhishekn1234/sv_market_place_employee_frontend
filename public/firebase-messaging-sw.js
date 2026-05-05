@@ -1,71 +1,63 @@
+importScripts('./firebase-config.js');
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js");
 
-firebase.initializeApp({
-  apiKey: "AIzaSyChCuX9ZrzrZUmeSc7WO-3Nalq8t84Yjyo",
-  authDomain: "sv-marketplace-46503.firebaseapp.com",
-  projectId: "sv-marketplace-46503",
-  messagingSenderId: "118069674424",
-  appId: "1:118069674424:web:c21a0a1edbb9e808a94f4d",
-});
-
+firebase.initializeApp(self.FIREBASE_CONFIG);
 const messaging = firebase.messaging();
+let notificationQueue = [];
 
-// 📩 Background Notification
 messaging.onBackgroundMessage((payload) => {
+  console.log("📩 Background message:", payload);
+
+  // ✅ Handle both payload types
   const title =
-    payload?.notification?.title ||
     payload?.data?.title ||
+    payload?.notification?.title ||
     "New Notification";
 
   const body =
-    payload?.notification?.body ||
     payload?.data?.body ||
+    payload?.notification?.body ||
     "You have a new update";
 
   const url = payload?.data?.url || "/notifications";
 
+  // 🚫 IMPORTANT: Skip duplicate if Firebase already showed one
+  if (payload.notification) return;
+
+  const key = title + body + url;
+
+  if (notificationQueue.includes(key)) return;
+
+  notificationQueue.push(key);
+  if (notificationQueue.length > 2) notificationQueue.shift();
+
+  const tag = `notif-${notificationQueue.length}`;
+
   self.registration.showNotification(title, {
     body,
-    icon: "/logo.png",
-    actions: [
-      {
-        action: "open",
-        title: "Open",
-      },
-    ],
-    data: { url },
-    vibrate: [200, 100, 200],
+    icon: "/icon.jpg",
+    tag,
     requireInteraction: true,
+    actions: [{ action: "open", title: "Open" }],
+    data: { url },
   });
 });
 
-// 🔔 CLICK HANDLING (IMPORTANT FIX)
+// 🔔 Click
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const url = event.notification.data?.url || "/notifications";
 
   event.waitUntil(
-    (async () => {
-      const clientsArr = await clients.matchAll({
-        type: "window",
-        includeUncontrolled: true,
-      });
-
-      // If "Open" button clicked
-      if (event.action === "open") {
-        for (const client of clientsArr) {
-          if (client.url.includes(url) && "focus" in client) {
-            return client.focus();
-          }
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
+      for (const client of clientsArr) {
+        if (client.url.includes(url) && "focus" in client) {
+          return client.focus();
         }
-
-        return clients.openWindow(url);
       }
-
-      // Default click anywhere on notification
       return clients.openWindow(url);
-    })()
+    })
   );
 });

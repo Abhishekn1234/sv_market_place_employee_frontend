@@ -1,34 +1,22 @@
-// src/components/firebase/notifications.ts
-
 import { getToken, onMessage } from "firebase/messaging";
 import { getFirebaseMessaging } from "./firebase";
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
-// 🔐 Get Token
+// 🔐 Get FCM Token
 export const requestAndGetToken = async (): Promise<string | null> => {
   try {
     const messaging = await getFirebaseMessaging();
     if (!messaging) return null;
 
-    // ⚠️ Only request if not already granted
     if (Notification.permission !== "granted") {
       const permission = await Notification.requestPermission();
-
-      if (permission !== "granted") {
-        console.log("❌ Permission denied");
-        return null;
-      }
+      if (permission !== "granted") return null;
     }
 
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
     });
-
-    if (!token) {
-      console.log("❌ No FCM token");
-      return null;
-    }
 
     console.log("✅ FCM Token:", token);
     return token;
@@ -38,9 +26,7 @@ export const requestAndGetToken = async (): Promise<string | null> => {
   }
 };
 
-
-
-// 🔔 Foreground Notifications
+// 🔔 Foreground Notifications (NO DUPLICATE)
 export const initOnMessage = async () => {
   const messaging = await getFirebaseMessaging();
   if (!messaging) return;
@@ -50,16 +36,14 @@ export const initOnMessage = async () => {
   onMessage(messaging, (payload) => {
     console.log("📩 Foreground message:", payload);
 
-    const title = payload?.notification?.title || "🔔 New Notification";
+    const title = payload?.data?.title || "🔔 New Notification";
     const url = payload?.data?.url || "/notifications";
 
-    // 🔊 SOUND ONLY (foreground UX)
+    // 🔊 Sound only
     audio.currentTime = 0;
-    audio.play().catch(() => {
-      console.log("🔇 Autoplay blocked");
-    });
+    audio.play().catch(() => {});
 
-    // OPTIONAL: show in-app event (toast, badge, etc.)
+    // 🔥 Custom event for UI
     window.dispatchEvent(
       new CustomEvent("in-app-notification", {
         detail: { title, url },

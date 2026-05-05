@@ -45,7 +45,7 @@ export default function NotificationsHeader({
           className="bg-blue-600 text-white"
         >
           <Check className="w-4 h-4 mr-1" />
-          {translations.notifications.markAllRead} ({selectedCount})
+          {translations.notifications.markAllRead} ({selectedCount > 2})
         </Button>
       </div>
 

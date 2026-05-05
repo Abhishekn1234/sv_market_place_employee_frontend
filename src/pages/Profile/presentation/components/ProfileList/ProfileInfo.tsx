@@ -67,16 +67,18 @@ export function ProfileInfo({
         <div className="space-y-1">
           <Label className="text-sm sm:text-base">Address</Label>
           {isEditing ? (
-            <Textarea
-              name="address"
-              value={formData.address}
-              onChange={onChange}
-              className="
-                resize-none 
-                h-20 sm:h-24 md:h-28
-                text-sm sm:text-base
-              "
-            />
+          <Textarea
+            name="address"
+            value={formData.address}
+            onChange={onChange}
+          
+            className="
+              resize-none 
+              min-h-20 sm:min-h-24 md:min-h-28
+              text-sm sm:text-base
+              shadow-sm
+            "
+          />
           ) : (
             <div className="text-sm sm:text-base break-words">
               {profile.address}
