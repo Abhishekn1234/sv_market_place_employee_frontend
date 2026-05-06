@@ -31,8 +31,8 @@ export default function NotificationsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const { translations } = useLanguage();
-  const notificationsTranslations = translations.notifications;
+  const { t } = useLanguage();
+  const notificationTranslations=t('notifications');
   const { theme } = useTheme();
 
  const {
@@ -110,7 +110,6 @@ useEffect(() => {
           setSelectedCategory={setSelectedCategory}
           markSelectedAsRead={markSelectedAsRead}
           markAllRead={markAllRead}   // ✅ ADD THIS
-          notificationsTranslations={notificationsTranslations}
           limit={limit}
             isPending={isPending}    
           setLimit={setLimit}
@@ -120,7 +119,7 @@ useEffect(() => {
         {notifications.length === 0 ? (
           <CommonCard className="flex items-center justify-center gap-2 py-10">
                 <Bell className="w-5 h-5" />
-                <span>{notificationsTranslations.noNotifications}</span>
+                <span>{t('notifications.noNotifications')}</span>
               </CommonCard>
         ) : (
           <>
@@ -130,8 +129,8 @@ useEffect(() => {
                 <NotificationItem
                   key={notification._id}
                   notification={notification}
+                  notificationsTranslations={notificationTranslations}
                   markAsRead={markAsRead}
-                  notificationsTranslations={notificationsTranslations}
                   isSelected={selectedIds.includes(notification._id)}
                   onSelect={handleSelectNotification}
                 />

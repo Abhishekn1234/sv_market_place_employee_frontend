@@ -16,10 +16,10 @@ export default function NotificationsHeader({
   readCount,
   totalCount,
   setFilter,
-  // markSelectedAsRead,
+   markSelectedAsRead,
   markAllRead,        // ✅ ADD THIS
   isPending,          // ✅ ADD THIS
-  notificationsTranslations,
+  // notificationsTranslations,
   limit,
   setLimit,
    selectedCount,
@@ -27,6 +27,8 @@ export default function NotificationsHeader({
   setSelectedCategory,
 }: any) {
   const {t,translations}=useLanguage();
+  const notificationsTranslations = translations.notifications;
+
   return (
     <div className="p-4 border rounded-lg space-y-4">
 
@@ -39,14 +41,19 @@ export default function NotificationsHeader({
         </h2>
 
         {/* RIGHT - BULK ACTION */}
-           <Button
-          onClick={markAllRead}
-          disabled={isPending || unreadCount === 0 ||selectedCount === 0}
-          className="bg-blue-600 text-white"
-        >
-          <Check className="w-4 h-4 mr-1" />
-          {translations.notifications.markAllRead} ({selectedCount > 2})
-        </Button>
+         <Button
+      onClick={selectedCount > 0 ? markSelectedAsRead : markAllRead}
+      disabled={isPending || unreadCount === 0}
+      className="bg-blue-600 text-white"
+    >
+      <Check className="w-4 h-4 mr-1" />
+
+      {selectedCount > 0
+        ? translations.notifications.markSelected
+        : translations.notifications.markAllRead}
+
+      {selectedCount > 0 && ` (${selectedCount})`}
+    </Button>
       </div>
 
       {/* SECOND ROW */}

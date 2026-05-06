@@ -14,4 +14,5 @@ export type NotificationsTranslations = {
   emailDigest: string;
   notificationSettings: string;
   categories: Record<string, string>;
+  markSelected:string;
 };
