@@ -574,6 +574,25 @@
       "completed": "مكتمل",
       "rowsPerPage": "عدد الصفوف لكل صفحة"
     }
+  },
+   "cancelBooking": {
+    "title": "إلغاء العمل",
+    "selectReason": "اختر السبب",
+    "enterReason": "أدخل السبب...",
+    "no": "لا",
+    "yes": "نعم",
+    "reasons": {
+      "BOOKED_WRONG_SERVICE": "تم حجز خدمة خاطئة",
+      "BOOKED_BY_MISTAKE": "تم الحجز عن طريق الخطأ",
+      "SCHEDULE_CHANGED": "تم تغيير الجدول",
+      "PRICE_TOO_HIGH": "السعر مرتفع جداً",
+      "SERVICE_NO_LONGER_NEEDED": "الخدمة لم تعد مطلوبة",
+      "OTHER": "أخرى"
+    },
+    "errors": {
+      "reasonRequired": "يرجى اختيار سبب",
+      "descriptionRequired": "يرجى إدخال السبب"
+    }
   }
 
 }

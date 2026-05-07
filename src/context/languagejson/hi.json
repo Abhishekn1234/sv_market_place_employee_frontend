@@ -530,5 +530,24 @@
       "rowsPerPage": "प्रति पृष्ठ पंक्तियाँ"
     }
   
+  },
+  "cancelBooking": {
+    "title": "काम रद्द करें",
+    "selectReason": "कारण चुनें",
+    "enterReason": "कारण दर्ज करें...",
+    "no": "नहीं",
+    "yes": "हाँ",
+    "reasons": {
+      "BOOKED_WRONG_SERVICE": "गलत सेवा बुक की गई",
+      "BOOKED_BY_MISTAKE": "गलती से बुक किया गया",
+      "SCHEDULE_CHANGED": "समय बदल गया",
+      "PRICE_TOO_HIGH": "कीमत बहुत अधिक है",
+      "SERVICE_NO_LONGER_NEEDED": "सेवा अब आवश्यक नहीं है",
+      "OTHER": "अन्य"
+    },
+    "errors": {
+      "reasonRequired": "कृपया कारण चुनें",
+      "descriptionRequired": "कृपया कारण दर्ज करें"
+    }
   }
 }

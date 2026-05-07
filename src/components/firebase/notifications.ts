@@ -1,3 +1,4 @@
+// notifications.ts
 import { getToken, onMessage } from "firebase/messaging";
 import { getFirebaseMessaging } from "./firebase";
 
@@ -26,7 +27,7 @@ export const requestAndGetToken = async (): Promise<string | null> => {
   }
 };
 
-// 🔔 Foreground Notifications (NO DUPLICATE)
+// 🔔 Foreground ONLY (NO system notification here)
 export const initOnMessage = async () => {
   const messaging = await getFirebaseMessaging();
   if (!messaging) return;
@@ -36,14 +37,14 @@ export const initOnMessage = async () => {
   onMessage(messaging, (payload) => {
     console.log("📩 Foreground message:", payload);
 
-    const title = payload?.data?.title || "🔔 New Notification";
+    const title = payload?.data?.title || "New Notification";
     const url = payload?.data?.url || "/notifications";
 
-    // 🔊 Sound only
+    // 🔊 sound
     audio.currentTime = 0;
     audio.play().catch(() => {});
 
-    // 🔥 Custom event for UI
+    // 📲 in-app event only
     window.dispatchEvent(
       new CustomEvent("in-app-notification", {
         detail: { title, url },

@@ -41,19 +41,19 @@ export default function NotificationsHeader({
         </h2>
 
         {/* RIGHT - BULK ACTION */}
-         <Button
-      onClick={selectedCount > 0 ? markSelectedAsRead : markAllRead}
-      disabled={isPending || unreadCount === 0}
-      className="bg-blue-600 text-white"
-    >
-      <Check className="w-4 h-4 mr-1" />
+        <Button
+  onClick={selectedCount > 0 ? markSelectedAsRead : markAllRead}
+  disabled={isPending || unreadCount === 0 || selectedCount === 0}
+  className="bg-blue-600 text-white"
+>
+  <Check className="w-4 h-4 mr-1" />
 
-      {selectedCount > 0
-        ? translations.notifications.markSelected
-        : translations.notifications.markAllRead}
+  {selectedCount > 0
+    ? translations.notifications.markSelected
+    : translations.notifications.markAllRead}
 
-      {selectedCount > 0 && ` (${selectedCount})`}
-    </Button>
+  {selectedCount > 0 && ` (${selectedCount})`}
+</Button>
       </div>
 
       {/* SECOND ROW */}

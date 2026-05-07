@@ -22,15 +22,9 @@ import type {
 } from "../types/workPresentation.types";
 import type { Dispute } from "@/pages/History/BookingHistory/domain/entities/disputes";
 import type { CancelReasonType, CancelWork } from "../../domain/entities/cancelwork";
+import { useLanguage } from "@/context/LanguageContext";
 // import { CancelWork } from "../../domain/entities/cancelwork";
-export const CANCEL_REASONS = [
-  "BOOKED_WRONG_SERVICE",
-  "BOOKED_BY_MISTAKE",
-  "SCHEDULE_CHANGED",
-  "PRICE_TOO_HIGH",
-  "SERVICE_NO_LONGER_NEEDED",
-  "OTHER",
-] as const;
+
 
 
 
@@ -49,7 +43,7 @@ export default function WorkModals({
 
   const upsertAssigned = useBookingSocketStore((s) => s.upsertAssigned);
   const [disputeWork, setDisputeWork] = useState<DisplayWork | null>(null);
-
+  const {t}=useLanguage();
   const handleCancel = () => {
   if (!cancelConfirmWork) return;
 
@@ -93,6 +87,14 @@ export default function WorkModals({
     onSettled: () => setCancelConfirmWork(null),
   });
 };
+const CANCEL_REASONS = [
+  "BOOKED_WRONG_SERVICE",
+  "BOOKED_BY_MISTAKE",
+  "SCHEDULE_CHANGED",
+  "PRICE_TOO_HIGH",
+  "SERVICE_NO_LONGER_NEEDED",
+  "OTHER",
+] as const;
 
   return (
     <>
@@ -190,56 +192,69 @@ export default function WorkModals({
         }}
       />
 
-      {cancelConfirmWork && (
-        <CommonModal open onOpenChange={() => setCancelConfirmWork(null)}>
-          <CommonModal.Content>
-            <CommonModal.Header>Cancel Work</CommonModal.Header>
+     {cancelConfirmWork && (
+  <CommonModal open onOpenChange={() => setCancelConfirmWork(null)}>
+    <CommonModal.Content>
+      <CommonModal.Header>
+        {t("cancelBooking.title")}
+      </CommonModal.Header>
 
-            <CommonModal.Body>
-              <select
-  value={cancelConfirmWork.cancelType ?? ""}
-  onChange={(e) => {
-    const value = e.target.value;
+      <CommonModal.Body>
+        <select
+          value={cancelConfirmWork.cancelType ?? ""}
+          onChange={(e) => {
+            const value = e.target.value;
 
-    setCancelConfirmWork((p) =>
-      p
-        ? {
-            ...p,
-            cancelType: value === "" ? undefined : (value as CancelReasonType),
+            setCancelConfirmWork((p) =>
+              p
+                ? {
+                    ...p,
+                    cancelType:
+                      value === "" ? undefined : (value as CancelReasonType),
+                  }
+                : p
+            );
+          }}
+          className="w-full border p-2 mb-3 rounded"
+        >
+          <option value="">
+            {t("cancelBooking.selectReason")}
+          </option>
+
+          {CANCEL_REASONS.map((key) => (
+            <option key={key} value={key}>
+              {t(`cancelBooking.reasons.${key}`)}
+            </option>
+          ))}
+        </select>
+
+        <Textarea
+          value={cancelConfirmWork.cancelledReason || ""}
+          onChange={(e) =>
+            setCancelConfirmWork((p) =>
+              p ? { ...p, cancelledReason: e.target.value } : p
+            )
           }
-        : p
-    );
-  }}
-  className="w-full border p-2 mb-3 rounded"
->
-                <option value="">Select reason</option>
-                {CANCEL_REASONS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+          className="shadow-sm"
+          placeholder={t("cancelBooking.enterReason")}
+        />
+      </CommonModal.Body>
 
-              <Textarea
-                value={cancelConfirmWork.cancelledReason || ""}
-                onChange={(e) =>
-                  setCancelConfirmWork((p) =>
-                    p ? { ...p, cancelledReason: e.target.value } : p
-                  )
-                }
-                placeholder="Enter reason..."
-              />
-            </CommonModal.Body>
+      <CommonModal.Footer>
+        <Button
+          variant="outline"
+          onClick={() => setCancelConfirmWork(null)}
+        >
+          {t("cancelBooking.no")}
+        </Button>
 
-            <CommonModal.Footer>
-              <Button variant="outline" onClick={() => setCancelConfirmWork(null)}>
-                No
-              </Button>
-              <Button onClick={handleCancel}>Yes</Button>
-            </CommonModal.Footer>
-          </CommonModal.Content>
-        </CommonModal>
-      )}
+        <Button onClick={handleCancel}>
+          {t("cancelBooking.yes")}
+        </Button>
+      </CommonModal.Footer>
+    </CommonModal.Content>
+  </CommonModal>
+)}
     </>
   );
 }

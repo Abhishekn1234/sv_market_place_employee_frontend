@@ -4,10 +4,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
-import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+// import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import { normalizeAssignedWorks } from "../../helpers/workPresentation.helpers";
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
+import { ASSIGNED_WORKS_KEY } from "../../hooks/useAssign";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props<TWork extends DisplayWork | Work> = {
   work: TWork;
@@ -26,7 +28,8 @@ export default function VerifyOtpModal<TWork extends DisplayWork | Work>({
   const [otp, setOtp] = useState("");
   const { mutate, isPending } = useVerifyOtp();
   // const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
- const removeAssigned = useBookingSocketStore((s) => s.removeAssigned);
+//  const removeAssigned = useBookingSocketStore((s) => s.removeAssigned);
+const queryClient = useQueryClient();
   if (!open) return null;
 
   const handleVerify = () => {
@@ -39,16 +42,19 @@ export default function VerifyOtpModal<TWork extends DisplayWork | Work>({
         purpose: "WORK_COMPLETE",
       },
       {
-        onSuccess: (res) => {
-  const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
+       onSuccess: (res) => {
+        const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
 
-  if (updatedWork) {
-    removeAssigned(updatedWork._id); // ✅ remove instead of update
-    onSuccess(updatedWork as TWork);
-  }
+        if (updatedWork) {
+          queryClient.setQueryData(ASSIGNED_WORKS_KEY, (old: any[] = []) => {
+            return old.filter((item) => item._id !== updatedWork._id);
+          });
 
-  onClose();
-},
+          onSuccess(updatedWork as TWork);
+        }
+
+        onClose();
+      },
       }
     );
   };

@@ -51,8 +51,8 @@ export default function StartWork({
           toast.success("Work Started");
 
           const socket =
-            getSocket("/workers/requests") ||
-            initializeSocket("/workers/requests");
+            getSocket("/workers/assigned-updates") ||
+            initializeSocket("/workers/assigned-updates");
 
           // 🔥 EMIT SOCKET EVENT (THIS IS KEY)
           socket.emit("booking.worker.started", {

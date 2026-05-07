@@ -1,6 +1,6 @@
 import './App.css';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ToastContainer } from "react-toastify";
 
 import { LocationProvider } from './context/LocationContext';
@@ -44,24 +44,36 @@ import Disputespage from './pages/History/BookingHistory/presentation/components
 import CurrentWorkPage from './pages/CurrentWork/presentation/CurrentWorkPage';
 
 import { initOnMessage } from './components/firebase/notifications';
-import { useNotificationManager } from './pages/Notifications/presentation/hooks/useNotificationhandler';
+// import { useNotificationManager } from './pages/Notifications/presentation/hooks/useNotificationhandler';
 import { useDynamicLocation } from '@/utils/useNotification';
 
 function AppContent() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"location" | "profile" | "password">("profile");
+  const initializedRef = useRef(false);
+
+  const [activeTab, setActiveTab] = useState<
+    "location" | "profile" | "password"
+  >("profile");
 
   useDynamicLocation();
-  useNotificationManager();
 
-  // ✅ Init foreground notifications
+  // ✅ FOREGROUND FCM (RUN ONLY ONCE)
   useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
     initOnMessage();
   }, []);
 
-  // ✅ Register Service Worker
+  // ✅ SERVICE WORKER REGISTER (SAFE GUARD)
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
+    if (!("serviceWorker" in navigator)) return;
+
+    let isRegistered = false;
+
+    if (!isRegistered) {
+      isRegistered = true;
+
       navigator.serviceWorker
         .register("/firebase-messaging-sw.js")
         .then((reg) => console.log("✅ SW registered:", reg))
@@ -69,7 +81,7 @@ function AppContent() {
     }
   }, []);
 
-  // ✅ Handle navigation from Service Worker
+  // ✅ NAVIGATION FROM SERVICE WORKER
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       const { type, payload } = event.data || {};
@@ -78,8 +90,7 @@ function AppContent() {
         console.log("🚀 Navigating from SW:", payload.url);
 
         setActiveTab(payload.tab || "profile");
-
-        navigate(payload.url); // SPA navigation
+        navigate(payload.url);
       }
     };
 
@@ -90,14 +101,11 @@ function AppContent() {
     };
   }, [navigate]);
 
-  // ✅ OPTIONAL: In-app notification click handling
+  // ✅ IN-APP NOTIFICATION CLICK
   useEffect(() => {
     const handler = (e: any) => {
       const { url } = e.detail || {};
-
-      if (url) {
-        navigate(url);
-      }
+      if (url) navigate(url);
     };
 
     window.addEventListener("in-app-notification-click", handler);
@@ -121,13 +129,20 @@ function AppContent() {
         <Route path="/services/employee" element={<ServiceSettings />} />
         <Route path="/services/documents" element={<DocumentOnboarding />} />
 
-        <Route path='/verify-otp-mobile' element={<VerifyMobilePage/>}/>
-        <Route path="/send-otp-mobile" element={<SendOtpMobilePage/>}/>
+        <Route path="/verify-otp-mobile" element={<VerifyMobilePage />} />
+        <Route path="/send-otp-mobile" element={<SendOtpMobilePage />} />
 
-        <Route path='/email-verification' element={<SendOtpEmailPage/>}/>
-        <Route path="/verify-otp-email" element={<VerifyOtpEmailPage/>}/>
+        <Route path="/email-verification" element={<SendOtpEmailPage />} />
+        <Route path="/verify-otp-email" element={<VerifyOtpEmailPage />} />
 
-        <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<HomePage />} />
 
           <Route
@@ -141,8 +156,8 @@ function AppContent() {
           />
 
           <Route path="history/booking" element={<BookingHistory />} />
-          <Route path='/disputes' element={<Disputespage/>}/>
-          <Route path='/currentWork' element={<CurrentWorkPage/>}/>
+          <Route path="/disputes" element={<Disputespage />} />
+          <Route path="/currentWork" element={<CurrentWorkPage />} />
 
           <Route path="history/transaction" element={<TransactionHistory />} />
           <Route path="history/work" element={<WorkingHistory />} />
@@ -152,11 +167,13 @@ function AppContent() {
 
           <Route path="settings/wallet" element={<Wallet />} />
 
-          {/* 🔔 TARGET PAGE */}
           <Route path="notifications" element={<NotificationsPage />} />
 
-          <Route path='availableWork' element={<AvailableWorkPage/>}/>
-          <Route path='availableBooking' element={<AvailableBookingPage/>}/>
+          <Route path="availableWork" element={<AvailableWorkPage />} />
+          <Route
+            path="availableBooking"
+            element={<AvailableBookingPage />}
+          />
         </Route>
       </Routes>
 

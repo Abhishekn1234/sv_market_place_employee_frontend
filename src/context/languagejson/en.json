@@ -529,6 +529,7 @@
     "subtitle": "View and manage your assigned bookings",
     "filterStatus": "Filter by status",
     "noBookings": "No current bookings available",
+    
     "status": {
       "all": "All",
       "pending": "Pending",
@@ -575,5 +576,25 @@
     "completed": "Completed",
     "rowsPerPage":"Rows per page"
   }
+  },
+  "cancelBooking": {
+  "title": "Cancel Work",
+  "selectReason": "Select reason",
+  "enterReason": "Enter reason...",
+  "no": "No",
+  "yes": "Yes",
+  "reasons": {
+    "BOOKED_WRONG_SERVICE": "Booked wrong service",
+    "BOOKED_BY_MISTAKE": "Booked by mistake",
+    "SCHEDULE_CHANGED": "Schedule changed",
+    "PRICE_TOO_HIGH": "Price too high",
+    "SERVICE_NO_LONGER_NEEDED": "Service no longer needed",
+    "OTHER": "Other"
+  },
+  "errors": {
+    "reasonRequired": "Please select a reason",
+    "descriptionRequired": "Please enter a reason"
+  }
+
   }
 }
