@@ -10,6 +10,7 @@ import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 import { ASSIGNED_WORKS_KEY } from "../../hooks/useAssign";
 import { useQueryClient } from "@tanstack/react-query";
+import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 
 type Props<TWork extends DisplayWork | Work> = {
   work: TWork;
@@ -42,19 +43,29 @@ const queryClient = useQueryClient();
         purpose: "WORK_COMPLETE",
       },
       {
-       onSuccess: (res) => {
-        const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
+      onSuccess: (res) => {
+  const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
 
-        if (updatedWork) {
-          queryClient.setQueryData(ASSIGNED_WORKS_KEY, (old: any[] = []) => {
-            return old.filter((item) => item._id !== updatedWork._id);
-          });
+  if (updatedWork) {
+    const id = updatedWork._id;
 
-          onSuccess(updatedWork as TWork);
-        }
+    // 1. React Query cache update
+    queryClient.setQueryData(ASSIGNED_WORKS_KEY, (old: any[] = []) => {
+      return old.filter((item) => item._id !== id);
+    });
 
-        onClose();
-      },
+    queryClient.invalidateQueries({
+      queryKey: ASSIGNED_WORKS_KEY,
+    });
+
+    // 2. Zustand store sync (IMPORTANT)
+    useBookingSocketStore.getState().removeAssigned(id);
+
+    onSuccess(updatedWork as TWork);
+  }
+
+  onClose();
+},
       }
     );
   };

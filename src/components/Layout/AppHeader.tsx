@@ -50,9 +50,9 @@ export default function AppHeader({
 
   // ✅ Select only what we need (better re-render control)
   const { data: profile } = useProfile();
- 
- const fullName = profile?.fullName ?? "User";
- const profileImage = profile?.profilePictureUrl;
+  const {user}=useAuthStore();
+const fullName = profile?.fullName || user?.fullName || "User";
+const profileImage = profile?.profilePictureUrl || user?.profileImage;
   const workerStatus = useAuthStore((s) => s.user?.worker?.status);
   const logout = useAuthStore((s) => s.logout);
 

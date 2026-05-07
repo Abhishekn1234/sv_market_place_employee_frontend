@@ -48,8 +48,8 @@ export default function AppSidebar({
 
  const { data: profile } = useProfile();
 const { data: unreadCount = 0 } = useUnreadCount();
-const fullName = profile?.fullName ?? "User";
-const profileImage = profile?.profilePictureUrl;
+const fullName = profile?.fullName || user?.fullName || "User";
+const profileImage = profile?.profilePictureUrl || user?.profileImage;
  console.log(user);
   const handleLogout = () => {
     logout();

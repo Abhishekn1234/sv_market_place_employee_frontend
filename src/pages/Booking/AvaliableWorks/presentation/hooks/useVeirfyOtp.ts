@@ -6,44 +6,28 @@ import { VerifyWorkUsecase } from "../../domain/usecase/VerifyWorkUsecase";
 import type { verifyotp } from "../../domain/entities/verifyotp";
 import type { Work } from "../../domain/entities/work";
 import { toast } from "react-toastify";
+import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+import { ASSIGNED_WORKS_KEY } from "./useAssign";
 export function useVerifyOtp() {
   const queryClient = useQueryClient();
   const repo = new VerifyOtpCompleteImpl();
   const usecase = new VerifyWorkUsecase(repo);
 
   return useMutation<Work, any, verifyotp>({
-    mutationFn: (data: verifyotp) => usecase.execute(data),
+    mutationFn: (data) => usecase.execute(data),
 
     onSuccess: (updatedWork) => {
+      const id = updatedWork._id;
 
-      
-                queryClient.setQueryData<Work[]>(["assigned-works"], (oldData) => {
-            if (!oldData) return [];
+      // React Query
+      queryClient.setQueryData(ASSIGNED_WORKS_KEY, (old: any[] = []) =>
+        old.filter((w) => w._id !== id)
+      );
 
-            // ✅ FORCE ARRAY SAFETY
-            const safeData = Array.isArray(oldData) ? oldData : [oldData];
-
-            return safeData.map((work) =>
-              work._id === updatedWork._id ? updatedWork : work
-            );
-          });
-
-      // // ✅ Optional but recommended
-      // queryClient.invalidateQueries({
-      //   queryKey: ["assigned-works"],
-      //   exact: false,
-      // });
+      // Zustand sync
+      useBookingSocketStore.getState().removeAssigned(id);
 
       toast.success("OTP verified successfully");
-    },
-
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "OTP verification failed";
-
-      toast.error(message);
     },
   });
 }

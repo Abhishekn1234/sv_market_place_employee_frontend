@@ -18,7 +18,7 @@ export function useAssign(open: boolean = true) {
     enabled: open,
     staleTime: 30_000,
     refetchOnWindowFocus: true, // Enable refetch on window focus for real-time updates
-    refetchInterval: 60_000, // Refetch every minute to keep data fresh
+  
   });
 
   return {
