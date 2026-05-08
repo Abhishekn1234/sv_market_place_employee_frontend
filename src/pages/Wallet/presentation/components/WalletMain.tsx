@@ -5,13 +5,14 @@ import {
   TrendingUp,
   Calendar,
   Receipt,
-  Loader2,
+  
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import type { Transaction } from "../../domain/entities/transaction";
 import type { WalletSummary } from "../../domain/entities/wallet";
 import { useState } from "react";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 type Props = {
   transactions: Transaction[];
@@ -203,8 +204,7 @@ const handleLoadMore = () => {
               >
                 {loadingMore ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Loading...
+                    <CommonSpinner/>
                   </>
                 ) : (
                   "Load More"

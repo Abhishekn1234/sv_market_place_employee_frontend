@@ -6,10 +6,11 @@ import { useCancel } from "../../hooks/useCancel";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import {  X, Loader2,  } from "lucide-react";
+import {  X  } from "lucide-react";
 import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
 import { WorkCard } from "./assignedworkpagecard";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 type Props = {
   open: boolean;
@@ -111,10 +112,7 @@ export default function AssignedWorkModal({
 
           {/* LOADING */}
           {isLoading && (
-            <div className="flex flex-col items-center">
-              <Loader2 className="animate-spin" />
-              Loading...
-            </div>
+            <CommonSpinner/>
           )}
 
           {/* ERROR */}

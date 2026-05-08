@@ -7,9 +7,9 @@ import { useWalletTransactions } from "@/pages/Wallet/presentation/hooks/useWall
 import TransactionFilters from "./components/TransactionFilters";
 import TransactionSummary from "./components/TransactionSummary";
 import TransactionTable from "./components/TransactionTable";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+
 import type { Transaction } from "../domain/entities/transaction";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 export default function TransactionHistory() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -85,17 +85,14 @@ export default function TransactionHistory() {
             </p>
           </div>
 
-          <Button className="w-full md:w-auto">
-            <Download className={`w-4 h-4 ${isRTL ? "ml-2" : "mr-2"}`} />
-            {page.export}
-          </Button>
+          
         </div>
 
-        {/* Loading State */}
+      
         {isLoading && (
-          <div className="text-center py-8">
-            <div className="text-sm text-gray-500">Loading transactions...</div>
-          </div>
+        
+           <CommonSpinner/>
+        
         )}
 
         {/* Error State */}

@@ -22,6 +22,7 @@ import {
 import { CATEGORY_MAP } from "./utils/typemap";
 import { useUnreadCount } from "./hooks/useUnreadCount";
 import { useMarkAllRead } from "./hooks/useMarkAllRead";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 export default function NotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
@@ -90,9 +91,7 @@ useEffect(() => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center p-10">
-        <Loader2 className="animate-spin w-6 h-6" />
-      </div>
+     <CommonSpinner/>
     );
   }
 

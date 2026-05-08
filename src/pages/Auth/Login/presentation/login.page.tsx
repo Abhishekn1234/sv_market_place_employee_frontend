@@ -20,6 +20,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/core/store/auth";
 import { getOnboardingStatus } from "@/pages/Servicesettings/presentation/helpers/documentstatus";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<Login>({
@@ -281,8 +282,7 @@ const handleSubmit = (e: React.FormEvent) => {
   >
     {isLoading ? (
       <>
-        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-        Signing in...
+       <CommonSpinner/>
       </>
     ) : (
       <>

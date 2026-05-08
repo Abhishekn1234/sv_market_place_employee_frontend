@@ -10,6 +10,7 @@ import {
 } from "../../helpers/workPresentation.helpers";
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 
 type Props<TWork extends DisplayWork | Work> = {
@@ -91,7 +92,9 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
             Close
           </Button>
           <Button onClick={handleConfirmClick} disabled={isLoading}>
-            {isLoading ? "Completing..." : "Confirm Complete"}
+          
+           {isLoading ? <CommonSpinner size="sm" /> : "Confirm Complete"}
+
           </Button>
         </div>
       </div>

@@ -20,6 +20,7 @@ import { Switch } from "../ui/switch";
 import { useWorkerStatus } from "@/pages/Home/presentation/hooks/useWorkerStatus";
 import { useAuthStore } from "@/core/store/auth";
 import { useProfile } from "@/pages/Profile/presentation/hooks/useProfile";
+import CommonSpinner from "../common/CommonSpinner";
 
 
 const languages = [
@@ -52,7 +53,7 @@ export default function AppHeader({
   const { data: profile } = useProfile();
   const {user}=useAuthStore();
 const fullName = profile?.fullName || user?.fullName || "User";
-const profileImage = profile?.profilePictureUrl || user?.profileImage;
+const profileImage = profile?.profilePictureUrl || user?.profilePictureUrl;
   const workerStatus = useAuthStore((s) => s.user?.worker?.status);
   const logout = useAuthStore((s) => s.logout);
 
@@ -124,7 +125,7 @@ const handleToggle = (checked: boolean) => {
       ? isOnline
         ? homeTranslations.online
         : homeTranslations.offline
-      : "Loading..."}
+      : <CommonSpinner/>}
   </span>
 </div>
 

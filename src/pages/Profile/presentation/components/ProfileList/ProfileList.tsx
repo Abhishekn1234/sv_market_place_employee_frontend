@@ -6,6 +6,7 @@ import { ProfileDocuments } from "./ProfileDocuments";
 import { ProfileHeader } from "./ProfileHeader";
 import { ProfileInfo } from "./ProfileInfo";
 import { useQueryClient } from "@tanstack/react-query";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 export default function ProfileList() {
   const { data: profile, isLoading } = useProfile();
@@ -49,9 +50,7 @@ export default function ProfileList() {
   // ✅ LOADER
   if (isLoading) {
     return (
-      <div className="w-full flex justify-center items-center py-20">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+     <CommonSpinner/>
     );
   }
 

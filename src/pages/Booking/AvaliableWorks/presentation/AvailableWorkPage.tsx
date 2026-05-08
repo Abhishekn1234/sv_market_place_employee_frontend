@@ -20,6 +20,7 @@ import type {
   WorkModalType,
   WorkTimerMap,
 } from "./types/workPresentation.types";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 export default function AvailableWorkPage() {
   const { language, t } = useLanguage();
@@ -114,9 +115,7 @@ export default function AvailableWorkPage() {
   if (socketBookings.length === 0 && isLoading) {
     return (
       <CommonCard title={t("sidebar.assignedWork")} className="mt-6">
-        <div className="py-10 text-center text-gray-500">
-          Loading assigned work...
-        </div>
+       <CommonSpinner size="md" color="black"/>
       </CommonCard>
     );
   }

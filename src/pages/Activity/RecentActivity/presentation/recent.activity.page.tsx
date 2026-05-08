@@ -9,6 +9,7 @@ import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/u
 
 import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/core/store/auth";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 
 export default function RecentActivity() {
@@ -119,7 +120,7 @@ useEffect(() => {
 
         client: item.customer?.email ?? "Client",
 
-        location: locations[id] ?? "Loading location...",
+        location: locations[id] ?? <CommonSpinner/>,
       };
 
     });

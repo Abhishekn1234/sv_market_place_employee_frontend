@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/context/LanguageContext";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 type Props = {
   bookingId: string | null;
@@ -78,7 +79,7 @@ export default function DisputeModal({
 
         {/* BODY */}
         <CommonModal.Body>
-          {isLoading && <p>Loading...</p>}
+          {isLoading && <CommonSpinner/>}
 
           {!isLoading && disputes.length === 0 && (
             <p className="text-gray-500 text-sm">

@@ -21,6 +21,7 @@ import LocationModal from "./LocationModal";
 import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/workerpayload";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/core/store/auth";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 initLeafletIcons();
 
@@ -191,7 +192,7 @@ const handleManualLocation = (lat: number, lng: number) => {
 };
 
   /* ---------------- UI STATES ---------------- */
-  if (isLoading) return <div className="p-6">Loading...</div>;
+  if (isLoading) return <CommonSpinner/>;
   if (!profile) return <div className="p-6">No profile found</div>;
   if (!tempLocation) return <div className="p-6">Select location...</div>;
 

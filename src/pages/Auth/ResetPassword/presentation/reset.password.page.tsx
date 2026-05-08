@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button'; 
 import { useNavigate } from 'react-router';
 import { Eye, EyeOff } from 'lucide-react'; 
+import CommonSpinner from '@/components/common/CommonSpinner';
 
 export default function ResetPasswordForm() {
   const { resetPassword, loading } = useResetPassword();
@@ -92,7 +93,7 @@ export default function ResetPasswordForm() {
           "
           disabled={loading}
         >
-          {loading ? 'Resetting...' : 'Reset Password'}
+          {loading ? <CommonSpinner/> : "Reset Password"}
         </Button>
 
         <p className="text-center text-sm sm:text-base md:text-lg mt-4">

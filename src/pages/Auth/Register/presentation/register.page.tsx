@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { COUNTRIES } from "./components/phonenumberformat";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/core/store/auth";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 
 export default function RegisterPage() {
@@ -252,7 +253,7 @@ const handleCountryChange = (iso: string) => {
               disabled={isLoading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-lg font-medium text-base transition-all disabled:opacity-50 active:scale-[0.98] mt-2"
             >
-              {isLoading ? "Creating Account..." : "Create Account"}
+              {isLoading ? <CommonSpinner/> : "Create Account"}
             </Button>
 
         

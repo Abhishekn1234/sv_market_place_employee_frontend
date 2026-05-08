@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import { reverseGeocode } from "@/components/common/CommonMap";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 interface CurrentLocationFetcherProps {
   onChange: (point: GeoPoint, placeName: string) => void;
@@ -51,7 +52,7 @@ export function CurrentLocationFetcher({ onChange }: CurrentLocationFetcherProps
   }, [onChange]);
 
   if (loading) {
-    return <span className="text-gray-500">Fetching current location...</span>;
+    return <CommonSpinner/>;
   }
 
   if (error) {
