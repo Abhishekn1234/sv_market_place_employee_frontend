@@ -7,53 +7,101 @@
     "edit": "Edit",
     "cancel": "Cancel",
     "save": "Save",
+     "start": "Start",
+    "complete": "Complete",
+    "chat": "Chat",
+     "confirm": "Confirm",
+       
     "saving": "Saving",
     "completed": "Completed",
     "pending": "Pending",
     "failed": "Failed",
     "hoursAgo": "{{count}} hours ago",
-    "logoutSuccess":"Logged out successfully",
-     "inputPlaceholder": "Type an input",
-      "Close":"Close"
+    "logoutSuccess": "Logged out successfully",
+    "inputPlaceholder": "Type an input",
+    "Close": "Close",
+    "na": "N/A",
+    "minutes": "minutes",
+    "close": "Close",
+    "loading": "Loading..."
+  },
+
+  "availableWork": {
+    "noWorks": "No works available",
+    "customer": "Customer",
+    "location": "Location",
+    "fetchingLocation": "Fetching location...",
+    "category": "Category",
+    "workerPoolAmount": "Worker Pool Amount",
+    "priceMode": "Price Mode",
+    "getDirections": "Get Directions",
+    "verifyOtp": "Verify OTP"
+  },
+
+  
+  
+
+  "completeWork": {
+    "title": "Complete Work",
+    "service": "Service",
+    "customer": "Customer",
+    "workedTime": "Worked Time",
+    "confirm": "Confirm Completion",
+    "success": "Work completed successfully",
+    "errorBookingId": "Booking ID not found",
+    "errorFailed": "Failed to complete work"
+  },
+
+ 
+
+  "startWork": {
+    "title": "Confirm Start Work",
+    "description": "Enter the 6-digit OTP to start work for",
+    "placeholder": "Enter OTP",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "starting": "Starting...",
+    "invalidOtp": "Please enter a valid 6-digit OTP",
+    "bookingIdMissing": "Booking ID not found",
+    "success": "Work Started",
+    "failed": "Failed to start work"
   },
   "HomePage": {
-  "dashboard": "Dashboard",
-  "welcome": "Welcome Back",
-  "totalBookings": "Total Bookings",
-  "assignedWorks": "Assigned Works",
-  "overview": "Overview",
-  "totalEmployees": "Total Employees",
-  "activeEmployees": "Active Employees",
-  "inactiveEmployees": "Inactive Employees",
-  "activeProjects": "Active Projects",
-  "completedProjects": "Completed Projects",
-  "pendingProjects": "Pending Projects",
-  "monthlyRevenue": "Monthly Revenue",
-  
-  "earnings": "Earnings",
-  "expenses": "Expenses",
-  "profit": "Profit",
-  "notifications": "Notifications",
-  "recentActivities": "Recent Activities",
-  "viewAll": "View All",
-  "online": "Online",
-  "offline": "Offline",
-  "quickActions": "Quick Actions",
-  "addEmployee": "Add Employee",
-  "createProject": "Create Project",
-  "viewReports": "View Reports",
-  "analytics": "Analytics",
-  "performance": "Performance",
-  "completed": "Completed",
-  "pending": "Pending",
-  "cancelled": "Cancelled",
-  "totalRevenue": "Total Revenue",
-  "bookingStatus": "Booking Status",
-  "monthlyBookings": "Monthly Bookings",
-  "revenueTrend": "Revenue Trend",
-  "noData": "No data available"
-},
-
+    "dashboard": "Dashboard",
+    "welcome": "Welcome Back",
+    "totalBookings": "Total Bookings",
+    "assignedWorks": "Assigned Works",
+    "overview": "Overview",
+    "totalEmployees": "Total Employees",
+    "activeEmployees": "Active Employees",
+    "inactiveEmployees": "Inactive Employees",
+    "activeProjects": "Active Projects",
+    "completedProjects": "Completed Projects",
+    "pendingProjects": "Pending Projects",
+    "monthlyRevenue": "Monthly Revenue",
+    "earnings": "Earnings",
+    "expenses": "Expenses",
+    "profit": "Profit",
+    "notifications": "Notifications",
+    "recentActivities": "Recent Activities",
+    "viewAll": "View All",
+    "online": "Online",
+    "offline": "Offline",
+    "quickActions": "Quick Actions",
+    "addEmployee": "Add Employee",
+    "createProject": "Create Project",
+    "viewReports": "View Reports",
+    "analytics": "Analytics",
+    "performance": "Performance",
+    "completed": "Completed",
+    "pending": "Pending",
+    "cancelled": "Cancelled",
+    "totalRevenue": "Total Revenue",
+    "bookingStatus": "Booking Status",
+    "monthlyBookings": "Monthly Bookings",
+    "revenueTrend": "Revenue Trend",
+    "noData": "No data available"
+  },
   "bookingHistory": {
     "title": "My Booking History",
     "subtitle": "View and manage all your service bookings",
@@ -66,7 +114,7 @@
     "bookingDetails": "Booking Details",
     "notes": "Notes",
     "filteredBookings": "filtered bookings",
-    "filters":"Filters",
+    "filters": "Filters",
     "statusOptions": {
       "all": "All Status",
       "completed": "Completed",
@@ -74,23 +122,20 @@
       "pending": "Pending",
       "inProgress": "In Progress",
       "cancelled": "Cancelled",
-      "requested":"Requested",
-      "ongoing":"Ongoing"
+      "requested": "Requested",
+      "ongoing": "Ongoing"
     },
-
     "serviceOptions": {
       "all": "All Services",
-       "allServices": "All Services"
+      "allServices": "All Services"
     },
-
     "stats": {
       "totalBookings": "Total Bookings",
       "completed": "Completed",
-      "totalSpent":"Total Spent",
+      "totalSpent": "Total Spent",
       "totalEarnings": "Total Earnings",
       "upcoming": "Upcoming"
     },
-
     "tableHeaders": {
       "id": "ID",
       "client": "Client",
@@ -101,12 +146,11 @@
       "status": "Status",
       "actions": "Actions"
     },
-    "actions":{
-      "View Details":"View Details",
-      "Accept":"Accept",
-      "Ignore":"Ignore"
+    "actions": {
+      "View Details": "View Details",
+      "Accept": "Accept",
+      "Ignore": "Ignore"
     },
-
     "detailsLabels": {
       "service": "Service:",
       "duration": "Duration:",
@@ -114,14 +158,12 @@
       "status": "Status:"
     }
   },
-
   "recentActivities": {
-    "pageTitle":"Recent Activity",
+    "pageTitle": "Recent Activity",
     "emptyState": {
       "title": "No Activities Found",
       "description": "No activities found for the selected time period and filters."
     },
-
     "periods": {
       "7days": "Last 7 Days",
       "15days": "Last 15 Days",
@@ -129,21 +171,18 @@
       "3months": "Last 3 Months",
       "6months": "Last 6 Months"
     },
-
     "types": {
       "all": "All",
       "booking": "Booking",
       "payment": "Payment",
       "transaction": "Transaction"
     },
-
     "status": {
       "completed": "Completed",
       "confirmed": "Confirmed",
       "pending": "Pending",
       "cancelled": "Cancelled"
     },
-
     "charts": {
       "earningsTrend": "Earnings Trend",
       "activityType": "Activity Type Distribution",
@@ -151,88 +190,74 @@
       "activityTrend": "Activity Count by Week"
     }
   },
-
   "pastActivities": {
-  "pageTitle": "Past Activities",
-  "timeline": "Activity Timeline",
-  "export": "Export",
-  "analytics": "Analytics",
-
-  "header": {
-    "employee": "Employee",
-    "employeeId": "Employee ID"
+    "pageTitle": "Past Activities",
+    "timeline": "Activity Timeline",
+    "export": "Export",
+    "analytics": "Analytics",
+    "header": {
+      "employee": "Employee",
+      "employeeId": "Employee ID"
+    },
+    "current": {
+      "showing": "Showing",
+      "activity": "Activity",
+      "activities": "Activities"
+    },
+    "emptyState": {
+      "title": "No activities found",
+      "description": "There are no activities available for the selected period."
+    },
+    "filters": {
+      "timePeriod": "Time Period"
+    },
+    "periods": {
+      "7days": "Last 7 Days",
+      "15days": "Last 15 Days",
+      "1month": "Last 1 Month",
+      "3months": "Last 3 Months",
+      "6months": "Last 6 Months"
+    },
+    "types": {
+      "all": "All",
+      "booking": "Bookings",
+      "payment": "Payments",
+      "transaction": "Transactions"
+    },
+    "stats": {
+      "totalActivities": "Total Activities",
+      "completed": "Completed",
+      "pending": "Pending",
+      "totalEarnings": "Total Earnings"
+    },
+    "status": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "failed": "Failed"
+    },
+    "chart": {
+      "earningsTrend": "Earnings Trend",
+      "activityType": "Activity Type Distribution",
+      "activityTrend": "Activity Trend",
+      "statusDistribution": "Status Distribution"
+    },
+    "insights": {
+      "completionRate": "Completion Rate",
+      "averageEarnings": "Average Earnings",
+      "mostActiveDay": "Most Active Day"
+    },
+    "timelineMeta": {
+      "activityCount": "Activities",
+      "time": "Time",
+      "amount": "Amount",
+      "location": "Location",
+      "client": "Client"
+    }
   },
-
-  "current": {
-    "showing": "Showing",
-    "activity": "Activity",
-    "activities": "Activities"
-  },
-
-  "emptyState": {
-    "title": "No activities found",
-    "description": "There are no activities available for the selected period."
-  },
-
-  "filters": {
-    "timePeriod": "Time Period"
-  },
-
-  "periods": {
-    "7days": "Last 7 Days",
-    "15days": "Last 15 Days",
-    "1month": "Last 1 Month",
-    "3months": "Last 3 Months",
-    "6months": "Last 6 Months"
-  },
-
-  "types": {
-    "all": "All",
-    "booking": "Bookings",
-    "payment": "Payments",
-    "transaction": "Transactions"
-  },
-
-  "stats": {
-    "totalActivities": "Total Activities",
-    "completed": "Completed",
-    "pending": "Pending",
-    "totalEarnings": "Total Earnings"
-  },
-
-  "status": {
-    "completed": "Completed",
-    "pending": "Pending",
-    "failed": "Failed"
-  },
-
-  "chart": {
-    "earningsTrend": "Earnings Trend",
-    "activityType": "Activity Type Distribution",
-    "activityTrend": "Activity Trend",
-    "statusDistribution": "Status Distribution"
-  },
-
-  "insights": {
-    "completionRate": "Completion Rate",
-    "averageEarnings": "Average Earnings",
-    "mostActiveDay": "Most Active Day"
-  },
-
-  "timelineMeta": {
-    "activityCount": "Activities",
-    "time": "Time",
-    "amount": "Amount",
-    "location": "Location",
-    "client": "Client"
-  }
-},
-
   "transactionHistory": {
     "pageTitle": "Payment Transaction History",
     "pageSubtitle": "View and manage your payment transactions",
     "export": "Export Report",
-
     "stats": {
       "totalPaid": "Total Paid",
       "pendingPayments": "Pending Payments",
@@ -240,10 +265,9 @@
       "completedTransactions": "Completed Transactions",
       "pendingTransactions": "Pending Transactions",
       "allTime": "All Time Transactions",
-      "totalSpent":"Total Spent",
-      "spentTransactions":"Spent Transactions"
+      "totalSpent": "Total Spent",
+      "spentTransactions": "Spent Transactions"
     },
-
     "filters": {
       "filterStatus": "Filter by status",
       "statusOptions": {
@@ -253,7 +277,6 @@
         "failed": "Failed"
       }
     },
-
     "table": {
       "transactionId": "Transaction ID",
       "date": "Date",
@@ -265,11 +288,9 @@
       "empty": "No transactions found"
     }
   },
-
   "workHistory": {
     "pageTitle": "Work History",
     "employeeLabel": "Employee",
-
     "cards": {
       "totalWorks": "Total Works",
       "completed": "Completed",
@@ -278,22 +299,19 @@
       "assigned": "Assigned",
       "workAccepted": "Work Accepted",
       "workCancelled": "Work Cancelled",
-        "workCompletedPending": "Work Completed Pending"
+      "workCompletedPending": "Work Completed Pending"
     },
-
     "filters": {
       "timePeriod": "Time Period",
       "status": "Status",
       "itemsPerPage": "Items Per Page",
       "searchPlaceholder": "Search works..."
     },
-
     "timeOptions": {
       "week": "This Week",
       "month": "This Month",
       "currentWeek": "Current Week"
     },
-
     "statusOptions": {
       "all": "All",
       "completed": "Completed",
@@ -304,11 +322,9 @@
       "workAccepted": "Work Accepted",
       "workCancelled": "Work Cancelled",
       "workCompletedPending": "Work Completed Pending",
-      "otpPending":"Customer needs to generate OTP",
-      "confirmed":"Confirmed"
-    
+      "otpPending": "Customer needs to generate OTP",
+      "confirmed": "Confirmed"
     },
-
     "tableHeaders": {
       "title": "Title",
       "workerPoolAmount": "Worker Pool Amount",
@@ -322,20 +338,23 @@
       "customerName": "Customer Name",
       "service": "Service",
       "serviceTier": "Service Tier",
-      "actions":"Actions"
+      "actions": "Actions"
     },
-     "actions": {
-  "cancel": "Cancel",
-  "start": "Start",
-  "viewDetails": "View Details",
-  "stopwork": "Stop Work",
-  "resumeWork": "Resume Work",
-  "completeWork": "Complete Work",
-  "payment": "Payment",
-  "generateInvoice": "Generate Invoice",
-  "generateOtp": "Generate OTP",
-   "verifyOtp": "Verify OTP"
-},
+    "actions": {
+      "cancel": "Cancel",
+      "start": "Start",
+      "viewDetails": "View Details",
+      "stopwork": "Stop Work",
+      "resumeWork": "Resume Work",
+      "completeWork": "Complete Work",
+      "payment": "Payment",
+      "generateInvoice": "Generate Invoice",
+      "generateOtp": "Generate OTP",
+      "verifyOtp": "Verify OTP",
+      "verify": "Verify",
+      "verifying": "Verifying..."
+    },
+   
     "pagination": {
       "pageInfo": "Page {currentPage} of {totalPages}",
       "first": "First",
@@ -344,7 +363,6 @@
       "last": "Last",
       "noRecords": "No records found"
     },
-
     "extraInfo": {
       "daysToStart": "{days} days to start",
       "daysUntilDue": "{days} days until due",
@@ -352,7 +370,6 @@
       "completedIn": "Completed in {hours} hrs"
     }
   },
-
   "notifications": {
     "title": "Notifications",
     "subtitle": "Stay updated with your latest activities",
@@ -368,7 +385,6 @@
     "highPriority": "High Priority",
     "emailDigest": "Email digest",
     "notificationSettings": "Notification settings",
-
     "categories": {
       "all": "All",
       "bookings": "Bookings",
@@ -377,7 +393,6 @@
       "alerts": "Alerts"
     }
   },
-
   "wallet": {
     "title": "Wallet",
     "manage": "Manage your balance and track transactions",
@@ -408,60 +423,52 @@
     "monthlyGrowth": "This Month's Growth",
     "transactionsToday": "Transactions Today"
   },
-
- "profile": {
-  "profile": "Profile",
-  "password": "Password",
-  "location": "Location",
-
-  "personalInformation": "Personal Information",
-  "fullName": "Full Name",
-  "email": "Email",
-
-  "contactInformation": "Contact Information",
-  "phone": "Phone",
-
-  "documents": "Documents",
-  "idProof": "ID Proof",
-  "addressProof": "Address Proof",
-  "photo": "Photo",
-
-  "settings": "Settings",
-  "profileSettings": "Profile Settings",
-
-  "edit": "Edit",
-  "save": "Save",
-  "cancel": "Cancel",
-  "clear": "Clear",
-  "update": "Update",
-  "updatePassword": "Update Password",
-  "currentPassword": "Current Password",
-  "newPassword": "New Password",
-  "confirmPassword": "Confirm Password",
-  "logout": "Logout",
-  "signOut": "Sign Out",
-   "address": "Address",
-  "browse": "Browse"
-},
-
+  "profile": {
+    "profile": "Profile",
+    "password": "Password",
+    "location": "Location",
+    "personalInformation": "Personal Information",
+    "fullName": "Full Name",
+    "email": "Email",
+    "contactInformation": "Contact Information",
+    "phone": "Phone",
+    "documents": "Documents",
+    "idProof": "ID Proof",
+    "addressProof": "Address Proof",
+    "photo": "Photo",
+    "settings": "Settings",
+    "profileSettings": "Profile Settings",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "update": "Update",
+    "updatePassword": "Update Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "logout": "Logout",
+    "signOut": "Sign Out",
+    "address": "Address",
+    "browse": "Browse"
+  },
   "home": {
     "dashboard": "Dashboard",
     "totalEmployees": "Total Employees",
     "activeProjects": "Active Projects",
     "totalBookings": "Total Bookings",
-  "assignedWorks": "Assigned Works",
+    "assignedWorks": "Assigned Works",
     "monthlyRevenue": "Monthly Revenue",
     "notifications": "Notifications",
     "online": "Online",
     "offline": "Offline"
   },
-
   "languages": {
     "english": "English",
     "arabic": "Arabic",
     "hindi": "Hindi"
   },
- "disputepage": {
+  "disputepage": {
     "title": "Disputes",
     "description": "Manage and respond to user disputes",
     "bookingId": "Booking ID",
@@ -476,33 +483,30 @@
     "noResponse": "No response",
     "noData": "No disputes found"
   },
-"sidebar": {
-  "home":"Home",
-  "history": "History",
-  "bookingHistory": "Booking History",
-  "transactionHistory": "Transaction History",
-  "workHistory": "Work History",
-  "disputes":"Disputes",
-
-  "activity": "Activity",
-  "recentActivity": "Recent Activity",
-  "pastActivity": "Past Activity",
-   "booking": "Booking",
+  "sidebar": {
+    "home": "Home",
+    "history": "History",
+    "bookingHistory": "Booking History",
+    "transactionHistory": "Transaction History",
+    "workHistory": "Work History",
+    "disputes": "Disputes",
+    "activity": "Activity",
+    "recentActivity": "Recent Activity",
+    "pastActivity": "Past Activity",
+    "booking": "Booking",
     "availableBooking": "Available Booking",
     "currentBooking": "Current Booking",
     "ongoingServices": "Ongoing Services",
-    "availableWork":"Available Work",
-    "currentWork":"Current Work",
-    "assignedWork":"Assigned Work",
-
-  "settings": "Settings",
-  "profileSettings": "Profile Settings",
-  "wallet": "Wallet",
-  "logout": "Logout",
-
-  "notifications": "Notifications"
-},
-"availableBookings": {
+    "availableWork": "Available Work",
+    "currentWork": "Current Work",
+    "assignedWork": "Assigned Work",
+    "settings": "Settings",
+    "profileSettings": "Profile Settings",
+    "wallet": "Wallet",
+    "logout": "Logout",
+    "notifications": "Notifications"
+  },
+  "availableBookings": {
     "title": "Available Bookings",
     "searchService": "Search service",
     "serviceTier": "Service tier",
@@ -519,8 +523,7 @@
     "tier": "Tier",
     "date": "Date",
     "standard": "Standard",
-
-  "enterprise": "Enterprise",
+    "enterprise": "Enterprise",
     "rowsPerPage": "Rows per page",
     "noBookings": "No bookings available"
   },
@@ -529,7 +532,6 @@
     "subtitle": "View and manage your assigned bookings",
     "filterStatus": "Filter by status",
     "noBookings": "No current bookings available",
-    
     "status": {
       "all": "All",
       "pending": "Pending",
@@ -539,7 +541,7 @@
       "confirmed": "Confirmed",
       "inProgress": "In Progress",
       "requested": "Requested",
-        "workCompletedPending": "Work Completed Pending"
+      "workCompletedPending": "Work Completed Pending"
     },
     "pagination": {
       "previous": "Previous",
@@ -547,7 +549,6 @@
       "page": "Page",
       "of": "of"
     },
-    
     "table": {
       "service": "Service",
       "customer": "Customer",
@@ -556,8 +557,8 @@
       "actions": "Actions"
     }
   },
-  "ongoingservices":{
-     "title": "Ongoing Services",
+  "ongoingservices": {
+    "title": "Ongoing Services",
     "serviceId": "Service ID",
     "customer": "Customer",
     "location": "Location",
@@ -567,34 +568,53 @@
     "view": "View",
     "noData": "No ongoing services found",
     "filters": {
-    "all": "All",
-    "status": "Status",
-    "location": "Location",
-    "inProgress": "In Progress",
-    "assigned": "Assigned",
-    "paused": "Paused",
-    "completed": "Completed",
-    "rowsPerPage":"Rows per page"
-  }
+      "all": "All",
+      "status": "Status",
+      "location": "Location",
+      "inProgress": "In Progress",
+      "assigned": "Assigned",
+      "paused": "Paused",
+      "completed": "Completed",
+      "rowsPerPage": "Rows per page"
+    }
   },
   "cancelBooking": {
-  "title": "Cancel Work",
-  "selectReason": "Select reason",
-  "enterReason": "Enter reason...",
-  "no": "No",
-  "yes": "Yes",
-  "reasons": {
-    "BOOKED_WRONG_SERVICE": "Booked wrong service",
-    "BOOKED_BY_MISTAKE": "Booked by mistake",
-    "SCHEDULE_CHANGED": "Schedule changed",
-    "PRICE_TOO_HIGH": "Price too high",
-    "SERVICE_NO_LONGER_NEEDED": "Service no longer needed",
-    "OTHER": "Other"
+    "title": "Cancel Work",
+    "selectReason": "Select reason",
+    "enterReason": "Enter reason...",
+    "no": "No",
+    "yes": "Yes",
+    "reasons": {
+      "BOOKED_WRONG_SERVICE": "Booked wrong service",
+      "BOOKED_BY_MISTAKE": "Booked by mistake",
+      "SCHEDULE_CHANGED": "Schedule changed",
+      "PRICE_TOO_HIGH": "Price too high",
+      "SERVICE_NO_LONGER_NEEDED": "Service no longer needed",
+      "OTHER": "Other"
+    },
+    
+    "errors": {
+      "reasonRequired": "Please select a reason",
+      "descriptionRequired": "Please enter a reason"
+    }
   },
-  "errors": {
-    "reasonRequired": "Please select a reason",
-    "descriptionRequired": "Please enter a reason"
-  }
-
+  "chat": {
+    "back": "Back",
+    "customer": "Customer",
+    "customerChat": "Customer chat",
+    "booking": "Booking",
+    "online": "Online",
+    "connecting": "Connecting",
+    "startConversation": "Start the conversation",
+    "emptyDescription": "Messages will appear here as soon as they are sent.",
+    "typeMessage": "Type a message...",
+    "sendMessage": "Send message",
+    "you": "You",
+    "loadingChat": "Loading chat",
+    "bookingNotFound": "Booking not found",
+    "bookingNotFoundDescription": "This chat is not available for the selected booking.",
+    "newMessageFrom": "New message from {{name}}",
+    "user": "User"
   }
 }
+

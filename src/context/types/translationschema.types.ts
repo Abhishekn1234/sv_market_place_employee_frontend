@@ -12,6 +12,7 @@ import type { WorkHistoryTranslations } from "./workhistorytranslation.types";
 
 export type TranslationSchema = {
   common: Record<string, string>;
+  chat: Record<string, string>;
   HomePage: HomePageTranslations;
   bookingHistory: BookingHistoryTranslations;
   workHistory: WorkHistoryTranslations;

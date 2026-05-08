@@ -12,6 +12,7 @@ import {
 
 import type { Work } from "../../../domain/entities/work";
 import { ActionButtons } from "./actionbuttonspageassignedwork";
+import { useLanguage } from "@/context/LanguageContext";
 
 type WorkCardProps = {
   work: Work;
@@ -30,6 +31,8 @@ export const WorkCard = ({
   isCancelling,
   cancelingWorkId,
 }: WorkCardProps) => {
+  const { t } = useLanguage();
+
   return (
     <div
       className={`border rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-5 shadow-sm ${
@@ -39,7 +42,7 @@ export const WorkCard = ({
       {/* HEADER */}
       <div className="flex justify-between items-start gap-2">
         <div className="min-w-0">
-          <p className="text-xs text-gray-500">ID</p>
+          <p className="text-xs text-gray-500">{t("bookingHistory.tableHeaders.id")}</p>
           <p className="font-mono text-xs sm:text-sm break-words">
             {work._id}
           </p>
@@ -88,7 +91,7 @@ export const WorkCard = ({
           }`}
         >
           <p className="font-semibold mb-2 flex gap-2">
-            <Wrench className="h-4 w-4" /> Service Details
+            <Wrench className="h-4 w-4" /> {t("bookingHistory.expandedRow.serviceDetails")}
           </p>
           <p className="flex gap-2">
             <Wrench className="h-4 w-4" /> {work.service?.name}
@@ -101,7 +104,7 @@ export const WorkCard = ({
 
         <div>
           <label className="text-sm flex gap-2 text-gray-500">
-            <Calendar className="h-4 w-4" /> Assigned At
+            <Calendar className="h-4 w-4" /> {t("bookingHistory.expandedRow.assignedAt")}
           </label>
           <div
             className={`mt-1 p-3 rounded-xl border ${
@@ -118,7 +121,7 @@ export const WorkCard = ({
           }`}
         >
           <p className="font-semibold mb-2 flex gap-2">
-            <User className="h-4 w-4" /> Customer
+            <User className="h-4 w-4" /> {t("completeWork.customer")}
           </p>
           <p className="flex gap-2">
             <Mail className="h-4 w-4" /> {work.customer?.fullName}
@@ -134,10 +137,10 @@ export const WorkCard = ({
           }`}
         >
           <p className="font-semibold mb-1 flex gap-2">
-            <DollarSign className="h-4 w-4" /> Payment
+            <DollarSign className="h-4 w-4" /> {t("bookingHistory.tableHeaders.payment")}
           </p>
           <p className="text-xl font-bold text-green-600">
-            SAR {work.booking?.amount}
+            {work.booking?.currency} {work.booking?.amount}
           </p>
         </div>
       </div>

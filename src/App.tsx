@@ -44,8 +44,9 @@ import Disputespage from './pages/History/BookingHistory/presentation/components
 import CurrentWorkPage from './pages/CurrentWork/presentation/CurrentWorkPage';
 
 import { initOnMessage } from './components/firebase/notifications';
-// import { useNotificationManager } from './pages/Notifications/presentation/hooks/useNotificationhandler';
+import { useNotificationManager } from './pages/Notifications/presentation/hooks/useNotificationhandler';
 import { useDynamicLocation } from '@/utils/useNotification';
+import ChatWorkerPage from './ChatCustomer/presentation/ChatWorkerPage';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ function AppContent() {
   >("profile");
 
   useDynamicLocation();
-
+  useNotificationManager();
   // ✅ FOREGROUND FCM (RUN ONLY ONCE)
   useEffect(() => {
     if (initializedRef.current) return;
@@ -164,7 +165,7 @@ function AppContent() {
 
           <Route path="activity/recent" element={<RecentActivity />} />
           <Route path="activity/past" element={<PastActivity />} />
-
+            <Route path="/chat/:bookingId" element={<ChatWorkerPage />} />
           <Route path="settings/wallet" element={<Wallet />} />
 
           <Route path="notifications" element={<NotificationsPage />} />

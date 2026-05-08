@@ -11,6 +11,7 @@ import {
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 import CommonSpinner from "@/components/common/CommonSpinner";
+import { useLanguage } from "@/context/LanguageContext";
 
 
 type Props<TWork extends DisplayWork | Work> = {
@@ -28,6 +29,7 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
 }: Props<TWork>) {
   const { mutate: completeWorkMutation, isPending: isLoading } =
     useCompleteWork();
+  const { t } = useLanguage();
 
   if (!open) return null;
 
@@ -35,7 +37,7 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
     const bookingId = getBookingId(work);
 
     if (!bookingId) {
-      toast.error("Booking ID missing");
+      toast.error(t("completeWork.errorBookingId"));
       return;
     }
 
@@ -57,13 +59,13 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
         } as TWork;
 
         onSuccess(updatedWork);
-        toast.success("Work Completed Successfully!");
+        toast.success(t("completeWork.success"));
         onClose();
       },
 
       onError: (err: unknown) => {
         const message =
-          err instanceof Error ? err.message : "Failed to complete work";
+          err instanceof Error ? err.message : t("completeWork.errorFailed");
         toast.error(message);
       },
     });
@@ -72,28 +74,28 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white w-[420px] rounded-lg shadow-lg p-6">
-        <h2 className="text-lg font-semibold mb-4">Complete Work</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("completeWork.title")}</h2>
 
         <div className="space-y-2 text-sm mb-4">
           <p>
-            <strong>Service:</strong> {work.service?.name || "N/A"}
+            <strong>{t("completeWork.service")}:</strong> {work.service?.name || t("common.na")}
           </p>
           <p>
-            <strong>Customer:</strong> {work.customer?.fullName || "N/A"}
+            <strong>{t("completeWork.customer")}:</strong> {work.customer?.fullName || t("common.na")}
           </p>
           <p>
-            <strong>Worked Time:</strong> {elapsedMinutes(work.elapsedTime)}{" "}
-            minutes
+            <strong>{t("completeWork.workedTime")}:</strong> {elapsedMinutes(work.elapsedTime)}{" "}
+            {t("common.minutes")}
           </p>
         </div>
 
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            Close
+            {t("common.close")}
           </Button>
           <Button onClick={handleConfirmClick} disabled={isLoading}>
           
-           {isLoading ? <CommonSpinner size="sm" /> : "Confirm Complete"}
+           {isLoading ? <CommonSpinner size="sm" /> : t("completeWork.confirm")}
 
           </Button>
         </div>

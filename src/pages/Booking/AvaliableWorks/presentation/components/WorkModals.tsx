@@ -52,11 +52,11 @@ export default function WorkModals({
 
       const type: CancelReasonType | undefined = cancelConfirmWork.cancelType;
       if (!type) {
-        toast.error("Please select a cancellation reason");
+        toast.error(t("cancelBooking.errorSelectReason"));
         return;
       }
   if (type === "OTHER" && !cancelConfirmWork.cancelledReason) {
-    toast.error("Enter cancellation reason");
+    toast.error(t("cancelBooking.errorEnterReason"));
     return;
   }
 
@@ -82,7 +82,7 @@ export default function WorkModals({
       });
 
       onCancelSuccess?.(booking);
-      toast.success("Cancelled");
+      toast.success(t("cancelBooking.success"));
     },
     onSettled: () => setCancelConfirmWork(null),
   });

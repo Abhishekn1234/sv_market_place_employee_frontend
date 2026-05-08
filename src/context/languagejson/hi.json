@@ -10,6 +10,14 @@
     "saving": "सहेजा जा रहा है",
     "completed": "पूर्ण",
     "pending": "लंबित",
+    "na": "उपलब्ध नहीं",
+    "minutes": "मिनट",
+    "close": "बंद करें",
+   
+    "confirm": "पुष्टि करें",
+    "start": "शुरू करें",
+    "complete": "पूरा करें",
+    "chat": "चैट",
     "failed": "विफल",
     "hoursAgo": "{{count}} घंटे पहले",
     "logoutSuccess":"सफलतापूर्वक लॉग आउट हो गया",
@@ -248,6 +256,18 @@
     "empty": "कोई लेन-देन नहीं मिला"
   }
 },
+"availableWork": {
+    "noWorks": "कोई कार्य उपलब्ध नहीं है",
+    "customer": "ग्राहक",
+    "location": "स्थान",
+    "fetchingLocation": "स्थान प्राप्त किया जा रहा है...",
+    "category": "श्रेणी",
+    "workerPoolAmount": "वर्कर पूल राशि",
+    "priceMode": "मूल्य प्रकार",
+    "getDirections": "दिशा प्राप्त करें",
+    "verifyOtp": "ओटीपी सत्यापित करें"
+  },
+
 
 "workHistory": {
   "pageTitle": "कार्य इतिहास",
@@ -304,7 +324,10 @@
   "payment": "भुगतान",
   "generateInvoice": "इनवॉइस जनरेट करें",
   "generateOtp": "ओटीपी जनरेट करें",
-  "verifyOtp": "ओटीपी सत्यापित करें"
+  "verifyOtp": "ओटीपी सत्यापित करें",
+  
+      "verifying": "सत्यापित किया जा रहा है...",
+      "verify": "सत्यापित करें"
 },
   "timeOptions": {
     "week": "इस सप्ताह",
@@ -327,6 +350,28 @@
   }
 },
 
+ "completeWork": {
+    "title": "कार्य पूरा करें",
+    "service": "सेवा",
+    "customer": "ग्राहक",
+    "workedTime": "कार्य समय",
+    "confirm": "पूरा करने की पुष्टि करें",
+    "success": "कार्य सफलतापूर्वक पूरा हुआ",
+    "errorBookingId": "बुकिंग आईडी नहीं मिली",
+    "errorFailed": "कार्य पूरा करने में विफल"
+  },
+ "startWork": {
+    "title": "कार्य प्रारंभ की पुष्टि करें",
+    "description": "कार्य प्रारंभ करने के लिए 6-अंकीय ओटीपी दर्ज करें",
+    "placeholder": "ओटीपी दर्ज करें",
+    "cancel": "रद्द करें",
+    "confirm": "पुष्टि करें",
+    "starting": "शुरू किया जा रहा है...",
+    "invalidOtp": "कृपया मान्य 6-अंकीय ओटीपी दर्ज करें",
+    "bookingIdMissing": "बुकिंग आईडी नहीं मिली",
+    "success": "कार्य शुरू हुआ",
+    "failed": "कार्य शुरू करने में विफल"
+  },
   "notifications": {
   "title": "सूचनाएँ",
   "subtitle": "अपनी नवीनतम गतिविधियों से अपडेट रहें",
@@ -549,5 +594,23 @@
       "reasonRequired": "कृपया कारण चुनें",
       "descriptionRequired": "कृपया कारण दर्ज करें"
     }
+  },
+  "chat": {
+    "back": "वापस",
+    "customer": "ग्राहक",
+    "customerChat": "ग्राहक चैट",
+    "booking": "बुकिंग",
+    "online": "ऑनलाइन",
+    "connecting": "कनेक्ट हो रहा है",
+    "startConversation": "बातचीत शुरू करें",
+    "emptyDescription": "भेजे जाते ही संदेश यहां दिखाई देंगे।",
+    "typeMessage": "संदेश लिखें...",
+    "sendMessage": "संदेश भेजें",
+    "you": "आप",
+    "loadingChat": "चैट लोड हो रही है",
+    "bookingNotFound": "बुकिंग नहीं मिली",
+    "bookingNotFoundDescription": "चयनित बुकिंग के लिए यह चैट उपलब्ध नहीं है।",
+    "newMessageFrom": "{{name}} से नया संदेश",
+    "user": "उपयोगकर्ता"
   }
 }

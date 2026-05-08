@@ -87,10 +87,10 @@ export default function Disputespage() {
         <Button
           size="sm"
           onClick={() => openModal(row)}
-          // disabled={row.status == "OPEN"}\
+          // disabled={row.status == "OPEN"}
           disabled={row.status=="IN_REVIEW"}
         >
-          Respond
+          {t("disputepage.respond")}
         </Button>
       ),
     },
@@ -172,7 +172,7 @@ export default function Disputespage() {
           {/* HEADER */}
           <CommonModal.Header>
             <h2 className="text-lg font-semibold">
-              Respond to Dispute
+              {t("disputepage.respondTitle")}
             </h2>
           </CommonModal.Header>
 
@@ -181,7 +181,7 @@ export default function Disputespage() {
             <textarea
               className="w-full border rounded p-2 text-sm"
               rows={4}
-              placeholder="Enter your response..."
+              placeholder={t("disputepage.responsePlaceholder")}
               value={response}
               onChange={(e) => setResponse(e.target.value)}
             />
@@ -196,7 +196,7 @@ export default function Disputespage() {
                 setResponse("");
               }}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
 
             <Button
@@ -204,8 +204,8 @@ export default function Disputespage() {
               disabled={respondMutation.isPending}
             >
               {respondMutation.isPending
-                ? "Submitting..."
-                : "Submit"}
+                ? t("common.submitting")
+                : t("common.submit")}
             </Button>
           </CommonModal.Footer>
         </CommonModal.Content>

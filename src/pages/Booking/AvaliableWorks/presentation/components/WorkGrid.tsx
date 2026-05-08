@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { CommonCard } from "@/components/common/CommonCard";
 import { reverseGeocode } from "@/components/common/CommonMap";
-import { MapPin, Timer } from "lucide-react";
+import { MapPin, MessageCircle, Timer } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   getBookingId,
@@ -13,6 +13,8 @@ import {
   normalizeAssignedWorks,
 } from "../helpers/workPresentation.helpers";
 import type { DisplayWork, WorkGridProps } from "../types/workPresentation.types";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function WorkGrid({
   workList,
@@ -24,7 +26,8 @@ export default function WorkGrid({
   onCancel,
 }: WorkGridProps) {
   const [locations, setLocations] = useState<Record<string, string>>({});
-
+  const { t } = useLanguage();
+const navigate = useNavigate();
   // ✅ Normalize
   const normalizedWorkList = useMemo(() => {
     return normalizeAssignedWorks(workList).filter(
@@ -63,7 +66,7 @@ export default function WorkGrid({
   if (!normalizedWorkList.length) {
     return (
       <div className="text-center py-16 text-gray-500 text-sm">
-        No works available
+        {t("availableWork.noWorks")}
       </div>
     );
   }
@@ -80,7 +83,7 @@ export default function WorkGrid({
 
         const categoryName =
           categories.find((c) => c._id === work.service?.category)?.name ||
-          "N/A";
+          t("common.na");
 
         const coordinates = getWorkCoordinates(getWorkLocation(work));
 
@@ -91,30 +94,30 @@ export default function WorkGrid({
           >
             <div className="space-y-2 text-sm">
               <h3 className="font-semibold text-base truncate">
-                {work.service?.name || "N/A"}
+                {work.service?.name || t("common.na")}
               </h3>
 
               <p className="text-gray-600 truncate">
-                Customer: {work.customer?.fullName || "N/A"}
+                {t("availableWork.customer")}: {work.customer?.fullName || t("common.na")}
               </p>
 
               <p className="text-gray-500 text-xs line-clamp-2">
-                Location: {locations[id] || "Fetching location..."} {/* ✅ FIX */}
+                {t("availableWork.location")}: {locations[id] || t("common.fetchingLocation")} {/* ✅ FIX */}
               </p>
 
               <p className="text-xs text-gray-500">
-                Category: {categoryName}
+                {t("availableWork.category")}: {categoryName}
               </p>
 
               <p className="text-xs font-medium text-green-600">
-                Worker Pool Amount: {getWorkerAmount(work)}{" "}
+                {t("availableWork.workerPoolAmount")}: {getWorkerAmount(work)}{" "}
                 {work.booking?.currency}
               </p>
 
               <p className="text-xs text-gray-500">
-                Price Mode:{" "}
+                {t("availableWork.priceMode")}:{" "}
                 {String(
-                  work.pricingMode ?? work.booking?.pricingMode ?? "N/A"
+                  work.pricingMode ?? work.booking?.pricingMode ?? t("common.na")
                 )}
               </p>
 
@@ -141,7 +144,7 @@ export default function WorkGrid({
                   className="w-full"
                 >
                   <MapPin size={16} />
-                  Get Directions
+                  {t("availableWork.getDirections")}
                 </Button>
               )}
 
@@ -149,7 +152,7 @@ export default function WorkGrid({
                 {canStartOrCancel(work) && (
                   <>
                     <Button className="flex-1" onClick={() => onStart(work)}>
-                      Start
+                      {t("common.start")}
                     </Button>
 
                     <Button
@@ -157,14 +160,20 @@ export default function WorkGrid({
                       className="flex-1"
                       onClick={() => onCancel(work)}
                     >
-                      Cancel
+                      {t("common.cancel")}
                     </Button>
+                    <Button
+                  onClick={() => navigate(`/chat/${work.bookingId}`)}
+                >
+                  <MessageCircle /> {t("common.chat")}
+                </Button>
                   </>
                 )}
+               
 
                 {work.status === "WORK_COMPLETED_PENDING" && (
                   <Button className="w-full" onClick={() => onVerify(work)}>
-                    Verify OTP
+                    {t("availableWork.verifyOtp")}
                   </Button>
                 )}
 
@@ -179,7 +188,7 @@ export default function WorkGrid({
                       })
                     }
                   >
-                    Complete
+                    {t("common.complete")}
                   </Button>
                 )}
               </div>

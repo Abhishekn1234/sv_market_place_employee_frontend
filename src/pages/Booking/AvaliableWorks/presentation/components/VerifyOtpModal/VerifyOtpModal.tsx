@@ -87,11 +87,11 @@ const queryClient = useQueryClient();
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
 
           <Button onClick={handleVerify} disabled={isPending}>
-            {isPending ? "Verifying..." : "Verify"}
+            {isPending ? t("workHistory.actions.verifying") : t("workHistory.actions.verify")}
           </Button>
         </div>
       </div>

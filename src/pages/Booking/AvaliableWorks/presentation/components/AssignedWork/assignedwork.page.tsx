@@ -11,6 +11,7 @@ import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
 import { WorkCard } from "./assignedworkpagecard";
 import CommonSpinner from "@/components/common/CommonSpinner";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Props = {
   open: boolean;
@@ -26,6 +27,8 @@ export default function AssignedWorkModal({
   const { assignedWorks, isLoading, isError, error } = useAssign(open);
   const { mutate: cancelWork, isPending: isCancelling } = useCancel();
 
+  const { t, language } = useLanguage();
+  const isRTL = language === "AR";
   const { theme } = useTheme();
   const dark = theme === "dark";
   const navigate = useNavigate();
@@ -43,7 +46,7 @@ export default function AssignedWorkModal({
   /* ---------------- OPEN CANCEL MODAL ---------------- */
   const handleCancel = (bookingId?: string) => {
     if (!bookingId) {
-      toast.error("Booking ID not found");
+      toast.error(t("common.errorBookingId"));
       return;
     }
 
@@ -57,7 +60,7 @@ export default function AssignedWorkModal({
     if (!cancelingWorkId) return;
 
     if (!cancelReason.trim()) {
-      toast.error("Please enter cancel reason");
+      toast.error(t("cancelBooking.errorEnterReason"));
       return;
     }
 
@@ -69,14 +72,14 @@ export default function AssignedWorkModal({
       },
       {
         onSuccess: () => {
-          toast.success("Booking cancelled successfully");
+          toast.success(t("cancelBooking.success"));
           onCancelSuccess?.();
           setShowCancelModal(false);
           setCancelReason("");
           setCancelingWorkId(null);
         },
         onError: (err: any) => {
-          toast.error(err?.message || "Failed to cancel booking");
+          toast.error(err?.message || t("cancelBooking.errorFailed"));
         },
         onSettled: () => {
           setCancelingWorkId(null);
@@ -89,16 +92,16 @@ export default function AssignedWorkModal({
     <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
       <CommonModal.Content
         className={`w-full h-[100dvh] sm:h-auto sm:max-w-3xl max-h-[100dvh] sm:max-h-[90vh] flex flex-col overflow-hidden rounded-none sm:rounded-2xl
-        ${dark ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"}`}
+        ${dark ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"} ${isRTL ? "text-right" : "text-left"}`}
       >
         {/* HEADER */}
-        <CommonModal.Header className="sticky top-0 z-10 border-b px-4 py-4 flex justify-between items-center">
+        <CommonModal.Header className={`sticky top-0 z-10 border-b px-4 py-4 flex justify-between items-center ${isRTL ? "flex-row-reverse" : ""}`}>
           <div>
             <h2 className="text-lg sm:text-2xl font-bold">
-              Assigned Works
+              {t("sidebar.assignedWork")}
             </h2>
             <p className="text-xs sm:text-sm text-gray-500">
-              Your accepted service bookings
+              {t("assignedWork.subtitle")}
             </p>
           </div>
 
@@ -125,7 +128,7 @@ export default function AssignedWorkModal({
           {/* EMPTY */}
           {!isLoading && !isError && works.length === 0 && (
             <div className="text-center text-gray-500">
-              No assigned work
+              {t("assignedWork.noWorks")}
             </div>
           )}
 
@@ -152,10 +155,10 @@ export default function AssignedWorkModal({
               navigate("/availableWork");
             }}
           >
-            Open Work
+            {t("assignedWork.openWork")}
           </Button>
 
-          <Button onClick={onClose}>Close</Button>
+          <Button onClick={onClose}>{t("common.close")}</Button>
         </CommonModal.Footer>
 
         {/* CANCEL MODAL */}
@@ -163,13 +166,13 @@ export default function AssignedWorkModal({
           <CommonModal open={showCancelModal} onOpenChange={setShowCancelModal}>
             <CommonModal.Content className="p-6 max-w-md">
               <h2 className="text-lg font-bold mb-3">
-                Cancel Booking
+                {t("cancelBooking.title")}
               </h2>
 
               <textarea
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="Enter cancel reason..."
+                placeholder={t("cancelBooking.enterReason")}
                 className="w-full border rounded-lg p-3 min-h-[120px]"
               />
 
@@ -178,14 +181,14 @@ export default function AssignedWorkModal({
                   variant="outline"
                   onClick={() => setShowCancelModal(false)}
                 >
-                  Close
+                  {t("common.close")}
                 </Button>
 
                 <Button
                   onClick={confirmCancel}
                   className="bg-red-600 text-white"
                 >
-                  Confirm Cancel
+                  {t("cancelBooking.confirmCancel")}
                 </Button>
               </div>
             </CommonModal.Content>

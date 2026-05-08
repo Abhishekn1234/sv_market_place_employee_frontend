@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import type { Work } from "../../../domain/entities/work";
+import { useLanguage } from "@/context/LanguageContext";
 
 type ActionButtonsProps = {
   work: Work;
@@ -16,6 +17,7 @@ export const ActionButtons = ({
   isCancelling,
   cancelingWorkId,
 }: ActionButtonsProps) => {
+  const { t } = useLanguage();
   /* ---------------- SAFE LOCATION HANDLING ---------------- */
   let lat: number | null = null;
   let lng: number | null = null;
@@ -57,7 +59,7 @@ export const ActionButtons = ({
       {/* 📍 GET DIRECTIONS */}
       {lat != null && lng != null && (
         <Button variant="outline" onClick={handleDirections}>
-          Get Directions
+          {t("availableWork.getDirections")}
         </Button>
       )}
 
@@ -69,8 +71,8 @@ export const ActionButtons = ({
           className="bg-red-600 text-white hover:bg-red-700"
         >
           {isCancelling && cancelingWorkId === bookingId
-            ? "Cancelling..."
-            : "Cancel Booking"}
+            ? t("common.loading")
+            : t("cancelBooking.confirmCancel")}
         </Button>
       )}
 

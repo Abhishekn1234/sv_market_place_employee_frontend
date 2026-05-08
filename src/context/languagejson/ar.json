@@ -14,8 +14,28 @@
     "hoursAgo": "منذ {{count}} ساعات",
     "logoutSuccess":"تم تسجيل الخروج بنجاح",
     "inputPlaceholder":"اكتب رسالة...",
-    "Close":"إغلاق"
+    "Close":"إغلاق",
+     "na": "غير متوفر",
+    "minutes": "دقائق",
+    "close": "إغلاق",
+  
+    "confirm": "تأكيد",
+    "start": "ابدأ",
+    "complete": "إكمال",
+    "chat": "دردشة"
   },
+   "availableWork": {
+    "noWorks": "لا توجد أعمال متاحة",
+    "customer": "العميل",
+    "location": "الموقع",
+    "fetchingLocation": "جارٍ تحميل الموقع...",
+    "category": "الفئة",
+    "workerPoolAmount": "مبلغ تجمع العمال",
+    "priceMode": "نوع التسعير",
+    "getDirections": "الحصول على الاتجاهات",
+    "verifyOtp": "التحقق من رمز OTP"
+  },
+
   "HomePage": {
   "dashboard": "لوحة التحكم",
   "welcome": "مرحبًا بعودتك",
@@ -332,7 +352,10 @@
   "payment": "الدفع",
   "generateInvoice": "إنشاء فاتورة",
   "generateOtp": "إنشاء رمز التحقق",
-  "verifyOtp": "التحقق من رمز التحقق"
+  
+   "verifyOtp": "التحقق من رمز OTP",
+      "verifying": "جارٍ التحقق...",
+      "verify": "تحقق"
 },
 
     "pagination": {
@@ -593,6 +616,46 @@
       "reasonRequired": "يرجى اختيار سبب",
       "descriptionRequired": "يرجى إدخال السبب"
     }
+  },
+  "chat": {
+    "back": "رجوع",
+    "customer": "العميل",
+    "customerChat": "دردشة العميل",
+    "booking": "الحجز",
+    "online": "متصل",
+    "connecting": "جارٍ الاتصال",
+    "startConversation": "ابدأ المحادثة",
+    "emptyDescription": "ستظهر الرسائل هنا بمجرد إرسالها.",
+    "typeMessage": "اكتب رسالة...",
+    "sendMessage": "إرسال الرسالة",
+    "you": "أنت",
+    "loadingChat": "جارٍ تحميل الدردشة",
+    "bookingNotFound": "لم يتم العثور على الحجز",
+    "bookingNotFoundDescription": "هذه الدردشة غير متاحة للحجز المحدد.",
+    "newMessageFrom": "رسالة جديدة من {{name}}",
+    "user": "مستخدم"
+  },
+    "completeWork": {
+    "title": "إكمال العمل",
+    "service": "الخدمة",
+    "customer": "العميل",
+    "workedTime": "مدة العمل",
+    "confirm": "تأكيد الإكمال",
+    "success": "تم إكمال العمل بنجاح",
+    "errorBookingId": "لم يتم العثور على معرف الحجز",
+    "errorFailed": "فشل في إكمال العمل"
+  },
+   "startWork": {
+    "title": "تأكيد بدء العمل",
+    "description": "أدخل رمز OTP المكون من 6 أرقام لبدء العمل",
+    "placeholder": "أدخل رمز OTP",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "starting": "جارٍ البدء...",
+    "invalidOtp": "يرجى إدخال رمز OTP صالح مكون من 6 أرقام",
+    "bookingIdMissing": "لم يتم العثور على معرف الحجز",
+    "success": "تم بدء العمل",
+    "failed": "فشل في بدء العمل"
   }
 
 }
