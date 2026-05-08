@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Loader2 } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import NotificationsHeader from "./components/NotificationHeader";
@@ -138,10 +138,7 @@ useEffect(() => {
 
             {/* LOADING */}
             {isFetching && (
-              <div className="text-center py-3">
-                <Loader2 className="animate-spin inline-block mr-2" />
-                Loading...
-              </div>
+              <CommonSpinner/>
             )}
 
             {/* PAGINATION */}
