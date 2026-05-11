@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/core/store/auth";
@@ -8,90 +10,65 @@ import { baseURL } from "@/api/apiConfig";
 
 import { useChatMessages } from "./useChatMessages";
 import { useSendChatMessage } from "./useSendChatMessage";
-
+import type { Message } from "@/ChatCustomer/domain/entities/chat";
+import { showBrowserNotification } from "./showBrowserNotification";
+import { playIncomingMessageSound } from "./PlayIncomingMessageSound";
+import { mergeUniqueMessages } from "./mergeUniqueMessages";
 const SOCKET_URL = `${baseURL}/chat`;
-
-type Message = {
-  id?: string;
-  text: string;
-  senderId: string;
-  senderName?: string;
-  self?: boolean;
-  createdAt?: string;
-};
-
 const messageCache = new Map<string, Message[]>();
 
-function playIncomingMessageSound() {
-  try {
-    const AudioContext =
-      window.AudioContext || (window as any).webkitAudioContext;
+export function useChat(
+  bookingId: string
+) {
+  const { accessToken, user } =
+    useAuthStore();
 
-    if (!AudioContext) return;
-
-    const audioContext = new AudioContext();
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(740, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(
-      520,
-      audioContext.currentTime + 0.12
-    );
-
-    gain.gain.setValueAtTime(0.001, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-      0.18,
-      audioContext.currentTime + 0.02
-    );
-    gain.gain.exponentialRampToValueAtTime(
-      0.001,
-      audioContext.currentTime + 0.18
-    );
-
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.2);
-
-    oscillator.onended = () => {
-      audioContext.close().catch(() => undefined);
-    };
-  } catch {}
-}
-
-export function useChat(bookingId: string) {
-  const { accessToken, user } = useAuthStore();
   const { t } = useLanguage();
+
   const navigate = useNavigate();
+
   const location = useLocation();
 
-  const socketRef = useRef<Socket | null>(null);
-  const tRef = useRef(t);
-  const locationPathRef = useRef(location.pathname);
+  const socketRef =
+    useRef<Socket | null>(null);
 
-  const [messages, setMessages] = useState<Message[]>(
-    () => messageCache.get(bookingId) ?? []
+  const tRef = useRef(t);
+
+  const locationPathRef = useRef(
+    location.pathname
   );
 
-  const [connected, setConnected] = useState(false);
-  const [input, setInput] = useState("");
+  const [messages, setMessages] =
+    useState<Message[]>(
+      () =>
+        messageCache.get(bookingId) ??
+        []
+    );
+
+  const [connected, setConnected] =
+    useState(false);
+
+  const [input, setInput] =
+    useState("");
 
   const myUserId = user?._id;
 
   // =========================
-  // API GET MESSAGES
+  // API GET
   // =========================
 
-  const { data } = useChatMessages(bookingId);
+  const { data } =
+    useChatMessages(bookingId);
 
   // =========================
-  // API SEND MESSAGE
+  // API SEND
   // =========================
 
-  const { mutateAsync: sendMessageApi } =
-    useSendChatMessage(bookingId);
+  const {
+    mutateAsync: sendMessageApi,
+  } = useSendChatMessage(
+    bookingId
+  );
 
   // =========================
   // TRANSLATION REF
@@ -102,164 +79,212 @@ export function useChat(bookingId: string) {
   }, [t]);
 
   useEffect(() => {
-    locationPathRef.current = location.pathname;
+    locationPathRef.current =
+      location.pathname;
   }, [location.pathname]);
 
   // =========================
   // LOAD API MESSAGES
   // =========================
 
-// =========================
-// LOAD API MESSAGES
-// =========================
+  useEffect(() => {
+    if (!data?.data) return;
 
-useEffect(() => {
-  if (!data?.data) return;
+   const formatted: Message[] =
+  data.data.map((msg: any) => ({
+    id: msg._id,
 
-  const formatted: Message[] = data.data.map(
-    (msg: any) => ({
-      id: msg._id,
-      text: msg.message,
-      senderId: msg.senderId,
-      senderName: msg.senderName,
-      createdAt: msg.createdAt,
-      self: msg.senderId === myUserId,
-    })
-  );
+    text: msg.message,
 
-  setMessages((prev) => {
-    // keep optimistic/local messages
-    const merged = [...prev];
+    senderId: msg.senderId,
 
-    formatted.forEach((incoming) => {
-      const exists = merged.some(
-        (m) =>
-          (incoming.id && m.id === incoming.id) ||
-          (
-            m.text === incoming.text &&
-            m.senderId === incoming.senderId &&
-            m.createdAt === incoming.createdAt
-          )
+    senderName: msg.senderName,
+
+    createdAt: msg.createdAt,
+
+    self:
+      msg.senderId === myUserId,
+
+    status:
+      msg.status ||
+      (msg.senderId === myUserId
+        ? "delivered"
+        : undefined),
+  }));
+
+    setMessages((prev) => {
+      const next =
+        mergeUniqueMessages(
+          prev,
+          formatted
+        );
+
+      messageCache.set(
+        bookingId,
+        next
       );
 
-      if (!exists) {
-        merged.push(incoming);
-      }
+      return next;
     });
-
-    // sort by time
-    merged.sort((a, b) => {
-      return (
-        new Date(a.createdAt || "").getTime() -
-        new Date(b.createdAt || "").getTime()
-      );
-    });
-
-    messageCache.set(bookingId, merged);
-
-    return merged;
-  });
-}, [data, bookingId, myUserId]);
+  }, [data, bookingId, myUserId]);
 
   // =========================
   // SOCKET CONNECTION
   // =========================
 
   useEffect(() => {
-    if (!accessToken || !bookingId) return;
+    if (
+      !accessToken ||
+      !bookingId
+    )
+      return;
 
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission().catch(() => undefined);
+    if (
+      "Notification" in window &&
+      Notification.permission ===
+        "default"
+    ) {
+      Notification.requestPermission().catch(
+        () => undefined
+      );
     }
 
     if (socketRef.current) {
       socketRef.current.disconnect();
+
       socketRef.current.removeAllListeners();
     }
 
-    const socket = io(SOCKET_URL, {
-      auth: {
-        token: accessToken,
-      },
-      transports: ["websocket"],
-      forceNew: true,
-    });
+    const socket = io(
+      SOCKET_URL,
+      {
+        auth: {
+          token: accessToken,
+        },
+        transports: ["websocket"],
+        forceNew: true,
+      }
+    );
 
     socketRef.current = socket;
 
+    // =========================
+    // CONNECT
+    // =========================
+
     socket.on("connect", () => {
-      console.log("Connected:", socket.id);
+      console.log(
+        "Connected:",
+        socket.id
+      );
 
       setConnected(true);
 
-      socket.emit("booking.chat.join", {
-        bookingId,
-      });
+      socket.emit(
+        "booking.chat.join",
+        {
+          bookingId,
+        }
+      );
     });
 
-    socket.on("disconnect", (reason) => {
-      console.log("Disconnected:", reason);
-      setConnected(false);
-    });
+    // =========================
+    // DISCONNECT
+    // =========================
 
-    socket.on("connect_error", (err) => {
-      console.log("connect_error:", err.message);
-    });
+    socket.on(
+      "disconnect",
+      (reason) => {
+        console.log(
+          "Disconnected:",
+          reason
+        );
+
+        setConnected(false);
+      }
+    );
+
+    // =========================
+    // ERROR
+    // =========================
+
+    socket.on(
+      "connect_error",
+      (err) => {
+        console.log(
+          "connect_error:",
+          err.message
+        );
+      }
+    );
 
     // =========================
     // RECEIVE MESSAGE
     // =========================
 
-   socket.on("booking.chat.message", (msg: any) => {
-  console.log("Received:", msg);
+    socket.on(
+      "booking.chat.message",
+      (msg: any) => {
+        console.log(
+          "Received:",
+          msg
+        );
 
-  const nextMessage: Message = {
-    id: msg._id || msg.id,
-    text: msg.message || msg.text,
-    senderId: msg.senderId,
-    senderName: msg.senderName,
-    createdAt: msg.createdAt,
-    self: msg.senderId === myUserId,
-  };
+        const nextMessage: Message = {
+  id:
+    msg._id || msg.id,
 
-  setMessages((prev) => {
-    const exists = prev.some((item) => {
-      // same real id
-      if (
-        nextMessage.id &&
-        item.id === nextMessage.id
-      ) {
-        return true;
+  text:
+    msg.message ||
+    msg.text,
+
+  senderId:
+    msg.senderId,
+
+  senderName:
+    msg.senderName,
+
+  createdAt:
+    msg.createdAt,
+
+  self:
+    msg.senderId ===
+    myUserId,
+
+  status:
+    msg.status ||
+    (msg.senderId === myUserId
+      ? "delivered"
+      : undefined),
+};
+
+        setMessages((prev) => {
+          const next =
+            mergeUniqueMessages(
+              prev,
+              [nextMessage]
+            );
+
+          messageCache.set(
+            bookingId,
+            next
+          );
+
+          return next;
+        });
+
+       if (!nextMessage.self) {
+        playIncomingMessageSound();
+
+            showBrowserNotification(
+            nextMessage.senderName ||
+              "New Message",
+            nextMessage.text,
+            bookingId
+          );
       }
-
-      // optimistic duplicate detection
-      return (
-        item.text === nextMessage.text &&
-        item.senderId === nextMessage.senderId &&
-        Math.abs(
-          new Date(item.createdAt || "").getTime() -
-            new Date(
-              nextMessage.createdAt || ""
-            ).getTime()
-        ) < 5000
-      );
-    });
-
-    if (exists) {
-      return prev;
-    }
-
-    const next = [...prev, nextMessage];
-
-    messageCache.set(bookingId, next);
-
-    return next;
-  });
-
-  if (!nextMessage.self) {
-    playIncomingMessageSound();
-  }
-});
+      }
+    );
 
     return () => {
       socket.disconnect();
@@ -275,83 +300,176 @@ useEffect(() => {
   // SEND MESSAGE
   // =========================
 
-  const sendMessage = async () => {
-    const text = String(input || "").trim();
+  const sendMessage =
+    async () => {
+      const text = String(
+        input || ""
+      ).trim();
 
-    if (!text) {
-      console.log("Empty message blocked");
-      return;
-    }
+      if (!text) {
+        console.log(
+          "Empty message blocked"
+        );
 
-    if (!socketRef.current) {
-      console.log("Socket not ready");
-      return;
-    }
+        return;
+      }
 
-    const tempId = Date.now().toString();
+      if (!socketRef.current) {
+        console.log(
+          "Socket not ready"
+        );
 
-    const optimisticMessage: Message = {
-      id: tempId,
-      text,
-      senderId: myUserId || "",
-      senderName: user?.fullName || "You",
-      createdAt: new Date().toISOString(),
-      self: true,
+        return;
+      }
+
+      // PREVENT DOUBLE SEND
+
+      const alreadySending =
+        messages.some(
+          (m) =>
+            m.text.trim() ===
+              text &&
+            m.senderId ===
+              myUserId &&
+            Math.abs(
+              new Date(
+                m.createdAt || 0
+              ).getTime() -
+                Date.now()
+            ) < 2000
+        );
+
+      if (alreadySending) return;
+
+      // TEMP ID
+
+      const tempId =
+        Date.now().toString();
+
+      // OPTIMISTIC MESSAGE
+
+            const optimisticMessage: Message = {
+          id: tempId,
+
+          text,
+
+          senderId:
+            myUserId || "",
+
+          senderName:
+            user?.fullName ||
+            "You",
+
+          createdAt:
+            new Date().toISOString(),
+
+          self: true,
+
+          status: "sent",
+        };
+
+      // ADD OPTIMISTIC
+
+      setMessages((prev) => {
+        const next =
+          mergeUniqueMessages(
+            prev,
+            [optimisticMessage]
+          );
+
+        messageCache.set(
+          bookingId,
+          next
+        );
+
+        return next;
+      });
+
+      setInput("");
+
+      try {
+        // SOCKET SEND
+
+        socketRef.current.emit(
+          "booking.chat.send",
+          {
+            bookingId,
+            text,
+          }
+        );
+
+        // API SAVE
+
+        const saved: any =
+          await sendMessageApi({
+            message: text,
+          });
+
+        // REMOVE TEMP + ADD REAL
+
+        setMessages((prev) => {
+                const savedMessage: Message = {
+            id: saved._id,
+
+            text:
+              saved.message,
+
+            senderId:
+              saved.senderId,
+
+            senderName:
+              saved.senderName,
+
+            createdAt:
+              saved.createdAt,
+
+            self:
+              saved.senderId ===
+              myUserId,
+
+            status: "delivered",
+          };
+
+          const withoutTemp =
+            prev.filter(
+              (msg) =>
+                msg.id !== tempId
+            );
+
+          const next =
+            mergeUniqueMessages(
+              withoutTemp,
+              [savedMessage]
+            );
+
+          messageCache.set(
+            bookingId,
+            next
+          );
+
+          return next;
+        });
+      } catch (error) {
+        console.log(error);
+
+        // ROLLBACK
+
+        setMessages((prev) => {
+          const next =
+            prev.filter(
+              (msg) =>
+                msg.id !== tempId
+            );
+
+          messageCache.set(
+            bookingId,
+            next
+          );
+
+          return next;
+        });
+      }
     };
-
-    // optimistic update
-    setMessages((prev) => {
-      const next = [...prev, optimisticMessage];
-
-      messageCache.set(bookingId, next);
-
-      return next;
-    });
-
-    setInput("");
-
-    try {
-      // socket emit
-      socketRef.current.emit("booking.chat.send", {
-        bookingId,
-        text,
-      });
-
-      // api save
-      const saved: any = await sendMessageApi({
-        message: text,
-      });
-
-      // replace temp id
-      setMessages((prev) => {
-        const next = prev.map((msg) =>
-          msg.id === tempId
-            ? {
-                ...msg,
-                id: saved._id,
-              }
-            : msg
-        );
-
-        messageCache.set(bookingId, next);
-
-        return next;
-      });
-    } catch (error) {
-      console.log(error);
-
-      // rollback
-      setMessages((prev) => {
-        const next = prev.filter(
-          (msg) => msg.id !== tempId
-        );
-
-        messageCache.set(bookingId, next);
-
-        return next;
-      });
-    }
-  };
 
   return {
     messages,

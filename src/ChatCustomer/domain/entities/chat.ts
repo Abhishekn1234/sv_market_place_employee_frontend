@@ -8,6 +8,15 @@ export interface ChatMessage {
   createdAt: string;
   updatedAt?: string;
 }
+export type Message = {
+  id?: string;
+  text: string;
+  status?: "sent" | "delivered" | "read";
+  senderId: string;
+  senderName?: string;
+  self?: boolean;
+  createdAt?: string;
+};
 
 export interface GetChatMessagesResponse {
   data: ChatMessage[];

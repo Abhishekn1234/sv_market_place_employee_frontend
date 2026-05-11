@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import {
+  Check,
+  CheckCheck,
   ChevronLeft,
   ChevronRight,
   MessageCircle,
@@ -172,15 +174,39 @@ export default function ChatWindow({
                         {msg.text}
                       </p>
                     </div>
-                    {time && (
-                      <div
-                        className={`mt-1 px-1 text-[11px] leading-none text-muted-foreground/80 ${
-                          self ? "text-right" : "text-left"
-                        }`}
-                      >
-                        {time}
-                      </div>
-                    )}
+                  {time && (
+  <div
+    className={`mt-1 flex items-center gap-1 px-1 text-[11px] leading-none ${
+      self
+        ? "justify-end"
+        : "justify-start"
+    } text-muted-foreground/80`}
+  >
+    <span>{time}</span>
+
+    {self && (
+      <span
+        className={`flex items-center ${
+          msg.status === "read"
+            ? "text-blue-500"
+            : "text-gray-400"
+        }`}
+      >
+        {msg.status === "sent" && (
+          <Check size={12} />
+        )}
+
+        {msg.status === "delivered" && (
+          <CheckCheck size={12} />
+        )}
+
+        {msg.status === "read" && (
+          <CheckCheck size={12} />
+        )}
+      </span>
+    )}
+  </div>
+)}
                   </div>
 
                   {self && (
