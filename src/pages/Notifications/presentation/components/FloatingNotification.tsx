@@ -8,9 +8,19 @@ export const FloatingNotification = () => {
 
   if (!data) return null;
 
+  const handleOpen = () => {
+    if (!data?.url) return;
+
+    // 🔥 FIX: ensure internal routing works correctly
+    if (data.url.startsWith("http")) {
+      window.open(data.url, "_blank");
+    } else {
+      navigate(data.url.startsWith("/") ? data.url : `/${data.url}`);
+    }
+  };
+
   return (
     <div className="fixed top-5 right-5 z-50 w-80 animate-slide-in">
-
       <div className="bg-white border border-gray-200 shadow-xl rounded-2xl p-4 flex gap-3">
 
         <div className="bg-blue-100 p-2 rounded-full">
@@ -27,7 +37,7 @@ export const FloatingNotification = () => {
           </p>
 
           <button
-            onClick={() => navigate(data.url)}
+            onClick={handleOpen}
             className="mt-2 flex items-center gap-1 text-xs text-blue-600 font-medium hover:underline"
           >
             <ExternalLink className="w-3 h-3" />

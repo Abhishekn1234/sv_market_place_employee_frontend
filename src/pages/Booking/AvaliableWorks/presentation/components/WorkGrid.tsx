@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { CommonCard } from "@/components/common/CommonCard";
 import { reverseGeocode } from "@/components/common/CommonMap";
-import { MapPin, MessageCircle, Timer } from "lucide-react";
+import { MapPin,  Timer } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   getBookingId,
@@ -15,7 +15,8 @@ import {
 import type { DisplayWork, WorkGridProps } from "../types/workPresentation.types";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
-import { useChatMessages } from "@/ChatCustomer/presentation/hooks/useChatMessages";
+// import { useChatMessages } from "@/ChatCustomer/presentation/hooks/useChatMessages";
+import { ChatBadge } from "./ChatBadge/ChatBadge";
 
 export default function WorkGrid({
   workList,
@@ -163,64 +164,55 @@ const navigate = useNavigate();
                     >
                       {t("common.cancel")}
                     </Button>
-                                    <div className="relative">
-                  {/* UNREAD COUNT BADGE */}
-                  {(() => {
-                 const { data: messages } = useChatMessages(
-                              work.bookingId,
-                              1,
-                              100
-                            );
-                
-                    const bookingMessages: any[] =
-                      messages?.data?.filter(
-                        (msg: any) =>
-                          String(msg.bookingId) ===
-                            String(work.bookingId) &&
-                          !msg?.isRead
-                      ) || []; 
-                      console.log(bookingMessages);
-
-                    return bookingMessages.length > 0 ? (
-                      <span className="absolute -top-2 -right-2 z-10 min-w-[20px] h-[20px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow">
-                        {bookingMessages.length}
-                      </span>
-                    ) : null;
-                  })()}
-
-                  <Button
-                    onClick={() =>
-                      navigate(`/chat/${work.bookingId}`)
-                    }
-                  >
-                    <MessageCircle size={16} />
-                    {t("common.chat")}
-                  </Button>
-                </div>
+                     <ChatBadge
+                                bookingId={work.bookingId}
+                                t={t}
+                                work={work}
+                                navigate={navigate}
+                              />
                   </>
                 )}
                
 
                 {work.status === "WORK_COMPLETED_PENDING" && (
+                  <>
                   <Button className="w-full" onClick={() => onVerify(work)}>
                     {t("availableWork.verifyOtp")}
                   </Button>
+                   <ChatBadge
+                                bookingId={work.bookingId}
+                                t={t}
+                                work={work}
+                                navigate={navigate}
+                              />
+                  </>
+                  
+                  
                 )}
 
                 {/* ✅ COMPLETE FIX */}
-                {isActiveWork(work) && (
-                  <Button
-                    className="w-full"
-                    onClick={() =>
-                      onComplete({
-                        ...work,
-                        elapsedTime: timers[id] || "00:00:00",
-                      })
-                    }
-                  >
-                    {t("common.complete")}
-                  </Button>
-                )}
+               {isActiveWork(work) && (
+                    <div className="flex items-center gap-3 w-full">
+                      <Button
+                        className="flex-1"
+                        onClick={() =>
+                          onComplete({
+                            ...work,
+                            elapsedTime: timers[id] || "00:00:00",
+                          })
+                        }
+                      >
+                        {t("common.complete")}
+                      </Button>
+
+                      <ChatBadge
+                        bookingId={work.bookingId}
+                        t={t}
+                        work={work}
+                        navigate={navigate}
+                      />
+                    </div>
+                  )}
               </div>
             </div>
           </CommonCard>

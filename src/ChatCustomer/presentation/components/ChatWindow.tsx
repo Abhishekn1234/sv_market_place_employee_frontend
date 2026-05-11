@@ -12,6 +12,8 @@ import {
 
 import { useChat } from "../hooks/useChat";
 import { useLanguage } from "@/context/LanguageContext";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 type ChatWindowProps = {
   bookingId: string;
@@ -69,7 +71,7 @@ export default function ChatWindow({
     <section className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
-          <button
+          <Button
             type="button"
             onClick={onBack}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
@@ -77,7 +79,7 @@ export default function ChatWindow({
             title={t("chat.back")}
           >
             <BackIcon className="h-4 w-4" />
-          </button>
+          </Button>
 
           <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white shadow-sm">
             {getInitials(customer?.name)}
@@ -175,38 +177,38 @@ export default function ChatWindow({
                       </p>
                     </div>
                   {time && (
-  <div
-    className={`mt-1 flex items-center gap-1 px-1 text-[11px] leading-none ${
-      self
-        ? "justify-end"
-        : "justify-start"
-    } text-muted-foreground/80`}
-  >
-    <span>{time}</span>
+                    <div
+                      className={`mt-1 flex items-center gap-1 px-1 text-[11px] leading-none ${
+                        self
+                          ? "justify-end"
+                          : "justify-start"
+                      } text-muted-foreground/80`}
+                    >
+                      <span>{time}</span>
 
-    {self && (
-      <span
-        className={`flex items-center ${
-          msg.status === "read"
-            ? "text-blue-500"
-            : "text-gray-400"
-        }`}
-      >
-        {msg.status === "sent" && (
-          <Check size={12} />
-        )}
+                      {self && (
+                        <span
+                          className={`flex items-center ${
+                            msg.status === "read"
+                              ? "text-blue-500"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {msg.status === "sent" && (
+                            <Check size={12} />
+                          )}
 
-        {msg.status === "delivered" && (
-          <CheckCheck size={12} />
-        )}
+                          {msg.status === "delivered" && (
+                            <CheckCheck size={12} />
+                          )}
 
-        {msg.status === "read" && (
-          <CheckCheck size={12} />
-        )}
-      </span>
-    )}
-  </div>
-)}
+                          {msg.status === "read" && (
+                            <CheckCheck size={12} />
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   </div>
 
                   {self && (
@@ -225,7 +227,7 @@ export default function ChatWindow({
       <footer className="shrink-0 border-t border-border bg-card p-3 sm:p-4">
         <div className="flex items-end gap-2">
           <div className="min-h-11 flex-1 rounded-lg border border-border bg-muted/60 px-3 py-2 transition focus-within:border-blue-500 focus-within:bg-card focus-within:ring-2 focus-within:ring-blue-100 dark:focus-within:ring-blue-500/20">
-            <textarea
+            <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={t("chat.typeMessage")}
@@ -240,7 +242,7 @@ export default function ChatWindow({
             />
           </div>
 
-          <button
+          <Button
             onClick={sendMessage}
             disabled={!input.trim()}
             className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -252,7 +254,7 @@ export default function ChatWindow({
             title={t("chat.sendMessage")}
           >
             <Send className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </footer>
     </section>

@@ -7,7 +7,14 @@ importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-comp
 firebase.initializeApp(self.FIREBASE_CONFIG);
 const messaging = firebase.messaging();
 
-// 🔥 Background notification (ONLY PLACE SYSTEM NOTIFICATION IS SHOWN)
+const channel = new BroadcastChannel("fcm_channel");
+
+// 🔥 ensure SW controls pages immediately
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+// 📩 Background notification
 messaging.onBackgroundMessage(async (payload) => {
   console.log("📩 Background message:", payload);
 
@@ -17,7 +24,7 @@ messaging.onBackgroundMessage(async (payload) => {
   const body = payload.data.body || "";
   const url = payload.data.url || "/notifications";
 
-  const tag = `notif-${title}-${body}-${url}`;
+  const tag = `notif-${title}-${url}`;
 
   const existing = await self.registration.getNotifications();
   if (existing.some((n) => n.tag === tag)) return;
@@ -27,23 +34,44 @@ messaging.onBackgroundMessage(async (payload) => {
     icon: "/icon.jpg",
     tag,
     data: { url },
-    actions: [{ action: "open", title: "Open" }],
     requireInteraction: true,
   });
 });
 
-// 🔔 Click handling
+// 🔔 Click handler (UNIFIED)
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const url = event.notification.data?.url || "/notifications";
+  const data = event.notification.data || {};
+
+  // build navigation URL from payload
+  let url = "/notifications";
+
+  if (data.type === "BOOKING_REQUEST") {
+    url = `/availableBooking?bookingId=${data.bookingId}`;
+  }
 
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
-      for (const client of clientsArr) {
-        if (client.url.includes(url)) return client.focus();
+    (async () => {
+      const clients = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+
+      // try to focus existing tab
+      for (const client of clients) {
+        client.focus();
+
+        client.postMessage({
+          type: "NAVIGATE",
+          url,
+        });
+
+        return;
       }
-      return clients.openWindow(url);
-    })
+
+      // fallback open new tab
+      return self.clients.openWindow(url);
+    })()
   );
 });

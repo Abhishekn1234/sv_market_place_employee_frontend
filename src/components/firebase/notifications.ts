@@ -27,12 +27,14 @@ export const requestAndGetToken = async (): Promise<string | null> => {
   }
 };
 
-// 🔔 Foreground ONLY (NO system notification here)
+// 🔔 Foreground handler (NOW ALSO NAVIGATES)
 export const initOnMessage = async () => {
   const messaging = await getFirebaseMessaging();
   if (!messaging) return;
 
   const audio = new Audio("/notification.wav");
+
+  const channel = new BroadcastChannel("fcm_channel");
 
   onMessage(messaging, (payload) => {
     console.log("📩 Foreground message:", payload);
@@ -44,11 +46,11 @@ export const initOnMessage = async () => {
     audio.currentTime = 0;
     audio.play().catch(() => {});
 
-    // 📲 in-app event only
-    window.dispatchEvent(
-      new CustomEvent("in-app-notification", {
-        detail: { title, url },
-      })
-    );
+    // 📡 unified navigation channel
+    channel.postMessage({
+      type: "NAVIGATE",
+      url,
+      title,
+    });
   });
 };

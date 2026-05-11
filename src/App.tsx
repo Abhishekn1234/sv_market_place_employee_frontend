@@ -51,6 +51,7 @@ import ChatWorkerPage from './ChatCustomer/presentation/ChatWorkerPage';
 function AppContent() {
   const navigate = useNavigate();
   const initializedRef = useRef(false);
+  const swRegisteredRef = useRef(false);
 
   const [activeTab, setActiveTab] = useState<
     "location" | "profile" | "password"
@@ -58,7 +59,8 @@ function AppContent() {
 
   useDynamicLocation();
   useNotificationManager();
-  // ✅ FOREGROUND FCM (RUN ONLY ONCE)
+
+  // ✅ FOREGROUND FCM (ONLY ONCE)
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
@@ -66,56 +68,47 @@ function AppContent() {
     initOnMessage();
   }, []);
 
-  // ✅ SERVICE WORKER REGISTER (SAFE GUARD)
+  // ✅ SERVICE WORKER REGISTER (FIXED)
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
+    if (swRegisteredRef.current) return;
 
-    let isRegistered = false;
+    swRegisteredRef.current = true;
 
-    if (!isRegistered) {
-      isRegistered = true;
-
-      navigator.serviceWorker
-        .register("/firebase-messaging-sw.js")
-        .then((reg) => console.log("✅ SW registered:", reg))
-        .catch((err) => console.error("❌ SW error:", err));
-    }
+    navigator.serviceWorker
+      .register("/firebase-messaging-sw.js")
+      .then((reg) => console.log("✅ SW registered:", reg))
+      .catch((err) => console.error("❌ SW error:", err));
   }, []);
 
-  // ✅ NAVIGATION FROM SERVICE WORKER
-  useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      const { type, payload } = event.data || {};
+  // ✅ NAVIGATION (BACKGROUND + FOREGROUND UNIFIED)
+ useEffect(() => {
+  const channel = new BroadcastChannel("fcm_channel");
 
-      if (type === "NAVIGATE" && payload?.url) {
-        console.log("🚀 Navigating from SW:", payload.url);
+  const handler = (event: MessageEvent) => {
+    const data = event.data;
 
-        setActiveTab(payload.tab || "profile");
-        navigate(payload.url);
-      }
-    };
+    if (data?.type === "NAVIGATE" && data.url) {
+      navigate(data.url, { replace: true });
+    }
+  };
 
-    navigator.serviceWorker?.addEventListener("message", handler);
+  channel.addEventListener("message", handler);
 
-    return () => {
-      navigator.serviceWorker?.removeEventListener("message", handler);
-    };
-  }, [navigate]);
+  // ALSO listen to SW direct messages (IMPORTANT fallback)
+  navigator.serviceWorker?.addEventListener("message", (event) => {
+    const { type, url } = event.data || {};
 
-  // ✅ IN-APP NOTIFICATION CLICK
-  useEffect(() => {
-    const handler = (e: any) => {
-      const { url } = e.detail || {};
-      if (url) navigate(url);
-    };
+    if (type === "NAVIGATE" && url) {
+      navigate(url, { replace: true });
+    }
+  });
 
-    window.addEventListener("in-app-notification-click", handler);
-
-    return () => {
-      window.removeEventListener("in-app-notification-click", handler);
-    };
-  }, [navigate]);
-
+  return () => {
+    channel.removeEventListener("message", handler);
+    channel.close();
+  };
+}, [navigate]);
   return (
     <LanguageProvider>
       <ToastContainer position="top-right" autoClose={5000} />
@@ -165,16 +158,15 @@ function AppContent() {
 
           <Route path="activity/recent" element={<RecentActivity />} />
           <Route path="activity/past" element={<PastActivity />} />
-            <Route path="/chat/:bookingId" element={<ChatWorkerPage />} />
+
+          <Route path="/chat/:bookingId" element={<ChatWorkerPage />} />
+
           <Route path="settings/wallet" element={<Wallet />} />
 
           <Route path="notifications" element={<NotificationsPage />} />
 
           <Route path="availableWork" element={<AvailableWorkPage />} />
-          <Route
-            path="availableBooking"
-            element={<AvailableBookingPage />}
-          />
+          <Route path="availableBooking" element={<AvailableBookingPage />} />
         </Route>
       </Routes>
 

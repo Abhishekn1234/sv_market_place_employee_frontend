@@ -1,4 +1,4 @@
-// hooks/useNotificationManager.ts
+// useNotificationManager.ts
 import { useEffect } from "react";
 import { useNotificationStore } from "@/core/store/notificationStore";
 import { useRegisterDeviceToken } from "./useRegisterToken";
@@ -20,7 +20,7 @@ export const useNotificationManager = () => {
 
   const user = useAuthStore((s) => s.user);
 
-  // 1️⃣ Ask permission + get token
+  // 1️⃣ Permission + token
   useEffect(() => {
     const init = async () => {
       if (!("Notification" in window)) return;
@@ -31,7 +31,6 @@ export const useNotificationManager = () => {
       if (permission !== "granted") return;
 
       const fcmToken = await requestAndGetToken();
-
       if (!fcmToken) return;
 
       setToken(fcmToken);
@@ -40,15 +39,15 @@ export const useNotificationManager = () => {
     init();
   }, []);
 
-  // 2️⃣ Register token when user + token available
+  // 2️⃣ Register token
   useEffect(() => {
     const register = async () => {
-      if (!token || !user) return;
-       if (!user?.role?._id) return;
+      if (!token || !user?.role?._id) return;
+
       await registerToken({
         token,
         platform: "WEB",
-        roleId: user?.role?._id,
+        roleId: user.role._id,
         deviceId: navigator.userAgent,
         appId: "your-app-id",
       });
@@ -59,39 +58,36 @@ export const useNotificationManager = () => {
     register();
   }, [token, user]);
 
-  // 3️⃣ Handle logout → unregister token
+  // 3️⃣ Logout cleanup
   useEffect(() => {
     if (!user && token) {
-      unregisterToken( token );
+      unregisterToken(token);
       reset();
     }
   }, [user]);
 
-  // 4️⃣ Handle token refresh (important!)
+  // 4️⃣ Token refresh
   useEffect(() => {
     const interval = setInterval(async () => {
       const newToken = await requestAndGetToken();
 
       if (newToken && newToken !== token) {
-        if (token) {
-          await unregisterToken(token);
-        }
+        if (token) await unregisterToken(token);
 
         setToken(newToken);
-        if (!user?.role?._id) return;
-        if (user) {
+
+        if (user?.role?._id) {
           await registerToken({
             token: newToken,
             platform: "WEB",
-            roleId: user?.role?._id,
+            roleId: user.role._id,
             deviceId: navigator.userAgent,
             appId: "your-app-id",
           });
         }
       }
-    }, 1000 * 60 * 30); // every 30 mins
+    }, 1000 * 60 * 30);
 
     return () => clearInterval(interval);
   }, [token, user]);
-
 };
