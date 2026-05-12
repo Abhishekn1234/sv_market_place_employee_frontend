@@ -1,16 +1,18 @@
 "use client";
 
 import type { Notification } from "../../domain/entities/notification";
-import {
-  CheckCircle,
-  Info,
-  BellRing,
-  Check,
-} from "lucide-react";
+
+import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/context/ThemeContext";
 import { Checkbox } from "@/components/ui/checkbox";
+
+import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
+
+import { getTypeIcon } from "../utils/gettypeicon";
+import { getTypeColor } from "../utils/gettypecolor";
 
 export default function NotificationItem({
   notification,
@@ -26,41 +28,50 @@ export default function NotificationItem({
   onSelect?: (id: string) => void;
 }) {
   const { theme } = useTheme();
+  const { translations } = useLanguage();
+  // console.log(notification);
+  const navigate = useNavigate();
 
-  const isDisabled = notification.isRead;
- const {translations}=useLanguage();
-  const getTypeIcon = (type: Notification["type"]) => {
-    switch (type) {
-      case "BOOKING_REQUEST":
-        return <BellRing className="w-5 h-5" />;
-      case "BOOKING_UPDATE":
-        return <CheckCircle className="w-5 h-5" />;
-      default:
-        return <Info className="w-5 h-5" />;
-    }
+  const isRead = notification.isRead;
+
+  // =========================
+  // SELECT NOTIFICATION
+  // =========================
+  const handleSelect = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (isRead) return;
+
+    onSelect?.(notification._id);
   };
 
-  const getTypeColor = (type: Notification["type"]) => {
-    if (theme === "dark") {
-      switch (type) {
-        case "BOOKING_REQUEST":
-          return "bg-indigo-900/40 text-indigo-300 border-indigo-800";
-        case "BOOKING_UPDATE":
-          return "bg-emerald-900/40 text-emerald-400 border-emerald-800";
-        default:
-          return "bg-blue-900/40 text-blue-400 border-blue-800";
-      }
-    }
+  // =========================
+  // NAVIGATE TO CHAT
+  // =========================
+ const handleNavigate = () => {
+  const type = notification.type;
 
-    switch (type) {
-      case "BOOKING_REQUEST":
-        return "bg-indigo-100 text-indigo-600 border-indigo-200";
-      case "BOOKING_UPDATE":
-        return "bg-emerald-100 text-emerald-600 border-emerald-200";
-      default:
-        return "bg-blue-100 text-blue-600 border-blue-200";
-    }
-  };
+  // CHAT NOTIFICATIONS
+  if (type.startsWith("CHAT")) {
+    if (!notification.bookingId) return;
+
+    navigate(`/chat/${notification.bookingId}`);
+    return;
+  }
+
+  // BOOKING REQUEST
+  if (type === "BOOKING_REQUEST") {
+    navigate("/availableWork");
+    return;
+  }
+
+  // OTHER BOOKING UPDATES
+   if (type.startsWith("BOOKING")) {
+    if (!notification.bookingId) return;
+
+   navigate("/availableWork");
+  }
+};
 
   const title =
     notification.title || notificationsTranslations.defaultTitle;
@@ -70,61 +81,88 @@ export default function NotificationItem({
 
   return (
     <div
-      onClick={() => {
-        if (!isDisabled) onSelect?.(notification._id);
-      }}
-      className={`flex items-center justify-between gap-4 p-4 rounded-lg border-2 transition
-        ${isSelected ? "border-blue-500 ring-2 ring-blue-500/30" : ""}
-        ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+      onClick={handleNavigate}
+      className={`flex items-center justify-between gap-4 p-4 rounded-xl border transition-all duration-200
+        ${
+          isSelected
+            ? "border-blue-500 ring-2 ring-blue-500/20"
+            : theme === "dark"
+            ? "border-gray-800"
+            : "border-gray-200"
+        }
+        ${
+          theme === "dark"
+            ? "bg-gray-900 hover:bg-gray-800"
+            : "bg-white hover:bg-gray-50"
+        }
+        cursor-pointer
       `}
     >
       {/* LEFT */}
-      <div className="flex items-center gap-3 flex-1">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        
+        {/* CHECKBOX */}
+        <div onClick={handleSelect}>
+          <Checkbox
+            checked={isSelected}
+            disabled={isRead}
+          />
+        </div>
 
-        <Checkbox
-          checked={isSelected}
-          disabled={isDisabled}
-          onCheckedChange={() => {
-            if (!isDisabled) onSelect?.(notification._id);
-          }}
-          onClick={(e) => e.stopPropagation()}
-        />
-
-        <div className={`p-3 rounded-xl border ${getTypeColor(notification.type)}`}>
+        {/* ICON */}
+        <div
+          className={`p-3 rounded-xl border shrink-0 ${getTypeColor(
+            notification.type,
+            theme
+          )}`}
+        >
           {getTypeIcon(notification.type)}
         </div>
 
-        <div>
-          <h3 className={`${theme === "dark" ? "text-gray-100" : "text-gray-900"} font-semibold`}>
+        {/* CONTENT */}
+        <div className="flex-1 min-w-0">
+          <h3
+            className={`font-semibold truncate ${
+              theme === "dark"
+                ? "text-gray-100"
+                : "text-gray-900"
+            }`}
+          >
             {title}
           </h3>
-          <p className={`${theme === "dark" ? "text-gray-400" : "text-gray-600"} text-sm`}>
+
+          <p
+            className={`text-sm truncate ${
+              theme === "dark"
+                ? "text-gray-400"
+                : "text-gray-600"
+            }`}
+          >
             {message}
           </p>
         </div>
       </div>
 
-      {/* RIGHT */}
-      <div className="flex gap-2">
-        {!notification.isRead && isSelected && (
+      {/* RIGHT ACTIONS */}
+      <div
+        className="flex items-center gap-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* SELECTED READ BUTTON */}
+        {!isRead && isSelected && (
           <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              markAsRead(notification._id);
-            }}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => markAsRead(notification._id)}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             {translations.notifications.read}
           </Button>
         )}
 
-        {!notification.isRead && !isSelected && (
+        {/* QUICK READ */}
+        {!isRead && !isSelected && (
           <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              markAsRead(notification._id);
-            }}
-            className="rounded-full w-9 h-9 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => markAsRead(notification._id)}
+            className="rounded-full w-9 h-9 p-0 bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Check className="w-4 h-4" />
           </Button>

@@ -117,6 +117,7 @@ function AppContent() {
                 "/availableBooking",
                 "/chat",
                 "/currentWork",
+                "/availableWork",
                 "/notifications",
               ];
 

@@ -10,6 +10,7 @@ export interface Notification {
   message: string;
   type: NotificationType;
   isRead: boolean;
+  bookingId?:string;
   createdAt: string;
 }
 

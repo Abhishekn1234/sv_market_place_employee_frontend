@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Bell } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
@@ -19,6 +19,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+
 import { CATEGORY_MAP } from "./utils/typemap";
 import { useUnreadCount } from "./hooks/useUnreadCount";
 import { useMarkAllRead } from "./hooks/useMarkAllRead";
@@ -33,39 +34,53 @@ export default function NotificationsPage() {
   const [limit, setLimit] = useState(10);
 
   const { t } = useLanguage();
-  const notificationTranslations=t('notifications');
+  const notificationTranslations = t("notifications");
   const { theme } = useTheme();
 
- const {
-  data,
-  isLoading,
-  isFetching,
-} = useNotifications({
-  page,
-  limit,
-  unreadOnly: filter === "unread" ? true : undefined,
-  type: CATEGORY_MAP[selectedCategory], // ✅ FIXED
-});
+  const {
+    data,
+    isLoading,
+    isFetching,
+  } = useNotifications({
+    page,
+    limit,
+    unreadOnly: filter === "unread" ? true : undefined,
+    type: CATEGORY_MAP[selectedCategory],
+  });
+  console.log(data);
 
   const { mutate: markAsReadApi } = useMarkAsRead();
+  const { mutate: markAllRead, isPending } = useMarkAllRead();
 
   const markAsRead = (id: string) => markAsReadApi(id);
 
-  const { mutate: markAllRead, isPending } = useMarkAllRead();
-      const notifications = data?.data || [];
-      const pagination = data?.pagination;
+  const notifications = data?.data || [];
+  const pagination = data?.pagination;
 
-      const totalPages = pagination?.totalPages || 1;
+  const totalPages = pagination?.totalPages || 1;
 
-    const { data: unreadData } = useUnreadCount();
+  const { data: unreadData } = useUnreadCount();
+  const unreadCount = unreadData || 0;
 
-    const unreadCount = unreadData || 0;
+  const totalCount = pagination?.totalItems || 0;
+  const readCount = totalCount - unreadCount;
 
+  // =========================
+  // UNREAD FILTER (IMPORTANT)
+  // =========================
+  const unreadNotifications = useMemo(
+    () => notifications.filter((n: any) => !n.isRead),
+    [notifications]
+  );
 
-    const totalCount = pagination?.totalItems || 0;
-    const readCount = totalCount - unreadCount;
-
+  // =========================
+  // SELECT SINGLE (BLOCK READ)
+  // =========================
   const handleSelectNotification = (id: string) => {
+    const target = notifications.find((n: any) => n._id === id);
+
+    if (!target || target.isRead) return; // 🚫 prevent read selection
+
     setSelectedIds((prev) =>
       prev.includes(id)
         ? prev.filter((item) => item !== id)
@@ -73,33 +88,54 @@ export default function NotificationsPage() {
     );
   };
 
-  // ✅ BULK READ
+  // =========================
+  // SELECT ALL (UNREAD ONLY)
+  // =========================
+  const toggleSelectAll = () => {
+    const unreadIds = unreadNotifications.map((n: any) => n._id);
+
+    const allSelected =
+      unreadIds.length > 0 &&
+      unreadIds.every((id) => selectedIds.includes(id));
+
+    if (allSelected) {
+      setSelectedIds((prev) =>
+        prev.filter((id) => !unreadIds.includes(id))
+      );
+    } else {
+      setSelectedIds(unreadIds);
+    }
+  };
+
+  // =========================
+  // BULK READ
+  // =========================
   const markSelectedAsRead = () => {
     selectedIds.forEach((id) => markAsRead(id));
     setSelectedIds([]);
   };
 
-  // RESET PAGE ON FILTER/LIMIT CHANGE
-useEffect(() => {
-  setPage(1);
-}, [filter, limit, selectedCategory]); 
+  // =========================
+  // EFFECTS
+  // =========================
+  useEffect(() => {
+    setPage(1);
+  }, [filter, limit, selectedCategory]);
 
-  // CLEAR SELECTION ON PAGE CHANGE
   useEffect(() => {
     setSelectedIds([]);
   }, [page]);
 
   if (isLoading) {
-    return (
-     <CommonSpinner/>
-    );
+    return <CommonSpinner />;
   }
 
   return (
     <div className={`p-4 ${theme === "dark" ? "text-white" : ""}`}>
       <div className="max-w-4xl mx-auto space-y-6">
 
-       <NotificationsHeader
+        {/* HEADER */}
+        <NotificationsHeader
           unreadCount={unreadCount}
           readCount={readCount}
           totalCount={totalCount}
@@ -108,23 +144,25 @@ useEffect(() => {
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
           markSelectedAsRead={markSelectedAsRead}
-          markAllRead={markAllRead}   // ✅ ADD THIS
+          markAllRead={markAllRead}
           limit={limit}
-            isPending={isPending}    
+          isPending={isPending}
           setLimit={setLimit}
           selectedCount={selectedIds.length}
+          toggleSelectAll={toggleSelectAll}   // ✅ IMPORTANT
         />
 
+        {/* EMPTY STATE */}
         {notifications.length === 0 ? (
           <CommonCard className="flex items-center justify-center gap-2 py-10">
-                <Bell className="w-5 h-5" />
-                <span>{t('notifications.noNotifications')}</span>
-              </CommonCard>
+            <Bell className="w-5 h-5" />
+            <span>{t("notifications.noNotifications")}</span>
+          </CommonCard>
         ) : (
           <>
             {/* LIST */}
             <div className="space-y-3">
-              {notifications.map((notification) => (
+              {notifications.map((notification: any) => (
                 <NotificationItem
                   key={notification._id}
                   notification={notification}
@@ -137,15 +175,12 @@ useEffect(() => {
             </div>
 
             {/* LOADING */}
-            {isFetching && (
-              <CommonSpinner/>
-            )}
+            {isFetching && <CommonSpinner />}
 
             {/* PAGINATION */}
             <Pagination className="mt-6 flex justify-end">
               <PaginationContent>
 
-                {/* PREVIOUS */}
                 <PaginationItem>
                   <PaginationPrevious
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -153,7 +188,6 @@ useEffect(() => {
                   />
                 </PaginationItem>
 
-                {/* PAGE NUMBERS */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .slice(Math.max(0, page - 2), page + 1)
                   .map((p) => (
@@ -167,7 +201,6 @@ useEffect(() => {
                     </PaginationItem>
                   ))}
 
-                {/* NEXT */}
                 <PaginationItem>
                   <PaginationNext
                     onClick={() =>

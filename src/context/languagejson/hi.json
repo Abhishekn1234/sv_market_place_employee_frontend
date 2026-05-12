@@ -374,6 +374,9 @@
   },
   "notifications": {
   "title": "सूचनाएँ",
+  "selectAll":"सबका चयन करें",
+  "unselectAll":"सभी को अचयनित करें",
+  "markSelected":"चिन्हित करें",
   "subtitle": "अपनी नवीनतम गतिविधियों से अपडेट रहें",
   "markAllRead": "सभी को पढ़ा हुआ चिह्नित करें",
   "clearAll": "सभी हटाएँ",

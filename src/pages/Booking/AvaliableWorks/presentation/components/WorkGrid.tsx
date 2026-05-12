@@ -176,7 +176,8 @@ const navigate = useNavigate();
 
                 {work.status === "WORK_COMPLETED_PENDING" && (
                   <>
-                  <Button className="w-full" onClick={() => onVerify(work)}>
+                  <div className="flex items-center gap-3 w-full">
+                  <Button className="flex-1" onClick={() => onVerify(work)}>
                     {t("availableWork.verifyOtp")}
                   </Button>
                    <ChatBadge
@@ -185,6 +186,7 @@ const navigate = useNavigate();
                                 work={work}
                                 navigate={navigate}
                               />
+                              </div>
                   </>
                   
                   
