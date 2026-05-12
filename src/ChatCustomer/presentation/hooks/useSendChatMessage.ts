@@ -1,6 +1,5 @@
-// presentation/hooks/useSendChatMessage.ts
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 import { ChatRepositoryImpl } from "../../data/repositories/ChatRepositoryImpl";
 import { SendChatMessageUseCase } from "../../domain/usecase/SendChatMessageUseCase";
@@ -16,9 +15,7 @@ import { CHAT_MESSAGES_KEY } from "./useChatMessages";
 const repo = new ChatRepositoryImpl();
 const useCase = new SendChatMessageUseCase(repo);
 
-export function useSendChatMessage(
-  bookingId: string
-) {
+export function useSendChatMessage(bookingId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -36,6 +33,14 @@ export function useSendChatMessage(
             messages: [...oldData.data, newMessage],
           };
         }
+      );
+
+      toast.success("Message sent");
+    },
+
+    onError: (error: any) => {
+      toast.error(
+        error?.message || "Failed to send message"
       );
     },
   });
