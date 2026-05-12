@@ -37,9 +37,11 @@ export default function EmployeeDetails({
   };
 
   /* ---------------- EDIT PERMISSION ---------------- */
+      const allowedStatuses = ["pending", "approved", "IN_PROGRESS"];
 
-  const canEdit =
-    user?.kycStatus === "pending" && hasAnyRequiredDocument();
+      const canEdit =
+        allowedStatuses.includes(user?.kycStatus ?? "") &&
+        hasAnyRequiredDocument();
 
   /* ---------------- TOAST CONTROL (avoid spam) ---------------- */
 
