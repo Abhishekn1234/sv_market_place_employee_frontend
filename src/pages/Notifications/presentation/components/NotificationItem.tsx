@@ -14,64 +14,61 @@ import { useLanguage } from "@/context/LanguageContext";
 import { getTypeIcon } from "../utils/gettypeicon";
 import { getTypeColor } from "../utils/gettypecolor";
 
+type Props = {
+  notification: Notification;
+  markAsRead: (id: string) => void;
+  notificationsTranslations: any;
+  isSelected?: boolean;
+  onSelect?: (id: string) => void;
+  onMarkedRead?: (id: string) => void;
+};
+
 export default function NotificationItem({
   notification,
   markAsRead,
   notificationsTranslations,
   isSelected,
   onSelect,
-}: {
-  notification: Notification;
-  markAsRead: (id: string) => void;
-  notificationsTranslations: any;
-  isSelected?: boolean;
-  onSelect?: (id: string) => void;
-}) {
+  onMarkedRead,
+}: Props) {
   const { theme } = useTheme();
   const { translations } = useLanguage();
-  // console.log(notification);
   const navigate = useNavigate();
 
   const isRead = notification.isRead;
 
   // =========================
-  // SELECT NOTIFICATION
+  // SELECT
   // =========================
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
-
     if (isRead) return;
 
     onSelect?.(notification._id);
   };
 
   // =========================
-  // NAVIGATE TO CHAT
+  // NAVIGATE
   // =========================
- const handleNavigate = () => {
-  const type = notification.type;
+  const handleNavigate = () => {
+    const type = notification.type;
 
-  // CHAT NOTIFICATIONS
-  if (type.startsWith("CHAT")) {
-    if (!notification.bookingId) return;
+    if (type.startsWith("CHAT")) {
+      if (!notification.bookingId) return;
+      navigate(`/chat/${notification.bookingId}`);
+      return;
+    }
 
-    navigate(`/chat/${notification.bookingId}`);
-    return;
-  }
+    if (type === "BOOKING_REQUEST") {
+      navigate("/availableWork");
+      return;
+    }
 
-  // BOOKING REQUEST
-  if (type === "BOOKING_REQUEST") {
-    navigate("/availableWork");
-    return;
-  }
-
-  // OTHER BOOKING UPDATES
-   if (type.startsWith("BOOKING")) {
-    if (!notification.bookingId) return;
-
-   navigate("/availableWork");
-  }
-};
+    if (type.startsWith("BOOKING")) {
+      if (!notification.bookingId) return;
+      navigate(`/availableWork`);
+    }
+  };
 
   const title =
     notification.title || notificationsTranslations.defaultTitle;
@@ -81,8 +78,9 @@ export default function NotificationItem({
 
   return (
     <div
-      onClick={handleNavigate}
+      onClick={!isRead ? handleNavigate : undefined}
       className={`flex items-center justify-between gap-4 p-4 rounded-xl border transition-all duration-200
+
         ${
           isSelected
             ? "border-blue-500 ring-2 ring-blue-500/20"
@@ -90,17 +88,23 @@ export default function NotificationItem({
             ? "border-gray-800"
             : "border-gray-200"
         }
+
         ${
           theme === "dark"
-            ? "bg-gray-900 hover:bg-gray-800"
+            ? isRead
+              ? "bg-gray-900 opacity-50"
+              : "bg-gray-900 hover:bg-gray-800"
+            : isRead
+            ? "bg-gray-100 opacity-60"
             : "bg-white hover:bg-gray-50"
         }
-        cursor-pointer
+
+        ${isRead ? "cursor-not-allowed" : "cursor-pointer"}
       `}
     >
       {/* LEFT */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        
+
         {/* CHECKBOX */}
         <div onClick={handleSelect}>
           <Checkbox
@@ -123,9 +127,7 @@ export default function NotificationItem({
         <div className="flex-1 min-w-0">
           <h3
             className={`font-semibold truncate ${
-              theme === "dark"
-                ? "text-gray-100"
-                : "text-gray-900"
+              theme === "dark" ? "text-gray-100" : "text-gray-900"
             }`}
           >
             {title}
@@ -133,9 +135,7 @@ export default function NotificationItem({
 
           <p
             className={`text-sm truncate ${
-              theme === "dark"
-                ? "text-gray-400"
-                : "text-gray-600"
+              theme === "dark" ? "text-gray-400" : "text-gray-600"
             }`}
           >
             {message}
@@ -143,30 +143,33 @@ export default function NotificationItem({
         </div>
       </div>
 
-      {/* RIGHT ACTIONS */}
-      <div
-        className="flex items-center gap-2"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* SELECTED READ BUTTON */}
+      {/* RIGHT */}
+      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+
         {!isRead && isSelected && (
           <Button
-            onClick={() => markAsRead(notification._id)}
+            onClick={() => {
+              markAsRead(notification._id);
+              onMarkedRead?.(notification._id);
+            }}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             {translations.notifications.read}
           </Button>
         )}
 
-        {/* QUICK READ */}
         {!isRead && !isSelected && (
           <Button
-            onClick={() => markAsRead(notification._id)}
+            onClick={() => {
+              markAsRead(notification._id);
+              onMarkedRead?.(notification._id);
+            }}
             className="rounded-full w-9 h-9 p-0 bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Check className="w-4 h-4" />
           </Button>
         )}
+
       </div>
     </div>
   );

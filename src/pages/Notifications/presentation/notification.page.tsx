@@ -37,17 +37,12 @@ export default function NotificationsPage() {
   const notificationTranslations = t("notifications");
   const { theme } = useTheme();
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-  } = useNotifications({
+  const { data, isLoading, isFetching } = useNotifications({
     page,
     limit,
     unreadOnly: filter === "unread" ? true : undefined,
     type: CATEGORY_MAP[selectedCategory],
   });
-  console.log(data);
 
   const { mutate: markAsReadApi } = useMarkAsRead();
   const { mutate: markAllRead, isPending } = useMarkAllRead();
@@ -66,7 +61,7 @@ export default function NotificationsPage() {
   const readCount = totalCount - unreadCount;
 
   // =========================
-  // UNREAD FILTER (IMPORTANT)
+  // PAGE UNREAD ONLY (IMPORTANT FIX)
   // =========================
   const unreadNotifications = useMemo(
     () => notifications.filter((n: any) => !n.isRead),
@@ -74,36 +69,35 @@ export default function NotificationsPage() {
   );
 
   // =========================
-  // SELECT SINGLE (BLOCK READ)
+  // SELECT SINGLE
   // =========================
   const handleSelectNotification = (id: string) => {
     const target = notifications.find((n: any) => n._id === id);
-
-    if (!target || target.isRead) return; // 🚫 prevent read selection
+    if (!target || target.isRead) return;
 
     setSelectedIds((prev) =>
       prev.includes(id)
-        ? prev.filter((item) => item !== id)
+        ? prev.filter((x) => x !== id)
         : [...prev, id]
     );
   };
 
   // =========================
-  // SELECT ALL (UNREAD ONLY)
+  // SELECT ALL (PAGE ONLY FIXED)
   // =========================
   const toggleSelectAll = () => {
-    const unreadIds = unreadNotifications.map((n: any) => n._id);
+    const pageUnreadIds = unreadNotifications.map((n: any) => n._id);
 
     const allSelected =
-      unreadIds.length > 0 &&
-      unreadIds.every((id) => selectedIds.includes(id));
+      pageUnreadIds.length > 0 &&
+      pageUnreadIds.every((id: string) => selectedIds.includes(id));
 
     if (allSelected) {
       setSelectedIds((prev) =>
-        prev.filter((id) => !unreadIds.includes(id))
+        prev.filter((id) => !pageUnreadIds.includes(id))
       );
     } else {
-      setSelectedIds(unreadIds);
+      setSelectedIds(pageUnreadIds);
     }
   };
 
@@ -116,8 +110,12 @@ export default function NotificationsPage() {
   };
 
   // =========================
-  // EFFECTS
+  // AUTO CLEANUP AFTER MARK AS READ
   // =========================
+  const handleMarkedRead = (id: string) => {
+    setSelectedIds((prev) => prev.filter((x) => x !== id));
+  };
+
   useEffect(() => {
     setPage(1);
   }, [filter, limit, selectedCategory]);
@@ -126,9 +124,7 @@ export default function NotificationsPage() {
     setSelectedIds([]);
   }, [page]);
 
-  if (isLoading) {
-    return <CommonSpinner />;
-  }
+  if (isLoading) return <CommonSpinner />;
 
   return (
     <div className={`p-4 ${theme === "dark" ? "text-white" : ""}`}>
@@ -149,10 +145,11 @@ export default function NotificationsPage() {
           isPending={isPending}
           setLimit={setLimit}
           selectedCount={selectedIds.length}
-          toggleSelectAll={toggleSelectAll}   // ✅ IMPORTANT
+          toggleSelectAll={toggleSelectAll}
+          currentPageUnreadCount={unreadNotifications.length}
         />
 
-        {/* EMPTY STATE */}
+        {/* EMPTY */}
         {notifications.length === 0 ? (
           <CommonCard className="flex items-center justify-center gap-2 py-10">
             <Bell className="w-5 h-5" />
@@ -170,11 +167,11 @@ export default function NotificationsPage() {
                   markAsRead={markAsRead}
                   isSelected={selectedIds.includes(notification._id)}
                   onSelect={handleSelectNotification}
+                  onMarkedRead={handleMarkedRead}
                 />
               ))}
             </div>
 
-            {/* LOADING */}
             {isFetching && <CommonSpinner />}
 
             {/* PAGINATION */}

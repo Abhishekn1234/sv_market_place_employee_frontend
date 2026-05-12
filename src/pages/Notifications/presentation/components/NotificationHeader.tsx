@@ -19,31 +19,31 @@ export default function NotificationsHeader({
   totalCount,
   setFilter,
   markSelectedAsRead,
-  markAllRead,
+  // markAllRead,
   isPending,
   limit,
   setLimit,
   selectedCount,
   selectedCategory,
   setSelectedCategory,
-
   toggleSelectAll,
-  // allSelected,
+  currentPageUnreadCount, // ✅ IMPORTANT ADD
 }: any) {
   const { t, translations } = useLanguage();
   const notificationsTranslations = translations.notifications;
+
   const hasSelection = selectedCount > 0;
 
   // =========================
-  // DERIVED STATE
+  // FIX: PAGE BASED COUNT (NOT GLOBAL)
   // =========================
-  const selectableCount = unreadCount;
+  const selectableCount = currentPageUnreadCount;
 
   const isAllSelected =
-    selectableCount > 0 && selectedCount === selectableCount;
+    selectableCount > 0 &&
+    selectedCount === selectableCount;
 
-  // const isPartialSelected =
-  //   selectedCount > 0 && selectedCount < selectableCount;
+  const isDisabledBulk = isPending || selectedCount === 0;
 
   return (
     <div className="p-4 border rounded-lg space-y-4">
@@ -51,45 +51,40 @@ export default function NotificationsHeader({
       {/* TOP ROW */}
       <div className="flex justify-between items-center">
 
-        {/* LEFT TITLE + SELECT ALL */}
+        {/* LEFT */}
         <div className="flex items-center gap-3">
 
-          {/* SELECT ALL CHECKBOX */}
+          {/* SELECT ALL */}
           <Checkbox
-  checked={isAllSelected}
-  onCheckedChange={toggleSelectAll}
-  disabled={selectableCount === 0}
-/>
-          {/* LABEL */}
+            checked={isAllSelected}
+            onCheckedChange={toggleSelectAll}
+            disabled={selectableCount === 0}
+          />
+
           <div className="text-sm font-medium">
             {isAllSelected
               ? t("notifications.unselectAll")
               : t("notifications.selectAll")}
           </div>
 
-          {/* TITLE */}
           <h2 className="text-lg font-semibold flex items-center gap-2 ml-4">
             <Bell /> {notificationsTranslations.title}
           </h2>
         </div>
 
         {/* BULK ACTION */}
-              {hasSelection && selectedCount > 0 && (
+        {hasSelection && (
           <Button
-            onClick={selectedCount > 0 ? markSelectedAsRead : markAllRead}
-            disabled={isPending || (!hasSelection && selectableCount === 0)}
+            onClick={markSelectedAsRead}
+            disabled={isDisabledBulk}
             className="bg-blue-600 text-white"
           >
             <Check className="w-4 h-4 mr-1" />
-
-            {selectedCount > 0
-              ? translations.notifications.markSelected
-              : translations.notifications.markAllRead}
-
-            {selectedCount > 0 && ` (${selectedCount})`}
+            {translations.notifications.markSelected}
+            {" "}
+            ({selectedCount})
           </Button>
         )}
-        
       </div>
 
       {/* SECOND ROW */}
@@ -97,6 +92,7 @@ export default function NotificationsHeader({
 
         {/* FILTERS */}
         <div className="flex gap-2 flex-wrap">
+
           <Button
             onClick={() => setFilter("all")}
             className="bg-gray-100 text-black hover:text-white"
@@ -117,6 +113,7 @@ export default function NotificationsHeader({
           >
             {translations.notifications.read} ({readCount})
           </Button>
+
         </div>
 
         {/* DROPDOWNS */}
