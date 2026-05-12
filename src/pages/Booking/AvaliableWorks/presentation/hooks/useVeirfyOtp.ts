@@ -19,12 +19,18 @@ export function useVerifyOtp() {
     onSuccess: (updatedWork) => {
       const id = updatedWork._id;
 
-      // React Query
+      // ✅ 1. INSTANT REMOVE FROM CACHE
       queryClient.setQueryData(ASSIGNED_WORKS_KEY, (old: any[] = []) =>
         old.filter((w) => w._id !== id)
       );
 
-      // Zustand sync
+      // ⚠️ 2. FORCE SYNC (prevents stale overwrite)
+      queryClient.invalidateQueries({
+        queryKey: ASSIGNED_WORKS_KEY,
+        refetchType: "none", // IMPORTANT
+      });
+
+      // ✅ 3. Zustand sync
       useBookingSocketStore.getState().removeAssigned(id);
 
       toast.success("OTP verified successfully");

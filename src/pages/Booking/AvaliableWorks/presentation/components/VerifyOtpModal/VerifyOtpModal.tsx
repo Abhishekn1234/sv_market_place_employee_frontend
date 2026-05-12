@@ -8,9 +8,10 @@ import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
 import { normalizeAssignedWorks } from "../../helpers/workPresentation.helpers";
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
-import { ASSIGNED_WORKS_KEY } from "../../hooks/useAssign";
-import { useQueryClient } from "@tanstack/react-query";
-import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+// import { ASSIGNED_WORKS_KEY } from "../../hooks/useAssign";
+// import { useQueryClient } from "@tanstack/react-query";
+// import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+import { Input } from "@/components/ui/input";
 
 type Props<TWork extends DisplayWork | Work> = {
   work: TWork;
@@ -30,7 +31,7 @@ export default function VerifyOtpModal<TWork extends DisplayWork | Work>({
   const { mutate, isPending } = useVerifyOtp();
   // const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
 //  const removeAssigned = useBookingSocketStore((s) => s.removeAssigned);
-const queryClient = useQueryClient();
+// const queryClient = useQueryClient();
   if (!open) return null;
 
   const handleVerify = () => {
@@ -43,24 +44,10 @@ const queryClient = useQueryClient();
         purpose: "WORK_COMPLETE",
       },
       {
-      onSuccess: (res) => {
+     onSuccess: (res) => {
   const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
 
   if (updatedWork) {
-    const id = updatedWork._id;
-
-    // 1. React Query cache update
-    queryClient.setQueryData(ASSIGNED_WORKS_KEY, (old: any[] = []) => {
-      return old.filter((item) => item._id !== id);
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: ASSIGNED_WORKS_KEY,
-    });
-
-    // 2. Zustand store sync (IMPORTANT)
-    useBookingSocketStore.getState().removeAssigned(id);
-
     onSuccess(updatedWork as TWork);
   }
 
@@ -77,7 +64,7 @@ const queryClient = useQueryClient();
           {t("workHistory.actions.verifyOtp")}
         </h2>
 
-        <input
+        <Input
           type="text"
           value={otp}
           onChange={(event) => setOtp(event.target.value)}
