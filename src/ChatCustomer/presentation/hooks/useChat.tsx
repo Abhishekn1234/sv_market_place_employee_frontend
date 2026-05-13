@@ -11,8 +11,8 @@ import { baseURL } from "@/api/apiConfig";
 import { useChatMessages } from "./useChatMessages";
 import { useSendChatMessage } from "./useSendChatMessage";
 import type { Message } from "@/ChatCustomer/domain/entities/chat";
-import { showBrowserNotification } from "./showBrowserNotification";
-import { playIncomingMessageSound } from "./PlayIncomingMessageSound";
+// import { showBrowserNotification } from "./showBrowserNotification";
+// import { playIncomingMessageSound } from "./PlayIncomingMessageSound";
 import { mergeUniqueMessages } from "./mergeUniqueMessages";
 const SOCKET_URL = `${baseURL}/chat`;
 const messageCache = new Map<string, Message[]>();
@@ -273,16 +273,14 @@ export function useChat(
           return next;
         });
 
-       if (!nextMessage.self) {
-        playIncomingMessageSound();
-
-            showBrowserNotification(
-            nextMessage.senderName ||
-              "New Message",
-            nextMessage.text,
-            bookingId
-          );
-      }
+     if (!nextMessage.self) {
+  // optional: emit event instead of UI logic
+  window.dispatchEvent(
+    new CustomEvent("chat:new-message", {
+      detail: nextMessage,
+    })
+  );
+}
       }
     );
 

@@ -8,6 +8,7 @@ import CommonSpinner from "@/components/common/CommonSpinner";
 import ChatWindow from "./components/ChatWindow";
 import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
 import { useLanguage } from "@/context/LanguageContext";
+import { Button } from "@/components/ui/button";
 
 export default function ChatWorkerPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -46,14 +47,14 @@ export default function ChatWorkerPage() {
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
             {t("chat.bookingNotFoundDescription")}
           </p>
-          <button
+          <Button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/availableWork")}
             className="mt-5 inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-accent hover:text-accent-foreground"
           >
             <BackIcon className="h-4 w-4" />
             {t("chat.back")}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -66,7 +67,7 @@ export default function ChatWorkerPage() {
       <div className="mx-auto flex h-[calc(100dvh-120px)] w-full max-w-5xl flex-col">
         <ChatWindow
           bookingId={bookingId!}
-          onBack={() => navigate(-1)}
+          onBack={() => navigate("/availableWork")}
           customer={{
             name: customer?.fullName,
             id: customer?._id,

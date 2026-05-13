@@ -4,6 +4,7 @@ import type { Notification } from "../../domain/entities/notification";
 
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +14,8 @@ import { useLanguage } from "@/context/LanguageContext";
 
 import { getTypeIcon } from "../utils/gettypeicon";
 import { getTypeColor } from "../utils/gettypecolor";
+
+import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
 
 type Props = {
   notification: Notification;
@@ -36,6 +39,20 @@ export default function NotificationItem({
   const navigate = useNavigate();
 
   const isRead = notification.isRead;
+  const ALLOWED_STATUSES = [
+  "IN_PROGRESS",
+  "WORKER_ACCEPTED",
+  "WORK_COMPLETED_PENDING",
+] as const;
+
+  // =========================
+  // ASSIGNED WORKS
+  // =========================
+  const { assignedWorks } = useAssign();
+
+//  console.log(assignedWorks);
+
+  
 
   // =========================
   // SELECT
@@ -46,29 +63,51 @@ export default function NotificationItem({
 
     onSelect?.(notification._id);
   };
+  const getAssignedBooking = (id?: string) => {
+  if (!id) return null;
+  return assignedWorks?.find((a) => a.booking?._id === id)?.booking || null;
+};
 
   // =========================
   // NAVIGATE
   // =========================
-  const handleNavigate = () => {
-    const type = notification.type;
+const handleNavigate = () => {
+  const type = notification.type;
+  const bookingId = notification.bookingId;
+  // console.log(bookingId);
+  const booking = getAssignedBooking(bookingId);
+  // console.log(booking);
+  const isAllowed = booking?.status
+    ? ALLOWED_STATUSES.includes(booking.status as any)
+    : false;
 
-    if (type.startsWith("CHAT")) {
-      if (!notification.bookingId) return;
-      navigate(`/chat/${notification.bookingId}`);
+  // CHAT
+  if (type.startsWith("CHAT")) {
+    if (!booking) {
+      toast.error("Booking not found or already finished.");
       return;
     }
 
-    if (type === "BOOKING_REQUEST") {
-      navigate("/availableWork");
+    navigate(`/chat/${bookingId}`);
+    return;
+  }
+
+  // BOOKING REQUEST
+  if (type === "BOOKING_REQUEST" || type.startsWith("BOOKING")) {
+    if (!booking) {
+      toast.error("Booking not found or already finished.");
       return;
     }
 
-    if (type.startsWith("BOOKING")) {
-      if (!notification.bookingId) return;
-      navigate(`/availableWork`);
+    if (!isAllowed) {
+      toast.error("Booking is not in an active state.");
+      return;
     }
-  };
+
+    navigate("/availableWork");
+    return;
+  }
+};
 
   const title =
     notification.title || notificationsTranslations.defaultTitle;
@@ -80,7 +119,6 @@ export default function NotificationItem({
     <div
       onClick={!isRead ? handleNavigate : undefined}
       className={`flex items-center justify-between gap-4 p-4 rounded-xl border transition-all duration-200
-
         ${
           isSelected
             ? "border-blue-500 ring-2 ring-blue-500/20"
@@ -104,13 +142,9 @@ export default function NotificationItem({
     >
       {/* LEFT */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
-
         {/* CHECKBOX */}
         <div onClick={handleSelect}>
-          <Checkbox
-            checked={isSelected}
-            disabled={isRead}
-          />
+          <Checkbox checked={isSelected} disabled={isRead} />
         </div>
 
         {/* ICON */}
@@ -144,8 +178,10 @@ export default function NotificationItem({
       </div>
 
       {/* RIGHT */}
-      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-
+      <div
+        className="flex items-center gap-2"
+        onClick={(e) => e.stopPropagation()}
+      >
         {!isRead && isSelected && (
           <Button
             onClick={() => {
@@ -169,7 +205,6 @@ export default function NotificationItem({
             <Check className="w-4 h-4" />
           </Button>
         )}
-
       </div>
     </div>
   );

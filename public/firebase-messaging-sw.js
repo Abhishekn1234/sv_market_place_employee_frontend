@@ -27,166 +27,95 @@ self.addEventListener("message", (event) => {
     self.skipWaiting();
   }
 });
+function getNotificationContent(data) {
+  const base = {
+    title: "Notification",
+    body: "You have a new update",
+    url: "/notifications",
+  };
 
+  const map = {
+    NEW_MESSAGE: {
+      title: "New chat message",
+      body: "You received a new message in chat",
+      url: `/chat/${data.bookingId}`,
+    },
+
+    BOOKING_REQUEST: {
+      title: "New booking request",
+      body: "Tap to view booking",
+      url: `/availableWork`,
+    },
+
+    WORK_ASSIGNED: {
+      title: "Work assigned",
+      body: "A new work has been assigned",
+      url: `/currentWork`,
+    },
+
+    BOOKING_UPDATED: {
+      title: "Booking updated",
+      body: "Booking status updated",
+      url: `/availableBooking?bookingId=${data.bookingId}`,
+    },
+  };
+
+  return map[data.type] || base;
+}
 // ✅ BACKGROUND MESSAGE
-messaging.onBackgroundMessage(async (payload) => {
-  console.log("📩 Background message:", payload);
+messaging.onBackgroundMessage((payload) => {
+  const data = payload?.data;
+  if (!data) return;
 
-  if (!payload?.data) return;
+  const { title, body, url } = getNotificationContent(data);
 
-  const data = payload.data;
-
-  const title =
-    data.title || "New Notification";
-
-  const body =
-    data.body || "You have a new update";
-
-  // ✅ UNIQUE TAG
-  const tag =
-    data.notificationId ||
-    `${Date.now()}-${Math.random()}`;
-
-  // ✅ ROUTE
-  let url = "/notifications";
-
-  switch (data.type) {
-    case "BOOKING_REQUEST":
-      url = `/availableBooking?bookingId=${data.bookingId}`;
-      break;
-
-    case "NEW_MESSAGE":
-      url = `/chat/${data.bookingId}`;
-      break;
-
-    case "WORK_ASSIGNED":
-      url = `/currentWork`;
-      break;
-
-    default:
-      url = "/notifications";
-  }
-
-  // ✅ ACTION BUTTONS
-  let actions = [];
-
-  switch (data.type) {
-    case "BOOKING_REQUEST":
-      actions = [
-        {
-          action: "open_booking",
-          title: "Open Booking",
-        },
-      ];
-      break;
-
-    case "NEW_MESSAGE":
-      actions = [
-        {
-          action: "open_chat",
-          title: "Open Chat",
-        },
-      ];
-      break;
-
-    case "WORK_ASSIGNED":
-      actions = [
-        {
-          action: "open_work",
-          title: "Open Work",
-        },
-      ];
-      break;
-
-    default:
-      actions = [
-        {
-          action: "open_notifications",
-          title: "Open",
-        },
-      ];
-  }
-
-  // ✅ SHOW NOTIFICATION
   self.registration.showNotification(title, {
     body,
-
     icon: "/icon.jpg",
     badge: "/icon.jpg",
-
     requireInteraction: true,
-
-    tag,
-
-    renotify: true,
-
-    actions,
-
+    actions: [
+      { action: "open", title: "Open" }
+    ],
     data: {
-      ...data,
       url,
+      type: data.type,
+      bookingId: data.bookingId,
     },
   });
 });
 
 // ✅ CLICK HANDLER
-self.addEventListener(
-  "notificationclick",
-  (event) => {
-    event.notification.close();
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
 
-    const data =
-      event.notification.data || {};
+  const data = event.notification.data || {};
 
-    let url =
-      data.url || "/notifications";
+  let url = data.url || "/notifications";
 
-    // ✅ BUTTON CLICK
-    switch (event.action) {
-      case "open_booking":
-        url = `/availableBooking?bookingId=${data.bookingId}`;
-        break;
-
-      case "open_chat":
-        url = `/chat/${data.bookingId}`;
-        break;
-
-      case "open_work":
-        url = `/currentWork`;
-        break;
-
-      default:
-        break;
-    }
-
-    event.waitUntil(
-      (async () => {
-        const clientsArr =
-          await self.clients.matchAll({
-            type: "window",
-            includeUncontrolled: true,
-          });
-
-        // ✅ EXISTING TAB
-        for (const client of clientsArr) {
-          await client.focus();
-
-          client.postMessage({
-            type: "NAVIGATE",
-            url,
-          });
-
-          channel.postMessage({
-            type: "NAVIGATE",
-            url,
-          });
-
-          return;
-        }
-
-        // ✅ NEW TAB
-        return self.clients.openWindow(url);
-      })()
-    );
+  if (event.action === "open") {
+    url = data.url;
   }
-);
+
+  event.waitUntil(
+    (async () => {
+      const clientsArr = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+
+      for (const client of clientsArr) {
+        client.focus();
+
+        client.postMessage({
+          type: "NAVIGATE",
+          url,
+        });
+
+        return;
+      }
+
+      return self.clients.openWindow(url);
+    })()
+  );
+});

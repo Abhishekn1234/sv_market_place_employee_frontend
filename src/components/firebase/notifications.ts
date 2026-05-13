@@ -34,23 +34,13 @@ export const initOnMessage = async () => {
 
   const audio = new Audio("/notification.wav");
 
-  const channel = new BroadcastChannel("fcm_channel");
-
   onMessage(messaging, (payload) => {
-    console.log("📩 Foreground message:", payload);
+    const data = payload?.data;
+    if (!data) return;
 
-    const title = payload?.data?.title || "New Notification";
-    const url = payload?.data?.url || "/notifications";
-
-    // 🔊 sound
     audio.currentTime = 0;
     audio.play().catch(() => {});
 
-    // 📡 unified navigation channel
-    channel.postMessage({
-      type: "NAVIGATE",
-      url,
-      title,
-    });
+    console.log("📩 Foreground message:", data);
   });
 };

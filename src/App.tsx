@@ -63,13 +63,13 @@ function AppContent() {
   useNotificationManager();
 
   // ✅ FOREGROUND FCM
-  useEffect(() => {
-    if (initializedRef.current) return;
+ useEffect(() => {
+  if (initializedRef.current) return;
 
-    initializedRef.current = true;
+  initializedRef.current = true;
 
-    initOnMessage();
-  }, []);
+  initOnMessage();
+}, []);
 
   // ✅ SERVICE WORKER REGISTER
   useEffect(() => {
