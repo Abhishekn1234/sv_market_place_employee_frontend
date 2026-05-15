@@ -35,6 +35,12 @@ function getNotificationContent(data) {
   };
 
   const map = {
+    CHAT_MESSAGE: {
+      title: "New chat message",
+      body: "You received a new message in chat",
+      url: `/chat/${data.bookingId}`,
+    },
+
     NEW_MESSAGE: {
       title: "New chat message",
       body: "You received a new message in chat",
@@ -54,8 +60,8 @@ function getNotificationContent(data) {
     },
 
     BOOKING_UPDATED: {
-      title: "Booking updated",
-      body: "Booking status updated",
+      title: "Booking status updated",
+      body: "Tap to view booking",
       url: `/availableBooking?bookingId=${data.bookingId}`,
     },
   };

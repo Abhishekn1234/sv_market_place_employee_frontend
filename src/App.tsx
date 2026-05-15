@@ -104,65 +104,93 @@ function AppContent() {
   }, []);
 
   // ✅ NAVIGATION HANDLER
-  useEffect(() => {
-    const channel = new BroadcastChannel("fcm_channel");
+ // ✅ NAVIGATION HANDLER
+useEffect(() => {
+  const channel = new BroadcastChannel("fcm_channel");
 
-    // ✅ BroadcastChannel messages
-    const channelHandler = (event: MessageEvent) => {
-      const data = event.data;
+  const allowedRoutes = [
+    "/availableBooking",
+    "/chat",
+    "/currentWork",
+    "/availableWork",
+    "/notifications",
+  ];
 
-      console.log("📡 BroadcastChannel:", data);
+  const canNavigate = (url?: string) => {
+    if (!url) return false;
 
-                  const allowedRoutes = [
-                "/availableBooking",
-                "/chat",
-                "/currentWork",
-                "/availableWork",
-                "/notifications",
-              ];
+    return allowedRoutes.some((route) =>
+      url.startsWith(route)
+    );
+  };
 
-              const isAllowed = allowedRoutes.some((route) =>
-                data.url?.startsWith(route)
-              );
+  // ✅ BroadcastChannel messages
+  const channelHandler = (event: MessageEvent) => {
+    const data = event.data;
 
-              if (data?.type === "NAVIGATE" && isAllowed) {
-                navigate(data.url);
-              }
-    };
+    console.log("📡 BroadcastChannel:", data);
 
-    // ✅ Service worker messages
-    const swHandler = (event: MessageEvent) => {
-      const data = event.data;
-
-      console.log("📨 SW Message:", data);
-
-      if (data?.type === "NAVIGATE" && data.url) {
+    if (
+      data?.type === "NAVIGATE" &&
+      canNavigate(data.url)
+    ) {
+      // prevent duplicate navigation
+      if (
+        window.location.pathname +
+          window.location.search !==
+        data.url
+      ) {
         navigate(data.url);
       }
-    };
+    }
+  };
 
-    channel.addEventListener("message", channelHandler);
+  // ✅ Service worker messages
+  const swHandler = (event: MessageEvent) => {
+    const data = event.data;
 
-    navigator.serviceWorker?.addEventListener(
+    console.log("📨 SW Message:", data);
+
+    if (
+      data?.type === "NAVIGATE" &&
+      canNavigate(data.url)
+    ) {
+      // prevent duplicate navigation
+      if (
+        window.location.pathname +
+          window.location.search !==
+        data.url
+      ) {
+        navigate(data.url);
+      }
+    }
+  };
+
+  channel.addEventListener(
+    "message",
+    channelHandler
+  );
+
+  navigator.serviceWorker?.addEventListener(
+    "message",
+    swHandler
+  );
+
+  // ✅ cleanup
+  return () => {
+    channel.removeEventListener(
+      "message",
+      channelHandler
+    );
+
+    navigator.serviceWorker?.removeEventListener(
       "message",
       swHandler
     );
 
-    // ✅ cleanup
-    return () => {
-      channel.removeEventListener(
-        "message",
-        channelHandler
-      );
-
-      navigator.serviceWorker?.removeEventListener(
-        "message",
-        swHandler
-      );
-
-      channel.close();
-    };
-  }, [navigate]);
+    channel.close();
+  };
+}, [navigate]);
 
   return (
     <LanguageProvider>
