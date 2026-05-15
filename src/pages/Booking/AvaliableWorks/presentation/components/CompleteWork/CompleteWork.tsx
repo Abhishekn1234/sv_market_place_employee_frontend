@@ -59,7 +59,7 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
         } as TWork;
 
         onSuccess(updatedWork);
-        toast.success(t("completeWork.success"));
+        // toast.success(t("completeWork.success"));
         onClose();
       },
 

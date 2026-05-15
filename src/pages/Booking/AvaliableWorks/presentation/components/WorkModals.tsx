@@ -35,7 +35,7 @@ export default function WorkModals({
   cancelConfirmWork,
   setCancelConfirmWork,
   cancelMutation,
-  onCancelSuccess,
+  // onCancelSuccess,
   onCompleteSuccess,
 }: WorkModalsProps) {
   const { emitStart, emitComplete, emitVerify, emitCancel, emitDispute } =
@@ -44,47 +44,56 @@ export default function WorkModals({
   const upsertAssigned = useBookingSocketStore((s) => s.upsertAssigned);
   const [disputeWork, setDisputeWork] = useState<DisplayWork | null>(null);
   const {t}=useLanguage();
-  const handleCancel = () => {
+ const handleCancel = () => {
   if (!cancelConfirmWork) return;
 
   const bookingId = getBookingId(cancelConfirmWork);
 
+  const type: CancelReasonType | undefined =
+    cancelConfirmWork.cancelType;
 
-      const type: CancelReasonType | undefined = cancelConfirmWork.cancelType;
-      if (!type) {
-        toast.error(t("cancelBooking.errorSelectReason"));
-        return;
-      }
-  if (type === "OTHER" && !cancelConfirmWork.cancelledReason) {
-    toast.error(t("cancelBooking.errorEnterReason"));
+  if (!type) {
+    toast.error(t("cancelBooking.errorSelectReason"));
+    return;
+  }
+
+  if (
+    type === "OTHER" &&
+    !cancelConfirmWork.cancelledReason
+  ) {
+    toast.error(
+      t("cancelBooking.errorEnterReason")
+    );
     return;
   }
 
   const payload: CancelWork =
-  type === "OTHER"
-    ? {
-        bookingId,
-        cancelReasonType: "OTHER",
-        cancelReason: cancelConfirmWork.cancelledReason!,
-      }
-    : {
-        bookingId,
-        cancelReasonType: type,
-      };
+    type === "OTHER"
+      ? {
+          bookingId,
+          cancelReasonType: "OTHER",
+          cancelReason:
+            cancelConfirmWork.cancelledReason!,
+        }
+      : {
+          bookingId,
+          cancelReasonType: type,
+        };
 
   cancelMutation.mutate(payload, {
-    onSuccess: (data: any) => {
-      const booking = data?.booking ?? data;
+    onSuccess: (_data: any) => {
+      // const booking =
+      //   data?.booking ?? data;
 
+      // ✅ ONLY SOCKET EMIT
       emitCancel({
         bookingId,
         status: "WORKER_CANCELLED",
       });
 
-      onCancelSuccess?.(booking);
-      toast.success(t("cancelBooking.success"));
+      // optional: keep only UI cleanup
+      setCancelConfirmWork(null);
     },
-    onSettled: () => setCancelConfirmWork(null),
   });
 };
 const CANCEL_REASONS = [

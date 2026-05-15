@@ -43,9 +43,8 @@ export function normalizeWorkStatus(status?: unknown): WorkStatus {
       "IN_PROGRESS",
       "WORK_COMPLETED_PENDING",
       "COMPLETED",
-      "WORKER_CANCELLED",
-      "WORKER_REJECTED",
-      "CUSTOMER_CANCELLED",
+       "INVOICE_GENERATED"
+      
     ].includes(normalized)
   ) {
     return normalized as WorkStatus;

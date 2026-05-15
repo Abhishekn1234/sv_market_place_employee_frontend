@@ -66,8 +66,18 @@ export default function AvailableWorkPage() {
   return Array.from(map.values());
 }, [assignedFromApi, socketBookings]);
   const workList = useMemo(() => {
-    return normalizeAssignedWorks(assignedBookings);
-  }, [assignedBookings]);
+  return normalizeAssignedWorks(
+    assignedBookings
+  ).filter((work) => {
+    const status =
+      work.status?.toUpperCase();
+
+    return (
+      status !== "CUSTOMER_CANCELLED" &&
+      status !== "WORKER_CANCELLED"
+    );
+  });
+}, [assignedBookings]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
