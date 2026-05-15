@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Menu,
   Sun,
@@ -10,6 +10,7 @@ import {
   Globe,
   LanguagesIcon,
 } from "lucide-react";
+
 import { useTheme } from "@/context/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
@@ -22,6 +23,7 @@ import { useAuthStore } from "@/core/store/auth";
 import { useProfile } from "@/pages/Profile/presentation/hooks/useProfile";
 import CommonSpinner from "../common/CommonSpinner";
 
+import OnboardingDialog from "@/components/common/OnboardingDialog";
 
 const languages = [
   { code: "EN", label: "English", icon: <LanguagesIcon /> },
@@ -49,14 +51,17 @@ export default function AppHeader({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
-  // ✅ Select only what we need (better re-render control)
-  const { data: profile } = useProfile();
-  const {user}=useAuthStore();
-const fullName = profile?.fullName || user?.fullName || "User";
-const profileImage = profile?.profilePictureUrl || user?.profilePictureUrl;
-  const workerStatus = useAuthStore((s) => s.user?.worker?.status);
-  const logout = useAuthStore((s) => s.logout);
+  // onboarding state
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
 
+  const { data: profile } = useProfile();
+  const { user, logout } = useAuthStore();
+
+  const fullName = profile?.fullName || user?.fullName || "User";
+  const profileImage =
+    profile?.profilePictureUrl || user?.profilePictureUrl;
+
+  const workerStatus = useAuthStore((s) => s.user?.worker?.status);
 
   const { updateStatus, loading } = useWorkerStatus();
 
@@ -64,12 +69,60 @@ const profileImage = profile?.profilePictureUrl || user?.profilePictureUrl;
   const isRTL = language === "AR";
 
   const isOnline = workerStatus === "ONLINE";
-  // const canToggle =
-  //   workerStatus === "ONLINE" || workerStatus === "OFFLINE";
 
-const handleToggle = (checked: boolean) => {
-  updateStatus(checked);
-};
+  // ✅ First login onboarding trigger
+  useEffect(() => {
+    const done = localStorage.getItem("onboarding_done");
+    if (!done) setOnboardingOpen(true);
+  }, []);
+
+  // --------------------------
+  // ONBOARDING STEPS
+  // --------------------------
+  const steps = [
+    {
+      id: "status",
+      label: "Set your status",
+      description: "Go online to receive jobs",
+      actionLabel: "Go Online",
+      done: isOnline,
+      onAction: () => updateStatus(true),
+    },
+    {
+      id: "language",
+      label: "Choose language",
+      description: "Select your preferred language",
+      actionLabel: "Open",
+      done: !!language,
+      onAction: () => setLangDropdownOpen(true),
+    },
+    {
+      id: "profile",
+      label: "Complete profile settings",
+      description: "Add location and details",
+      actionLabel: "Open Profile",
+      done: !!profile,
+      onAction: () => navigate("/settings/profile"),
+    },
+  ];
+
+  const allDone = steps.every((s) => s.done);
+
+  // auto close onboarding
+  useEffect(() => {
+    if (allDone && onboardingOpen) {
+      const t = setTimeout(() => {
+        setOnboardingOpen(false);
+        localStorage.setItem("onboarding_done", "true");
+      }, 1000);
+
+      return () => clearTimeout(t);
+    }
+  }, [allDone, onboardingOpen]);
+
+  const handleToggle = (checked: boolean) => {
+    updateStatus(checked);
+  };
 
   const handleLogout = () => {
     toast.success("Logged out successfully");
@@ -80,148 +133,151 @@ const handleToggle = (checked: boolean) => {
   };
 
   return (
-    <header
-      className={`flex items-center px-4 py-3 border-b transition-all ${
-        theme === "dark"
-          ? "border-gray-800 bg-gray-900 text-gray-100"
-          : "border-gray-200 bg-gray-50 text-gray-900"
-      }`}
-    >
-      <Button
-        variant="ghost"
-        onClick={() =>
-          window.innerWidth >= 1024
-            ? setMini(!mini)
-            : setMobileOpen(!mobileOpen)
-        }
-        className="p-2"
+    <>
+      {/* ================= HEADER ================= */}
+      <header
+        className={`flex items-center px-4 py-3 border-b transition-all ${
+          theme === "dark"
+            ? "border-gray-800 bg-gray-900 text-gray-100"
+            : "border-gray-200 bg-gray-50 text-gray-900"
+        }`}
       >
-        <Menu className="h-5 w-5" />
-      </Button>
-
-      <div className="flex-1" />
-
-      <div className="flex items-center gap-4">
-        {/* 🔹 Worker Status */}
-       <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-        <Switch
-          checked={isOnline}
-          onCheckedChange={handleToggle}
-          disabled={loading || !workerStatus}
-          className="
-            data-[state=checked]:bg-green-500
-            data-[state=unchecked]:bg-gray-300
-            border border-gray-400
-            shadow-sm
-          "
-        />
-
-  <span
-    className={`text-sm font-medium ${
-      isOnline ? "text-green-600" : "text-gray-500"
-    }`}
-  >
-    {workerStatus
-      ? isOnline
-        ? homeTranslations.online
-        : homeTranslations.offline
-      : <CommonSpinner/>}
-  </span>
-</div>
-
-        {/* 🔹 Theme Toggle */}
-        <Button variant="ghost" onClick={toggleTheme} className="p-2">
-          {theme === "light" ? (
-            <Moon className="h-5 w-5 text-gray-700" />
-          ) : (
-            <Sun className="h-5 w-5 text-yellow-400" />
-          )}
+        {/* MENU */}
+        <Button
+          variant="ghost"
+          onClick={() =>
+            window.innerWidth >= 1024
+              ? setMini(!mini)
+              : setMobileOpen(!mobileOpen)
+          }
+          className="p-2"
+        >
+          <Menu className="h-5 w-5" />
         </Button>
 
-        {/* 🔹 Language Dropdown */}
-        <div className="relative">
-          <Button
-          variant="ghost"
-            onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-            className="flex items-center gap-2 p-2 rounded border cursor-pointer"
+        <div className="flex-1" />
+
+        {/* RIGHT ACTIONS */}
+        <div className="flex items-center gap-4">
+          {/* STATUS */}
+          <div
+            className={`flex items-center gap-3 ${
+              isRTL ? "flex-row-reverse" : ""
+            }`}
           >
-            <Globe className="h-5 w-5" />
-            <span>{language}</span>
+            <Switch
+              checked={isOnline}
+              onCheckedChange={handleToggle}
+              disabled={loading || !workerStatus}
+            />
+
+            <span
+              className={`text-sm font-medium ${
+                isOnline ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              {workerStatus ? (
+                isOnline ? (
+                  homeTranslations.online
+                ) : (
+                  homeTranslations.offline
+                )
+              ) : (
+                <CommonSpinner />
+              )}
+            </span>
+          </div>
+
+          {/* THEME */}
+          <Button variant="ghost" onClick={toggleTheme} className="p-2">
+            {theme === "light" ? (
+              <Moon className="h-5 w-5 text-gray-700" />
+            ) : (
+              <Sun className="h-5 w-5 text-yellow-400" />
+            )}
           </Button>
 
-          {langDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-36 rounded-md border shadow-lg z-50 bg-white text-black">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => {
-                    setLanguage(lang.code as "EN" | "AR" | "HI");
-                    setLangDropdownOpen(false);
-                  }}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-gray-100"
-                >
-                  <span>{lang.icon}</span>
-                  <span>{lang.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+          {/* LANGUAGE */}
+          <div className="relative">
+            <Button
+              variant="ghost"
+              onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+            >
+              <Globe className="h-5 w-5" />
+              <span>{language}</span>
+            </Button>
 
-        {/* 🔹 Profile Dropdown */}
-        <div className="relative">
-          <Button
-            variant="ghost"
-            className="flex items-center gap-2 p-1"
-            onClick={() => setDropdownOpen((p) => !p)}
-          >
-            {profileImage ? (
-              <img
-                src={profileImage}
-                alt={fullName}
-                className="h-8 w-8 rounded-full object-cover border"
-              />
-            ) : (
-              <div className="h-8 w-8 rounded-full flex items-center justify-center font-semibold bg-gray-300">
-                {fullName
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
+            {langDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-36 bg-white border rounded-md shadow-lg z-50">
+                {languages.map((lang) => (
+                  <Button
+                    key={lang.code}
+                    variant="ghost"
+                    onClick={() => {
+                      setLanguage(lang.code as "EN" | "AR" | "HI");
+                      setLangDropdownOpen(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2 hover:bg-gray-100"
+                  >
+                    <span>{lang.icon}</span>
+                    {lang.label}
+                  </Button>
+                ))}
               </div>
             )}
-            <span className="text-sm font-medium truncate max-w-[120px]">
-              {fullName || "User"}
-            </span>
-          </Button>
+          </div>
 
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white border z-50">
-              <ul className="py-1">
-                <li>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start px-4 py-2 gap-2"
-                    onClick={() => navigate("/settings/profile")}
-                  >
-                    <Settings className="h-4 w-4" /> Profile Settings
-                  </Button>
-                </li>
-                <li>
-                  <Button
-                    variant="ghost"
-                    onClick={handleLogout}
-                    className="w-full justify-start px-4 py-2 gap-2 text-red-600"
-                  >
-                    <LogOut className="h-4 w-4" /> Sign Out
-                  </Button>
-                </li>
-              </ul>
-            </div>
-          )}
+          {/* PROFILE */}
+          <div className="relative">
+            <Button
+              variant="ghost"
+              onClick={() => setDropdownOpen((p) => !p)}
+              className="flex items-center gap-2"
+            >
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  className="h-8 w-8 rounded-full"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                  {fullName?.slice(0, 2)}
+                </div>
+              )}
+              <span className="text-sm">{fullName}</span>
+            </Button>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-50">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-4 py-2"
+                  onClick={() => navigate("/settings/profile")}
+                >
+                  <Settings className="h-4 w-4" />
+                  {translations.sidebar.profileSettings}
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-4 py-2 text-red-600"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4" />
+                 {translations.sidebar.logout}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* ================= ONBOARDING DIALOG ================= */}
+      <OnboardingDialog
+        open={onboardingOpen}
+        onOpenChange={setOnboardingOpen}
+        steps={steps}
+      />
+    </>
   );
 }
