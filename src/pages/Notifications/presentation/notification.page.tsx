@@ -11,6 +11,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useNotifications } from "./hooks/useNotification";
 import { useMarkAsRead } from "./hooks/useMarkasRead";
 
+
 import {
   Pagination,
   PaginationContent,
@@ -81,7 +82,9 @@ export default function NotificationsPage() {
         : [...prev, id]
     );
   };
-
+  const unreadSelectedIds = selectedIds.filter((id) =>
+  notifications.find((n: any) => n._id === id && !n.isRead)
+);
   // =========================
   // SELECT ALL (PAGE ONLY FIXED)
   // =========================
@@ -104,11 +107,17 @@ export default function NotificationsPage() {
   // =========================
   // BULK READ
   // =========================
-  const markSelectedAsRead = () => {
-    selectedIds.forEach((id) => markAsRead(id));
-    setSelectedIds([]);
-  };
+const markSelectedAsRead = () => {
+  const ids = selectedIds.filter((id) =>
+    notifications.some((n: any) => n._id === id && !n.isRead)
+  );
 
+  if (ids.length === 0) return;
+
+  ids.forEach((id) => markAsRead(id));
+
+  setSelectedIds([]);
+};
   // =========================
   // AUTO CLEANUP AFTER MARK AS READ
   // =========================
@@ -144,7 +153,7 @@ export default function NotificationsPage() {
           limit={limit}
           isPending={isPending}
           setLimit={setLimit}
-          selectedCount={selectedIds.length}
+        selectedCount={unreadSelectedIds.length}
           toggleSelectAll={toggleSelectAll}
           currentPageUnreadCount={unreadNotifications.length}
         />

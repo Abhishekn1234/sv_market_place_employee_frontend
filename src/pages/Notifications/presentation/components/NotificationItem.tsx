@@ -143,9 +143,11 @@ const handleNavigate = () => {
       {/* LEFT */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* CHECKBOX */}
-        <div onClick={handleSelect}>
-          <Checkbox checked={isSelected} disabled={isRead} />
-        </div>
+       {!isRead && (
+  <div onClick={handleSelect}>
+    <Checkbox checked={isSelected} />
+  </div>
+)}
 
         {/* ICON */}
         <div

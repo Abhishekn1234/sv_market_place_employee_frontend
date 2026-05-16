@@ -19,7 +19,7 @@ export default function NotificationsHeader({
   totalCount,
   setFilter,
   markSelectedAsRead,
-  // markAllRead,
+   markAllRead,
   isPending,
   limit,
   setLimit,
@@ -74,17 +74,25 @@ export default function NotificationsHeader({
 
         {/* BULK ACTION */}
         {hasSelection && (
-          <Button
-            onClick={markSelectedAsRead}
-            disabled={isDisabledBulk}
-            className="bg-blue-600 text-white"
-          >
-            <Check className="w-4 h-4 mr-1" />
-            {translations.notifications.markSelected}
-            {" "}
-            ({selectedCount})
-          </Button>
-        )}
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                onClick={markSelectedAsRead}
+                disabled={isDisabledBulk}
+                className="bg-blue-600 text-white"
+              >
+                <Check className="w-4 h-4 mr-1" />
+                {translations.notifications.markSelected} ({selectedCount})
+              </Button>
+
+              <Button
+                onClick={markAllRead}
+                disabled={isPending}
+                className="bg-gray-600 text-white"
+              >
+                {translations.notifications.markAllRead}
+              </Button>
+            </div>
+          )}
       </div>
 
       {/* SECOND ROW */}
