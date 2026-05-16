@@ -150,6 +150,7 @@ export default function Disputespage() {
           </div>
         ) : (
           <CommonTable
+          currentPage={1}
             columns={columns}
             data={data}
             keyExtractor={(row) => row._id}

@@ -89,6 +89,7 @@ export default function DisputeModal({
 
           {!isLoading && disputes.length > 0 && (
             <CommonTable<Dispute>
+             
               columns={columns}
               data={disputes}
               keyExtractor={(d) => d._id}

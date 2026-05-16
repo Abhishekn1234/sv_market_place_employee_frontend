@@ -32,7 +32,7 @@ interface CommonTableProps<T> {
   data: T[];
   keyExtractor: (row: T) => string;
 
-  currentPage: number;
+  currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
 
@@ -77,7 +77,7 @@ export function CommonTable<T>({
 
   const renderedColumns = isRTL ? [...columns].reverse() : columns;
 
-  const visiblePages = getVisiblePages(currentPage, totalPages, 3);
+  const visiblePages = getVisiblePages(currentPage??1, totalPages, 3);
 
   const hasData = data.length > 0;
 
@@ -177,7 +177,7 @@ export function CommonTable<T>({
           {/* Prev */}
           <PaginationPrevious
             onClick={() =>
-              onPageChange?.(Math.max(currentPage - 1, 1))
+              onPageChange?.(Math.max(currentPage??1 - 1, 1))
             }
           />
 
@@ -199,7 +199,7 @@ export function CommonTable<T>({
           <PaginationNext
             onClick={() =>
               onPageChange?.(
-                Math.min(currentPage + 1, totalPages)
+                Math.min(currentPage??1 + 1, totalPages)
               )
             }
           />
