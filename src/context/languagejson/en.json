@@ -10,8 +10,9 @@
      "start": "Start",
     "complete": "Complete",
     "chat": "Chat",
+    "view More": "View More",
      "confirm": "Confirm",
-       
+      "noData": "No data available",
     "saving": "Saving",
     "completed": "Completed",
     "pending": "Pending",
@@ -100,7 +101,40 @@
     "bookingStatus": "Booking Status",
     "monthlyBookings": "Monthly Bookings",
     "revenueTrend": "Revenue Trend",
-    "noData": "No data available"
+    "noData": "No data available",
+    "stats": {
+    "title": "Wallet Overview",
+    "subtitle": "Earnings based on selected period",
+
+    "filters": {
+      "today": "Today",
+      "7_days": "7D",
+      "30_days": "30D",
+      "3_months": "3M",
+      "all": "All"
+    },
+
+    "cards": {
+      "totalEarned": {
+        "title": "Total Earned",
+        "sub": "Total revenue"
+      },
+      "currentBalance": {
+        "title": "Current Balance",
+        "sub": "Available balance"
+      },
+      "transactions": {
+        "title": "Transactions",
+        "sub": "Completed jobs"
+      },
+      "avgTransaction": {
+        "title": "Avg / Transaction",
+        "sub": "Efficiency metric"
+      }
+    },
+
+    "footer": "Showing data for"
+  }
   },
   "bookingHistory": {
     "title": "My Booking History",

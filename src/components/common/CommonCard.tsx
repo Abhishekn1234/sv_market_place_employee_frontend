@@ -15,7 +15,7 @@ interface CommonCardProps {
   title?: string | ReactNode;
   headerAlign?: "left" | "right";
   children?: ReactNode;
-  value?: string | number;
+  value?: string | number | ReactNode;
   label?: string;
   description?: string | ReactNode;
   footer?: ReactNode;

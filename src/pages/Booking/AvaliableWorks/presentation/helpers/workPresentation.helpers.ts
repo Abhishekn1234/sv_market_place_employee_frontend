@@ -52,46 +52,47 @@ export function normalizeWorkStatus(status?: unknown): WorkStatus {
 
   return "UNKNOWN";
 }
-
+const isCancelled = (status?: string) => {
+  const s = status?.toUpperCase();
+  return (
+    s === "CUSTOMER_CANCELLED" ||
+    s === "WORKER_CANCELLED"
+  );
+};
 // ✅ MAIN NORMALIZER (MOST IMPORTANT FIX)
 export function normalizeAssignedWorks(
   assignedBookings: Array<Partial<DisplayWork> | Partial<Booking>>
 ): DisplayWork[] {
   const map = new Map<string, DisplayWork>();
 
-  assignedBookings.forEach((item: any) => {
-    const booking = item.booking;
- const id = getBookingId(item);
+ assignedBookings.forEach((item: any) => {
+  const booking = item.booking;
+  const id = getBookingId(item);
 
-    if (!id) return;
+  if (!id) return;
 
-    const existing = map.get(id);
+  const statusSource =
+    item.status ?? booking?.status;
 
-    // ✅ FORCE BOOKING STATUS
-   const statusSource =
-  item.status ?? booking?.status ?? existing?.status;
+  // 🔥 HARD BLOCK CANCELLED
+  if (isCancelled(statusSource)) return;
 
-    const startedAt =
+  const existing = map.get(id);
+
+  map.set(id, {
+    ...(existing ?? {}),
+    ...item,
+    _id: id,
+    id,
+    booking,
+    status: normalizeWorkStatus(statusSource),
+    workStartedAt:
       item.workStartedAt ||
       item.startedAt ||
       booking?.startedAt ||
-      existing?.workStartedAt;
-
-    map.set(id, {
-      ...(existing ?? {}),
-      ...item,
-
-      _id: id, // ✅ CRITICAL
-      id,
-
-      booking,
-
-      status: normalizeWorkStatus(statusSource),
-
-      workStartedAt: startedAt,
-      startedAt,
-    });
+      existing?.workStartedAt,
   });
+});
 
   return Array.from(map.values());
 }

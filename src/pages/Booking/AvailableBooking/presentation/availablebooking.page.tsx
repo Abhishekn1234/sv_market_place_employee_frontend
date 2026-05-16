@@ -101,7 +101,7 @@ export default function AvailableBookingPage() {
 
         {/* NO DATA */}
         {bookings.length === 0 && (
-          <div className="text-center py-16 text-gray-500">No records found</div>
+          <div className="text-center py-16 text-gray-500">{translations.common.noData}</div>
         )}
 
         {/* BOOKINGS GRID */}

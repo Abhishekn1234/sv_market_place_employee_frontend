@@ -23,6 +23,7 @@ import type {
 import type { Dispute } from "@/pages/History/BookingHistory/domain/entities/disputes";
 import type { CancelReasonType, CancelWork } from "../../domain/entities/cancelwork";
 import { useLanguage } from "@/context/LanguageContext";
+import { useQueryClient } from "@tanstack/react-query";
 // import { CancelWork } from "../../domain/entities/cancelwork";
 
 
@@ -42,8 +43,10 @@ export default function WorkModals({
     useAssignedEmitter();
 
   const upsertAssigned = useBookingSocketStore((s) => s.upsertAssigned);
+  const removeAssigned = useBookingSocketStore((s) => s.removeAssigned);
   const [disputeWork, setDisputeWork] = useState<DisplayWork | null>(null);
   const {t}=useLanguage();
+  const queryClient=useQueryClient();
  const handleCancel = () => {
   if (!cancelConfirmWork) return;
 
@@ -81,20 +84,26 @@ export default function WorkModals({
         };
 
   cancelMutation.mutate(payload, {
-    onSuccess: (_data: any) => {
-      // const booking =
-      //   data?.booking ?? data;
+  onSuccess: (_data: any) => {
+    const bookingId = getBookingId(cancelConfirmWork);
 
-      // ✅ ONLY SOCKET EMIT
-      emitCancel({
-        bookingId,
-        status: "WORKER_CANCELLED",
-      });
+    // ✅ 1. REMOVE FROM SOCKET STORE IMMEDIATELY
+   
 
-      // optional: keep only UI cleanup
-      setCancelConfirmWork(null);
-    },
-  });
+    // OR (if you prefer hook form already used elsewhere)
+     removeAssigned(bookingId);
+
+    // ✅ 2. EMIT SOCKET EVENT
+    emitCancel({
+      bookingId,
+      status: "WORKER_CANCELLED",
+    });
+    queryClient.setQueryData(["assigned-works"], (old: any[] = []) =>
+    old.filter((b) => (b.booking?._id || b._id) !== bookingId)
+  );
+    setCancelConfirmWork(null);
+  },
+});
 };
 const CANCEL_REASONS = [
   "BOOKED_WRONG_SERVICE",

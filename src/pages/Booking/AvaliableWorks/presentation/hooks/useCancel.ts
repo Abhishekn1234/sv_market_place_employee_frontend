@@ -12,59 +12,40 @@ export function useCancel(_addBooking?: (booking: GetBooking) => void) {
   const repo = new CancelImpl();
   const usecase = new CancelWorkUsecase(repo);
   const removeAssigned=useBookingSocketStore((state) => state.removeAssigned);
-  return useMutation({
-    mutationFn: (data:CancelWork) => usecase.execute(data),
+ return useMutation({
+  mutationFn: (data: CancelWork) => usecase.execute(data),
+
+  onMutate: async (data) => {
+    const bookingId = data.bookingId;
+
+    await queryClient.cancelQueries({ queryKey: ["assigned-works"] });
+
+    const previous = queryClient.getQueryData(["assigned-works"]);
+
+    queryClient.setQueryData(["assigned-works"], (old: any[] = []) =>
+      old.filter((b) => (b.booking?._id || b._id) !== bookingId)
+    );
+
+    return { previous };
+  },
+
+  onError: (_err, _vars, context) => {
+    queryClient.setQueryData(["assigned-works"], context?.previous);
+  },
 
   onSuccess: (cancelledBooking: any) => {
-  const status = cancelledBooking?.status?.toUpperCase();
+    const bookingId =
+      cancelledBooking?.booking?._id || cancelledBooking?._id;
+     queryClient.setQueryData(["assigned-works"], (old: any[] = []) =>
+      old.filter((b) => (b.booking?._id || b._id) !== bookingId)
+    );
+    removeAssigned(bookingId);
+    toast.success("Booking cancelled successfully");
+  },
 
-  const isCancelled =
-    status === "WORKER_CANCELLED" ||
-    status === "CUSTOMER_CANCELLED";
-
-  if (!isCancelled) return;
-
-  const bookingId =
-    cancelledBooking?.booking?._id ||
-    cancelledBooking?._id;
-
-  // =========================
-  // 1. React Query cache update
-  // =========================
-  queryClient.setQueryData<GetBooking[]>(
-    ["assigned-works"],
-    (old) => {
-      const safeOld = Array.isArray(old) ? old : [];
-
-      return safeOld.filter((b: any) => {
-        const id = b.booking?._id || b._id;
-
-        // remove if same booking OR cancelled status
-        const bStatus = b.status?.toUpperCase();
-
-        return !(
-          id === bookingId ||
-          bStatus === "WORKER_CANCELLED" ||
-          bStatus === "CUSTOMER_CANCELLED"
-        );
-      });
-    }
-  );
-
-  // =========================
-  // 2. Zustand store update
-  // =========================
-  removeAssigned(bookingId);
-
-  toast.success("Booking cancelled successfully");
-},
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to cancel booking";
-
-      toast.error(message);
-    },
-  });
+  onSettled: () => {
+    // optional refetch AFTER UI already updated
+    queryClient.invalidateQueries({ queryKey: ["assigned-works"] });
+  },
+});
 }

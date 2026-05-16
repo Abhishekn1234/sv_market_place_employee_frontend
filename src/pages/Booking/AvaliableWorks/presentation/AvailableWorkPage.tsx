@@ -27,7 +27,7 @@ export default function AvailableWorkPage() {
   const { data: categories } = useServiceCategory();
   const cancelMutation = useCancel();
   const { assignedWorks: assignedFromApi, isLoading } = useAssign();
-
+//  console.log("API Assigned from useAssign:", assignedFromApi);
   const isRTL = language === "AR";
   const socketBookings = useBookingSocketStore((state) => state.assignedBookings);
   const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
@@ -46,6 +46,7 @@ export default function AvailableWorkPage() {
     const id = b.booking?._id || b._id;
     map.set(id, b);
   });
+  console.log("API Assigned:", assignedFromApi);
 
   // ✅ SOCKET OVERRIDE (MERGED, NOT REPLACED)
   socketBookings.forEach((b) => {

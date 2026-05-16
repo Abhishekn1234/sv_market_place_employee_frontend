@@ -13,6 +13,7 @@ import type { Transaction } from "../../domain/entities/transaction";
 import type { WalletSummary } from "../../domain/entities/wallet";
 import { useState } from "react";
 import CommonSpinner from "@/components/common/CommonSpinner";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   transactions: Transaction[];
@@ -197,19 +198,21 @@ const handleLoadMore = () => {
           {/* LOAD MORE BUTTON */}
           {visibleCount < transactions.length && (
             <div className="flex justify-center mt-4">
-              <button
+                          <Button
                 onClick={handleLoadMore}
+                
                 disabled={loadingMore}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full disabled:opacity-60"
+                className="text-black bg-white"
               >
                 {loadingMore ? (
-                  <>
-                    <CommonSpinner/>
-                  </>
+                  <span className="flex items-center gap-2">
+                    <CommonSpinner />
+                  </span>
                 ) : (
-                  "Load More"
+                  translations.common.viewMore
                 )}
-              </button>
+                {translations.common.viewMore}
+              </Button>
             </div>
           )}
         </div>

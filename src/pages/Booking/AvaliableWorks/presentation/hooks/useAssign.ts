@@ -16,6 +16,7 @@ export function useAssign(open: boolean = true) {
       return Array.isArray(res) ? res : res ? [res] : [];
     },
     enabled: open,
+    
     staleTime: 30_000,
     refetchOnWindowFocus: true, // Enable refetch on window focus for real-time updates
   

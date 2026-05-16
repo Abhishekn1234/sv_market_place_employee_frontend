@@ -155,7 +155,7 @@ const handleOpenDisputes = (bookingId: string) => {
         columns={columns}
         data={filteredBookings}
         keyExtractor={(b) => b._id}
-        currentPage={pagination?.currentPage}
+        currentPage={pagination?.currentPage ?? 1}
         totalPages={pagination?.totalPages}
         onPageChange={setPage}
         isRTL={isRTL}

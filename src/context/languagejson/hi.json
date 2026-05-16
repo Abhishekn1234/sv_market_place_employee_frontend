@@ -9,10 +9,12 @@
     "save": "बचाना",
     "saving": "सहेजा जा रहा है",
     "completed": "पूर्ण",
+    "noData": "कोई डेटा उपलब्ध नहीं है",
     "pending": "लंबित",
     "na": "उपलब्ध नहीं",
     "minutes": "मिनट",
     "close": "बंद करें",
+    "viewMore": "और देखें",
    
     "confirm": "पुष्टि करें",
     "start": "शुरू करें",
@@ -28,6 +30,39 @@
   "dashboard": "डैशबोर्ड",
   "welcome": "वापसी पर स्वागत है",
   "overview": "सारांश",
+  "stats": {
+    "title": "वॉलेट अवलोकन",
+    "subtitle": "चुनी गई अवधि के अनुसार आय",
+
+    "filters": {
+      "today": "आज",
+      "7_days": "7 दिन",
+      "30_days": "30 दिन",
+      "3_months": "3 महीने",
+      "all": "सभी"
+    },
+
+    "cards": {
+      "totalEarned": {
+        "title": "कुल कमाई",
+        "sub": "कुल आय"
+      },
+      "currentBalance": {
+        "title": "वर्तमान बैलेंस",
+        "sub": "उपलब्ध बैलेंस"
+      },
+      "transactions": {
+        "title": "लेनदेन",
+        "sub": "पूर्ण किए गए कार्य"
+      },
+      "avgTransaction": {
+        "title": "औसत / लेनदेन",
+        "sub": "दक्षता माप"
+      }
+    },
+
+    "footer": "डेटा दिखाया जा रहा है"
+  },
    "totalBookings": "कुल बुकिंग",
   "assignedWorks": "निर्दिष्ट कार्य",
   "activeEmployees": "सक्रिय कर्मचारी",

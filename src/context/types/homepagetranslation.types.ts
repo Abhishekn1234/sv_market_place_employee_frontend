@@ -3,6 +3,40 @@
 export type HomePageTranslations = {
   dashboard: string;
   welcome?: string;
+ 
+stats:{
+  title: string;
+  subtitle: string;
+ filters: {
+    today: string;
+    "7_days": string;
+    "30_days": string;
+    "3_months": string;
+    all: string;
+  };
+
+  cards: {
+    totalEarned: {
+      title: string;
+      sub: string;
+    };
+    currentBalance: {
+      title: string;
+      sub: string;
+    };
+    transactions: {
+      title: string;
+      sub: string;
+    };
+    avgTransaction: {
+      title: string;
+      sub: string;
+    };
+  };
+
+  footer: string;
+}
+  
   overview?: string;
   totalEmployees?: string;
   activeEmployees?: string;

@@ -17,6 +17,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/components/ui/utils";
 
 export type TableColumn<T> = {
@@ -31,7 +32,7 @@ interface CommonTableProps<T> {
   data: T[];
   keyExtractor: (row: T) => string;
 
-  currentPage?: number;
+  currentPage: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
 
@@ -42,6 +43,24 @@ interface CommonTableProps<T> {
   isRTL?: boolean;
 }
 
+const getVisiblePages = (
+  currentPage: number,
+  totalPages: number,
+  max = 3
+) => {
+  const half = Math.floor(max / 2);
+
+  let start = Math.max(currentPage - half, 1);
+  let end = start + max - 1;
+
+  if (end > totalPages) {
+    end = totalPages;
+    start = Math.max(end - max + 1, 1);
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+};
+
 export function CommonTable<T>({
   columns,
   data,
@@ -49,19 +68,31 @@ export function CommonTable<T>({
   currentPage,
   totalPages = 0,
   onPageChange,
-  emptyMessage = "No data found",
+  emptyMessage,
   renderExpandedRow,
   expandedRowKey,
   isRTL = false,
 }: CommonTableProps<T>) {
+  const { translations } = useLanguage(); // ✅ FIXED LOCATION
+
   const renderedColumns = isRTL ? [...columns].reverse() : columns;
+
+  const visiblePages = getVisiblePages(currentPage, totalPages, 3);
+
+  const hasData = data.length > 0;
+
+  const showPagination =
+    hasData && totalPages > 1 && !!onPageChange;
+
+  const finalEmptyMessage =
+    emptyMessage ?? translations.common.noData ?? "No data found";
 
   return (
     <>
       {/* TABLE WRAPPER */}
       <div className="w-full overflow-x-auto">
         <Table className={cn("min-w-full", isRTL && "direction-rtl")}>
-          {/* HEADER (hidden on mobile) */}
+          {/* HEADER */}
           <TableHeader className="hidden md:table-header-group">
             <TableRow>
               {renderedColumns.map((col) => (
@@ -80,13 +111,13 @@ export function CommonTable<T>({
 
           {/* BODY */}
           <TableBody>
-            {data.length === 0 ? (
+            {!hasData ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length || 1}
                   className="text-center py-6"
                 >
-                  {emptyMessage}
+                  {finalEmptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
@@ -96,7 +127,7 @@ export function CommonTable<T>({
                 return (
                   <React.Fragment key={rowKey}>
                     {/* ROW */}
-                  <TableRow className="block md:table-row mb-4 md:mb-0 border-b md:border-0 last:border-b-0">
+                    <TableRow className="block md:table-row mb-4 md:mb-0 border-b md:border-0 last:border-b-0">
                       {renderedColumns.map((col) => {
                         const value =
                           col.render !== undefined
@@ -112,7 +143,6 @@ export function CommonTable<T>({
                               isRTL ? "text-right" : "text-left"
                             )}
                           >
-                            {/* MOBILE LABEL */}
                             <span className="md:hidden font-medium text-gray-500">
                               {col.header}:{" "}
                             </span>
@@ -142,34 +172,35 @@ export function CommonTable<T>({
       </div>
 
       {/* PAGINATION */}
-      {totalPages > 1 && onPageChange && currentPage && (
-        <Pagination
-          className={cn(
-            "mt-6 flex flex-wrap gap-2",
-            isRTL ? "justify-start" : "justify-end"
-          )}
-          dir="ltr"
-        >
+      {showPagination && (
+        <Pagination className="mt-6 flex w-full justify-end" dir="ltr">
+          {/* Prev */}
           <PaginationPrevious
-            onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
+            onClick={() =>
+              onPageChange?.(Math.max(currentPage - 1, 1))
+            }
           />
 
-          <PaginationContent>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <PaginationItem key={i}>
+          {/* Pages */}
+          <PaginationContent className="flex gap-2">
+            {visiblePages.map((page) => (
+              <PaginationItem key={page}>
                 <PaginationLink
-                  isActive={currentPage === i + 1}
-                  onClick={() => onPageChange(i + 1)}
+                  isActive={currentPage === page}
+                  onClick={() => onPageChange?.(page)}
                 >
-                  {i + 1}
+                  {page}
                 </PaginationLink>
               </PaginationItem>
             ))}
           </PaginationContent>
 
+          {/* Next */}
           <PaginationNext
             onClick={() =>
-              onPageChange(Math.min(currentPage + 1, totalPages))
+              onPageChange?.(
+                Math.min(currentPage + 1, totalPages)
+              )
             }
           />
         </Pagination>

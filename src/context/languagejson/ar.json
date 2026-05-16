@@ -6,7 +6,9 @@
     "location": "الموقع",
     "edit": "تعديل",
     "cancel": "إلغاء",
+    "view More": "عرض المزيد",
     "save": "حفظ",
+    "noData": "لا توجد بيانات متاحة",
     "saving": "جارٍ الحفظ",
     "completed": "مكتمل",
     "pending": "قيد الانتظار",
@@ -40,6 +42,39 @@
   "dashboard": "لوحة التحكم",
   "welcome": "مرحبًا بعودتك",
   "overview": "نظرة عامة",
+  "stats": {
+    "title": "نظرة عامة على المحفظة",
+    "subtitle": "الأرباح حسب الفترة المحددة",
+
+    "filters": {
+      "today": "اليوم",
+      "7_days": "7 أيام",
+      "30_days": "30 يوم",
+      "3_months": "3 أشهر",
+      "all": "الكل"
+    },
+
+    "cards": {
+      "totalEarned": {
+        "title": "إجمالي الأرباح",
+        "sub": "إجمالي الإيرادات"
+      },
+      "currentBalance": {
+        "title": "الرصيد الحالي",
+        "sub": "الرصيد المتاح"
+      },
+      "transactions": {
+        "title": "المعاملات",
+        "sub": "الطلبات المكتملة"
+      },
+      "avgTransaction": {
+        "title": "متوسط / معاملة",
+        "sub": "كفاءة الأرباح"
+      }
+    },
+
+    "footer": "عرض البيانات لـ"
+  },
   "totalBookings": "إجمالي الحجوزات",
   "assignedWorks": "الأعمال المعيّنة",
   "totalEmployees": "إجمالي الموظفين",
