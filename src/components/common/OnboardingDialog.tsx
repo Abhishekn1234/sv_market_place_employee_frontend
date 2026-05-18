@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 export type OnboardingStep = {
   id: string;
-  title: string;
+  title?: string;
   description?: string;
   actionLabel: string;
   done: boolean;
