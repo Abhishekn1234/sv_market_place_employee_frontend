@@ -31,11 +31,19 @@ export default function WorkGrid({
   const { t } = useLanguage();
 const navigate = useNavigate();
   // ✅ Normalize
-  const normalizedWorkList = useMemo(() => {
-    return normalizeAssignedWorks(workList).filter(
-      (work) => work.status !== "UNKNOWN"
-    );
-  }, [workList]);
+  const HIDDEN_STATUSES = [
+  "UNKNOWN",
+  "CUSTOMER_CANCELLED",
+  "WORKER_CANCELLED",
+  "COMPLETED",
+];
+
+const normalizedWorkList = useMemo(() => {
+  return normalizeAssignedWorks(workList).filter(
+    (work) => !HIDDEN_STATUSES.includes(work.status)
+  );
+}, [workList]);
+
 
   // ✅ Fetch location (FIXED with bookingId)
   useEffect(() => {
@@ -123,7 +131,7 @@ const navigate = useNavigate();
                 )}
               </p>
 
-              <p className="text-xs font-medium">Status: {work.status}</p>
+              <p className="text-xs font-medium">{t("HomePage.bookingStatus")}: {work.status}</p>
 
               {/* ✅ TIMER FIX */}
               {isActiveWork(work) && timers[id] && (

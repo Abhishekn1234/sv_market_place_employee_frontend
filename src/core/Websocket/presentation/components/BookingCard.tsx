@@ -1,3 +1,5 @@
+import CommonSpinner from "@/components/common/CommonSpinner";
+
 export function BookingCard({
   booking,
   dark,
@@ -75,7 +77,7 @@ export function BookingCard({
             onClick={onAccept}
             className="w-full bg-green-500 text-white py-2 rounded"
           >
-            {accepting ? "Processing..." : "Accept"}
+            {accepting ? <CommonSpinner size="sm" color="white" /> : "Accept"}
           </button>
 
           <button

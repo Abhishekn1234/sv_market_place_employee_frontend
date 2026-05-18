@@ -172,39 +172,53 @@ export function CommonTable<T>({
       </div>
 
       {/* PAGINATION */}
-      {showPagination && (
-        <Pagination className="mt-6 flex w-full justify-end" dir="ltr">
-          {/* Prev */}
-          <PaginationPrevious
-            onClick={() =>
-              onPageChange?.(Math.max(currentPage??1 - 1, 1))
-            }
-          />
-
-          {/* Pages */}
-          <PaginationContent className="flex gap-2">
-            {visiblePages.map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  isActive={currentPage === page}
-                  onClick={() => onPageChange?.(page)}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-          </PaginationContent>
-
-          {/* Next */}
-          <PaginationNext
-            onClick={() =>
-              onPageChange?.(
-                Math.min(currentPage??1 + 1, totalPages)
-              )
-            }
-          />
-        </Pagination>
+    {/* PAGINATION */}
+{showPagination && (
+  <Pagination
+    className="mt-6 flex w-full justify-end"
+    dir="ltr"
+  >
+    {/* Prev */}
+    <PaginationPrevious
+      onClick={() => {
+        if ((currentPage ?? 1) > 1) {
+          onPageChange?.((currentPage ?? 1) - 1);
+        }
+      }}
+      className={cn(
+        (currentPage ?? 1) <= 1 &&
+          "pointer-events-none opacity-50"
       )}
+    />
+
+    {/* Pages */}
+    <PaginationContent className="flex gap-2">
+      {visiblePages.map((page) => (
+        <PaginationItem key={page}>
+          <PaginationLink
+            isActive={(currentPage ?? 1) === page}
+            onClick={() => onPageChange?.(page)}
+          >
+            {page}
+          </PaginationLink>
+        </PaginationItem>
+      ))}
+    </PaginationContent>
+
+    {/* Next */}
+    <PaginationNext
+      onClick={() => {
+        if ((currentPage ?? 1) < totalPages) {
+          onPageChange?.((currentPage ?? 1) + 1);
+        }
+      }}
+      className={cn(
+        (currentPage ?? 1) >= totalPages &&
+          "pointer-events-none opacity-50"
+      )}
+    />
+  </Pagination>
+)}
     </>
   );
 }
