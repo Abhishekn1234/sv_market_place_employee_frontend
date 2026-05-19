@@ -37,7 +37,15 @@
     "getDirections": "الحصول على الاتجاهات",
     "verifyOtp": "التحقق من رمز OTP"
   },
-
+  "onboarding":{
+    "title": "إكمال الإعداد",
+    "doneTitle": "كل شيء جاهز 🎉",
+    "description": "يتم تحديث تقدمك تلقائيًا بناءً على ملفك الشخصي.",
+    "progress": "التقدم",
+    "completed": "مكتمل",
+    "waiting": "في انتظار التحديث...",
+    "finished": "اكتمل الإعداد تلقائيًا"
+  },
   "HomePage": {
   "dashboard": "لوحة التحكم",
   "welcome": "مرحبًا بعودتك",

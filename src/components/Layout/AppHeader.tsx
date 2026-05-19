@@ -24,6 +24,7 @@ import { useProfile } from "@/pages/Profile/presentation/hooks/useProfile";
 import CommonSpinner from "../common/CommonSpinner";
 
 import OnboardingDialog from "@/components/common/OnboardingDialog";
+import HeaderGuide from "../common/HomeGuide";
 
 const languages = [
   { code: "EN", label: "English", icon: <LanguagesIcon /> },
@@ -46,95 +47,150 @@ export default function AppHeader({
 }: AppHeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  const { language, setLanguage, translations } = useLanguage();
+  const { language, setLanguage, translations } =
+    useLanguage();
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] =
+    useState(false);
 
-  // onboarding state
-  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [langDropdownOpen, setLangDropdownOpen] =
+    useState(false);
+
+  const [onboardingOpen, setOnboardingOpen] =
+    useState(false);
+
+  const [showHeaderGuide, setShowHeaderGuide] =
+    useState(false);
 
   const { data: profile } = useProfile();
   const { user, logout } = useAuthStore();
 
-  const fullName = profile?.fullName || user?.fullName || "User";
+  const fullName =
+    profile?.fullName ||
+    user?.fullName ||
+    "User";
+
   const profileImage =
-    profile?.profilePictureUrl || user?.profilePictureUrl;
+    profile?.profilePictureUrl ||
+    user?.profilePictureUrl;
 
-  const workerStatus = useAuthStore((s) => s.user?.worker?.status);
+  const workerStatus = useAuthStore(
+    (s) => s.user?.worker?.status
+  );
 
-  const { updateStatus, loading } = useWorkerStatus();
+  const { updateStatus, loading } =
+    useWorkerStatus();
 
-  const homeTranslations = translations.HomePage;
+  const homeTranslations =
+    translations.HomePage;
+
   const isRTL = language === "AR";
 
-  const isOnline = workerStatus === "ONLINE";
+  const isOnline =
+    workerStatus === "ONLINE";
 
-  // ✅ First login onboarding trigger
+  // FIRST LOGIN
   useEffect(() => {
-    const done = localStorage.getItem("onboarding_done");
-    if (!done) setOnboardingOpen(true);
+    const done = localStorage.getItem(
+      "onboarding_done"
+    );
+
+    if (!done) {
+      setOnboardingOpen(true);
+    }
   }, []);
 
-  // --------------------------
-  // ONBOARDING STEPS
-  // --------------------------
+  // STEPS
   const steps = [
     {
       id: "status",
-      label: "Set your status",
-      description: "Go online to receive jobs",
+      title: "Set your status",
+      description:
+        "Go online to receive jobs",
       actionLabel: "Go Online",
       done: isOnline,
       onAction: () => updateStatus(true),
     },
+
     {
       id: "language",
-      label: "Choose language",
-      description: "Select your preferred language",
+      title: "Choose language",
+      description:
+        "Select your preferred language",
       actionLabel: "Open",
       done: !!language,
-      onAction: () => setLangDropdownOpen(true),
+      onAction: () =>
+        setLangDropdownOpen(true),
     },
+
     {
       id: "profile",
-      label: "Complete profile settings",
-      description: "Add location and details",
+      title: "Complete profile",
+      description:
+        "Open profile settings and update your details",
       actionLabel: "Open Profile",
       done: !!profile,
-      onAction: () => navigate("/settings/profile"),
+      onAction: () =>
+        navigate("/settings/profile"),
     },
   ];
 
-  const allDone = steps.every((s) => s.done);
+  const allDone = steps.every(
+    (s) => s.done
+  );
 
-  // auto close onboarding
+  // AUTO CLOSE
   useEffect(() => {
     if (allDone && onboardingOpen) {
       const t = setTimeout(() => {
         setOnboardingOpen(false);
-        localStorage.setItem("onboarding_done", "true");
-      }, 1000);
+
+        localStorage.setItem(
+          "onboarding_done",
+          "true"
+        );
+
+        setShowHeaderGuide(true);
+      }, 800);
 
       return () => clearTimeout(t);
     }
   }, [allDone, onboardingOpen]);
 
-  const handleToggle = (checked: boolean) => {
+  const handleToggle = (
+    checked: boolean
+  ) => {
     updateStatus(checked);
   };
 
   const handleLogout = () => {
-    toast.success("Logged out successfully");
+    toast.success(
+      "Logged out successfully"
+    );
+
     logout();
+
     setDropdownOpen(false);
     setMobileOpen(false);
-    navigate("/login", { replace: true });
+
+    navigate("/login", {
+      replace: true,
+    });
   };
 
   return (
     <>
-      {/* ================= HEADER ================= */}
+      {/* GUIDE */}
+      <HeaderGuide
+        open={showHeaderGuide}
+        onClose={() =>
+          setShowHeaderGuide(false)
+        }
+        // title="Header Controls"
+        // description="Use the top controls to go online, change language, and manage your profile settings."
+      />
+
+      {/* HEADER */}
       <header
         className={`flex items-center px-4 py-3 border-b transition-all ${
           theme === "dark"
@@ -157,23 +213,32 @@ export default function AppHeader({
 
         <div className="flex-1" />
 
-        {/* RIGHT ACTIONS */}
+        {/* RIGHT */}
         <div className="flex items-center gap-4">
           {/* STATUS */}
           <div
             className={`flex items-center gap-3 ${
-              isRTL ? "flex-row-reverse" : ""
+              isRTL
+                ? "flex-row-reverse"
+                : ""
             }`}
           >
             <Switch
               checked={isOnline}
-              onCheckedChange={handleToggle}
-              disabled={loading || !workerStatus}
+              onCheckedChange={
+                handleToggle
+              }
+              disabled={
+                loading ||
+                !workerStatus
+              }
             />
 
             <span
               className={`text-sm font-medium ${
-                isOnline ? "text-green-600" : "text-gray-500"
+                isOnline
+                  ? "text-green-600"
+                  : "text-gray-500"
               }`}
             >
               {workerStatus ? (
@@ -189,7 +254,11 @@ export default function AppHeader({
           </div>
 
           {/* THEME */}
-          <Button variant="ghost" onClick={toggleTheme} className="p-2">
+          <Button
+            variant="ghost"
+            onClick={toggleTheme}
+            className="p-2"
+          >
             {theme === "light" ? (
               <Moon className="h-5 w-5 text-gray-700" />
             ) : (
@@ -201,9 +270,14 @@ export default function AppHeader({
           <div className="relative">
             <Button
               variant="ghost"
-              onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+              onClick={() =>
+                setLangDropdownOpen(
+                  !langDropdownOpen
+                )
+              }
             >
               <Globe className="h-5 w-5" />
+
               <span>{language}</span>
             </Button>
 
@@ -214,12 +288,23 @@ export default function AppHeader({
                     key={lang.code}
                     variant="ghost"
                     onClick={() => {
-                      setLanguage(lang.code as "EN" | "AR" | "HI");
-                      setLangDropdownOpen(false);
+                      setLanguage(
+                        lang.code as
+                          | "EN"
+                          | "AR"
+                          | "HI"
+                      );
+
+                      setLangDropdownOpen(
+                        false
+                      );
                     }}
                     className="flex items-center gap-2 w-full px-4 py-2 hover:bg-gray-100"
                   >
-                    <span>{lang.icon}</span>
+                    <span>
+                      {lang.icon}
+                    </span>
+
                     {lang.label}
                   </Button>
                 ))}
@@ -231,7 +316,11 @@ export default function AppHeader({
           <div className="relative">
             <Button
               variant="ghost"
-              onClick={() => setDropdownOpen((p) => !p)}
+              onClick={() =>
+                setDropdownOpen(
+                  (p) => !p
+                )
+              }
               className="flex items-center gap-2"
             >
               {profileImage ? (
@@ -241,10 +330,16 @@ export default function AppHeader({
                 />
               ) : (
                 <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                  {fullName?.slice(0, 2)}
+                  {fullName?.slice(
+                    0,
+                    2
+                  )}
                 </div>
               )}
-              <span className="text-sm">{fullName}</span>
+
+              <span className="text-sm">
+                {fullName}
+              </span>
             </Button>
 
             {dropdownOpen && (
@@ -252,10 +347,18 @@ export default function AppHeader({
                 <Button
                   variant="ghost"
                   className="w-full justify-start px-4 py-2"
-                  onClick={() => navigate("/settings/profile")}
+                  onClick={() =>
+                    navigate(
+                      "/settings/profile"
+                    )
+                  }
                 >
                   <Settings className="h-4 w-4" />
-                  {translations.sidebar.profileSettings}
+
+                  {
+                    translations.sidebar
+                      .profileSettings
+                  }
                 </Button>
 
                 <Button
@@ -264,7 +367,11 @@ export default function AppHeader({
                   onClick={handleLogout}
                 >
                   <LogOut className="h-4 w-4" />
-                 {translations.sidebar.logout}
+
+                  {
+                    translations.sidebar
+                      .logout
+                  }
                 </Button>
               </div>
             )}
@@ -272,10 +379,12 @@ export default function AppHeader({
         </div>
       </header>
 
-      {/* ================= ONBOARDING DIALOG ================= */}
+      {/* ONBOARDING */}
       <OnboardingDialog
         open={onboardingOpen}
-        onOpenChange={setOnboardingOpen}
+        onOpenChange={
+          setOnboardingOpen
+        }
         steps={steps}
       />
     </>

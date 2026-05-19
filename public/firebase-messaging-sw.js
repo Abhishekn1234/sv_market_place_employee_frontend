@@ -47,11 +47,14 @@ function getNotificationContent(data) {
       url: `/chat/${data.bookingId}`,
     },
 
-    BOOKING_REQUEST: {
-      title: "New booking request",
-      body: "Tap to view booking",
-      url: `/availableWork`,
-    },
+          BOOKING_UPDATED: {
+        title: "Booking status updated",
+        body: "Tap to view booking",
+        url:
+          data.status === "REQUESTED"
+            ? `/availableBooking?status=requested&bookingId=${data.bookingId}`
+            : `/availableBooking?bookingId=${data.bookingId}`,
+      },
 
     WORK_ASSIGNED: {
       title: "Work assigned",

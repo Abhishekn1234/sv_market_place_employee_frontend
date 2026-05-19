@@ -1,3 +1,5 @@
+"use client";
+
 import {
   CreditCard,
   ArrowUpRight,
@@ -5,15 +7,15 @@ import {
   TrendingUp,
   Calendar,
   Receipt,
-  
 } from "lucide-react";
+
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import type { Transaction } from "../../domain/entities/transaction";
 import type { WalletSummary } from "../../domain/entities/wallet";
-import { useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import CommonSpinner from "@/components/common/CommonSpinner";
-import { Button } from "@/components/ui/button";
 
 type Props = {
   transactions: Transaction[];
@@ -30,80 +32,91 @@ export function WalletMain({
   totalDebit,
   wallet,
 }: Props) {
-  const { translations, language } = useLanguage();
+  const { translations,  } = useLanguage();
   const walletT = translations.wallet;
-  const isRTL = language === "AR";
+  // const isRTL = language === "AR";
+
   const currencyLabel = wallet?.currency ?? "USD";
   const formattedBalance = `${totalBalance.toLocaleString()} ${currencyLabel}`;
+
   const updatedAt = wallet?.updatedAt
     ? new Date(wallet.updatedAt).toLocaleString()
     : null;
-  const [visibleCount, setVisibleCount] = useState(5);
-const [loadingMore, setLoadingMore] = useState(false);
-const visibleTransactions = transactions.slice(0, visibleCount);
-const handleLoadMore = () => {
-  setLoadingMore(true);
 
-  setTimeout(() => {
-    setVisibleCount((prev) => prev + 5);
-    setLoadingMore(false);
-  }, 800); // simulate API delay
-};
+  const [visibleCount, setVisibleCount] = useState(5);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  const visibleTransactions = transactions.slice(0, visibleCount);
+
+  // ✅ AUTO LOAD MORE (NO BUTTON)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting && visibleCount < transactions.length) {
+          setLoadingMore(true);
+
+          setTimeout(() => {
+            setVisibleCount((prev) => prev + 5);
+            setLoadingMore(false);
+          }, 600); // simulate API delay
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [visibleCount, transactions.length]);
+
   return (
     <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-      {/* Balance Card */}
-      <CommonCard className=" text-black ">
+
+      {/* BALANCE CARD */}
+      <CommonCard className="text-black">
         <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div>
-              <p className="text-sm">
-                {walletT.totalBalance}
-              </p>
-              <p className="text-2xl sm:text-4xl font-bold mt-1 sm:mt-2 break-all">
-               {formattedBalance}
+              <p className="text-sm">{walletT.totalBalance}</p>
+              <p className="text-2xl sm:text-4xl font-bold mt-1 sm:mt-2">
+                {formattedBalance}
               </p>
 
               <div className="flex flex-col gap-2 mt-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <TrendingUp className="w-4 h-4" />
                   <span className="text-black text-sm">
                     {walletT.monthlyGrowth}
                   </span>
                 </div>
-               {updatedAt && (
-              <span className="text-black text-xs sm:text-sm">
-                Updated:{" "}
-                {new Date(updatedAt).toLocaleString("en-US", {
-                  month: "short",
-                  year: "numeric",
-                  day:"2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })}
-              </span>
-            )}
+
+                {updatedAt && (
+                  <span className="text-black text-xs sm:text-sm">
+                    Updated: {updatedAt}
+                  </span>
+                )}
               </div>
             </div>
 
-            <CreditCard className="w-10 h-10 sm:w-12 sm:h-12 opacity-80 self-end sm:self-auto" />
+            <CreditCard className="w-10 h-10 sm:w-12 sm:h-12 opacity-80" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4 sm:mt-6">
             <div className="bg-white/10 rounded-xl p-3 sm:p-4">
-              <p className="text-black text-xs sm:text-sm">
-                {walletT.income}
-              </p>
-              <p className="text-lg sm:text-xl font-semibold text-black break-all">
+              <p className="text-black text-xs sm:text-sm">{walletT.income}</p>
+              <p className="text-lg font-semibold text-black">
                 {totalCredit.toLocaleString()}
               </p>
             </div>
 
             <div className="bg-white/10 rounded-xl p-3 sm:p-4">
-              <p className="text-black text-xs sm:text-sm">
-                {walletT.expenses}
-              </p>
-              <p className="text-lg sm:text-xl font-semibold text-black break-all">
+              <p className="text-black text-xs sm:text-sm">{walletT.expenses}</p>
+              <p className="text-lg font-semibold text-black">
                 {totalDebit.toLocaleString()}
               </p>
             </div>
@@ -111,7 +124,7 @@ const handleLoadMore = () => {
         </div>
       </CommonCard>
 
-      {/* Quick Actions */}
+      {/* QUICK ACTIONS (UNCHANGED) */}
       <CommonCard>
         <div className="p-4 sm:p-6">
           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
@@ -119,59 +132,46 @@ const handleLoadMore = () => {
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <button className="flex items-start sm:items-center gap-3 p-4 border rounded-xl w-full text-left">
-              <ArrowUpRight className="text-green-600 mt-1 sm:mt-0" />
+            <button className="flex gap-3 p-4 border rounded-xl text-left">
+              <ArrowUpRight className="text-green-600" />
               <div>
                 <p className="font-semibold">{walletT.addFunds}</p>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  {walletT.depositMoney}
-                </p>
               </div>
             </button>
 
-            <button className="flex items-start sm:items-center gap-3 p-4 border rounded-xl w-full text-left">
-              <ArrowDownRight className="text-rose-600 mt-1 sm:mt-0" />
+            <button className="flex gap-3 p-4 border rounded-xl text-left">
+              <ArrowDownRight className="text-rose-600" />
               <div>
                 <p className="font-semibold">{walletT.withdraw}</p>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  {walletT.transferFunds}
-                </p>
               </div>
             </button>
           </div>
         </div>
       </CommonCard>
 
-      {/* Recent Transactions */}
-    <CommonCard>
+      {/* TRANSACTIONS */}
+      <CommonCard>
         <div className="p-4 sm:p-6">
-          
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="flex items-center gap-2 text-lg font-semibold">
-              <Receipt className="w-5 h-5" />
-              {walletT.recentTransactions}
-            </h3>
-          </div>
+          <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
+            <Receipt className="w-5 h-5" />
+            {walletT.recentTransactions}
+          </h3>
 
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-4">
             {visibleTransactions.map((txn: any) => (
               <div
                 key={txn.id}
-                className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border rounded-xl ${
-                  isRTL ? "text-right" : "text-left"
-                }`}
+                className="flex justify-between items-center p-4 border rounded-xl"
               >
-                <div className="flex gap-3 items-start">
+                <div className="flex gap-3">
                   {txn.type === "credit" ? (
-                    <ArrowUpRight className="text-green-600 mt-1" />
+                    <ArrowUpRight className="text-green-600" />
                   ) : (
-                    <ArrowDownRight className="text-rose-600 mt-1" />
+                    <ArrowDownRight className="text-rose-600" />
                   )}
 
                   <div>
-                    <p className="font-medium break-words">
-                      {txn.description}
-                    </p>
+                    <p className="font-medium">{txn.description}</p>
                     <div className="flex items-center gap-1 text-xs text-gray-500">
                       <Calendar className="w-4 h-4" />
                       {txn.date}
@@ -179,40 +179,23 @@ const handleLoadMore = () => {
                   </div>
                 </div>
 
-                <div className={isRTL ? "text-left" : "text-right"}>
-                  <p
-                    className={`font-bold ${
-                      txn.type === "credit"
-                        ? "text-green-600"
-                        : "text-rose-600"
-                    }`}
-                  >
-                    {txn.type === "credit" ? "+" : "-"}SAR{" "}
-                    {txn.amount.toLocaleString()}
-                  </p>
-                </div>
+                <p
+                  className={`font-bold ${
+                    txn.type === "credit"
+                      ? "text-green-600"
+                      : "text-rose-600"
+                  }`}
+                >
+                  {txn.type === "credit" ? "+" : "-"} SAR {txn.amount}
+                </p>
               </div>
             ))}
           </div>
 
-          {/* LOAD MORE BUTTON */}
+          {/* 👇 AUTO TRIGGER LOADER */}
           {visibleCount < transactions.length && (
-            <div className="flex justify-center mt-4">
-                          <Button
-                onClick={handleLoadMore}
-                
-                disabled={loadingMore}
-                className="text-black bg-white"
-              >
-                {loadingMore ? (
-                  <span className="flex items-center gap-2">
-                    <CommonSpinner />
-                  </span>
-                ) : (
-                  translations.common.viewMore
-                )}
-                {translations.common.viewMore}
-              </Button>
+            <div ref={loaderRef} className="flex justify-center py-4">
+              {loadingMore && <CommonSpinner />}
             </div>
           )}
         </div>

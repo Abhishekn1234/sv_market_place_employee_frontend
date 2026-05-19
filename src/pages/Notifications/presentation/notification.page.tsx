@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Bell } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
@@ -10,21 +10,10 @@ import { useTheme } from "@/context/ThemeContext";
 
 import { useNotifications } from "./hooks/useNotification";
 import { useMarkAsRead } from "./hooks/useMarkasRead";
-
-
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-
-import { CATEGORY_MAP } from "./utils/typemap";
-import { useUnreadCount } from "./hooks/useUnreadCount";
 import { useMarkAllRead } from "./hooks/useMarkAllRead";
 import CommonSpinner from "@/components/common/CommonSpinner";
+
+import { CATEGORY_MAP } from "./utils/typemap";
 
 export default function NotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
@@ -32,12 +21,20 @@ export default function NotificationsPage() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+
+  const limit = 10;
 
   const { t } = useLanguage();
-  const notificationTranslations = t("notifications");
   const { theme } = useTheme();
 
+  const notificationTranslations = t("notifications");
+
+  const { mutate: markAsReadApi } = useMarkAsRead();
+  const { mutate: markAllRead, isPending } = useMarkAllRead();
+
+  // =========================
+  // API
+  // =========================
   const { data, isLoading, isFetching } = useNotifications({
     page,
     limit,
@@ -45,35 +42,46 @@ export default function NotificationsPage() {
     type: CATEGORY_MAP[selectedCategory],
   });
 
-  const { mutate: markAsReadApi } = useMarkAsRead();
-  const { mutate: markAllRead, isPending } = useMarkAllRead();
-
-  const markAsRead = (id: string) => markAsReadApi(id);
-
   const notifications = data?.data || [];
   const pagination = data?.pagination;
 
   const totalPages = pagination?.totalPages || 1;
 
-  const { data: unreadData } = useUnreadCount();
-  const unreadCount = unreadData || 0;
+  // =========================
+  // ACCUMULATED LIST
+  // =========================
+  const [allNotifications, setAllNotifications] = useState<any[]>([]);
 
-  const totalCount = pagination?.totalItems || 0;
-  const readCount = totalCount - unreadCount;
+  useEffect(() => {
+    if (page === 1) {
+      setAllNotifications(notifications);
+    } else {
+      setAllNotifications((prev) => [...prev, ...notifications]);
+    }
+  }, [notifications, page]);
+
+  // reset on filter change
+  useEffect(() => {
+    setPage(1);
+    setAllNotifications([]);
+  }, [filter, selectedCategory]);
 
   // =========================
-  // PAGE UNREAD ONLY (IMPORTANT FIX)
+  // UNREAD
   // =========================
   const unreadNotifications = useMemo(
-    () => notifications.filter((n: any) => !n.isRead),
-    [notifications]
+    () => allNotifications.filter((n) => !n.isRead),
+    [allNotifications]
   );
 
+  const unreadCount = unreadNotifications.length;
+  const readCount = allNotifications.length - unreadCount;
+
   // =========================
-  // SELECT SINGLE
+  // SELECT LOGIC
   // =========================
   const handleSelectNotification = (id: string) => {
-    const target = notifications.find((n: any) => n._id === id);
+    const target = allNotifications.find((n) => n._id === id);
     if (!target || target.isRead) return;
 
     setSelectedIds((prev) =>
@@ -82,18 +90,13 @@ export default function NotificationsPage() {
         : [...prev, id]
     );
   };
-  const unreadSelectedIds = selectedIds.filter((id) =>
-  notifications.find((n: any) => n._id === id && !n.isRead)
-);
-  // =========================
-  // SELECT ALL (PAGE ONLY FIXED)
-  // =========================
+
   const toggleSelectAll = () => {
-    const pageUnreadIds = unreadNotifications.map((n: any) => n._id);
+    const pageUnreadIds = unreadNotifications.map((n) => n._id);
 
     const allSelected =
       pageUnreadIds.length > 0 &&
-      pageUnreadIds.every((id: string) => selectedIds.includes(id));
+      pageUnreadIds.every((id) => selectedIds.includes(id));
 
     if (allSelected) {
       setSelectedIds((prev) =>
@@ -104,36 +107,55 @@ export default function NotificationsPage() {
     }
   };
 
-  // =========================
-  // BULK READ
-  // =========================
-const markSelectedAsRead = () => {
-  const ids = selectedIds.filter((id) =>
-    notifications.some((n: any) => n._id === id && !n.isRead)
-  );
+  const markAsRead = (id: string) => markAsReadApi(id);
 
-  if (ids.length === 0) return;
+  const markSelectedAsRead = () => {
+    const ids = selectedIds.filter((id) =>
+      allNotifications.some((n) => n._id === id && !n.isRead)
+    );
 
-  ids.forEach((id) => markAsRead(id));
+    if (!ids.length) return;
 
-  setSelectedIds([]);
-};
-  // =========================
-  // AUTO CLEANUP AFTER MARK AS READ
-  // =========================
+    ids.forEach(markAsRead);
+    setSelectedIds([]);
+  };
+
   const handleMarkedRead = (id: string) => {
     setSelectedIds((prev) => prev.filter((x) => x !== id));
   };
 
-  useEffect(() => {
-    setPage(1);
-  }, [filter, limit, selectedCategory]);
+  // =========================
+  // INFINITE SCROLL (IMPORTANT)
+  // =========================
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  const loadMore = useCallback(() => {
+    if (!isFetching && page < totalPages) {
+      setPage((p) => p + 1);
+    }
+  }, [isFetching, page, totalPages]);
 
   useEffect(() => {
-    setSelectedIds([]);
-  }, [page]);
+    if (observerRef.current) observerRef.current.disconnect();
 
-  if (isLoading) return <CommonSpinner />;
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => observerRef.current?.disconnect();
+  }, [loadMore]);
+
+  if (isLoading && page === 1) return <CommonSpinner />;
 
   return (
     <div className={`p-4 ${theme === "dark" ? "text-white" : ""}`}>
@@ -143,7 +165,7 @@ const markSelectedAsRead = () => {
         <NotificationsHeader
           unreadCount={unreadCount}
           readCount={readCount}
-          totalCount={totalCount}
+          totalCount={allNotifications.length}
           filter={filter}
           setFilter={setFilter}
           selectedCategory={selectedCategory}
@@ -152,14 +174,13 @@ const markSelectedAsRead = () => {
           markAllRead={markAllRead}
           limit={limit}
           isPending={isPending}
-          setLimit={setLimit}
-        selectedCount={unreadSelectedIds.length}
+          selectedCount={selectedIds.length}
           toggleSelectAll={toggleSelectAll}
           currentPageUnreadCount={unreadNotifications.length}
         />
 
         {/* EMPTY */}
-        {notifications.length === 0 ? (
+        {allNotifications.length === 0 ? (
           <CommonCard className="flex items-center justify-center gap-2 py-10">
             <Bell className="w-5 h-5" />
             <span>{t("notifications.noNotifications")}</span>
@@ -168,7 +189,7 @@ const markSelectedAsRead = () => {
           <>
             {/* LIST */}
             <div className="space-y-3">
-              {notifications.map((notification: any) => (
+              {allNotifications.map((notification) => (
                 <NotificationItem
                   key={notification._id}
                   notification={notification}
@@ -181,47 +202,15 @@ const markSelectedAsRead = () => {
               ))}
             </div>
 
-            {isFetching && <CommonSpinner />}
-
-            {/* PAGINATION */}
-            <Pagination className="mt-6 flex justify-end">
-              <PaginationContent>
-
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    className={page === 1 ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .slice(Math.max(0, page - 2), page + 1)
-                  .map((p) => (
-                    <PaginationItem key={p}>
-                      <PaginationLink
-                        isActive={page === p}
-                        onClick={() => setPage(p)}
-                      >
-                        {p}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() =>
-                      setPage((p) => Math.min(totalPages, p + 1))
-                    }
-                    className={
-                      page === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                    }
-                  />
-                </PaginationItem>
-
-              </PaginationContent>
-            </Pagination>
+            {/* 👇 OBSERVER TRIGGER + SPINNER */}
+            {page < totalPages && (
+              <div
+                ref={loadMoreRef}
+                className="flex justify-center py-6"
+              >
+                <CommonSpinner />
+              </div>
+            )}
           </>
         )}
       </div>

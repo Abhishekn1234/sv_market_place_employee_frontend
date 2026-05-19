@@ -26,6 +26,15 @@
     "close": "Close",
     "loading": "Loading..."
   },
+  "onboarding":{
+     "title": "Complete setup",
+    "doneTitle": "You're all set 🎉",
+    "description": "Your progress updates automatically based on your profile.",
+    "progress": "Progress",
+    "completed": "Completed",
+    "waiting": "Waiting for update...",
+    "finished": "Setup completed automatically"
+  },
 
   "availableWork": {
     "noWorks": "No works available",

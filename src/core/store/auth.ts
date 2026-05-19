@@ -161,19 +161,30 @@ export const useAuthStore = create<AuthState>()(
       },
 
       /* ------------------ UPDATE STATUS ------------------ */
-      updateUserStatus: (status) => {
-  const { user } = get();
-  if (!user) return;
+   updateUserStatus: (status: any) =>
+  set((state) => {
+    if (!state.user) return state;
 
-  set({
-    user: {
-      ...user,
-      worker: {
-        ...(user.worker || {}), // ✅ FIX
-        status: mapStatus(status),
+    // normalize all possible backend values
+    const normalized =
+      status === "ONLINE" ||
+      status === 1 ||
+      status === "1"
+        ? "ONLINE"
+        : status === "BUSY"
+        ? "BUSY"
+        : "OFFLINE";
+
+    return {
+      user: {
+        ...state.user,
+        worker: {
+          ...state.user.worker,
+          status: normalized,
+        },
       },
-    },
-  });},
+    };
+  }),
 
       /* ------------------ UPDATE WORKER ------------------ */
      updateWorker: (payload) => {
