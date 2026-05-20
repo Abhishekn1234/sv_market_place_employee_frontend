@@ -155,19 +155,28 @@ export function useChat(bookingId: string) {
 
         const body = nextMessage.text || "New message received";
 
-        const url = `/message/${bookingId}`;
+        const url = `/chat/${bookingId}`;
 
-        if (Notification.permission === "granted") {
-          const notification = new Notification(title, {
-            body,
-            icon: "/logo.png",
-            tag: nextMessage.id,
-          });
-
-          notification.onclick = () => {
-            window.focus();
-            navigate(url);
-          };
+        if (
+          Notification.permission === "granted" &&
+          "serviceWorker" in navigator
+        ) {
+          navigator.serviceWorker.ready
+            .then((registration) =>
+              registration.showNotification(title, {
+                body,
+                icon: "/logo.png",
+                tag: nextMessage.id,
+                requireInteraction: true,
+                actions: [{ action: "open", title: "Open" }],
+                data: { url, bookingId },
+              } as NotificationOptions & {
+                actions: { action: string; title: string }[];
+              })
+            )
+            .catch(() => {
+              navigate(url);
+            });
         }
       }
     });
