@@ -9,6 +9,9 @@ export function BookingCard({
   onDirections,
   onNavigate,
 }: any) {
+  // const status = booking?.status?.trim?.()?.toUpperCase?.() ?? booking?.status;
+
+
   return (
     <div
       className={`relative border rounded-xl p-4 flex flex-col gap-3 ${

@@ -16,6 +16,7 @@ import type { WalletSummary } from "../../domain/entities/wallet";
 
 import { useEffect, useRef, useState } from "react";
 import CommonSpinner from "@/components/common/CommonSpinner";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   transactions: Transaction[];
@@ -132,19 +133,19 @@ export function WalletMain({
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <button className="flex gap-3 p-4 border rounded-xl text-left">
+            <Button className="flex gap-3 p-4 border rounded-xl text-left">
               <ArrowUpRight className="text-green-600" />
               <div>
                 <p className="font-semibold">{walletT.addFunds}</p>
               </div>
-            </button>
+            </Button>
 
-            <button className="flex gap-3 p-4 border rounded-xl text-left">
+            <Button className="flex gap-3 p-4 border rounded-xl text-left">
               <ArrowDownRight className="text-rose-600" />
               <div>
                 <p className="font-semibold">{walletT.withdraw}</p>
               </div>
-            </button>
+            </Button>
           </div>
         </div>
       </CommonCard>

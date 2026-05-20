@@ -168,8 +168,9 @@ const handleSubmit = (e: React.FormEvent) => {
                 }
                 className="h-11 pl-10 pr-10 border-slate-200"
               />
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2"
               >
@@ -178,7 +179,7 @@ const handleSubmit = (e: React.FormEvent) => {
                 ) : (
                   <Eye className="h-4 w-4 text-slate-400" />
                 )}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -260,8 +261,9 @@ const handleSubmit = (e: React.FormEvent) => {
         }
         className="h-14 pl-12 pr-12"
       />
-      <button
+      <Button
         type="button"
+        variant="outline"
         onClick={() => setShowPassword(!showPassword)}
         className="absolute right-4 top-1/2 -translate-y-1/2"
       >
@@ -270,7 +272,7 @@ const handleSubmit = (e: React.FormEvent) => {
         ) : (
           <Eye className="h-5 w-5 text-slate-400" />
         )}
-      </button>
+      </Button>
     </div>
   </div>
 

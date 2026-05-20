@@ -70,7 +70,10 @@ export default function SocketBookingsModal({
           setTimeout(() => {
             onClose();
             onBookingAccepted?.();
-            navigate("/availableWork");
+            // if booking is in REQUESTED status, go to availableBooking; otherwise go to available work
+            const bookingStatus = acceptedBooking?.status ?? "";
+            const isRequested = String(bookingStatus).toUpperCase() === "REQUESTED";
+            navigate(isRequested ? "/availableBooking" : "/availableWork");
           }, 100);
         },
       }

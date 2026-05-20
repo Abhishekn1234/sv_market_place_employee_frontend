@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Bell } from "lucide-react";
+
 import { useLanguage } from "@/context/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import NotificationsHeader from "./components/NotificationHeader";
@@ -22,29 +22,23 @@ export default function NotificationsPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
 
-  const limit = 10;
-
   const { t } = useLanguage();
   const { theme } = useTheme();
 
-  const notificationTranslations = t("notifications");
-
-  const { mutate: markAsReadApi } = useMarkAsRead();
-  const { mutate: markAllRead, isPending } = useMarkAllRead();
+const { mutateAsync: markAsReadApi } = useMarkAsRead();
+  const { mutate: markAllRead } = useMarkAllRead();
 
   // =========================
-  // API
+  // API (NO LIMIT)
   // =========================
   const { data, isLoading, isFetching } = useNotifications({
     page,
-    limit,
     unreadOnly: filter === "unread" ? true : undefined,
     type: CATEGORY_MAP[selectedCategory],
   });
 
   const notifications = data?.data || [];
   const pagination = data?.pagination;
-
   const totalPages = pagination?.totalPages || 1;
 
   // =========================
@@ -60,10 +54,10 @@ export default function NotificationsPage() {
     }
   }, [notifications, page]);
 
-  // reset on filter change
   useEffect(() => {
     setPage(1);
     setAllNotifications([]);
+    setSelectedIds([]);
   }, [filter, selectedCategory]);
 
   // =========================
@@ -92,40 +86,50 @@ export default function NotificationsPage() {
   };
 
   const toggleSelectAll = () => {
-    const pageUnreadIds = unreadNotifications.map((n) => n._id);
+    const unreadIds = unreadNotifications.map((n) => n._id);
 
     const allSelected =
-      pageUnreadIds.length > 0 &&
-      pageUnreadIds.every((id) => selectedIds.includes(id));
+      unreadIds.length > 0 &&
+      unreadIds.every((id) => selectedIds.includes(id));
 
     if (allSelected) {
       setSelectedIds((prev) =>
-        prev.filter((id) => !pageUnreadIds.includes(id))
+        prev.filter((id) => !unreadIds.includes(id))
       );
     } else {
-      setSelectedIds(pageUnreadIds);
+      setSelectedIds(unreadIds);
     }
   };
 
-  const markAsRead = (id: string) => markAsReadApi(id);
+  // =========================
+  // MARK AS READ (SELECTED ONLY)
+  // =========================
+ const markSelectedAsRead = async () => {
+  const idsToMark = selectedIds;
 
-  const markSelectedAsRead = () => {
-    const ids = selectedIds.filter((id) =>
-      allNotifications.some((n) => n._id === id && !n.isRead)
+  if (!idsToMark.length) return;
+
+  await Promise.all(
+    idsToMark.map((id) => markAsReadApi(id))
+  );
+
+  setSelectedIds([]);
+};
+  // =========================
+  // MARK ALL READ (ONLY WHEN SELECT ALL MODE)
+  // =========================
+  const handleMarkAllAsRead = async () => {
+    await markAllRead();
+
+    setAllNotifications((prev) =>
+      prev.map((n) => ({ ...n, isRead: true }))
     );
 
-    if (!ids.length) return;
-
-    ids.forEach(markAsRead);
     setSelectedIds([]);
   };
 
-  const handleMarkedRead = (id: string) => {
-    setSelectedIds((prev) => prev.filter((x) => x !== id));
-  };
-
   // =========================
-  // INFINITE SCROLL (IMPORTANT)
+  // INFINITE SCROLL
   // =========================
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -139,14 +143,9 @@ export default function NotificationsPage() {
   useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
 
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMore();
-        }
-      },
-      { threshold: 1 }
-    );
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) loadMore();
+    });
 
     if (loadMoreRef.current) {
       observerRef.current.observe(loadMoreRef.current);
@@ -154,6 +153,16 @@ export default function NotificationsPage() {
 
     return () => observerRef.current?.disconnect();
   }, [loadMore]);
+
+  // =========================
+  // SELECT MODE DETECTION
+  // =========================
+  const isSelectAllMode =
+    selectedIds.length > 0 &&
+    unreadNotifications.length > 0 &&
+    unreadNotifications.every((n) =>
+      selectedIds.includes(n._id)
+    );
 
   if (isLoading && page === 1) return <CommonSpinner />;
 
@@ -171,48 +180,39 @@ export default function NotificationsPage() {
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
           markSelectedAsRead={markSelectedAsRead}
-          markAllRead={markAllRead}
-          limit={limit}
-          isPending={isPending}
+          markAllRead={handleMarkAllAsRead}
           selectedCount={selectedIds.length}
           toggleSelectAll={toggleSelectAll}
           currentPageUnreadCount={unreadNotifications.length}
+          isSelectAllMode={isSelectAllMode}
         />
 
-        {/* EMPTY */}
-        {allNotifications.length === 0 ? (
-          <CommonCard className="flex items-center justify-center gap-2 py-10">
-            <Bell className="w-5 h-5" />
-            <span>{t("notifications.noNotifications")}</span>
-          </CommonCard>
-        ) : (
-          <>
-            {/* LIST */}
-            <div className="space-y-3">
-              {allNotifications.map((notification) => (
-                <NotificationItem
-                  key={notification._id}
-                  notification={notification}
-                  notificationsTranslations={notificationTranslations}
-                  markAsRead={markAsRead}
-                  isSelected={selectedIds.includes(notification._id)}
-                  onSelect={handleSelectNotification}
-                  onMarkedRead={handleMarkedRead}
-                />
-              ))}
-            </div>
+        {/* LIST */}
+        <CommonCard className="p-0">
+          <div className="space-y-3">
+            {allNotifications.map((notification) => (
+              <NotificationItem
+                notificationsTranslations={t("notifications")}
+                key={notification._id}
+                notification={notification}
+                markAsRead={markAsReadApi}
+                isSelected={selectedIds.includes(notification._id)}
+                onSelect={handleSelectNotification}
+              />
+            ))}
+          </div>
 
-            {/* 👇 OBSERVER TRIGGER + SPINNER */}
-            {page < totalPages && (
-              <div
-                ref={loadMoreRef}
-                className="flex justify-center py-6"
-              >
-                <CommonSpinner />
-              </div>
-            )}
-          </>
-        )}
+          {/* LOADER */}
+          {page < totalPages && (
+            <div
+              ref={loadMoreRef}
+              className="flex justify-center py-6"
+            >
+              <CommonSpinner />
+            </div>
+          )}
+        </CommonCard>
+
       </div>
     </div>
   );

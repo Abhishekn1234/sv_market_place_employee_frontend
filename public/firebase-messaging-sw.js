@@ -22,34 +22,37 @@ function getNotificationContent(data = {}, notification = {}) {
       url: `/chat/${bookingId}`,
     },
 
-    BOOKING_REQUEST: {
-      title: notification.title || "New booking request",
-      body: notification.body || "Tap to view booking request",
-      url: `/availableBooking?status=requested&bookingId=${bookingId}`,
-    },
+  BOOKING_REQUEST: {
+  title: notification.title || "New booking request",
+  body: notification.body || "Tap to view booking request",
+  url:
+    data.status === "REQUESTED"
+      ? `/availableBooking?status=requested&bookingId=${bookingId}`
+      : `/availableWork?bookingId=${bookingId}`,
+},
 
-    BOOKING_UPDATE: {
-      title: notification.title || "Booking status updated",
-      body: notification.body || "Tap to view booking",
-      url:
-        data.status === "REQUESTED"
-          ? `/availableBooking?status=requested&bookingId=${bookingId}`
-          : `/availableBooking?bookingId=${bookingId}`,
-    },
+BOOKING_UPDATE: {
+  title: notification.title || "Booking status updated",
+  body: notification.body || "Tap to view booking",
+  url:
+    data.status === "REQUESTED"
+      ? `/availableBooking?status=requested&bookingId=${bookingId}`
+      : `/availableWork?bookingId=${bookingId}`,
+},
 
-    BOOKING_UPDATED: {
-      title: notification.title || "Booking status updated",
-      body: notification.body || "Tap to view booking",
-      url:
-        data.status === "REQUESTED"
-          ? `/availableBooking?status=requested&bookingId=${bookingId}`
-          : `/availableBooking?bookingId=${bookingId}`,
-    },
+   BOOKING_UPDATED: {
+  title: notification.title || "Booking status updated",
+  body: notification.body || "Tap to view booking",
+  url:
+    data.status === "REQUESTED"
+      ? `/availableBooking?status=requested&bookingId=${bookingId}`
+      : `/availableWork?bookingId=${bookingId}`,
+},
 
     WORK_ASSIGNED: {
       title: notification.title || "Work assigned",
       body: notification.body || "A new work has been assigned",
-      url: "/currentWork",
+      url: "/availableWork",
     },
   };
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -19,31 +21,49 @@ export default function NotificationsHeader({
   totalCount,
   setFilter,
   markSelectedAsRead,
-   markAllRead,
+  markAllRead,
   isPending,
-  limit,
-  setLimit,
   selectedCount,
   selectedCategory,
   setSelectedCategory,
   toggleSelectAll,
-  currentPageUnreadCount, // ✅ IMPORTANT ADD
+  currentPageUnreadCount,
 }: any) {
   const { t, translations } = useLanguage();
   const notificationsTranslations = translations.notifications;
 
-  const hasSelection = selectedCount > 0;
+  const [bulkHandled, setBulkHandled] = useState(false);
 
-  // =========================
-  // FIX: PAGE BASED COUNT (NOT GLOBAL)
-  // =========================
-  const selectableCount = currentPageUnreadCount;
+  useEffect(() => {
+    if (selectedCount === 0) {
+      setBulkHandled(false);
+    }
+  }, [selectedCount]);
+
+  const hasSelection = selectedCount > 0 && !bulkHandled;
 
   const isAllSelected =
-    selectableCount > 0 &&
-    selectedCount === selectableCount;
+    currentPageUnreadCount > 0 &&
+    selectedCount === currentPageUnreadCount;
 
-  const isDisabledBulk = isPending || selectedCount === 0;
+  const isDisabled = isPending || selectedCount === 0 || bulkHandled;
+
+  // =========================
+  // ACTIONS
+  // =========================
+  const handleMarkSelected = async () => {
+    if (isDisabled) return;
+
+    setBulkHandled(true);
+    await Promise.resolve(markSelectedAsRead());
+  };
+
+  const handleMarkAll = async () => {
+    if (isDisabled) return;
+
+    setBulkHandled(true);
+    await Promise.resolve(markAllRead());
+  };
 
   return (
     <div className="p-4 border rounded-lg space-y-4">
@@ -58,7 +78,7 @@ export default function NotificationsHeader({
           <Checkbox
             checked={isAllSelected}
             onCheckedChange={toggleSelectAll}
-            disabled={selectableCount === 0}
+            disabled={currentPageUnreadCount === 0}
           />
 
           <div className="text-sm font-medium">
@@ -68,31 +88,38 @@ export default function NotificationsHeader({
           </div>
 
           <h2 className="text-lg font-semibold flex items-center gap-2 ml-4">
-            <Bell /> {notificationsTranslations.title}
+            <Bell />
+            {notificationsTranslations.title}
           </h2>
         </div>
 
-        {/* BULK ACTION */}
+        {/* BULK ACTIONS */}
         {hasSelection && (
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                onClick={markSelectedAsRead}
-                disabled={isDisabledBulk}
-                className="bg-blue-600 text-white"
-              >
-                <Check className="w-4 h-4 mr-1" />
-                {translations.notifications.markSelected} ({selectedCount})
-              </Button>
+          <div className="ml-auto flex items-center gap-2">
 
+            {/* MARK SELECTED (always when any selection) */}
+            <Button
+              onClick={handleMarkSelected}
+              disabled={isDisabled}
+              className="bg-blue-600 text-white"
+            >
+              <Check className="w-4 h-4 mr-1" />
+              {translations.notifications.markSelected} ({selectedCount})
+            </Button>
+
+            {/* MARK ALL ONLY WHEN SELECT ALL ACTIVE */}
+            {isAllSelected && (
               <Button
-                onClick={markAllRead}
-                disabled={isPending}
+                onClick={handleMarkAll}
+                disabled={isDisabled}
                 className="bg-gray-600 text-white"
               >
                 {translations.notifications.markAllRead}
               </Button>
-            </div>
-          )}
+            )}
+
+          </div>
+        )}
       </div>
 
       {/* SECOND ROW */}
@@ -101,76 +128,38 @@ export default function NotificationsHeader({
         {/* FILTERS */}
         <div className="flex gap-2 flex-wrap">
 
-          <Button
-            onClick={() => setFilter("all")}
-            className="bg-gray-100 text-black hover:text-white"
-          >
+          <Button onClick={() => setFilter("all")} variant="outline">
             {translations.notifications.categories.all} ({totalCount})
           </Button>
 
-          <Button
-            onClick={() => setFilter("unread")}
-            className="bg-gray-100 text-black hover:text-white"
-          >
+          <Button onClick={() => setFilter("unread")} variant="outline">
             {translations.notifications.unread} ({unreadCount})
           </Button>
 
-          <Button
-            onClick={() => setFilter("read")}
-            className="bg-gray-100 text-black hover:text-white"
-          >
+          <Button onClick={() => setFilter("read")} variant="outline">
             {translations.notifications.read} ({readCount})
           </Button>
 
         </div>
 
-        {/* DROPDOWNS */}
-        <div className="flex gap-2 items-center">
+        {/* CATEGORY (your Select kept) */}
+        <Select
+          value={selectedCategory}
+          onValueChange={setSelectedCategory}
+        >
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
 
-          {/* CATEGORY */}
-          <Select
-            value={selectedCategory}
-            onValueChange={setSelectedCategory}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                {t("notifications.categories.all")}
-              </SelectItem>
-              <SelectItem value="booking">
-                {t("notifications.categories.bookings")}
-              </SelectItem>
-              <SelectItem value="payment">
-                {t("notifications.categories.payments")}
-              </SelectItem>
-              <SelectItem value="system">
-                {t("notifications.categories.system")}
-              </SelectItem>
-              <SelectItem value="alert">
-                {t("notifications.categories.alerts")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="booking">Bookings</SelectItem>
+            <SelectItem value="payment">Payments</SelectItem>
+            <SelectItem value="system">System</SelectItem>
+            <SelectItem value="alert">Alerts</SelectItem>
+          </SelectContent>
+        </Select>
 
-          {/* LIMIT */}
-          <Select
-            value={String(limit)}
-            onValueChange={(v) => setLimit(Number(v))}
-          >
-            <SelectTrigger className="w-[100px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-            </SelectContent>
-          </Select>
-
-        </div>
       </div>
     </div>
   );

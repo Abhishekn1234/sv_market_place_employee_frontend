@@ -39,55 +39,59 @@ export const useNotificationManager = () => {
     init();
   }, []);
 
-  // 2️⃣ Register token
+  // 2️⃣ Register token (avoid re-register loops)
   useEffect(() => {
-    const register = async () => {
-      if (!token || !user?.role?._id) return;
+    const roleId = user?.role?._id;
+    if (!token || !roleId) return;
+    if (token) return;
 
+    const register = async () => {
       await registerToken({
         token,
         platform: "WEB",
-        roleId: user.role._id,
+        roleId,
         deviceId: navigator.userAgent,
         appId: "your-app-id",
       });
-
       setRegistered(true);
     };
 
     register();
-  }, [token, user]);
+  }, [token, user?.role?._id]);
 
   // 3️⃣ Logout cleanup
   useEffect(() => {
-    if (!user && token) {
-      unregisterToken(token);
-      reset();
-    }
-  }, [user]);
+    if (user) return;
+    if (!token) return;
 
-  // 4️⃣ Token refresh
+    unregisterToken(token);
+    reset();
+  }, [user, token]);
+
+  // 4️⃣ Token refresh (register only when truly needed)
   useEffect(() => {
     const interval = setInterval(async () => {
       const newToken = await requestAndGetToken();
+      if (!newToken || newToken === token) return;
 
-      if (newToken && newToken !== token) {
-        if (token) await unregisterToken(token);
+      // Only do network calls if we have a logged-in user role
+      const roleId = user?.role?._id;
 
-        setToken(newToken);
+      if (token) await unregisterToken(token);
+      setToken(newToken);
 
-        if (user?.role?._id) {
-          await registerToken({
-            token: newToken,
-            platform: "WEB",
-            roleId: user.role._id,
-            deviceId: navigator.userAgent,
-            appId: "your-app-id",
-          });
-        }
+      if (roleId) {
+        await registerToken({
+          token: newToken,
+          platform: "WEB",
+          roleId,
+          deviceId: navigator.userAgent,
+          appId: "your-app-id",
+        });
+        setRegistered(true);
       }
     }, 1000 * 60 * 30);
 
     return () => clearInterval(interval);
-  }, [token, user]);
+  }, [token, user?.role?._id]);
 };

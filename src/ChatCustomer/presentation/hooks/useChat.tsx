@@ -52,8 +52,12 @@ export function useChat(bookingId: string) {
   useEffect(() => {
     locationRef.current = location.pathname;
 
-    // IMPORTANT: adjust if your route differs
-    isInChatPage.current = location.pathname.includes(`/chat/${bookingId}`);
+    // Determine whether user is currently viewing this booking's chat.
+    // Using pathname.includes can fail due to formatting differences; extract bookingId from URL instead.
+    const match = location.pathname.match(/\/chat\/([^/]+)/);
+    const currentBookingId = match?.[1];
+    isInChatPage.current = String(currentBookingId) === String(bookingId);
+
   }, [location.pathname, bookingId]);
 
   // =========================
@@ -148,7 +152,10 @@ export function useChat(bookingId: string) {
       // =========================
       const isSelf = nextMessage.self;
 
+      // If user is already viewing this booking's chat, skip browser notifications.
       if (!isSelf && !isInChatPage.current) {
+
+
         const title = `New message from ${
           nextMessage.senderName || "User"
         }`;

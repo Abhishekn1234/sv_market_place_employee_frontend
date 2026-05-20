@@ -59,6 +59,8 @@ const isCancelled = (status?: string) => {
     s === "WORKER_CANCELLED"
   );
 };
+
+
 // ✅ MAIN NORMALIZER (MOST IMPORTANT FIX)
 export function normalizeAssignedWorks(
   assignedBookings: Array<Partial<DisplayWork> | Partial<Booking>>
