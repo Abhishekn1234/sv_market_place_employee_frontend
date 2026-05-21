@@ -185,10 +185,10 @@ const CANCEL_REASONS = [
                 old.filter((b) => (b.booking?._id || b._id) !== bookingId)
               );
 
-  emitVerify({
-    bookingId,
-    status: "COMPLETED",
-  });
+            emitVerify({
+              bookingId,
+              status: "COMPLETED",
+            });
             }}
           />
         )}
