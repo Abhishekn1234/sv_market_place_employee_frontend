@@ -177,13 +177,13 @@ const CANCEL_REASONS = [
             onClose={closeModal}
             onSuccess={() => {
                const bookingId = getBookingId(selectedWork);
+              // Remove the work from the store after successful OTP verification
+              removeAssigned(bookingId);
 
-  upsertAssigned({
-    ...selectedWork,
-    _id: bookingId,
-    bookingId,
-    status: "COMPLETED",
-  });
+              // ✅ Remove from API cache to ensure instant UI update
+              queryClient.setQueryData(["assigned-works"], (old: any[] = []) =>
+                old.filter((b) => (b.booking?._id || b._id) !== bookingId)
+              );
 
   emitVerify({
     bookingId,

@@ -73,8 +73,13 @@ export function normalizeAssignedWorks(
 
   if (!id) return;
 
+  // ✅ Source of Truth: If the booking itself is completed or pending, use its status
+  // This resolves cases where the assignment status (item.status) lags behind the global booking state.
+  const bStatus = booking?.status?.toUpperCase();
   const statusSource =
-    item.status ?? booking?.status;
+    bStatus && FINAL_WORK_STATUSES.includes(bStatus as any)
+      ? booking.status
+      : item.status ?? booking?.status;
 
   // 🔥 HARD BLOCK CANCELLED
   if (isCancelled(statusSource)) return;
