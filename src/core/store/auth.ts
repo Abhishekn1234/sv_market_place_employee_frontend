@@ -7,7 +7,24 @@ import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/worke
 import type { Worker } from "@/pages/Profile/domain/entities/workertype";
 import { getOnboardingStatus, type OnboardingStatus } from "@/pages/Servicesettings/presentation/helpers/documentstatus";
 
-/* ----------------------------- Helpers ----------------------------- */
+/* =========================
+   NOTIFICATION TYPE
+========================= */
+
+export interface AppNotification {
+  _id: string;
+  title?: string;
+  message?: string;
+  type?: string;
+  bookingId?: string;
+  url?: string;
+  createdAt?: string;
+  isRead?: boolean;
+}
+
+/* =========================
+   HELPERS
+========================= */
 
 export const mapStatus = (status: string | number): WorkerStatus => {
   switch (status) {
@@ -26,7 +43,9 @@ export const mapStatus = (status: string | number): WorkerStatus => {
   }
 };
 
-/* ----------------------------- Types ----------------------------- */
+/* =========================
+   USER TYPE
+========================= */
 
 export interface EmployeeUser {
   _id?: string;
@@ -38,7 +57,7 @@ export interface EmployeeUser {
 
   preferredTheme?: "light" | "dark";
   preferredLanguage?: "EN" | "AR" | "HI";
-   
+
   profileImage?: string;
   profilePictureUrl?: string;
   profilePicturePublicId?: string;
@@ -46,43 +65,68 @@ export interface EmployeeUser {
   documents?: ApiDocument[];
   isVerified?: boolean;
   kycStatus?: string;
+
   role?: {
     _id?: string;
     name?: string;
-    modules?:string[];
+    modules?: string[];
   };
+
   worker?: Worker;
-   isOnboarded?: boolean;
-   onboardingStatus?: OnboardingStatus;
+  isOnboarded?: boolean;
+  onboardingStatus?: OnboardingStatus;
 }
+
+/* =========================
+   AUTH STATE
+========================= */
 
 interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   user: EmployeeUser | null;
   isAuthenticated: boolean;
-  hydrated: boolean; // ✅ ADD THIS
+
+  hydrated: boolean;
   setHydrated: () => void;
 
+  /* =========================
+     NOTIFICATIONS (NEW)
+  ========================= */
+  notifications: AppNotification[];
+  unreadCount: number;
 
-  /* Core */
+  setNotifications: (n: AppNotification[]) => void;
+  addNotification: (n: AppNotification) => void;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  clearNotifications: () => void;
+
+  /* =========================
+     AUTH
+  ========================= */
   setAuth: (user: EmployeeUser) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
 
-  /* Updates */
+  /* =========================
+     UPDATES
+  ========================= */
   updateUserProfile: (payload: Partial<EmployeeUser>) => void;
   updateUserStatus: (status: WorkerStatus) => void;
   updateWorker: (payload: Partial<Worker>) => void;
 
-  /* Preferences */
+  /* =========================
+     PREFERENCES
+  ========================= */
   setPreferredLanguage: (lang: "EN" | "AR" | "HI") => void;
   setPreferredTheme: (theme: "light" | "dark") => void;
   setUserLocation: (location: GeoPoint) => void;
-  
 }
 
-/* ----------------------------- Store ----------------------------- */
+/* =========================
+   STORE
+========================= */
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -91,43 +135,98 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       user: null,
       isAuthenticated: false,
-       hydrated: false, // ✅
 
-    setHydrated: () => set({ hydrated: true }),
+      hydrated: false,
+      setHydrated: () => set({ hydrated: true }),
 
-      /* ------------------ SET USER ------------------ */
-     setAuth: (incomingUser) => {
-  const existingUser = get().user;
+      /* =========================
+         NOTIFICATIONS STATE
+      ========================= */
+      notifications: [],
+      unreadCount: 0,
 
-  const incomingLocation = incomingUser?.worker?.location;
+      setNotifications: (n) =>
+        set(() => ({
+          notifications: n,
+          unreadCount: n.filter((x) => !x.isRead).length,
+        })),
 
-  const finalUser: EmployeeUser = {
-    ...incomingUser,
+      addNotification: (n) =>
+        set((state) => {
+          const exists = state.notifications.some(
+            (x) => x._id === n._id
+          );
 
-    worker: {
-      ...(existingUser?.worker || {}),
-      ...(incomingUser.worker || {}),
+          if (exists) return state;
 
-      // ✅ KEEP OLD LOCATION IF MISSING
-      location:
-        incomingLocation ??
-        existingUser?.worker?.location,
-    },
-  };
+          const updated = [n, ...state.notifications];
 
-  const status = getOnboardingStatus(finalUser);
+          return {
+            notifications: updated,
+            unreadCount: updated.filter((x) => !x.isRead).length,
+          };
+        }),
+        markAllAsRead: () =>
+  set((state) => ({
+    notifications: state.notifications.map((n) => ({
+      ...n,
+      isRead: true,
+    })),
+    unreadCount: 0,
+  })),
 
-  set({
-    user: {
-      ...finalUser,
-      onboardingStatus: status,
-      isOnboarded: status === "COMPLETED",
-    },
-    isAuthenticated: true,
-  });
-},
+      markAsRead: (id) =>
+        set((state) => {
+          const updated = state.notifications.map((n) =>
+            n._id === id ? { ...n, isRead: true } : n
+          );
 
-      /* ------------------ SET TOKENS ------------------ */
+          return {
+            notifications: updated,
+            unreadCount: updated.filter((x) => !x.isRead).length,
+          };
+        }),
+
+      clearNotifications: () =>
+        set({
+          notifications: [],
+          unreadCount: 0,
+        }),
+
+      /* =========================
+         AUTH
+      ========================= */
+
+      setAuth: (incomingUser) => {
+        const existingUser = get().user;
+
+        const incomingLocation = incomingUser?.worker?.location;
+
+        const finalUser: EmployeeUser = {
+          ...incomingUser,
+
+          worker: {
+            ...(existingUser?.worker || {}),
+            ...(incomingUser.worker || {}),
+
+            location:
+              incomingLocation ??
+              existingUser?.worker?.location,
+          },
+        };
+
+        const status = getOnboardingStatus(finalUser);
+
+        set({
+          user: {
+            ...finalUser,
+            onboardingStatus: status,
+            isOnboarded: status === "COMPLETED",
+          },
+          isAuthenticated: true,
+        });
+      },
+
       setTokens: (accessToken, refreshToken) =>
         set({
           accessToken,
@@ -135,19 +234,23 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
         }),
 
-      /* ------------------ LOGOUT ------------------ */
-              logout: () => {
-            set({
-              accessToken: null,
-              refreshToken: null,
-              user: null,
-              isAuthenticated: false,
-            });
+      logout: () => {
+        set({
+          accessToken: null,
+          refreshToken: null,
+          user: null,
+          isAuthenticated: false,
+          notifications: [],
+          unreadCount: 0,
+        });
 
-            localStorage.clear(); // or removeItem is fine if only one
-          },
+        localStorage.clear();
+      },
 
-      /* ------------------ UPDATE PROFILE ------------------ */
+      /* =========================
+         PROFILE UPDATE
+      ========================= */
+
       updateUserProfile: (payload) => {
         const { user } = get();
         if (!user) return;
@@ -160,49 +263,49 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      /* ------------------ UPDATE STATUS ------------------ */
-   updateUserStatus: (status: any) =>
-  set((state) => {
-    if (!state.user) return state;
+      updateUserStatus: (status: any) =>
+        set((state) => {
+          if (!state.user) return state;
 
-    // normalize all possible backend values
-    const normalized =
-      status === "ONLINE" ||
-      status === 1 ||
-      status === "1"
-        ? "ONLINE"
-        : status === "BUSY"
-        ? "BUSY"
-        : "OFFLINE";
+          const normalized =
+            status === "ONLINE" ||
+            status === 1 ||
+            status === "1"
+              ? "ONLINE"
+              : status === "BUSY"
+              ? "BUSY"
+              : "OFFLINE";
 
-    return {
-      user: {
-        ...state.user,
-        worker: {
-          ...state.user.worker,
-          status: normalized,
-        },
+          return {
+            user: {
+              ...state.user,
+              worker: {
+                ...state.user.worker,
+                status: normalized,
+              },
+            },
+          };
+        }),
+
+      updateWorker: (payload) => {
+        const { user } = get();
+        if (!user) return;
+
+        set({
+          user: {
+            ...user,
+            worker: {
+              ...(user.worker || {}),
+              ...payload,
+            },
+          },
+        });
       },
-    };
-  }),
 
-      /* ------------------ UPDATE WORKER ------------------ */
-     updateWorker: (payload) => {
-  const { user } = get();
-  if (!user) return;
+      /* =========================
+         PREFERENCES
+      ========================= */
 
-  set({
-    user: {
-      ...user,
-      worker: {
-        ...(user.worker || {}), // ✅ FIX: create if missing
-        ...payload,
-      },
-    },
-  });
-},
-
-      /* ------------------ LANGUAGE ------------------ */
       setPreferredLanguage: (lang) => {
         const { user } = get();
         if (!user) return;
@@ -215,7 +318,6 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      /* ------------------ THEME ------------------ */
       setPreferredTheme: (theme) => {
         const { user } = get();
         if (!user) return;
@@ -228,7 +330,6 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      /* ------------------ LOCATION ------------------ */
       setUserLocation: (location) => {
         const { user } = get();
         if (!user?.worker) return;
@@ -245,16 +346,18 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-  name: "employee-storage",
+      name: "employee-storage",
 
-  onRehydrateStorage: () => (state) => {
-    state?.setHydrated(); // ✅ VERY IMPORTANT
-  },
-}
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      },
+    }
   )
 );
 
-
+/* =========================
+   SELECTORS
+========================= */
 
 export const useEmployeeUser = () =>
   useAuthStore((s) => s.user);
@@ -270,3 +373,9 @@ export const usePreferredLanguage = () =>
 
 export const usePreferredTheme = () =>
   useAuthStore((s) => s.user?.preferredTheme);
+
+export const useNotifications = () =>
+  useAuthStore((s) => s.notifications);
+
+export const useUnreadCount = () =>
+  useAuthStore((s) => s.unreadCount);

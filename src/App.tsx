@@ -11,6 +11,9 @@ import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./ProtectedRoute";
 import AppLayout from "./components/Layout/AppLayout";
 
+/* =========================
+   PAGES
+========================= */
 import HomePage from "./pages/Home/presentation/home.page";
 import ProfileSettings from "./pages/Profile/presentation/profile.page";
 import RegisterPage from "./pages/Auth/Register/presentation/register.page";
@@ -26,9 +29,6 @@ import WorkingHistory from "./pages/History/WorkHistory/presentation/WorkingHist
 import ServiceSettings from "./pages/Servicesettings/presentation/servicesettings.page";
 import DocumentOnboarding from "./pages/DocumentsOnboarding/presentation/document.onboarding.page";
 
-import RecentActivity from "./pages/Activity/RecentActivity/presentation/recent.activity.page";
-import PastActivity from "./pages/Activity/PastActivity/presentation/past.activity.page";
-
 import Wallet from "./pages/Wallet/presentation/wallet.page";
 import NotificationsPage from "./pages/Notifications/presentation/notification.page";
 
@@ -43,10 +43,18 @@ import SendOtpMobilePage from "./pages/Auth/MobileVerification/presentation/comp
 import Disputespage from "./pages/History/BookingHistory/presentation/components/Disputes.page";
 import CurrentWorkPage from "./pages/CurrentWork/presentation/CurrentWorkPage";
 
+import ChatWorkerPage from "./ChatCustomer/presentation/ChatWorkerPage";
+
+/* =========================
+   NOTIFICATIONS
+========================= */
 import { initOnMessage } from "./components/firebase/notifications";
 import { useNotificationManager } from "./pages/Notifications/presentation/hooks/useNotificationhandler";
 import { useDynamicLocation } from "@/utils/useNotification";
-import ChatWorkerPage from "./ChatCustomer/presentation/ChatWorkerPage";
+
+/* =========================
+   APP CONTENT
+========================= */
 
 function AppContent() {
   const navigate = useNavigate();
@@ -58,23 +66,27 @@ function AppContent() {
     "location" | "profile" | "password"
   >("profile");
 
-  // ✅ hooks
+  /* =========================
+     CUSTOM HOOKS
+  ========================= */
   useDynamicLocation();
   useNotificationManager();
 
-  // ✅ FOREGROUND FCM
- useEffect(() => {
-  if (initializedRef.current) return;
+  /* =========================
+     FOREGROUND FCM
+  ========================= */
+  useEffect(() => {
+    if (initializedRef.current) return;
 
-  initializedRef.current = true;
+    initializedRef.current = true;
+    initOnMessage();
+  }, []);
 
-  initOnMessage();
-}, []);
-
-  // ✅ SERVICE WORKER REGISTER
+  /* =========================
+     SERVICE WORKER REGISTER
+  ========================= */
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-
     if (swRegisteredRef.current) return;
 
     swRegisteredRef.current = true;
@@ -89,11 +101,8 @@ function AppContent() {
 
         await navigator.serviceWorker.ready;
 
-        // ✅ force update instantly
         if (reg.waiting) {
-          reg.waiting.postMessage({
-            type: "SKIP_WAITING",
-          });
+          reg.waiting.postMessage({ type: "SKIP_WAITING" });
         }
       } catch (err) {
         console.error("❌ SW registration error:", err);
@@ -103,94 +112,115 @@ function AppContent() {
     registerSW();
   }, []);
 
-  // ✅ NAVIGATION HANDLER
- // ✅ NAVIGATION HANDLER
-useEffect(() => {
-  const channel = new BroadcastChannel("fcm_channel");
+  /* =========================
+     NAVIGATION HANDLER
+  ========================= */
 
-  const allowedRoutes = [
-    "/availableBooking",
-    "/chat",
-    "/currentWork",
-    "/availableWork",
-    "/notifications",
-  ];
+  useEffect(() => {
+    const allowedRoutes = [
+      "/availableBooking",
+      "/chat",
+      "/currentWork",
+      "/availableWork",
+      "/notifications",
+    ];
 
-  const canNavigate = (url?: string) => {
-    if (!url) return false;
+    const normalize = (url: string) =>
+      url.split("?")[0];
 
-    return allowedRoutes.some((route) =>
-      url.startsWith(route)
+    const canNavigate = (url?: string) => {
+      if (!url) return false;
+
+      try {
+        const path = new URL(url, window.location.origin)
+          .pathname;
+
+        return allowedRoutes.some((route) =>
+          path.startsWith(route)
+        );
+      } catch {
+        return false;
+      }
+    };
+
+    const handleNavigate = (url?: string) => {
+      if (!canNavigate(url)) return;
+
+      const current =
+        window.location.pathname +
+        window.location.search;
+
+      if (normalize(current) === normalize(url!)) return;
+
+      console.log("🚀 Navigating:", url);
+      navigate(url!);
+    };
+
+    /* =========================
+       BROADCAST CHANNEL
+    ========================= */
+    const channel = new BroadcastChannel(
+      "fcm_channel"
     );
-  };
 
-  // ✅ BroadcastChannel messages
-  const channelHandler = (event: MessageEvent) => {
-    const data = event.data;
+    const channelHandler = (event: MessageEvent) => {
+      const data = event.data;
 
-    console.log("📡 BroadcastChannel:", data);
+      console.log("📡 BroadcastChannel:", data);
 
-    if (
-      data?.type === "NAVIGATE" &&
-      canNavigate(data.url)
-    ) {
-      // prevent duplicate navigation
-      if (
-        window.location.pathname +
-          window.location.search !==
-        data.url
-      ) {
-        navigate(data.url);
+      if (data?.type === "NAVIGATE") {
+        handleNavigate(data.url);
       }
-    }
-  };
+    };
 
-  // ✅ Service worker messages
-  const swHandler = (event: MessageEvent) => {
-    const data = event.data;
-
-    console.log("📨 SW Message:", data);
-
-    if (
-      data?.type === "NAVIGATE" &&
-      canNavigate(data.url)
-    ) {
-      // prevent duplicate navigation
-      if (
-        window.location.pathname +
-          window.location.search !==
-        data.url
-      ) {
-        navigate(data.url);
-      }
-    }
-  };
-
-  channel.addEventListener(
-    "message",
-    channelHandler
-  );
-
-  navigator.serviceWorker?.addEventListener(
-    "message",
-    swHandler
-  );
-
-  // ✅ cleanup
-  return () => {
-    channel.removeEventListener(
+    channel.addEventListener(
       "message",
       channelHandler
     );
 
-    navigator.serviceWorker?.removeEventListener(
-      "message",
-      swHandler
-    );
+    /* =========================
+       SERVICE WORKER MESSAGES
+    ========================= */
+    const swHandler = (event: MessageEvent) => {
+      const data = event.data;
 
-    channel.close();
-  };
-}, [navigate]);
+      console.log("📨 SW Message:", data);
+
+      if (data?.type === "NAVIGATE") {
+        handleNavigate(data.url);
+      }
+    };
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener(
+        "message",
+        swHandler
+      );
+    }
+
+    /* =========================
+       CLEANUP
+    ========================= */
+    return () => {
+      channel.removeEventListener(
+        "message",
+        channelHandler
+      );
+
+      channel.close();
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener(
+          "message",
+          swHandler
+        );
+      }
+    };
+  }, [navigate]);
+
+  /* =========================
+     ROUTES
+  ========================= */
 
   return (
     <LanguageProvider>
@@ -201,63 +231,23 @@ useEffect(() => {
 
       <Routes>
         {/* AUTH */}
-        <Route
-          path="/register"
-          element={<RegisterPage />}
-        />
-
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
-
-        <Route
-          path="/forgot-password"
-          element={<ForgotPasswordPage />}
-        />
-
-        <Route
-          path="/verify-otp"
-          element={<VerifyOtpPage />}
-        />
-
-        <Route
-          path="/reset-password"
-          element={<ResetPasswordPage />}
-        />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/verify-otp" element={<VerifyOtpPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* SERVICES */}
-        <Route
-          path="/services/employee"
-          element={<ServiceSettings />}
-        />
-
-        <Route
-          path="/services/documents"
-          element={<DocumentOnboarding />}
-        />
+        <Route path="/services/employee" element={<ServiceSettings />} />
+        <Route path="/services/documents" element={<DocumentOnboarding />} />
 
         {/* MOBILE */}
-        <Route
-          path="/verify-otp-mobile"
-          element={<VerifyMobilePage />}
-        />
-
-        <Route
-          path="/send-otp-mobile"
-          element={<SendOtpMobilePage />}
-        />
+        <Route path="/verify-otp-mobile" element={<VerifyMobilePage />} />
+        <Route path="/send-otp-mobile" element={<SendOtpMobilePage />} />
 
         {/* EMAIL */}
-        <Route
-          path="/email-verification"
-          element={<SendOtpEmailPage />}
-        />
-
-        <Route
-          path="/verify-otp-email"
-          element={<VerifyOtpEmailPage />}
-        />
+        <Route path="/email-verification" element={<SendOtpEmailPage />} />
+        <Route path="/verify-otp-email" element={<VerifyOtpEmailPage />} />
 
         {/* PROTECTED */}
         <Route
@@ -268,10 +258,7 @@ useEffect(() => {
             </ProtectedRoute>
           }
         >
-          <Route
-            index
-            element={<HomePage />}
-          />
+          <Route index element={<HomePage />} />
 
           {/* PROFILE */}
           <Route
@@ -285,72 +272,26 @@ useEffect(() => {
           />
 
           {/* HISTORY */}
-          <Route
-            path="history/booking"
-            element={<BookingHistory />}
-          />
+          <Route path="history/booking" element={<BookingHistory />} />
+          <Route path="history/transaction" element={<TransactionHistory />} />
+          <Route path="history/work" element={<WorkingHistory />} />
 
-          <Route
-            path="history/transaction"
-            element={<TransactionHistory />}
-          />
-
-          <Route
-            path="history/work"
-            element={<WorkingHistory />}
-          />
-
-          {/* DISPUTES */}
-          <Route
-            path="/disputes"
-            element={<Disputespage />}
-          />
-
-          {/* CURRENT WORK */}
-          <Route
-            path="/currentWork"
-            element={<CurrentWorkPage />}
-          />
-
-          {/* ACTIVITY */}
-          <Route
-            path="activity/recent"
-            element={<RecentActivity />}
-          />
-
-          <Route
-            path="activity/past"
-            element={<PastActivity />}
-          />
+          {/* OTHER */}
+          <Route path="/disputes" element={<Disputespage />} />
+          <Route path="/currentWork" element={<CurrentWorkPage />} />
 
           {/* CHAT */}
-          <Route
-            path="/chat/:bookingId"
-            element={<ChatWorkerPage />}
-          />
+          <Route path="/chat/:bookingId" element={<ChatWorkerPage />} />
 
           {/* WALLET */}
-          <Route
-            path="settings/wallet"
-            element={<Wallet />}
-          />
+          <Route path="settings/wallet" element={<Wallet />} />
 
           {/* NOTIFICATIONS */}
-          <Route
-            path="notifications"
-            element={<NotificationsPage />}
-          />
+          <Route path="notifications" element={<NotificationsPage />} />
 
           {/* BOOKINGS */}
-          <Route
-            path="availableWork"
-            element={<AvailableWorkPage />}
-          />
-
-          <Route
-            path="availableBooking"
-            element={<AvailableBookingPage />}
-          />
+          <Route path="availableWork" element={<AvailableWorkPage />} />
+          <Route path="availableBooking" element={<AvailableBookingPage />} />
         </Route>
       </Routes>
 
@@ -359,6 +300,10 @@ useEffect(() => {
     </LanguageProvider>
   );
 }
+
+/* =========================
+   ROOT APP
+========================= */
 
 export default function App() {
   return (

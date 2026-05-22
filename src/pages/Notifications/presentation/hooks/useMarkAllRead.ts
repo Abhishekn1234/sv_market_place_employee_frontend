@@ -1,13 +1,15 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { NotificationRepositoryImpl } from "../../data/repositories/NotificationRepoImpl";
 import { MarkAllNotificationsReadUseCase } from "../../domain/usecase/MarkAllReadUsecase";
 import { toast } from "react-toastify";
+import { useAuthStore } from "@/core/store/auth";
+
 
 const repo = new NotificationRepositoryImpl();
 const useCase = new MarkAllNotificationsReadUseCase(repo);
 
 export const useMarkAllRead = () => {
-  const queryClient = useQueryClient();
+  const markAllAsRead = useAuthStore((s) => s.markAllAsRead);
 
   return useMutation({
     mutationFn: () => useCase.execute(),
@@ -15,15 +17,13 @@ export const useMarkAllRead = () => {
     onSuccess: () => {
       toast.success("All notifications marked as read");
 
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-     queryClient.setQueryData(["unread-count"], 0);
+       markAllAsRead();
     },
 
     onError: (error: any) => {
-      // 🔥 extract backend message safely
       const message =
-        error?.response?.data?.message ||   // axios style
-        error?.message ||                   // generic JS error
+        error?.response?.data?.message ||
+        error?.message ||
         "Something went wrong";
 
       toast.error(message);

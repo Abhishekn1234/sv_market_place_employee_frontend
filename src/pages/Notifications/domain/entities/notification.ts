@@ -31,6 +31,7 @@ export interface RegisterDeviceTokenPayload {
 
 export interface NotificationResponse {
   data: Notification[];
+  notifications?: Notification[];
   pagination: {
     totalItems: number;
     totalPages: number;

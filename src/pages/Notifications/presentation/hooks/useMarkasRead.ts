@@ -1,24 +1,24 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { NotificationRepositoryImpl } from "../../data/repositories/NotificationRepoImpl";
 import { MarkNotificationReadUseCase } from "../../domain/usecase/GetReasdCountUsecase";
 import { toast } from "react-toastify";
+import { useAuthStore } from "@/core/store/auth";
+
 
 const repo = new NotificationRepositoryImpl();
 const useCase = new MarkNotificationReadUseCase(repo);
 
 export const useMarkAsRead = () => {
-  const queryClient = useQueryClient();
+  const markAsRead = useAuthStore((s) => s.markAsRead);
 
   return useMutation({
     mutationFn: (id: string) => useCase.execute(id),
 
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       toast.success("Notification marked as read ✅");
 
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      queryClient.setQueryData(["unread-count"], (old: number = 0) =>
-    Math.max(0, old - 1)
-  );
+      // ✅ instant UI update
+      markAsRead(id);
     },
 
     onError: (error: any) => {

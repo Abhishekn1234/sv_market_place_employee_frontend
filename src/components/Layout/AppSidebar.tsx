@@ -50,7 +50,7 @@ export default function AppSidebar({
 const { data: unreadCount = 0 } = useUnreadCount();
 const fullName = profile?.fullName || user?.fullName || "User";
 const profileImage = profile?.profilePictureUrl || user?.profileImage;
- console.log(user);
+//  console.log(user);
   const handleLogout = () => {
     logout();
     toast.success(t("common.logoutSuccess"));
