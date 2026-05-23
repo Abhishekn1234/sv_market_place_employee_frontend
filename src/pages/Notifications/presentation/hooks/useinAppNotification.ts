@@ -12,12 +12,17 @@ export const useInAppNotification = () => {
       }, 5000);
     };
 
+    const closeHandler = () => setNotification(null);
+
     window.addEventListener("in-app-notification", handler);
+    window.addEventListener("in-app-notification-close", closeHandler);
 
     return () => {
       window.removeEventListener("in-app-notification", handler);
+      window.removeEventListener("in-app-notification-close", closeHandler);
     };
   }, []);
+
 
   return notification;
 };

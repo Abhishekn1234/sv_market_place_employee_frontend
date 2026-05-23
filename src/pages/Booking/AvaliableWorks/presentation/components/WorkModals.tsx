@@ -36,7 +36,7 @@ export default function WorkModals({
   cancelConfirmWork,
   setCancelConfirmWork,
   cancelMutation,
-  // onCancelSuccess,
+  onCancelSuccess,
   onCompleteSuccess,
 }: WorkModalsProps) {
   const { emitStart, emitComplete, emitVerify, emitCancel, emitDispute } =
@@ -98,6 +98,7 @@ export default function WorkModals({
       bookingId,
       status: "WORKER_CANCELLED",
     });
+    onCancelSuccess?.(_data?.booking || _data);
     queryClient.setQueryData(["assigned-works"], (old: any[] = []) =>
     old.filter((b) => (b.booking?._id || b._id) !== bookingId)
   );
@@ -175,7 +176,7 @@ const CANCEL_REASONS = [
             open
             work={selectedWork}
             onClose={closeModal}
-            onSuccess={() => {
+            onSuccess={(updatedWork) => {
                const bookingId = getBookingId(selectedWork);
               // Remove the work from the store after successful OTP verification
               removeAssigned(bookingId);
@@ -185,10 +186,12 @@ const CANCEL_REASONS = [
                 old.filter((b) => (b.booking?._id || b._id) !== bookingId)
               );
 
-            emitVerify({
-              bookingId,
-              status: "COMPLETED",
-            });
+              emitVerify({
+                bookingId,
+                status: "COMPLETED",
+              });
+
+              onCompleteSuccess?.(updatedWork);
             }}
           />
         )}

@@ -1,6 +1,7 @@
 import { Bell, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useInAppNotification } from "../hooks/useinAppNotification";
+import { Button } from "@/components/ui/button";
 
 export const FloatingNotification = () => {
   const data = useInAppNotification();
@@ -36,13 +37,24 @@ export const FloatingNotification = () => {
             {data.body}
           </p>
 
-          <button
-            onClick={handleOpen}
-            className="mt-2 flex items-center gap-1 text-xs text-blue-600 font-medium hover:underline"
-          >
-            <ExternalLink className="w-3 h-3" />
-            Open
-          </button>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <Button
+            variant="ghost"
+              onClick={handleOpen}
+              className="flex-1 flex items-center justify-center gap-1 text-xs text-blue-600 font-medium hover:underline"
+            >
+              <ExternalLink className="w-3 h-3" />
+              Open
+            </Button>
+
+            <Button
+            variant="ghost"
+              onClick={() => window.dispatchEvent(new CustomEvent("in-app-notification-close"))}
+              className="flex-1 flex items-center justify-center text-xs text-gray-600 font-medium hover:underline"
+            >
+              Close
+            </Button>
+          </div>
         </div>
       </div>
     </div>

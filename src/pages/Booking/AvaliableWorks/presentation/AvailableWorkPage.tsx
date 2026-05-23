@@ -29,8 +29,9 @@ export default function AvailableWorkPage() {
   const { assignedWorks: assignedFromApi, isLoading } = useAssign();
 //  console.log("API Assigned from useAssign:", assignedFromApi);
   const isRTL = language === "AR";
+  const removeAssigned = useBookingSocketStore((state) => state.removeAssigned);
   const socketBookings = useBookingSocketStore((state) => state.assignedBookings);
-  const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
+  // const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
 
   const [selectedWork, setSelectedWork] = useState<DisplayWork | null>(null);
   const [modalType, setModalType] = useState<WorkModalType | null>(null);
@@ -70,12 +71,23 @@ export default function AvailableWorkPage() {
   return normalizeAssignedWorks(
     assignedBookings
   ).filter((work) => {
-    const status =
-      work.status?.toUpperCase();
+    const status = work.status?.toUpperCase();
+    const bookingStatus = work.booking?.status?.toUpperCase();
+
+    // Broaden exclusion to handle all cancellation types instantly
+    const excludedStatuses = [
+      "CUSTOMER_CANCELLED",
+      "WORKER_CANCELLED",
+      "CANCELLED",
+      "ADMIN_CANCELLED",
+      "CANCELLED_BY_CUSTOMER",
+      "COMPLETED",
+      "WORK_COMPLETED",
+    ];
 
     return (
-      status !== "CUSTOMER_CANCELLED" &&
-      status !== "WORKER_CANCELLED"
+      !excludedStatuses.includes(status || "") &&
+      !excludedStatuses.includes(bookingStatus || "")
     );
   });
 }, [assignedBookings]);
@@ -112,6 +124,13 @@ export default function AvailableWorkPage() {
 
     return () => window.clearInterval(interval);
   }, [workList]);
+
+  // ✅ Automatically close modals if the selected work is cancelled or removed from the list
+  useEffect(() => {
+    if (selectedWork && !workList.some((w) => w.id === selectedWork.id)) {
+      closeModal();
+    }
+  }, [workList, selectedWork]);
 
   const openModal = (work: DisplayWork, type: WorkModalType) => {
     setSelectedWork(work);
@@ -155,7 +174,8 @@ export default function AvailableWorkPage() {
         setCancelConfirmWork={setCancelConfirmWork}
         cancelMutation={cancelMutation}
         onCancelSuccess={(updatedBooking: Booking) => {
-          upsertAssigned(updatedBooking);
+          const bookingId = updatedBooking?._id || updatedBooking?._id;
+          if (bookingId) removeAssigned(bookingId);
         }}
       />
     </CommonCard>

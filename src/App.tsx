@@ -27,8 +27,7 @@ import TransactionHistory from "./pages/History/TransactionHistory/presentation/
 import WorkingHistory from "./pages/History/WorkHistory/presentation/WorkingHistory";
 
 import ServiceSettings from "./pages/Servicesettings/presentation/servicesettings.page";
-import DocumentOnboarding from "./pages/DocumentsOnboarding/presentation/document.onboarding.page";
-
+import DocumentOnboarding from "./pages/DocumentsOnboarding/presentation/document.onboarding.page"
 import Wallet from "./pages/Wallet/presentation/wallet.page";
 import NotificationsPage from "./pages/Notifications/presentation/notification.page";
 
@@ -93,9 +92,9 @@ function AppContent() {
 
     const registerSW = async () => {
       try {
-        const reg = await navigator.serviceWorker.register(
-          "/firebase-messaging-sw.js"
-        );
+        // Keep only one SW registration path (main.tsx). This is a no-op if already controlled.
+        const reg = await navigator.serviceWorker.ready;
+
 
         console.log("✅ SW registered:", reg);
 
@@ -168,7 +167,7 @@ function AppContent() {
 
       console.log("📡 BroadcastChannel:", data);
 
-      if (data?.type === "NAVIGATE") {
+      if (data?.type === "NAVIGATE" && data.isUserAction) {
         handleNavigate(data.url);
       }
     };
@@ -186,7 +185,7 @@ function AppContent() {
 
       console.log("📨 SW Message:", data);
 
-      if (data?.type === "NAVIGATE") {
+      if (data?.type === "NAVIGATE" && data.isUserAction) {
         handleNavigate(data.url);
       }
     };
@@ -198,8 +197,11 @@ function AppContent() {
       );
     }
 
-    // Some browsers deliver SW -> window messages via window "message"
-    window.addEventListener("message", swHandler);
+    // Guarded window message handler to prevent collision with other libraries
+    const windowHandler = (e: MessageEvent) => {
+      if (e.data?.type === "NAVIGATE" && e.data?.isUserAction) swHandler(e);
+    };
+    window.addEventListener("message", windowHandler);
 
     /* =========================
        CLEANUP

@@ -88,7 +88,7 @@ function getNotificationContent(data = {}, notification = {}) {
 
     ADMIN_MESSAGE: {
       title: "Admin Message",
-      body: notification?.body || data?.message || "You received a new admin message",
+      body: notification?.body || data?.body || data?.message || "You received a new admin message",
       url: "/notifications",
     },
   };
@@ -104,8 +104,8 @@ function getNotificationContent(data = {}, notification = {}) {
   }
 
   // Admin messages (and defaults) keep notifications page
-  if (type === "ADMIN_MESSAGE") {
-    result.url = "/notifications";
+  if (type === "ADMIN_MESSAGE" || !type) {
+    result.url = data?.url || "/notifications";
   }
 
   return result;
@@ -115,12 +115,14 @@ function getNotificationContent(data = {}, notification = {}) {
    SHOW NOTIFICATION
 ========================= */
 
-function showNotification(data, notification) {
+function showNotification(data, notification, messageId) {
   const { title, body, url } = getNotificationContent(data, notification);
 
-  // Create a stable tag to allow replacement/deduping of similar notifications
-  const stableId = data.messageId || data.id || data.bookingId || "general";
-  const tag = `${data.type || "notification"}-${stableId}`;
+  // ✅ Use messageId as the tag. 
+  // If the payload has a 'notification' block, the browser shows a native one automatically.
+  // By using the same messageId as tag, this manual showNotification (with buttons) 
+  // will REPLACE the default browser one instead of creating a second card.
+  const tag = messageId || data.messageId || data.bookingId || "general";
 
   return self.registration.showNotification(title, {
     body,
@@ -137,7 +139,7 @@ function showNotification(data, notification) {
       url,
       type: data.type,
       bookingId: data.bookingId,
-      messageId: data.messageId,
+      messageId: messageId || data.messageId,
     },
   });
 }
@@ -145,12 +147,26 @@ function showNotification(data, notification) {
 /* =========================
    BACKGROUND MESSAGES (FCM)
 ========================= */
-
 messaging.onBackgroundMessage((payload) => {
   const data = payload?.data || {};
   const notification = payload?.notification || {};
+  const messageId = payload?.messageId;
 
-  showNotification(data, notification);
+  // ✅ Check if app is in foreground to avoid showing native notification 
+  // when the In-App FloatingNotification is already showing.
+  self.clients
+    .matchAll({ type: "window", includeUncontrolled: true })
+    .then((clients) => {
+      const isForeground = clients.some((client) => client.focused);
+
+      if (isForeground) {
+        console.log("⏭️ App is in foreground, skipping native notification.");
+        return;
+      }
+
+      console.log("📥 Background Message Received, showing native notification:", messageId);
+      showNotification(data, notification, messageId);
+    });
 });
 
 /* =========================
@@ -186,6 +202,7 @@ self.addEventListener("notificationclick", (event) => {
           if (!clientUrl.includes(targetPath)) {
             client.postMessage({
               type: "NAVIGATE",
+              isUserAction: true,
               url,
             });
           }

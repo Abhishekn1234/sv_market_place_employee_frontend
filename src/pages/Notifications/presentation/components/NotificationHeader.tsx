@@ -10,10 +10,12 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLanguage } from "@/context/LanguageContext";
 import { Bell, Check } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function NotificationsHeader({
   unreadCount,
@@ -21,6 +23,7 @@ export default function NotificationsHeader({
   totalCount,
   setFilter,
   markSelectedAsRead,
+  selectedNotificationIds = [], // ✅ Default to empty array to prevent length error
   markAllRead,
   isPending,
   selectedCount,
@@ -28,6 +31,7 @@ export default function NotificationsHeader({
   setSelectedCategory,
   toggleSelectAll,
   currentPageUnreadCount,
+
 }: any) {
   const { t, translations } = useLanguage();
   const notificationsTranslations = translations.notifications;
@@ -35,28 +39,68 @@ export default function NotificationsHeader({
   const [bulkHandled, setBulkHandled] = useState(false);
 
   useEffect(() => {
-    if (selectedCount === 0) {
+    if (selectedCount === 0 && bulkHandled) {
       setBulkHandled(false);
     }
   }, [selectedCount]);
 
   const hasSelection = selectedCount > 0 && !bulkHandled;
+  const queryClient = useQueryClient();
+
+  // =========================
+  // ACTIONS
+  // =========================
+  const handleMarkSelected = async () => {
+    // The button's disabled state is controlled by `isDisabled`, which correctly checks `selectedCount === 0`.
+    // If `isDisabled` is false, it means `selectedCount > 0`.
+    // If `selectedNotificationIds` is empty here, it indicates a discrepancy
+    // between `selectedCount` and the actual `selectedNotificationIds` array,
+    // which should be addressed in the parent component.
+    if (isDisabled) return;
+    if (selectedNotificationIds.length === 0) {
+      console.warn("Attempted to mark selected, but selectedNotificationIds is empty despite selectedCount > 0. This indicates a state management issue in the parent component.");
+      toast.error(t("notifications.noNotificationsSelected"));
+      return;
+    }
+
+    setBulkHandled(true);
+
+    // 1. Optimistically update the cache
+    // We assume the query key for fetching notifications is "notifications"
+    const previousNotifications = queryClient.getQueryData(["notifications"]);
+
+    queryClient.setQueryData(["notifications"], (old: any) => {
+      if (!old || !old.notifications) return old;
+      return {
+        ...old,
+        notifications: old.notifications.map((notif: any) =>
+          selectedNotificationIds?.includes(notif._id) ? { ...notif, isRead: true } : notif
+        ),
+      };
+    });
+
+    try {
+      // 2. Call the actual API to mark selected notifications as read
+      // The `markSelectedAsRead` prop is expected to be a function that handles the API call
+      // and returns a Promise. It might implicitly know which notifications to mark,
+      // or it might accept `selectedNotificationIds` as an argument.
+      // For this implementation, we assume it handles the selected IDs internally.
+      await Promise.resolve(markSelectedAsRead());
+      toast.success(t("notifications.markSelectedSuccess"));
+    } catch (error) {
+      // 3. Revert to previous state on error
+      queryClient.setQueryData(["notifications"], previousNotifications);
+      toast.error(t("notifications.markSelectedFailed"));
+    } finally {
+      setBulkHandled(false);
+    }
+  };
 
   const isAllSelected =
     currentPageUnreadCount > 0 &&
     selectedCount === currentPageUnreadCount;
 
   const isDisabled = isPending || selectedCount === 0 || bulkHandled;
-
-  // =========================
-  // ACTIONS
-  // =========================
-  const handleMarkSelected = async () => {
-    if (isDisabled) return;
-
-    setBulkHandled(true);
-    await Promise.resolve(markSelectedAsRead());
-  };
 
   const handleMarkAll = async () => {
     if (isDisabled) return;
