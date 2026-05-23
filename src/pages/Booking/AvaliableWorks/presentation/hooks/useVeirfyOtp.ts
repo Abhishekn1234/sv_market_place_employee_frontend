@@ -33,6 +33,12 @@ export function useVerifyOtp() {
       }
 
       // ✅ UPDATE CACHE
+      // NOTE: do not hardcode status. Backend may respond with CUSTOMER_CANCELLED.
+      const nextStatusRaw =
+        response?.booking?.status ??
+        response?.status ??
+        response?.bookingStatus;
+
       queryClient.setQueryData(
         ASSIGNED_WORKS_KEY,
         (old: any[] = []) =>
@@ -47,11 +53,12 @@ export function useVerifyOtp() {
             return {
               ...work,
 
-              // ✅ update status
-              status: "INVOICE_GENERATED",
+              // ✅ update status from backend (fallback to INVOICE_GENERATED)
+              status:
+                nextStatusRaw ?? "INVOICE_GENERATED",
 
               // ✅ attach invoice details
-              invoice: response?.invoice,
+              invoice: response?.invoice ?? response?.booking?.invoice,
 
               // optional
               completedAt: new Date().toISOString(),

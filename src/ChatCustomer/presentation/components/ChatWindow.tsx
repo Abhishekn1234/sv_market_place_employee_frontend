@@ -126,7 +126,7 @@ export default function ChatWindow({
         className="min-h-0 flex-1 overflow-y-auto bg-muted/35 px-3 py-5 dark:bg-background sm:px-5"
       >
         {messages.length === 0 ? (
-                <CommonCard className="flex h-full min-h-[320px] items-center justify-center text-center">
+                <CommonCard className="flex h-full min-h-[240px] sm:min-h-[320px] items-center justify-center text-center">
           <div className="max-w-xs px-5 py-6">
             <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
               <MessageCircle className="h-5 w-5" />

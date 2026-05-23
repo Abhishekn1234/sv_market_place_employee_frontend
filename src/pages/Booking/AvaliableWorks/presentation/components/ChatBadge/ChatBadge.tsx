@@ -14,7 +14,7 @@ export function ChatBadge({ bookingId, navigate,t }: any) {
   return (
     <div className="relative">
       {bookingMessages.length > 0 && (
-        <span className="absolute -top-2 -right-2 z-10 min-w-[20px] h-[20px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow">
+        <span className="absolute -top-2 -right-2 z-10 w-5 h-5 px-0.5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow">
           {bookingMessages.length}
         </span>
       )}

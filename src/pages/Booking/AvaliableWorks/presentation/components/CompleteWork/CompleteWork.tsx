@@ -73,7 +73,7 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-[420px] rounded-lg shadow-lg p-6">
+      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
         <h2 className="text-lg font-semibold mb-4">{t("completeWork.title")}</h2>
 
         <div className="space-y-2 text-sm mb-4">

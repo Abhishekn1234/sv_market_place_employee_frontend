@@ -22,7 +22,7 @@ export default function HeaderGuide({ open, onClose }: Props) {
           className="fixed top-20 right-6 z-[9999]"
         >
 
-          <div className="relative w-[300px] rounded-3xl border bg-white p-5 shadow-2xl">
+          <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md rounded-3xl border bg-white p-5 shadow-2xl">
 
             {/* ARROW pointing to header */}
             <div className="absolute -top-8 right-10">

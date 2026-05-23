@@ -43,7 +43,6 @@ export const useNotificationManager = () => {
   useEffect(() => {
     const roleId = user?.role?._id;
     if (!token || !roleId) return;
-    if (token) return;
 
     const register = async () => {
       await registerToken({

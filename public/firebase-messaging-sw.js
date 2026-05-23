@@ -93,7 +93,22 @@ function getNotificationContent(data = {}, notification = {}) {
     },
   };
 
-  return map[type] || base;
+  const result = map[type] || base;
+
+  // If this is a booking notification with REQUESTED status, route to availableBooking
+  if (
+    (type === "BOOKING_REQUEST" || type === "BOOKING_UPDATE" || type === "BOOKING_UPDATED") &&
+    data.status === "REQUESTED"
+  ) {
+    result.url = `/availableBooking?status=requested&bookingId=${bookingId}`;
+  }
+
+  // Admin messages (and defaults) keep notifications page
+  if (type === "ADMIN_MESSAGE") {
+    result.url = "/notifications";
+  }
+
+  return result;
 }
 
 /* =========================
@@ -103,16 +118,26 @@ function getNotificationContent(data = {}, notification = {}) {
 function showNotification(data, notification) {
   const { title, body, url } = getNotificationContent(data, notification);
 
+  // Create a stable tag to allow replacement/deduping of similar notifications
+  const stableId = data.messageId || data.id || data.bookingId || "general";
+  const tag = `${data.type || "notification"}-${stableId}`;
+
   return self.registration.showNotification(title, {
     body,
     icon: "/icon.png",
     badge: "/icon.png",
     requireInteraction: true,
-    tag: `${data.type || "notification"}-${data.bookingId || url}`,
+    renotify: false,
+    tag,
+    actions: [
+      { action: "open", title: "Open" },
+      { action: "close", title: "Close" },
+    ],
     data: {
       url,
       type: data.type,
       bookingId: data.bookingId,
+      messageId: data.messageId,
     },
   });
 }
@@ -140,6 +165,8 @@ self.addEventListener("notificationclick", (event) => {
 
   event.waitUntil(
     (async () => {
+      if (event.action === "close") return;
+
       const clientsArr = await self.clients.matchAll({
         type: "window",
         includeUncontrolled: true,
@@ -149,10 +176,19 @@ self.addEventListener("notificationclick", (event) => {
         if ("focus" in client) {
           await client.focus();
 
-          client.postMessage({
-            type: "NAVIGATE",
-            url,
-          });
+          // Check if client is already on the target page
+          const clientUrl = new URL(client.url).pathname;
+          let targetPath = "/notifications";
+          try {
+            targetPath = new URL(url, self.location.origin).pathname;
+          } catch (e) {}
+
+          if (!clientUrl.includes(targetPath)) {
+            client.postMessage({
+              type: "NAVIGATE",
+              url,
+            });
+          }
 
           return;
         }

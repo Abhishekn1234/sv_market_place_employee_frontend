@@ -91,7 +91,7 @@ export default function AssignedWorkModal({
   return (
     <CommonModal open={open} onOpenChange={(v) => !v && onClose()}>
       <CommonModal.Content
-        className={`w-full h-[100dvh] sm:h-auto sm:max-w-3xl max-h-[100dvh] sm:max-h-[90vh] flex flex-col overflow-hidden rounded-none sm:rounded-2xl
+          className={`w-full min-h-[100dvh] sm:h-auto sm:max-w-3xl max-h-[100dvh] sm:max-h-[90vh] flex flex-col overflow-hidden rounded-none sm:rounded-2xl
         ${dark ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"} ${isRTL ? "text-right" : "text-left"}`}
       >
         {/* HEADER */}

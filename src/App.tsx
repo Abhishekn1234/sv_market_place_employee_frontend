@@ -198,6 +198,9 @@ function AppContent() {
       );
     }
 
+    // Some browsers deliver SW -> window messages via window "message"
+    window.addEventListener("message", swHandler);
+
     /* =========================
        CLEANUP
     ========================= */
