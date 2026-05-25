@@ -112,7 +112,7 @@ export default function NotificationItem({
         (notification as any).bookingStatus ||
         ""
     ).toUpperCase();
-
+    
     const isRequested = bookingStatus === "REQUESTED";
 
     const isAllowed = booking?.status
