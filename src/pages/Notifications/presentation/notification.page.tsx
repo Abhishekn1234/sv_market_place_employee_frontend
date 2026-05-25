@@ -25,8 +25,8 @@ export default function NotificationsPage() {
   const { t } = useLanguage();
   const { theme } = useTheme();
 
-const { mutateAsync: markAsReadApi } = useMarkAsRead();
-  const { mutate: markAllRead } = useMarkAllRead();
+const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRead();
+  const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllRead();
 
   // =========================
   // API (NO LIMIT)
@@ -105,12 +105,18 @@ const { mutateAsync: markAsReadApi } = useMarkAsRead();
   // MARK AS READ (SELECTED ONLY)
   // =========================
  const markSelectedAsRead = async () => {
-  const idsToMark = selectedIds;
+  const idsToMark = [...selectedIds];
 
   if (!idsToMark.length) return;
 
   await Promise.all(
     idsToMark.map((id) => markAsReadApi(id))
+  );
+
+  setAllNotifications((prev) =>
+    prev.map((n) =>
+      idsToMark.includes(n._id) ? { ...n, isRead: true } : n
+    )
   );
 
   setSelectedIds([]);
@@ -154,16 +160,6 @@ const { mutateAsync: markAsReadApi } = useMarkAsRead();
     return () => observerRef.current?.disconnect();
   }, [loadMore]);
 
-  // =========================
-  // SELECT MODE DETECTION
-  // =========================
-  const isSelectAllMode =
-    selectedIds.length > 0 &&
-    unreadNotifications.length > 0 &&
-    unreadNotifications.every((n) =>
-      selectedIds.includes(n._id)
-    );
-
   if (isLoading && page === 1) return <CommonSpinner />;
 
   return (
@@ -181,10 +177,10 @@ const { mutateAsync: markAsReadApi } = useMarkAsRead();
           setSelectedCategory={setSelectedCategory}
           markSelectedAsRead={markSelectedAsRead}
           markAllRead={handleMarkAllAsRead}
-          selectedCount={selectedIds.length}
+          selectedNotificationIds={selectedIds}
+          isPending={isMarkingSelected || isMarkingAll}
           toggleSelectAll={toggleSelectAll}
           currentPageUnreadCount={unreadNotifications.length}
-          isSelectAllMode={isSelectAllMode}
         />
 
         {/* LIST */}

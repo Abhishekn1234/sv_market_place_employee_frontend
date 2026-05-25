@@ -416,6 +416,10 @@
   "notifications": {
     "title": "Notifications",
     "subtitle": "Stay updated with your latest activities",
+    "markSelectedSuccess": "Selected notifications marked as read",
+    "markSelectedFailed": "Failed to mark selected notifications as read",
+    "markAllSuccess": "All notifications marked as read",
+    "markAllFailed": "Failed to mark all notifications as read",
     "markAllRead": "Mark all as read",
     "clearAll": "Clear all",
     "total": "Total",

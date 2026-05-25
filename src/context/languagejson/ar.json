@@ -421,6 +421,10 @@
   "notifications": {
     "title": "الإشعارات",
     "subtitle": "ابقَ على اطلاع بآخر أنشطتك",
+    "markSelectedSuccess": "تم تحديد الإشعارات المحددة كمقروءة",
+    "markSelectedFailed": "فشل في تحديد الإشعارات المحددة كمقروءة",
+    "markAllSuccess": "تم تحديد جميع الإشعارات كمقروءة",
+    "markAllFailed": "فشل في تحديد جميع الإشعارات كمقروءة",
     "markAllRead": "تحديد الكل كمقروء",
     "clearAll": "حذف الكل",
     "total": "الإجمالي",

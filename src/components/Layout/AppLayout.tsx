@@ -11,8 +11,9 @@ import SocketBookingsModal from "@/core/Websocket/socketchecking";
 
 import { useAuthStore } from "@/core/store/auth";
 import { useBookingSocket } from "@/core/Websocket/presentation/utils/useBookingsocket";
+import { useAssignedSocketInit } from "@/core/Websocket/presentation/hooks/socketinitliazation";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
-// import { useWorkerWorkSocket } from "@/core/Websocket/presentation/utils/useAssignsocket";
+import { useAssignedSocket } from "@/core/Websocket/presentation/utils/useAssignsocket";
 
 export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -32,8 +33,9 @@ export default function AppLayout() {
   const isWorkerOnline = user?.worker?.status === "ONLINE";
 
   /* ================= SOCKET ================= */
-  useBookingSocket();
-  // useWorkerWorkSocket();
+  useBookingSocket(); // 🔥 Request socket for modal
+  useAssignedSocketInit(); // 🔥 Assigned socket for assigned works
+  useAssignedSocket(); // 🔥 Assigned socket event listeners
 
   /* ================= STORE ================= */
   const requestBookings = useBookingSocketStore((s) => s.requestBookings);

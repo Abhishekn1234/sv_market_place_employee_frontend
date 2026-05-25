@@ -7,15 +7,26 @@ import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/b
 
 const normalize = (data: any): Booking | null => {
   const b = data?.booking ?? data;
-  const id = b?._id || data?.bookingId;
+  const id = b?._id || data?.bookingId || data?.booking?._id;
 
   if (!id) return null;
 
   return {
     ...b,
-    _id: id,
-    status: (b.status || b.bookingStatus || "").toUpperCase(),
+    _id: String(id),
+    status: String(b.status || b.bookingStatus || "").toUpperCase(),
   };
+};
+
+const isCancelledStatus = (status?: string) => {
+  const normalized = String(status ?? "").trim().toUpperCase();
+  return [
+    "CUSTOMER_CANCELLED",
+    "WORKER_CANCELLED",
+    "CANCELLED",
+    "CANCELLED_BY_CUSTOMER",
+    "ADMIN_CANCELLED",
+  ].includes(normalized);
 };
 
 /* ================= SOCKET INSTANCE ================= */
@@ -49,43 +60,25 @@ export function useBookingSocket() {
       setConnected(false);
     });
 
-    const onUpsert = (data: any) => {
-      const b = normalize(data);
-      if (!b) return;
-
-      upsertRequest(b);
-    };
-
-    const onAssigned = (data: any) => {
-      const b = normalize(data);
-      if (!b) return;
-
-      upsertAssigned(b);
-      removeRequest(String(b._id));
-    };
-
-    const onRemove = (data: any) => {
-      const id = data?.bookingId || data?._id;
-      if (!id) return;
-
+    const removeBooking = (id: string) => {
       removeRequest(String(id));
       removeAssigned(String(id));
     };
 
-    // REQUEST EVENTS
+    const onUpsert = (data: any) => {
+      const b = normalize(data);
+      if (!b) return;
+
+      if (isCancelledStatus(b.status)) {
+        removeBooking(String(b._id));
+        return;
+      }
+
+      upsertRequest(b);
+    };
+
+    // REQUEST EVENTS ONLY (for modal)
     socket.on("booking.created", onUpsert);
-    socket.on("booking.updated", onUpsert);
-    socket.on("booking.worker.rejected", onRemove);
-
-    // ASSIGNED EVENTS
-    socket.on("booking.worker.accepted", onAssigned);
-    socket.on("booking.work.started", onAssigned);
-    socket.on("booking.work.completed-by-worker", onAssigned);
-    socket.on("booking.completion.confirmed", onAssigned);
-
-    socket.on("booking.dispute.created", onAssigned);
-    socket.on("booking.dispute.responded", onAssigned);
-    socket.on("booking.dispute.resolved", onAssigned);
 
     return () => {
       console.log("[Socket] cleanup");

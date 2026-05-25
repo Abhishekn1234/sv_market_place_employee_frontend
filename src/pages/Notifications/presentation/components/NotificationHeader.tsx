@@ -10,103 +10,145 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { useQueryClient } from "@tanstack/react-query";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLanguage } from "@/context/LanguageContext";
+
 import { Bell, Check } from "lucide-react";
 import { toast } from "react-toastify";
+
+interface NotificationsHeaderProps {
+  unreadCount: number;
+  readCount: number;
+  totalCount: number;
+
+  filter: "all" | "unread" | "read";
+  setFilter: (filter: "all" | "unread" | "read") => void;
+
+  markSelectedAsRead: () => void | Promise<void>;
+
+  // SINGLE SOURCE OF TRUTH
+  selectedNotificationIds: string[];
+
+  markAllRead: () => void | Promise<void>;
+
+  isPending: boolean;
+
+  selectedCategory: string;
+  setSelectedCategory: (category: string) => void;
+
+  toggleSelectAll: () => void;
+
+  currentPageUnreadCount: number;
+}
 
 export default function NotificationsHeader({
   unreadCount,
   readCount,
   totalCount,
+
   setFilter,
+
   markSelectedAsRead,
-  selectedNotificationIds = [], // ✅ Default to empty array to prevent length error
+
+  selectedNotificationIds = [],
+
   markAllRead,
+
   isPending,
-  selectedCount,
+
   selectedCategory,
   setSelectedCategory,
-  toggleSelectAll,
-  currentPageUnreadCount,
 
-}: any) {
+  toggleSelectAll,
+
+  currentPageUnreadCount,
+}: NotificationsHeaderProps) {
   const { t, translations } = useLanguage();
+
   const notificationsTranslations = translations.notifications;
 
   const [bulkHandled, setBulkHandled] = useState(false);
 
+  // =========================
+  // SINGLE SOURCE OF TRUTH
+  // =========================
+  const selectedCount = selectedNotificationIds.length;
+
+  const hasSelection = selectedCount > 0;
+
+  // =========================
+  // RESET BULK STATE
+  // =========================
   useEffect(() => {
     if (selectedCount === 0 && bulkHandled) {
       setBulkHandled(false);
     }
-  }, [selectedCount]);
-
-  const hasSelection = selectedCount > 0 && !bulkHandled;
-  const queryClient = useQueryClient();
+  }, [selectedCount, bulkHandled]);
 
   // =========================
-  // ACTIONS
+  // DISABLED STATE
+  // =========================
+  const isDisabled =
+    isPending ||
+    selectedCount === 0 ||
+    bulkHandled;
+
+  // =========================
+  // MARK SELECTED
   // =========================
   const handleMarkSelected = async () => {
-    // The button's disabled state is controlled by `isDisabled`, which correctly checks `selectedCount === 0`.
-    // If `isDisabled` is false, it means `selectedCount > 0`.
-    // If `selectedNotificationIds` is empty here, it indicates a discrepancy
-    // between `selectedCount` and the actual `selectedNotificationIds` array,
-    // which should be addressed in the parent component.
     if (isDisabled) return;
-    if (selectedNotificationIds.length === 0) {
-      console.warn("Attempted to mark selected, but selectedNotificationIds is empty despite selectedCount > 0. This indicates a state management issue in the parent component.");
-      toast.error(t("notifications.noNotificationsSelected"));
-      return;
-    }
 
     setBulkHandled(true);
 
-    // 1. Optimistically update the cache
-    // We assume the query key for fetching notifications is "notifications"
-    const previousNotifications = queryClient.getQueryData(["notifications"]);
-
-    queryClient.setQueryData(["notifications"], (old: any) => {
-      if (!old || !old.notifications) return old;
-      return {
-        ...old,
-        notifications: old.notifications.map((notif: any) =>
-          selectedNotificationIds?.includes(notif._id) ? { ...notif, isRead: true } : notif
-        ),
-      };
-    });
-
     try {
-      // 2. Call the actual API to mark selected notifications as read
-      // The `markSelectedAsRead` prop is expected to be a function that handles the API call
-      // and returns a Promise. It might implicitly know which notifications to mark,
-      // or it might accept `selectedNotificationIds` as an argument.
-      // For this implementation, we assume it handles the selected IDs internally.
       await Promise.resolve(markSelectedAsRead());
-      toast.success(t("notifications.markSelectedSuccess"));
+
+      toast.success(
+        t("notifications.markSelectedSuccess")
+      );
     } catch (error) {
-      // 3. Revert to previous state on error
-      queryClient.setQueryData(["notifications"], previousNotifications);
-      toast.error(t("notifications.markSelectedFailed"));
+      console.error(error);
+
+      toast.error(
+        t("notifications.markSelectedFailed")
+      );
     } finally {
       setBulkHandled(false);
     }
   };
 
+  // =========================
+  // SELECT ALL STATE
+  // =========================
   const isAllSelected =
     currentPageUnreadCount > 0 &&
     selectedCount === currentPageUnreadCount;
 
-  const isDisabled = isPending || selectedCount === 0 || bulkHandled;
-
+  // =========================
+  // MARK ALL
+  // =========================
   const handleMarkAll = async () => {
     if (isDisabled) return;
 
     setBulkHandled(true);
-    await Promise.resolve(markAllRead());
+
+    try {
+      await Promise.resolve(markAllRead());
+
+      toast.success(
+        t("notifications.markAllSuccess")
+      );
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        t("notifications.markAllFailed")
+      );
+    } finally {
+      setBulkHandled(false);
+    }
   };
 
   return (
@@ -132,38 +174,42 @@ export default function NotificationsHeader({
           </div>
 
           <h2 className="text-lg font-semibold flex items-center gap-2 ml-4">
-            <Bell />
+            <Bell className="w-5 h-5" />
             {notificationsTranslations.title}
           </h2>
+
         </div>
 
         {/* BULK ACTIONS */}
         {hasSelection && (
           <div className="ml-auto flex items-center gap-2">
 
-            {/* MARK SELECTED (always when any selection) */}
+            {/* MARK SELECTED */}
             <Button
               onClick={handleMarkSelected}
               disabled={isDisabled}
               className="bg-blue-600 text-white"
             >
               <Check className="w-4 h-4 mr-1" />
-              {translations.notifications.markSelected} ({selectedCount})
+
+              {notificationsTranslations.markSelected} (
+              {selectedCount})
             </Button>
 
-            {/* MARK ALL ONLY WHEN SELECT ALL ACTIVE */}
+            {/* MARK ALL */}
             {isAllSelected && (
               <Button
                 onClick={handleMarkAll}
                 disabled={isDisabled}
                 className="bg-gray-600 text-white"
               >
-                {translations.notifications.markAllRead}
+                {notificationsTranslations.markAllRead}
               </Button>
             )}
 
           </div>
         )}
+
       </div>
 
       {/* SECOND ROW */}
@@ -172,21 +218,33 @@ export default function NotificationsHeader({
         {/* FILTERS */}
         <div className="flex gap-2 flex-wrap">
 
-          <Button onClick={() => setFilter("all")} variant="outline">
-            {translations.notifications.categories.all} ({totalCount})
+          <Button
+            onClick={() => setFilter("all")}
+            variant="outline"
+          >
+            {notificationsTranslations.categories.all} (
+            {totalCount})
           </Button>
 
-          <Button onClick={() => setFilter("unread")} variant="outline">
-            {translations.notifications.unread} ({unreadCount})
+          <Button
+            onClick={() => setFilter("unread")}
+            variant="outline"
+          >
+            {notificationsTranslations.unread} (
+            {unreadCount})
           </Button>
 
-          <Button onClick={() => setFilter("read")} variant="outline">
-            {translations.notifications.read} ({readCount})
+          <Button
+            onClick={() => setFilter("read")}
+            variant="outline"
+          >
+            {notificationsTranslations.read} (
+            {readCount})
           </Button>
 
         </div>
 
-        {/* CATEGORY (your Select kept) */}
+        {/* CATEGORY */}
         <Select
           value={selectedCategory}
           onValueChange={setSelectedCategory}
@@ -196,11 +254,27 @@ export default function NotificationsHeader({
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="booking">Bookings</SelectItem>
-            <SelectItem value="payment">Payments</SelectItem>
-            <SelectItem value="system">System</SelectItem>
-            <SelectItem value="alert">Alerts</SelectItem>
+
+            <SelectItem value="all">
+              All
+            </SelectItem>
+
+            <SelectItem value="booking">
+              Bookings
+            </SelectItem>
+
+            <SelectItem value="payment">
+              Payments
+            </SelectItem>
+
+            <SelectItem value="system">
+              System
+            </SelectItem>
+
+            <SelectItem value="alert">
+              Alerts
+            </SelectItem>
+
           </SelectContent>
         </Select>
 

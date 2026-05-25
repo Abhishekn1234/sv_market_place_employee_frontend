@@ -106,6 +106,15 @@ export default function NotificationItem({
 
     const booking = getAssignedBooking(bookingId);
 
+    const bookingStatus = String(
+      booking?.status ||
+        (notification as any).status ||
+        (notification as any).bookingStatus ||
+        ""
+    ).toUpperCase();
+
+    const isRequested = bookingStatus === "REQUESTED";
+
     const isAllowed = booking?.status
       ? ALLOWED_STATUSES.includes(booking.status as any)
       : false;
@@ -126,6 +135,11 @@ export default function NotificationItem({
       type === "BOOKING_REQUEST" ||
       type.startsWith("BOOKING")
     ) {
+      if (type === "BOOKING_REQUEST" || isRequested) {
+        navigate("/availableBooking");
+        return;
+      }
+
       if (!booking) {
         toast.error("Booking not found or already finished.");
         return;
