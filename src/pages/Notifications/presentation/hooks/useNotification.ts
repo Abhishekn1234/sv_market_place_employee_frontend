@@ -14,9 +14,7 @@ export const useNotifications = (params?: any) => {
   useEffect(() => {
     if (!query.data) return;
 
-    const data = Array.isArray(query.data)
-      ? query.data
-      : query.data?.data || [];
+    const data = query.data.data || [];
 
     setNotifications(data);
   }, [query.data, setNotifications]);

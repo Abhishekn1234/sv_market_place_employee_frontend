@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 
-import type { NotificationResponse } from "../domain/entities/notification";
 import { useLanguage } from "@/context/LanguageContext";
 
 import NotificationsHeader from "./components/NotificationHeader";
@@ -38,9 +37,8 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
     type: CATEGORY_MAP[selectedCategory],
   });
 
-  const response = data as NotificationResponse | undefined;
-  const notifications = response?.data;
-  const pagination = response?.pagination;
+  const notifications = data?.data;
+  const pagination = data?.pagination;
   const totalPages = pagination?.totalPages || 1;
 
   // =========================
@@ -61,6 +59,7 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
   useEffect(() => {
     setPage(1);
     setSelectedIds([]);
+    setAllNotifications([]);
   }, [filter, selectedCategory]);
 
   // =========================
