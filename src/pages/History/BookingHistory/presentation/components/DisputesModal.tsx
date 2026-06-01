@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/context/LanguageContext";
 import CommonSpinner from "@/components/common/CommonSpinner";
+import { toast } from "react-toastify";
 
 type Props = {
   bookingId: string | null;
@@ -61,8 +62,12 @@ export default function DisputeModal({
       },
       {
         onSuccess: () => {
+          toast.success("Response submitted successfully");
           setSelected(null);
           setResponse("");
+        },
+        onError: (err: any) => {
+            toast.error(err?.response?.data?.message || "Failed to submit response");
         },
       }
     );
@@ -100,7 +105,7 @@ export default function DisputeModal({
           {selected && (
             <div className="mt-4 border-t pt-3 space-y-2">
               <Label className="text-sm font-medium">
-                Respond to: {selected.reason}
+                {t('disputepage.response')}: {selected.reason}
               </Label>
 
               <Textarea
@@ -119,8 +124,8 @@ export default function DisputeModal({
                 className=" text-white px-4 py-2 rounded-md text-sm  disabled:opacity-50"
               >
                 {respondMutation.isPending
-                  ? "Sending..."
-                  : "Respond"}
+                  ?<CommonSpinner size="sm" />
+                  : t("disputepage.respond")}
               </Button>
             </div>
           )}

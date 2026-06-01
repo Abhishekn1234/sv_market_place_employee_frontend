@@ -12,6 +12,7 @@ import type { Dispute } from "../../domain/entities/disputes";
 import { useGetDisputes } from "../hooks/useGetDispute";
 import { useRespondDisputes } from "../hooks/useRespondDispute";
 import { getDisputeStatusStyle } from "../utils/disputescolors";
+import { toast } from "react-toastify";
 
 export default function Disputespage() {
   const { language, t } = useLanguage();
@@ -44,14 +45,22 @@ export default function Disputespage() {
   const handleSubmit = () => {
     if (!selected) return;
 
-    respondMutation.mutate({
-      disputeId: selected._id,
-      response,
-    });
-
-    // reset
-    setSelected(null);
-    setResponse("");
+    respondMutation.mutate(
+      {
+        disputeId: selected._id,
+        response,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Response submitted successfully");
+          setSelected(null);
+          setResponse("");
+        },
+        onError: (err: any) => {
+          toast.error(err?.message || "Failed to submit response");
+        },
+      }
+    );
   };
 
   const columns: TableColumn<Dispute>[] = [
