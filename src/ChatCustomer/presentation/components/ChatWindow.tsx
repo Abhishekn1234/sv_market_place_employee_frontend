@@ -52,6 +52,7 @@ export default function ChatWindow({
 }: ChatWindowProps) {
   const { messages, input, setInput, sendMessage, connected } =
     useChat(bookingId);
+  // Example: Use last 6 chars of bookingId as code
   const { language, t } = useLanguage();
 
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -97,7 +98,7 @@ export default function ChatWindow({
             </h2>
             <div className="mt-0.5 flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
               <span className="truncate">
-                {t("chat.booking")} #{bookingId}
+                {t("chat.booking")} 
               </span>
               <span className="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
               <span
