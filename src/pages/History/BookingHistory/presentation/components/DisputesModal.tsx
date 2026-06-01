@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/context/LanguageContext";
 import CommonSpinner from "@/components/common/CommonSpinner";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 type Props = {
   bookingId: string | null;
@@ -62,13 +62,13 @@ export default function DisputeModal({
       },
       {
         onSuccess: () => {
-          toast.success("Response submitted successfully");
+          // toast.success("Response submitted successfully");
           setSelected(null);
           setResponse("");
         },
-        onError: (err: any) => {
-            toast.error(err?.response?.data?.message || "Failed to submit response");
-        },
+        // onError: (err: any) => {
+        //     toast.error(err?.response?.data?.message || "Failed to submit response");
+        // },
       }
     );
   };
