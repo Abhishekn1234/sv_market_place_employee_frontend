@@ -5,7 +5,7 @@ import {
   FileText, 
   Image as ImageIcon, 
   ArrowRight,
-  Loader2,
+  // Loader2,
   X,
   CheckCircle2
 } from "lucide-react";
@@ -17,6 +17,7 @@ import type { ApiDocument } from "@/pages/Profile/domain/entities/documents";
 import type { DocumentsOnboarding } from "../domain/entities/documentsonboarding";
 import { useNavigate } from "react-router-dom";
 import { CommonCard } from "@/components/common/CommonCard";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 type UploadDocument = ApiDocument & { file: File };
 
@@ -152,8 +153,7 @@ export default function DocumentOnboarding() {
             >
               {mutation.isPending ? (
                 <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                  Uploading...
+                  <CommonSpinner/>
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-2">

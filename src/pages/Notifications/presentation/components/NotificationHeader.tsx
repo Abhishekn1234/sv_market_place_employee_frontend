@@ -250,29 +250,29 @@ export default function NotificationsHeader({
           onValueChange={setSelectedCategory}
         >
           <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Category" />
+            <SelectValue placeholder={notificationsTranslations.categoryPlaceholder} />
           </SelectTrigger>
 
           <SelectContent>
 
             <SelectItem value="all">
-              All
+              {notificationsTranslations.categories.all}
             </SelectItem>
 
             <SelectItem value="booking">
-              Bookings
+              {notificationsTranslations.categories.booking}
             </SelectItem>
 
             <SelectItem value="payment">
-              Payments
+              {notificationsTranslations.categories.payment}
             </SelectItem>
 
             <SelectItem value="system">
-              System
+              {notificationsTranslations.categories.system}
             </SelectItem>
 
             <SelectItem value="alert">
-              Alerts
+              {notificationsTranslations.categories.alert}
             </SelectItem>
 
           </SelectContent>

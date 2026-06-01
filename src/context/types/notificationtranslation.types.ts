@@ -5,6 +5,7 @@ export type NotificationsTranslations = {
   clearAll: string;
   total: string;
   unread: string;
+  categoryPlaceholder?: string;
   read: string;
   thisWeek: string;
   noNotifications: string;

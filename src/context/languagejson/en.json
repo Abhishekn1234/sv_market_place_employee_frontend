@@ -435,12 +435,13 @@
     "highPriority": "High Priority",
     "emailDigest": "Email digest",
     "notificationSettings": "Notification settings",
+    "categoryPlaceholder": "Category",
     "categories": {
       "all": "All",
-      "bookings": "Bookings",
-      "payments": "Payments",
+      "booking": "Bookings",
+      "payment": "Payments",
       "system": "System",
-      "alerts": "Alerts"
+      "alert": "Alerts"
     }
   },
   "wallet": {
@@ -667,4 +668,3 @@
     "user": "User"
   }
 }
-

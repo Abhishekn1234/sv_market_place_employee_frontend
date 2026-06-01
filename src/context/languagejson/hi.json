@@ -438,13 +438,13 @@
   "highPriority": "उच्च प्राथमिकता",
   "emailDigest": "ईमेल सारांश",
   "notificationSettings": "सूचना सेटिंग्स",
-
+  "categoryPlaceholder": "श्रेणी",
   "categories": {
     "all": "सभी",
-    "bookings": "बुकिंग",
-    "payments": "भुगतान",
+    "booking": "बुकिंग",
+    "payment": "भुगतान",
     "system": "सिस्टम",
-    "alerts": "अलर्ट"
+    "alert": "अलर्ट"
   }
 },
 

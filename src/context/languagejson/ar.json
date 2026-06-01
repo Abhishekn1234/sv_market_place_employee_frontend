@@ -441,12 +441,13 @@
     "emailDigest": "ملخص البريد",
     "notificationSettings": "إعدادات الإشعارات",
 
+    "categoryPlaceholder": "الفئة",
     "categories": {
       "all": "الكل",
-      "bookings": "الحجوزات",
-      "payments": "المدفوعات",
+      "booking": "الحجوزات",
+      "payment": "المدفوعات",
       "system": "النظام",
-      "alerts": "تنبيهات"
+      "alert": "تنبيهات"
     }
   },
 
@@ -709,5 +710,3 @@
   }
 
 }
-
-
