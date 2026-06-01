@@ -24,6 +24,7 @@
     "minutes": "मिनट",
     "close": "बंद करें",
     "viewMore": "और देखें",
+    "loading": "लोड हो रहा है...",
    
     "confirm": "पुष्टि करें",
     "start": "शुरू करें",
@@ -139,6 +140,7 @@
 
     "tableHeaders": {
       "id": "आईडी",
+      "bookingCode": "बुकिंग कोड",
       "client": "क्लाइंट",
       "service": "सेवा",
       "date": "तारीख",
@@ -146,6 +148,22 @@
       "payment": "भुगतान",
       "status": "स्थिति",
       "actions": "क्रियाएँ"
+    }
+    ,
+    "expandedRow": {
+      "customerDetails": "ग्राहक विवरण",
+      "serviceDetails": "सेवा विवरण",
+      "workDetails": "कार्य विवरण",
+      "serviceCategory": "सेवा श्रेणी",
+      "serviceItem": "सेवा आइटम",
+      "serviceTier": "सेवा स्तर",
+      "bookingCode": "बुकिंग कोड",
+      "bookingType": "बुकिंग प्रकार",
+      "workStartDate": "कार्य प्रारंभ तिथि",
+      "startDate": "प्रारंभ तिथि",
+      "workAssignedOn": "कार्य सौंपा गया",
+      "workStartedOn": "कार्य प्रारंभ हुआ",
+      "workCompletedOn": "कार्य पूर्ण हुआ"
     }
   },
 

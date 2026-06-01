@@ -23,4 +23,5 @@ export type BookingHistoryTranslations = {
   Ignore: string;
 };
   detailsLabels: Record<string, string>;
+  expandedRow:Record<string, string>;
 };

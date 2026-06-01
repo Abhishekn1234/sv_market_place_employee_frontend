@@ -26,6 +26,7 @@ onLimitChange: (value: number) => void;
 
   services: ServiceCategory[];
   statusConfig: Record<string, { label: string }>;
+  isMobile?: boolean;
 };
 
 export function BookingFilters({
@@ -39,6 +40,7 @@ export function BookingFilters({
   limit,
   onLimitChange,
   statusConfig,
+  isMobile,
 }: Props) {
   const {translations,language}=useLanguage();
   const isRTL=language==="AR";
@@ -92,7 +94,7 @@ export function BookingFilters({
         </SelectContent>
       </Select>
         </div>
-       <div>
+       {!isMobile && (<div>
   <Select value={limit.toString()} onValueChange={(v) => onLimitChange(Number(v))}>
     <SelectTrigger>
       <SelectValue placeholder="Rows per page" />
@@ -105,9 +107,8 @@ export function BookingFilters({
       ))}
     </SelectContent>
   </Select>
-</div>
+</div>)}
      
     </div>
   );
 }
-

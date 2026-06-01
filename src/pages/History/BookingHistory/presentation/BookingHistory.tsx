@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { CommonTable } from "@/components/common/CommonTable";
 import { CommonCard } from "@/components/common/CommonCard";
+import CommonSpinner from "@/components/common/CommonSpinner";
 import { toast } from "react-toastify";
 
 import { useLanguage } from "@/context/LanguageContext";
@@ -33,7 +34,15 @@ export default function BookingHistory() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
 
-  
+  const [isMobile, setIsMobile] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const debouncedStatusFilter = useDebounce(statusFilter, 300);
@@ -41,20 +50,58 @@ export default function BookingHistory() {
   const debouncedPage = useDebounce(page, 300);
   const debouncedLimit = useDebounce(limit, 300);
 
+  // Reset page and clear list when filters change
+  useEffect(() => {
+    setPage(1);
+    setBookings([]);
+  }, [debouncedSearchTerm, debouncedStatusFilter, debouncedServiceFilter]);
 
-  const { data, isError } = useGetBookingHistory({
+  const { data, isError, isLoading } = useGetBookingHistory({
     page: debouncedPage,
-    limit: debouncedLimit,
+    limit: isMobile ? 10 : debouncedLimit,
     search: debouncedSearchTerm,
   });
 
   const [bookings, setBookings] = useState<BookingHistory[]>([]);
 
   useEffect(() => {
-    if (data?.data) setBookings(data.data);
-  }, [data]);
+    if (data?.data) {
+      if (isMobile && debouncedPage > 1) {
+        setBookings((prev) => {
+          const existingIds = new Set(prev.map((b) => b._id));
+          const newItems = data.data.filter((b: BookingHistory) => !existingIds.has(b._id));
+          return [...prev, ...newItems];
+        });
+      } else {
+        setBookings(data.data);
+      }
+    }
+  }, [data, isMobile, debouncedPage]);
 
   const pagination = data?.pagination;
+
+  // Infinite Scroll logic for Mobile
+  useEffect(() => {
+    if (!isMobile || !pagination || pagination.currentPage >= pagination.totalPages) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoading) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [isMobile, pagination, isLoading]);
 
   const normalize = (value?: string) => value?.toLowerCase().replace(/\s|-/g, "");
 
@@ -143,9 +190,10 @@ const handleOpenDisputes = (bookingId: string) => {
             serviceFilter={serviceFilter}
             onServiceChange={setServiceFilter}
             limit={limit}
-            onLimitChange={(val) => { setLimit(val); setPage(1); }}
+            onLimitChange={(val: number) => { setLimit(val); setPage(1); }}
             services={categories}
             statusConfig={statusConfig}
+            isMobile={isMobile}
           />
         </div>
       </CommonCard>
@@ -155,13 +203,26 @@ const handleOpenDisputes = (bookingId: string) => {
         columns={columns}
         data={filteredBookings}
         keyExtractor={(b) => b._id}
-        currentPage={pagination?.currentPage ?? 1}
-        totalPages={pagination?.totalPages}
-        onPageChange={setPage}
+        currentPage={isMobile ? (undefined as any) : (pagination?.currentPage ?? 1)}
+        totalPages={isMobile ? (undefined as any) : (pagination?.totalPages as any)}
+        onPageChange={isMobile ? (undefined as any) : setPage}
         isRTL={isRTL}
         expandedRowKey={expandedBooking}
         renderExpandedRow={(b) => <BookingExpandedRow booking={b} bookingCategories={categories} />}
       />
+
+      {/* MOBILE INFINITE SCROLL UI */}
+      {isMobile && (
+        <div ref={observerTarget} className="py-6 flex flex-col items-center gap-2">
+          {isLoading && (
+            <>
+              <CommonSpinner />
+              <p className="text-xs text-muted-foreground">{translations.common.loading}</p>
+            </>
+          )}
+        </div>
+      )}
+
       <DisputeModal
           open={openDisputeModal}
           bookingId={selectedBookingId}

@@ -56,8 +56,9 @@ export default function Disputespage() {
 
   const columns: TableColumn<Dispute>[] = [
     {
-      key: "bookingId",
+      key: "bookingCode",
       header: t("disputepage.bookingId"),
+      render: (row: any) => row.booking?.bookingCode || row.bookingId,
     },
     {
       key: "raisedBy",
@@ -109,7 +110,7 @@ export default function Disputespage() {
             {data.map((row:any) => (
               <CommonCard
                 key={row._id}
-                title={`#${row.bookingId}`}
+                title={`#${row.booking?.bookingCode || row.bookingId}`}
                 description={
                   <div className="text-sm space-y-1">
                     <p>

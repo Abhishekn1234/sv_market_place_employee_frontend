@@ -28,4 +28,5 @@ export type TranslationSchema = {
   availableBookings?:AvailableBookingsLang;
   currentBookings?:CurrentBookings;
   ongoingservices?:OngoingServiceLang;
+  expandedRow?:any;
 };

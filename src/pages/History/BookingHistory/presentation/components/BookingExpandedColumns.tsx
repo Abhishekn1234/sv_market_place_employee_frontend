@@ -13,6 +13,7 @@ import {
   ClockIcon,
 } from "lucide-react";
 import { reverseGeocode } from "@/components/common/CommonMap";
+import { useLanguage } from "@/context/LanguageContext";
 
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 
@@ -25,10 +26,14 @@ type Props = {
   bookingCategories: ServiceCategory[];
 };
 
+const geoCache = new Map<string, string>();
+
 export function BookingExpandedRow({ booking, bookingCategories }: Props) {
   const { formatSmartDate } = useStringUtils();
   const [locationName, setLocationName] = useState<string>("—");
- const geoCache = new Map<string, string>();
+  const { translations } = useLanguage();
+  const expandedLabels = translations.bookingHistory.expandedRow;
+
  useEffect(() => {
   if (
     booking.booking.location &&
@@ -77,7 +82,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
       {/* Customer Details */}
       <div className="space-y-3">
-        <div className="font-medium">Customer Details</div>
+        <div className="font-medium">{expandedLabels.customerDetails}</div>
 
         <div className="flex gap-2">
           <User className="h-4 w-4" />
@@ -97,42 +102,47 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
 
       {/* Service Details */}
       <div className="space-y-3">
-        <div className="font-medium">Service Details</div>
+        <div className="font-medium">{expandedLabels.serviceDetails}</div>
 
         <div className="flex gap-2">
           <Layers2 className="h-4 w-4" />
-          <span>Service Category : {category?.name ?? "—"}</span>
+          <span>{expandedLabels.serviceCategory} : {category?.name ?? "—"}</span>
         </div>
 
         <div className="flex gap-2">
           <Layers3Icon className="h-4 w-4" />
-          <span>Service Item : {serviceName}</span>
+          <span>{expandedLabels.serviceItem} : {serviceName}</span>
         </div>
 
         <div className="flex gap-2">
           <Layers className="h-4 w-4" />
-          <span>Service Tier : {serviceTierName}</span>
+          <span>{expandedLabels.serviceTier} : {serviceTierName}</span>
         </div>
       </div>
 
       {/* Work Details */}
       <div className="space-y-3">
-        <div className="font-medium">Work Details</div>
+        <div className="font-medium">{expandedLabels.workDetails}</div>
+
+        <div className="flex gap-2">
+          <Layers className="h-4 w-4" />
+          <span>{expandedLabels.bookingCode}: {(booking.booking as any).bookingCode ?? "—"}</span>
+        </div>
 
         <div className="flex gap-2">
           <TypeIcon className="h-4 w-4" />
-          <span>Booking Type:{booking.booking.bookingType ?? "—"}</span>
+          <span>{expandedLabels.bookingType}:{booking.booking.bookingType ?? "—"}</span>
         </div>
 
         <div className="flex gap-2">
           <LucideDiameter className="h-4 w-4" />
-          <span>Work Start Date :{formatSmartDate(booking.booking.startDate ?? new Date())}</span>
+          <span>{expandedLabels.workStartDate} :{formatSmartDate(booking.booking.startDate ?? new Date())}</span>
         </div>
 
         <div className="flex gap-2">
           <Calendar className="h-4 w-4" />
           <span>
-            Start Date:{" "}
+            {expandedLabels.startDate}:{" "}
             {booking.booking.schedule?.startDateTime
               ? formatSmartDate(new Date(booking.booking.schedule.startDateTime))
               : "—"}
@@ -150,7 +160,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
           <div className="flex gap-2 items-center">
             <ClockIcon className="h-4 w-4" />
             <span>
-              Work Assigned On:{" "}
+              {expandedLabels.workAssignedOn}:{" "}
               {formatSmartDate(new Date(booking.assignedAt), { showTime: true })}
             </span>
           </div>
@@ -160,7 +170,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
           <div className="flex gap-2 items-center">
             <ClockIcon className="h-4 w-4" />
             <span>
-              Work Started On:{" "}
+              {expandedLabels.workStartedOn}:{" "}
               {formatSmartDate(new Date(booking.startedAt), { showTime: true })}
             </span>
           </div>
@@ -170,7 +180,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
           <div className="flex gap-2 items-center">
             <ClockIcon className="h-6 w-6" />
             <span>
-              Work Completed On:{" "}
+              {expandedLabels.workCompletedOn}:{" "}
               {formatSmartDate(new Date(booking.completedAt), { showTime: true })}
             </span>
           </div>

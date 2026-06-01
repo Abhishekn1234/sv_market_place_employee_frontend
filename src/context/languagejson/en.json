@@ -181,6 +181,7 @@
     },
     "tableHeaders": {
       "id": "ID",
+      "bookingCode": "Booking Code",
       "client": "Client",
       "service": "Service",
       "date": "Date",
@@ -193,6 +194,21 @@
       "View Details": "View Details",
       "Accept": "Accept",
       "Ignore": "Ignore"
+    },
+    "expandedRow": {
+      "customerDetails": "Customer Details",
+      "serviceDetails": "Service Details",
+      "workDetails": "Work Details",
+      "serviceCategory": "Service Category",
+      "serviceItem": "Service Item",
+      "serviceTier": "Service Tier",
+      "bookingCode": "Booking Code",
+      "bookingType": "Booking Type",
+      "workStartDate": "Work Start Date",
+      "startDate": "Start Date",
+      "workAssignedOn": "Work Assigned On",
+      "workStartedOn": "Work Started On",
+      "workCompletedOn": "Work Completed On"
     },
     "detailsLabels": {
       "service": "Service:",

@@ -37,9 +37,10 @@ export function useBookingColumns({
 
   return [
     {
-      key: "_id",
-      header: tableHeaders.id,
+      key: "bookingCode",
+      header: tableHeaders.bookingCode,
       className: cellClass,
+      render: (b) => <span dir="ltr">{(b.booking as any)?.bookingCode ?? "—"}</span>,
     },
     {
       key: "customer",

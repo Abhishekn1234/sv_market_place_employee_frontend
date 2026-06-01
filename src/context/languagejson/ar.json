@@ -20,7 +20,8 @@
      "na": "غير متوفر",
     "minutes": "دقائق",
     "close": "إغلاق",
-  
+    "loading": "جارٍ التحميل...",
+
     "confirm": "تأكيد",
     "start": "ابدأ",
     "complete": "إكمال",
@@ -160,6 +161,7 @@
 
     "tableHeaders": {
       "id": "المعرّف",
+      "bookingCode": "رقم الحجز",
       "client": "العميل",
       "service": "الخدمة",
       "date": "التاريخ",
@@ -167,6 +169,21 @@
       "payment": "الدفع",
       "status": "الحالة",
       "actions": "الإجراءات"
+    },
+    "expandedRow": {
+      "customerDetails": "تفاصيل العميل",
+      "serviceDetails": "تفاصيل الخدمة",
+      "workDetails": "تفاصيل العمل",
+      "serviceCategory": "فئة الخدمة",
+      "serviceItem": "عنصر الخدمة",
+      "serviceTier": "مستوى الخدمة",
+      "bookingCode": "رمز الحجز",
+      "bookingType": "نوع الحجز",
+      "workStartDate": "تاريخ بدء العمل",
+      "startDate": "تاريخ البدء",
+      "workAssignedOn": "تم تعيين العمل في",
+      "workStartedOn": "بدأ العمل في",
+      "workCompletedOn": "اكتمل العمل في"
     },
 
     "detailsLabels": {
