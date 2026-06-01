@@ -111,7 +111,7 @@ export default function DisputeModal({
               <Textarea
                 value={response}
                 onChange={(e) => setResponse(e.target.value)}
-                className="w-full border rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border  shadow-sm rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                 rows={3}
                 placeholder={t('common.inputPlaceholder')}
               />
