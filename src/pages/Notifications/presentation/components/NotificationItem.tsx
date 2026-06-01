@@ -161,48 +161,40 @@ export default function NotificationItem({
   const message =
     notification.message || notificationsTranslations.defaultMessage;
 
+  const formattedDate = new Date(notification.createdAt).toLocaleString(
+    undefined,
+    {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
+
   return (
     <div
       onClick={!isDisabled ? handleNavigate : undefined}
-      className={`flex items-center justify-between gap-4 p-4 rounded-xl border transition-all duration-200
+      className={`group flex flex-col gap-4 rounded-3xl border bg-white p-4 shadow-sm transition-all duration-200 sm:flex-row sm:items-center sm:justify-between sm:p-5
         ${
           isSelected
             ? "border-blue-500 ring-2 ring-blue-500/20"
             : theme === "dark"
-            ? "border-gray-800"
-            : "border-gray-200"
+            ? "border-slate-800 bg-slate-950 shadow-slate-900/20"
+            : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white"
         }
-
-        ${
-          theme === "dark"
-            ? isRead
-              ? "bg-gray-900 opacity-50"
-              : "bg-gray-900 hover:bg-gray-800"
-            : isRead
-            ? "bg-gray-100 opacity-60"
-            : "bg-white hover:bg-gray-50"
-        }
-
-        ${
-          isDisabled
-            ? "cursor-not-allowed opacity-70"
-            : "cursor-pointer"
-        }
+        ${isDisabled ? "cursor-not-allowed opacity-70" : "cursor-pointer"}
       `}
     >
-      {/* LEFT */}
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-
-        {/* CHECKBOX */}
-        {!isDisabled && (
-          <div onClick={handleSelect}>
-            <Checkbox checked={isSelected} />
-          </div>
-        )}
-
-        {/* ICON */}
+      <div className="flex flex-1 items-start gap-4 min-w-0">
         <div
-          className={`p-3 rounded-xl border shrink-0 ${getTypeColor(
+          onClick={handleSelect}
+          className={isDisabled ? "cursor-not-allowed" : "cursor-pointer"}
+        >
+          <Checkbox checked={isSelected} disabled={isDisabled} />
+        </div>
+
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-3xl border text-white ${getTypeColor(
             notification.type,
             theme
           )}`}
@@ -210,54 +202,41 @@ export default function NotificationItem({
           {getTypeIcon(notification.type)}
         </div>
 
-        {/* CONTENT */}
-        <div className="flex-1 min-w-0">
-          <h3
-            className={`font-semibold truncate ${
-              theme === "dark"
-                ? "text-gray-100"
-                : "text-gray-900"
-            }`}
-          >
-            {title}
-          </h3>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <h3
+                className={`font-semibold tracking-tight ${
+                  theme === "dark"
+                    ? "text-slate-100"
+                    : "text-slate-900"
+                }`}
+              >
+                {title}
+              </h3>
+              <p
+                className={`mt-1 text-sm leading-6 ${
+                  theme === "dark"
+                    ? "text-slate-400"
+                    : "text-slate-600"
+                }`}
+              >
+                {message}
+              </p>
+            </div>
 
-          <p
-            className={`text-sm truncate ${
-              theme === "dark"
-                ? "text-gray-400"
-                : "text-gray-600"
-            }`}
-          >
-            {message}
-          </p>
+            <div className="mt-2 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 sm:mt-0">
+              <span>{formattedDate}</span>
+              <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
+                isRead
+                  ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                  : "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
+              }`}>
+                {isRead ? "Read" : "Unread"}
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* RIGHT */}
-      <div
-        className="flex items-center gap-2"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* {!isDisabled && isSelected && (
-          <Button
-            onClick={handleMarkRead}
-            disabled={isDisabled}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            {translations.notifications.read}
-          </Button>
-        )} */}
-
-        {/* {!isDisabled && !isSelected && (
-          <Button
-            onClick={handleMarkRead}
-            disabled={isDisabled}
-            className="rounded-full w-9 h-9 p-0 bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Check className="w-4 h-4" />
-          </Button>
-        )} */}
       </div>
     </div>
   );

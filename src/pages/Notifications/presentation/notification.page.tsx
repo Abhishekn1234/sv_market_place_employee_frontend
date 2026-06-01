@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 
+import type { NotificationResponse } from "../domain/entities/notification";
 import { useLanguage } from "@/context/LanguageContext";
-import { CommonCard } from "@/components/common/CommonCard";
+
 import NotificationsHeader from "./components/NotificationHeader";
 import NotificationItem from "./components/NotificationItem";
 import { useTheme } from "@/context/ThemeContext";
@@ -37,8 +38,9 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
     type: CATEGORY_MAP[selectedCategory],
   });
 
-  const notifications = data?.data || [];
-  const pagination = data?.pagination;
+  const response = data as NotificationResponse | undefined;
+  const notifications = response?.data;
+  const pagination = response?.pagination;
   const totalPages = pagination?.totalPages || 1;
 
   // =========================
@@ -47,6 +49,8 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
   const [allNotifications, setAllNotifications] = useState<any[]>([]);
 
   useEffect(() => {
+    if (notifications === undefined) return;
+
     if (page === 1) {
       setAllNotifications(notifications);
     } else {
@@ -56,7 +60,6 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
 
   useEffect(() => {
     setPage(1);
-    setAllNotifications([]);
     setSelectedIds([]);
   }, [filter, selectedCategory]);
 
@@ -163,10 +166,51 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
   if (isLoading && page === 1) return <CommonSpinner />;
 
   return (
-    <div className={`p-4 ${theme === "dark" ? "text-white" : ""}`}>
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div
+      className={`min-h-screen py-6 px-4 sm:px-6 lg:px-8 ${
+        theme === "dark"
+          ? "bg-slate-950 text-white"
+          : "bg-slate-0 text-slate-900"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* HEADER */}
+        <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-900/95 dark:shadow-none">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-600">
+                {t("notifications.title")}
+              </p>
+              <h1 className="text-3xl font-semibold tracking-tight">
+                {t("notifications.title")}
+              </h1>
+              <p className="max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+                {t("notifications.subtitle")}
+              </p>
+            </div>
+
+            <div className="grid w-full gap-3 sm:grid-cols-2 lg:w-auto">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-center dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                  {t("notifications.unread")}
+                </p>
+                <p className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">
+                  {unreadCount}
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-center dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                  {t("notifications.total")}
+                </p>
+                <p className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">
+                  {allNotifications.length}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <NotificationsHeader
           unreadCount={unreadCount}
           readCount={readCount}
@@ -183,32 +227,34 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
           currentPageUnreadCount={unreadNotifications.length}
         />
 
-        {/* LIST */}
-        <CommonCard className="p-0">
-          <div className="space-y-3">
-            {allNotifications.map((notification) => (
-              <NotificationItem
-                notificationsTranslations={t("notifications")}
-                key={notification._id}
-                notification={notification}
-                markAsRead={markAsReadApi}
-                isSelected={selectedIds.includes(notification._id)}
-                onSelect={handleSelectNotification}
-              />
-            ))}
-          </div>
+       
+          {allNotifications.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {t("notifications.noNotifications")}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3 p-4 sm:p-6">
+              {allNotifications.map((notification) => (
+                <NotificationItem
+                  notificationsTranslations={t("notifications")}
+                  key={notification._id}
+                  notification={notification}
+                  markAsRead={markAsReadApi}
+                  isSelected={selectedIds.includes(notification._id)}
+                  onSelect={handleSelectNotification}
+                />
+              ))}
 
-          {/* LOADER */}
-          {page < totalPages && (
-            <div
-              ref={loadMoreRef}
-              className="flex justify-center py-6"
-            >
-              <CommonSpinner />
+              {page < totalPages && (
+                <div ref={loadMoreRef} className="flex justify-center py-6">
+                  <CommonSpinner />
+                </div>
+              )}
             </div>
           )}
-        </CommonCard>
-
+       
       </div>
     </div>
   );

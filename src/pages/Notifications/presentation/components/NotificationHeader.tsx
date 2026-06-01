@@ -46,6 +46,7 @@ export default function NotificationsHeader({
   unreadCount,
   readCount,
   totalCount,
+  filter,
 
   setFilter,
 
@@ -152,10 +153,10 @@ export default function NotificationsHeader({
   };
 
   return (
-    <div className="p-4 border rounded-lg space-y-4">
+    <div className="rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/95 dark:shadow-none space-y-4">
 
       {/* TOP ROW */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
         {/* LEFT */}
         <div className="flex items-center gap-3">
@@ -182,18 +183,17 @@ export default function NotificationsHeader({
 
         {/* BULK ACTIONS */}
         {hasSelection && (
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
 
             {/* MARK SELECTED */}
             <Button
               onClick={handleMarkSelected}
               disabled={isDisabled}
+              variant="secondary"
               className="bg-blue-600 text-white"
             >
               <Check className="w-4 h-4 mr-1" />
-
-              {notificationsTranslations.markSelected} (
-              {selectedCount})
+              {notificationsTranslations.markSelected} ({selectedCount})
             </Button>
 
             {/* MARK ALL */}
@@ -201,7 +201,7 @@ export default function NotificationsHeader({
               <Button
                 onClick={handleMarkAll}
                 disabled={isDisabled}
-                className="bg-gray-600 text-white"
+                variant="outline"
               >
                 {notificationsTranslations.markAllRead}
               </Button>
@@ -213,33 +213,29 @@ export default function NotificationsHeader({
       </div>
 
       {/* SECOND ROW */}
-      <div className="flex justify-between items-center flex-wrap gap-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
 
         {/* FILTERS */}
-        <div className="flex gap-2 flex-wrap">
-
+        <div className="flex flex-wrap gap-2">
           <Button
             onClick={() => setFilter("all")}
-            variant="outline"
+            variant={filter === "all" ? "secondary" : "outline"}
           >
-            {notificationsTranslations.categories.all} (
-            {totalCount})
+            {notificationsTranslations.categories.all} ({totalCount})
           </Button>
 
           <Button
             onClick={() => setFilter("unread")}
-            variant="outline"
+            variant={filter === "unread" ? "secondary" : "outline"}
           >
-            {notificationsTranslations.unread} (
-            {unreadCount})
+            {notificationsTranslations.unread} ({unreadCount})
           </Button>
 
           <Button
             onClick={() => setFilter("read")}
-            variant="outline"
+            variant={filter === "read" ? "secondary" : "outline"}
           >
-            {notificationsTranslations.read} (
-            {readCount})
+            {notificationsTranslations.read} ({readCount})
           </Button>
 
         </div>
@@ -249,7 +245,7 @@ export default function NotificationsHeader({
           value={selectedCategory}
           onValueChange={setSelectedCategory}
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-40">
             <SelectValue placeholder={notificationsTranslations.categoryPlaceholder} />
           </SelectTrigger>
 

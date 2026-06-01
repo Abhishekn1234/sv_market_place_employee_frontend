@@ -6,9 +6,12 @@ const repo = new NotificationRepositoryImpl();
 const useCase = new GetNotificationsUseCase(repo);
 
 export const useGetNotifications = (params?: any) => {
-  return useQuery({
-    queryKey: ["notifications", params],
-    queryFn: () => useCase.execute(params),
-    refetchOnWindowFocus: false,
-  });
+  return useQuery(
+    {
+      queryKey: ["notifications", params],
+      queryFn: () => useCase.execute(params),
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    } as any,
+  );
 };
