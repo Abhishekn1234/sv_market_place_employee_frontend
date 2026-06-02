@@ -31,8 +31,10 @@ export default function HeaderGuide({ open, onClose }: Props) {
 
             {/* CLOSE */}
             <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
-              className="absolute right-3 top-3 text-gray-400 hover:text-black"
+              className="absolute right-3 top-3 text-gray-400 hover:text-black size-4"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -58,7 +60,8 @@ export default function HeaderGuide({ open, onClose }: Props) {
 
               <Button
                 onClick={onClose}
-                className="mt-4 w-full rounded-xl bg-blue-600 text-white py-2 text-sm"
+                variant="default"
+                className="mt-4 w-full rounded-xl"
               >
                 {t("onboarding.doneTitle")}
               </Button>
