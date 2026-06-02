@@ -117,7 +117,11 @@ export default function TransactionHistory() {
   // Reset pagination when search/filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, limit]);
+  }, [searchTerm, statusFilter, limit, sort]);
+
+  const isFilterActive = useMemo(() => {
+    return searchTerm !== "" || statusFilter !== "all" || sort !== "createdAt:desc";
+  }, [searchTerm, statusFilter, sort]);
 
   // Infinite scroll observer for mobile
   useEffect(() => {
@@ -191,6 +195,7 @@ export default function TransactionHistory() {
           statusFilter={statusFilter}
           onSearchChange={setSearchTerm}
           onStatusChange={setStatusFilter}
+            isFilterActive={isFilterActive}
             sort={sort}
             onSortChange={setSort}
           limit={limit}

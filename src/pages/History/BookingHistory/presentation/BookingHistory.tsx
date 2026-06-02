@@ -30,6 +30,7 @@ export default function BookingHistory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">("all");
   const [serviceFilter, setServiceFilter] = useState<string>("all");
+  const [sort, setSort] = useState("schedule.startDateTime:desc");
 
   const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -46,8 +47,6 @@ export default function BookingHistory() {
   }, []);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const debouncedStatusFilter = useDebounce(statusFilter, 300);
-  const debouncedServiceFilter = useDebounce(serviceFilter, 300);
   const debouncedPage = useDebounce(page, 300);
   const debouncedLimit = useDebounce(limit, 300);
 
@@ -55,6 +54,7 @@ export default function BookingHistory() {
     page: debouncedPage,
     limit: isMobile ? 10 : debouncedLimit,
     search: debouncedSearchTerm,
+    sort: sort,
   });
 
   const pagination = data?.pagination;
@@ -87,9 +87,10 @@ export default function BookingHistory() {
 
   const filteredBookings = useMemo(() => {
     return bookings.filter((b) => {
-      const search = debouncedSearchTerm.toLowerCase();
+      const search = searchTerm.toLowerCase();
 
       const matchesSearch =
+        !search ||
         b.customer?.fullName?.toLowerCase().includes(search) ||
         b._id?.toLowerCase().includes(search) ||
         b.booking.bookingCode?.toLowerCase().includes(search) ||
@@ -98,24 +99,31 @@ export default function BookingHistory() {
         (typeof b.service === "string" && String(b.service).toLowerCase().includes(search));
 
       const matchesStatus =
-        debouncedStatusFilter === "all" || normalize(b.status) === normalize(String(debouncedStatusFilter));
+        statusFilter === "all" || normalize(b.status) === normalize(String(statusFilter));
 
       const matchesService =
-        debouncedServiceFilter === "all" ||
-        (typeof b.service === "object" && b.service?.category === debouncedServiceFilter);
+        serviceFilter === "all" ||
+        (typeof b.service === "object" && b.service?.category === serviceFilter);
 
       return matchesSearch && matchesStatus && matchesService;
     });
-  }, [bookings, debouncedSearchTerm, debouncedStatusFilter, debouncedServiceFilter]);
+  }, [bookings, searchTerm, statusFilter, serviceFilter]);
 
   const toggleExpanded = (id: string) => {
     setExpandedBooking((prev) => (prev === id ? null : id));
   };
 
+  const isFilterActive = useMemo(() => {
+    return searchTerm !== "" || statusFilter !== "all" || serviceFilter !== "all" || sort !== "schedule.startDateTime:desc";
+  }, [searchTerm, statusFilter, serviceFilter, sort]);
+
+
+
   const handleClearFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
     setServiceFilter("all");
+    setSort("schedule.startDateTime:desc");
     setPage(1);
   };
 
@@ -180,6 +188,9 @@ export default function BookingHistory() {
                 statusFilter={statusFilter}
                 onStatusChange={setStatusFilter}
                 serviceFilter={serviceFilter}
+                sort={sort}
+                onSortChange={setSort}
+                isFilterActive={isFilterActive}
                 onServiceChange={setServiceFilter}
                 limit={limit}
                 onClear={handleClearFilters}

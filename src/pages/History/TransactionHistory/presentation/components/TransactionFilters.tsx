@@ -23,6 +23,7 @@ interface Props {
   isMobile: boolean;
   sort: string;
   onSortChange: (v: string) => void;
+  isFilterActive: boolean;
   onClear: () => void;
 }
 
@@ -36,6 +37,7 @@ export default function TransactionFilters({
   isMobile,
   sort,
   onSortChange,
+  isFilterActive,
   onClear,
 }: Props) {
   const { translations, language, t } = useLanguage();
@@ -114,6 +116,7 @@ export default function TransactionFilters({
       {/* CLEAR BUTTON */}
       <Button
         variant="outline"
+        disabled={!isFilterActive}
         onClick={onClear}
         className="w-full md:w-auto bg-white border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors gap-2 text-xs sm:text-sm py-2 sm:py-2.5 h-auto"
       >

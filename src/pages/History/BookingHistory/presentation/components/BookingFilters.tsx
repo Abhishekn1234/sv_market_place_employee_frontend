@@ -28,7 +28,10 @@ type Props = {
   serviceFilter: string;
   onServiceChange: (value: string) => void;
   onClear: () => void;
+  sort: string;
+  onSortChange: (value: string) => void;
 
+  isFilterActive: boolean;
   services: ServiceCategory[];
   statusConfig: Record<string, { label: string }>;
   isMobile?: boolean;
@@ -43,6 +46,9 @@ export function BookingFilters({
   onServiceChange,
   services,
   onClear,
+  sort,
+  onSortChange,
+  isFilterActive,
   limit,
   onLimitChange,
   statusConfig,
@@ -64,7 +70,7 @@ export function BookingFilters({
   }, [statusConfig]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8">
       {/* Search Input */}
       <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-3" : ""}`}>
         {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
@@ -119,9 +125,22 @@ export function BookingFilters({
         </Select>
       </div>
 
+      {/* Sort Filter */}
+      <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-4" : ""}`}>
+        <Select value={sort} onValueChange={onSortChange}>
+          <SelectTrigger className="border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white">
+            <SelectValue placeholder={t('common.sort') ?? "Sort by"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="schedule.startDateTime:desc">{t('common.newest') ?? "Newest"}</SelectItem>
+            <SelectItem value="schedule.startDateTime:asc">{t('common.oldest') ?? "Oldest"}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Rows Per Page (desktop only) */}
       {!isMobile && (
-        <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-4" : ""}`}>
+        <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-5" : ""}`}>
           {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
             {translations.common?.limit ?? "Rows"}
           </Label> */}
@@ -141,10 +160,11 @@ export function BookingFilters({
       )}
 
       {/* Clear Button */}
-      <div className={`flex items-end ${isRTL ? "lg:order-5" : ""}`}>
+      <div className={`flex items-end ${isRTL ? "lg:order-6" : ""}`}>
         <Button
           variant="outline"
           size="default"
+          disabled={!isFilterActive}
           onClick={onClear}
           className="w-full bg-white border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors gap-2 h-10"
         >
