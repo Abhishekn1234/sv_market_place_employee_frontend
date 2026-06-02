@@ -3,6 +3,7 @@ import { getToken, onMessage } from "firebase/messaging";
 import { getFirebaseMessaging } from "./firebase";
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+const DEFAULT_NOTIF_URL = "/notifications";
 
 // 🔐 Get FCM Token
 export const requestAndGetToken = async (): Promise<string | null> => {
@@ -34,7 +35,6 @@ export const initOnMessage = async () => {
 
   const audio = new Audio("/notification.wav");
   const channel = new BroadcastChannel("fcm_channel");
-  const DEFAULT_NOTIF_URL = "/notifications";
 
   // simple in-memory dedupe for foreground notifications
   const recentTags = new Set<string>();
@@ -78,9 +78,9 @@ export const initOnMessage = async () => {
             tag,
             actions: [{ action: "open", title: "Open" }],
             data: { url, type: data?.type, bookingId: data?.bookingId, messageId: data?.messageId },
-          }as NotificationOptions );
+          } as NotificationOptions);
 
-          notif.onclick = (e: any) => {
+          notif.onclick = (e: Event) => {
             e.preventDefault();
             channel.postMessage({ type: "NAVIGATE", url });
             window.focus?.();
