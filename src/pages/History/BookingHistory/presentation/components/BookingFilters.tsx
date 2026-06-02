@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,6 +13,7 @@ import {
 import type { BookingStatus } from "../../../../Booking/AvailableBooking/domain/entities/bookingstatus";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import { useLanguage } from "@/context/LanguageContext";
+import { Label } from "@/components/ui/label";
 
 type Props = {
   searchTerm: string;
@@ -20,7 +22,7 @@ type Props = {
   statusFilter: BookingStatus | "all";
   onStatusChange: (value: BookingStatus | "all") => void;
   limit: number;
-onLimitChange: (value: number) => void;
+  onLimitChange: (value: number) => void;
   serviceFilter: string;
   onServiceChange: (value: string) => void;
 
@@ -42,73 +44,97 @@ export function BookingFilters({
   statusConfig,
   isMobile,
 }: Props) {
-  const {translations,language}=useLanguage();
-  const isRTL=language==="AR";
-  const bookingfilters=translations.bookingHistory;
-  const limits = [5, 10, 20, 50];
-  const uniqueStatusOptions = Object.entries(statusConfig).reduce<Record<string, string>>((acc, [key, cfg]) => {
-  if (!Object.values(acc).includes(cfg.label)) {
-    acc[key] = cfg.label;
-  }
-  return acc;
-}, {});
+  const { translations, language } = useLanguage();
+  const isRTL = language === "AR";
+  const bookingfilters = translations.bookingHistory;
+
+  const limits = useMemo(() => [5, 10, 20, 50], []);
+
+  const uniqueStatusOptions = useMemo(() => {
+    return Object.entries(statusConfig).reduce<Record<string, string>>((acc, [key, cfg]) => {
+      if (!Object.values(acc).includes(cfg.label)) {
+        acc[key] = cfg.label;
+      }
+      return acc;
+    }, {});
+  }, [statusConfig]);
 
   return (
-    <div className={`${isRTL?"grid grid-cols-1 md:grid-cols-4 gap-4":"grid grid-cols-1 md:grid-cols-4 gap-4"}`}>
-     <div className={`${isRTL?"order-3":""}`}>
-      <Input
-        placeholder={bookingfilters.searchPlaceholder}
-        value={searchTerm}
-        onChange={(e) => onSearchChange(e.target.value)}
-      />
-     </div>
-      <div className={`${isRTL?"order-2":""}`}>
-         <Select value={statusFilter} onValueChange={(v) => onStatusChange(v as BookingStatus | "all")}>
-  <SelectTrigger>
-    <SelectValue placeholder={bookingfilters.statusPlaceholder} />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectItem value="all">{bookingfilters.statusOptions.all}</SelectItem>
-    {Object.entries(uniqueStatusOptions).map(([key, label]) => (
-      <SelectItem key={key} value={key}>
-        {label}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-8">
+      {/* Search Input */}
+      <div className={`space-y-2 ${isRTL ? "lg:order-3" : ""}`}>
+        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+          {bookingfilters.searchPlaceholder ?? "Search"}
+        </Label>
+        <Input
+          type="text"
+          placeholder={bookingfilters.searchPlaceholder ?? "Search..."}
+          value={searchTerm}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
+          className="w-full border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white"
+        />
       </div>
-    
-        <div className={`${isRTL?"order-1":""}`}>
-           <Select value={serviceFilter} onValueChange={onServiceChange}>
-        <SelectTrigger>
-          <SelectValue placeholder={bookingfilters.serviceOptions.allServices} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{bookingfilters.serviceOptions.allServices}</SelectItem>
 
-          {services.map((service) => (
-            <SelectItem key={service._id} value={service._id}>
-              {service.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {/* Status Filter */}
+      <div className={`space-y-2 ${isRTL ? "lg:order-2" : ""}`}>
+        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+          {bookingfilters.statusPlaceholder ?? "Status"}
+        </Label>
+        <Select value={statusFilter} onValueChange={(v) => onStatusChange(v as BookingStatus | "all")}>
+          <SelectTrigger className="border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white">
+            <SelectValue placeholder={bookingfilters.statusPlaceholder ?? "Select status"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{bookingfilters.statusOptions?.all ?? "All"}</SelectItem>
+            {Object.entries(uniqueStatusOptions).map(([key, label]) => (
+              <SelectItem key={key} value={key}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Service Filter */}
+      <div className={`space-y-2 ${isRTL ? "lg:order-1" : ""}`}>
+        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+          {bookingfilters.serviceOptions?.allServices ?? "Category"}
+        </Label>
+        <Select value={serviceFilter} onValueChange={onServiceChange}>
+          <SelectTrigger className="border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white">
+            <SelectValue placeholder={bookingfilters.serviceOptions?.allServices ?? "All Services"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{bookingfilters.serviceOptions?.allServices ?? "All Services"}</SelectItem>
+            {services.map((service) => (
+              <SelectItem key={service._id} value={service._id}>
+                {service.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Rows Per Page (desktop only) */}
+      {!isMobile && (
+        <div className={`space-y-2 ${isRTL ? "lg:order-4" : ""}`}>
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+            {translations.common?.limit ?? "Rows"}
+          </Label>
+          <Select value={limit.toString()} onValueChange={(v) => onLimitChange(Number(v))}>
+            <SelectTrigger className="border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white">
+              <SelectValue placeholder="Rows per page" />
+            </SelectTrigger>
+            <SelectContent>
+              {limits.map((l) => (
+                <SelectItem key={l} value={l.toString()}>
+                  {l}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-       {!isMobile && (<div>
-  <Select value={limit.toString()} onValueChange={(v) => onLimitChange(Number(v))}>
-    <SelectTrigger>
-      <SelectValue placeholder="Rows per page" />
-    </SelectTrigger>
-    <SelectContent>
-      {limits.map((l) => (
-        <SelectItem key={l} value={l.toString()}>
-          {l}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>)}
-     
+      )}
     </div>
   );
 }

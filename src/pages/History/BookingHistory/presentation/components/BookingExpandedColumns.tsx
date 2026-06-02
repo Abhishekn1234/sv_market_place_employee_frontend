@@ -95,8 +95,8 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
         </div>
 
         <div className="flex items-start gap-2">
-          <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
-          <span className="break-words whitespace-normal">{locationName}</span>
+          <MapPin className="h-4 w-4 shrink-0 mt-1" />
+          <span className="wrap-break-word whitespace-normal">{locationName}</span>
         </div>
       </div>
 
