@@ -70,7 +70,7 @@ export function BookingFilters({
   }, [statusConfig]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8">
       {/* Search Input */}
       <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-3" : ""}`}>
         {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
