@@ -7,12 +7,13 @@ import { ProfileHeader } from "./ProfileHeader";
 import { ProfileInfo } from "./ProfileInfo";
 import { useQueryClient } from "@tanstack/react-query";
 import CommonSpinner from "@/components/common/CommonSpinner";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ProfileList() {
   const { data: profile, isLoading } = useProfile();
   const { mutateAsync, isPending } = useUpdateProfile();
   const queryClient = useQueryClient();
-
+  const { translations } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ fullName: "", address: "" });
   const [files, setFiles] = useState<Record<string, File | undefined>>({});
@@ -21,9 +22,9 @@ export default function ProfileList() {
   );
 
   const fileFields = [
-    { label: "ID Proof", key: "idProof" },
-    { label: "Address Proof", key: "addressProof" },
-    { label: "Photo Proof", key: "photoProof" },
+    { label: translations.profile.idProof, key: "idProof" },
+    { label: translations.profile.addressProof, key: "addressProof" },
+    { label: translations.profile.photo, key: "photoProof" },
   ] as const;
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function ProfileList() {
   if (!profile) {
     return (
       <div className="text-center py-10 text-gray-500">
-        No profile data found
+        {translations.profile.noProfileData ?? "No profile data found"}
       </div>
     );
   }
@@ -101,7 +102,7 @@ export default function ProfileList() {
     // ✅ SAFE REFETCH
     queryClient.invalidateQueries({ queryKey: ["profile"] });
 
-    toast.success("Profile updated");
+    toast.success(translations.profile.profileUpdated ?? "Profile updated");
     setIsEditing(false);
   };
 
@@ -123,9 +124,7 @@ export default function ProfileList() {
         canEdit={canEdit}
         onEdit={() => {
           if (!canEdit) {
-            toast.error(
-              "Please upload ID Proof, Address Proof and Photo Proof before editing profile"
-            );
+            toast.error(translations.profile.uploadRequiredDocs ?? "Please upload ID Proof, Address Proof and Photo Proof before editing profile");
             return;
           }
           setIsEditing(true);

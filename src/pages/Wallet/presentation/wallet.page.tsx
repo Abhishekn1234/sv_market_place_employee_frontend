@@ -8,7 +8,7 @@ import { useWalletTransactions } from "./hooks/useWalletTransactions";
 import type { Transaction } from "../domain/entities/transaction";
 import { useAuthStore } from "@/core/store/auth";
 export default function Wallet() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRTL = language === "AR";
 
   const { data: wallet } = useWallet();
@@ -22,7 +22,7 @@ export default function Wallet() {
     id: parseInt(txn.id) || index + 1,
     type: txn.type === "CREDIT" ? "credit" : "debit",
     amount: txn.amount,
-    description: txn.note || txn.source || "Transaction",
+    description: txn.note || txn.source || t("wallet.transaction"),
     date: new Date(txn.createdAt).toISOString().split("T")[0],
   }));
 
@@ -42,7 +42,7 @@ export default function Wallet() {
     .reduce((a, t) => a + t.amount, 0);
 
     const user = useAuthStore.getState().user;
-  const username = user?.fullName ?? "User";
+  const username = user?.fullName ?? t("common.user");
 
   return (
     <div

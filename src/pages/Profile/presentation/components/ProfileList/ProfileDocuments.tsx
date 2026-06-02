@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { FileUp, FileCheck, FileWarning } from "lucide-react";
 import { FilePreviewWithName } from "../../../presentation/components/FilePreview/FilePreviewwithName";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Props = {
   isEditing: boolean;
@@ -22,10 +23,11 @@ export function ProfileDocuments({
   onFileChange,
 }: Props) {
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const { translations, t } = useLanguage();
   const { theme } = useTheme();
 
   return (
-    <CommonCard title="Documents">
+    <CommonCard title={translations.profile.documents ?? "Documents"}>
       {/* ✅ Explicit grid wrapper inside the card content area */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {fileFields.map(({ label, key }) => {
@@ -67,7 +69,7 @@ export function ProfileDocuments({
               ) : (
                 <div className="flex flex-col items-center gap-2 text-slate-400">
                   <FileWarning className="h-8 w-8 opacity-20" />
-                  <span className="text-[10px] font-medium italic">No document uploaded</span>
+                  <span className="text-[10px] font-medium italic">{translations.profile.noDocUploaded ?? "No document uploaded"}</span>
                 </div>
               )}
             </div>
@@ -99,12 +101,12 @@ export function ProfileDocuments({
                   {hasFile ? (
                     <>
                       <FileCheck className="h-4 w-4" />
-                      Change Document
+                      {translations.profile.changeDoc ?? "Change Document"}
                     </>
                   ) : (
                     <>
                       <FileUp className="h-4 w-4" />
-                      Upload {label}
+                      {t('profile.uploadDoc', { label }) ?? `Upload ${label}`}
                     </>
                   )}
                 </Button>

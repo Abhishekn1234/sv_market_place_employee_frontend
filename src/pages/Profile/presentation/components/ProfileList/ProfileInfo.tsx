@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CommonCard } from "@/components/common/CommonCard";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Props = {
   profile: any;
@@ -16,6 +17,7 @@ export function ProfileInfo({
   formData,
   onChange,
 }: Props) {
+  const {translations} = useLanguage();
   return (
     <div className="
       grid grid-cols-1 
@@ -25,11 +27,13 @@ export function ProfileInfo({
       
       {/* Personal Information */}
       <CommonCard
-        title="Personal Information"
+        title={translations.profile.personalInformation ?? "Personal Information"}
         contentClassName="space-y-3 sm:space-y-4"
       >
         <div className="space-y-1">
-          <Label className="text-sm sm:text-base">Full Name</Label>
+          <Label className="text-sm sm:text-base">
+            {translations.profile.fullName ?? "Full Name"}
+          </Label>
           {isEditing ? (
             <Input
               name="fullName"
@@ -45,7 +49,9 @@ export function ProfileInfo({
         </div>
 
         <div className="space-y-1">
-          <Label className="text-sm sm:text-base">Email</Label>
+          <Label className="text-sm sm:text-base">
+            {translations.profile.email ?? "Email"}
+          </Label>
           <div className="text-sm sm:text-base break-all">
             {profile.email}
           </div>
@@ -54,18 +60,22 @@ export function ProfileInfo({
 
       {/* Contact Information */}
       <CommonCard
-        title="Contact Information"
+        title={translations.profile.contactInformation ?? "Contact Information"}
         contentClassName="space-y-3 sm:space-y-4"
       >
         <div className="space-y-1">
-          <Label className="text-sm sm:text-base">Phone</Label>
+          <Label className="text-sm sm:text-base">
+            {translations.profile.phone ?? "Phone"}
+          </Label>
           <div className="text-sm sm:text-base break-words">
             {profile.phone}
           </div>
         </div>
 
         <div className="space-y-1">
-          <Label className="text-sm sm:text-base">Address</Label>
+          <Label className="text-sm sm:text-base">
+            {translations.profile.address ?? "Address"}
+          </Label>
           {isEditing ? (
           <Textarea
             name="address"

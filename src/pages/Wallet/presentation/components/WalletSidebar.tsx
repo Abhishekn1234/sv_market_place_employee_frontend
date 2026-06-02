@@ -18,9 +18,10 @@ export function WalletSidebar({
   totalDebit,
   wallet,
 }: Props) {
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
   const walletT = translations.wallet;
   const currencyLabel = wallet?.currency ?? "USD";
+  const locale = language === 'AR' ? 'ar-EG' : language === 'HI' ? 'hi-IN' : 'en-US';
   const now = new Date();
 
   const startOfToday = new Date(now);
@@ -49,7 +50,7 @@ const monthTransactions = transactions.filter((tx: any) => {
               {walletT.monthlySummary}
             </h3>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-              {now.toLocaleString("en-US", { month: "long" })}
+              {now.toLocaleString(locale, { month: 'long' })}
             </span>
           </div>
 
@@ -64,36 +65,42 @@ const monthTransactions = transactions.filter((tx: any) => {
             <div className="flex justify-between gap-3">
               <span>{walletT.avgTransaction}</span>
               <span className="font-medium whitespace-nowrap tabular-nums">
-                {currencyLabel}
-                {transactions.length
+                {new Intl.NumberFormat(locale, {
+                  style: "currency",
+                  currency: currencyLabel,
+                }).format(transactions.length
                   ? Math.round((totalCredit + totalDebit) / transactions.length)
-                  : 0}
+                  : 0)}
               </span>
             </div>
 
             <div className="flex justify-between gap-3">
               <span>{walletT.largestIncome}</span>
               <span className="text-emerald-600 font-semibold whitespace-nowrap tabular-nums">
-                {currencyLabel}
-                {Math.max(
+                {new Intl.NumberFormat(locale, {
+                  style: "currency",
+                  currency: currencyLabel,
+                }).format(Math.max(
                   0,
                   ...transactions
                     .filter((t) => t.type === "CREDIT")
                     .map((t) => t.amount)
-                )}
+                ))}
               </span>
             </div>
 
             <div className="flex justify-between gap-3">
               <span>{walletT.largestExpense}</span>
               <span className="text-rose-600 font-semibold whitespace-nowrap tabular-nums">
-                {currencyLabel}
-                {Math.max(
+                {new Intl.NumberFormat(locale, {
+                  style: "currency",
+                  currency: currencyLabel,
+                }).format(Math.max(
                   0,
                   ...transactions
                     .filter((t) => t.type === "debit")
                     .map((t) => t.amount)
-                )}
+                ))}
               </span>
             </div>
           </div>
@@ -112,7 +119,10 @@ const monthTransactions = transactions.filter((tx: any) => {
               <div className="flex items-center justify-between gap-3">
                 <span>{walletT.availableBalance}</span>
                 <span className="font-semibold tabular-nums">
-                  {currencyLabel}{totalBalance.toLocaleString()}
+                  {new Intl.NumberFormat(locale, {
+                    style: "currency",
+                    currency: currencyLabel,
+                  }).format(totalBalance)}
                 </span>
               </div>
             </div>
@@ -140,4 +150,3 @@ const monthTransactions = transactions.filter((tx: any) => {
     </div>
   );
 }
-

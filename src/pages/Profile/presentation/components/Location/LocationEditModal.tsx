@@ -29,7 +29,7 @@ type Props = {
 export default function LocationEditModal({
   tempLocation,
   setTempLocation,
-  locationName,
+  // locationName,
   setLocationName,
   radius,
   setRadius,
@@ -44,15 +44,13 @@ export default function LocationEditModal({
   onClose,
   onSave,
 }: Props) {
-  console.log(locationName);
   const {translations}=useLanguage();
-    const edits=translations.profile
-    console.log(edits);
+  const edits=translations.profile;
   return (
     <div className="border rounded p-4 space-y-5">
       {/* Location Mode */}
       <div>
-        <Label>Location Mode</Label>
+        <Label>{edits.locationMode ?? "Location Mode"}</Label>
         <div className="flex gap-4 mt-2">
           <Label className="flex items-center gap-2">
             <Input
@@ -60,7 +58,7 @@ export default function LocationEditModal({
               checked={locationMode === "CURRENT"}
               onChange={() => setLocationMode("CURRENT")}
             />
-            Current Location
+            {edits.currentLocation ?? "Current Location"}
           </Label>
           <Label className="flex items-center gap-2">
             <Input
@@ -68,12 +66,11 @@ export default function LocationEditModal({
               checked={locationMode === "MANUAL"}
               onChange={() => setLocationMode("MANUAL")}
             />
-            Manual Location
+            {edits.manualLocation ?? "Manual Location"}
           </Label>
         </div>
       </div>
 
-     
       <CommonMap
         location={tempLocation}
         setLocation={setTempLocation}
@@ -87,16 +84,16 @@ export default function LocationEditModal({
 
   
       <div>
-        <Label>Service Radius (km)</Label>
+        <Label>{edits.serviceRadius ?? "Service Radius (km)"}</Label>
        <div>
-          <Label>Service Radius (km)</Label>
+          <Label>{edits.serviceRadius ?? "Service Radius (km)"}</Label>
           <Input
             type="number"
             value={radius / 1000}
             onChange={(e) => {
               const valueKm = Number(e.target.value);
               if (valueKm > 15) {
-                toast.error("Radius cannot exceed 15 km");
+                toast.error(edits.radiusLimitError ?? "Radius cannot exceed 15 km");
                 setRadius(15000); 
               } else if (valueKm < 0) {
                 setRadius(0);

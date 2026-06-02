@@ -34,7 +34,7 @@ export default function LocationModal({
   /* ---------------- RADIUS ---------------- */
   const handleRadiusChange = (valueKm: number) => {
     if (valueKm > 45) {
-      toast.error("Radius cannot exceed 45 km"); // ✅ fixed message
+      toast.error(edits.radiusLimitError ?? "Radius cannot exceed 45 km");
       setRadius(45000);
     } else if (valueKm < 0) {
       setRadius(0);
@@ -48,7 +48,7 @@ export default function LocationModal({
     setLocationMode(mode);
 
     if (mode === "CURRENT") {
-      onUseCurrentLocation(); // ✅ trigger GPS fetch
+      onUseCurrentLocation();
     }
 
     // ❗ MANUAL handled via map click, no immediate action needed
@@ -58,9 +58,9 @@ export default function LocationModal({
     <div className="border rounded p-4 space-y-5">
       {/* Location Mode */}
       <div>
-        <Label>Location Mode</Label>
+        <Label>{edits.locationMode ?? "Location Mode"}</Label>
         <div className="flex gap-4 mt-2">
-          {["CURRENT", "MANUAL"].map((mode) => (
+          {['CURRENT', 'MANUAL'].map((mode) => (
             <label key={mode} className="flex items-center gap-2">
               <input
                 type="radio"
@@ -70,8 +70,8 @@ export default function LocationModal({
                 }
               />
               {mode === "CURRENT"
-                ? "Current Location"
-                : "Manual Location"}
+                ? edits.currentLocation ?? "Current Location"
+                : edits.manualLocation ?? "Manual Location"}
             </label>
           ))}
         </div>
@@ -91,7 +91,7 @@ export default function LocationModal({
 
       {/* Radius */}
       <div>
-        <Label>Service Radius (km)</Label>
+        <Label>{edits.serviceRadius ?? "Service Radius (km)"}</Label>
         <input
           type="number"
           value={radius / 1000}
@@ -102,7 +102,7 @@ export default function LocationModal({
 
       {/* Categories */}
       <ServiceSelector
-        label="Service Categories"
+        label={edits.serviceCategories ?? "Service Categories"}
         items={serviceCategories}
         selected={selectedCategories}
         setSelected={setSelectedCategories}
@@ -111,7 +111,7 @@ export default function LocationModal({
 
       {/* Tiers */}
       <ServiceSelector
-        label="Service Tiers"
+        label={edits.serviceTiers ?? "Service Tiers"}
         items={serviceTiers}
         selected={selectedTiers}
         setSelected={setSelectedTiers}

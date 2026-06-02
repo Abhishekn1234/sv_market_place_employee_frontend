@@ -27,7 +27,7 @@ export function ProfileHeader({
   onSave,
   onImageChange,
 }: Props) {
-  const { translations } = useLanguage();
+  const { translations, t } = useLanguage();
   const profiles = translations.profile;
 
   return (
@@ -100,7 +100,7 @@ export function ProfileHeader({
             disabled={isPending}
             className="w-full sm:w-auto"
           >
-            {isPending ? "Saving..." :profiles.save}
+            {isPending ? (t('common.saving') ?? "Saving...") : profiles.save}
           </Button>
           <Button
             variant="outline"
@@ -117,8 +117,8 @@ export function ProfileHeader({
           className="w-full sm:w-auto"
           title={
             !canEdit
-              ? "Upload ID Proof, Address Proof and Photo Proof to enable editing"
-              : "Edit profile"
+              ? (translations.profile.uploadRequiredDocs ?? "Upload ID Proof, Address Proof and Photo Proof to enable editing")
+              : (translations.profile.editProfile ?? "Edit profile")
           }
         >
           <Edit3 className="h-4 w-4 mr-1" />

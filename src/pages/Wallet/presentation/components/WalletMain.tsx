@@ -32,26 +32,28 @@ export function WalletMain({
   totalDebit,
   wallet,
 }: Props) {
-  const { translations } = useLanguage();
+  const { translations, t, language } = useLanguage();
   const walletT = translations.wallet;
 
   const currencyLabel = wallet?.currency ?? "USD";
-  const formattedBalance = new Intl.NumberFormat("en-US", {
+  const locale = language === 'AR' ? 'ar-EG' : language === 'HI' ? 'hi-IN' : 'en-US';
+
+  const formattedBalance = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currencyLabel,
     maximumFractionDigits: 2,
   }).format(totalBalance);
-  const formattedCredit = new Intl.NumberFormat("en-US", {
+  const formattedCredit = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currencyLabel,
     maximumFractionDigits: 2,
   }).format(totalCredit);
-  const formattedDebit = new Intl.NumberFormat("en-US", {
+  const formattedDebit = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currencyLabel,
     maximumFractionDigits: 2,
   }).format(totalDebit);
-  const formattedNet = new Intl.NumberFormat("en-US", {
+  const formattedNet = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currencyLabel,
     maximumFractionDigits: 2,
@@ -135,7 +137,7 @@ export function WalletMain({
             </div>
             <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-slate-200">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
-                Net
+                {t('wallet.net')}
               </p>
               <p className="mt-2 text-lg font-semibold text-white">
                 {formattedNet}
@@ -145,7 +147,7 @@ export function WalletMain({
 
           {updatedAt && (
             <p className="mt-5 text-sm text-slate-300">
-              Updated: {updatedAt}
+              {t('wallet.updated')} {updatedAt}
             </p>
           )}
         </div>
@@ -160,7 +162,7 @@ export function WalletMain({
                 {walletT.quickActions}
               </h3>
               <p className="text-sm text-slate-500">
-                Manage funds, deposits, and withdrawals instantly.
+                {t('wallet.manageFunds')}
               </p>
             </div>
             <div className="inline-flex flex-wrap gap-2">
@@ -184,7 +186,7 @@ export function WalletMain({
               {walletT.recentTransactions}
             </div>
             <p className="text-sm text-slate-500">
-              Showing {visibleTransactions.length} of {transactions.length}
+              {(t as any)('wallet.showingOf', { current: visibleTransactions.length, total: transactions.length })}
             </p>
           </div>
 
@@ -229,7 +231,7 @@ export function WalletMain({
                       }`}
                     >
                       {txn.type === "credit" ? "+" : "-"}
-                      {new Intl.NumberFormat("en-US", {
+                      {new Intl.NumberFormat(locale, {
                         style: "currency",
                         currency: currencyLabel,
                         maximumFractionDigits: 2,
@@ -243,7 +245,7 @@ export function WalletMain({
               ))
             ) : (
               <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-500">
-                No recent transactions available.
+                {t('wallet.noTransactions')}
               </div>
             )}
           </div>
