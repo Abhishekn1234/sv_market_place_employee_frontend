@@ -36,7 +36,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [language]);
 
   
-  const t = (key: string): string => {
+  const t = (key: string, params?: Record<string, string | number>): any => {
     const keys = key.split(".");
     let value: any = allTranslations[language];
 
@@ -44,7 +44,15 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
       value = value?.[k];
       if (value === undefined) return key;
     }
-    return typeof value === "string" ? value : key;
+
+    if (typeof value === "string" && params) {
+      let result = value;
+      Object.entries(params).forEach(([k, v]) => {
+        result = result.replace(new RegExp(`{{${k}}}`, "g"), String(v));
+      });
+      return result;
+    }
+    return value;
   };
 
   return (
