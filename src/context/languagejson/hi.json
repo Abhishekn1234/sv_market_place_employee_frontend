@@ -299,8 +299,9 @@
 
   "filters": {
     "filterStatus": "स्थिति के अनुसार फ़िल्टर करें",
+    "searchPlaceholder": "लेन-देन खोजें...",
     "statusOptions": {
-      "all": "सभी स्थितियाँ",
+      "all": "सभी स्थिति",
       "completed": "पूर्ण",
       "pending": "लंबित",
       "failed": "विफल"

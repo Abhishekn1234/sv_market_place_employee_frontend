@@ -29,40 +29,41 @@ export function WalletSidebar({
 
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-// TODAY transactions
-const todayTransactions = transactions.filter((tx: any) => {
-  const date = new Date(tx.date);
-  return date >= startOfToday && date <= now;
-});
+  // TODAY transactions
+  const todayTransactions = transactions.filter((tx: any) => {
+    const date = new Date(tx.date);
+    return date >= startOfToday && date <= now;
+  });
 
-// MONTH transactions
-const monthTransactions = transactions.filter((tx: any) => {
-  const date = new Date(tx.date);
-  return date >= startOfMonth && date <= now;
-});
+  // MONTH transactions
+  const monthTransactions = transactions.filter((tx: any) => {
+    const date = new Date(tx.date);
+    return date >= startOfMonth && date <= now;
+  });
+
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="lg:sticky lg:top-4 space-y-4 sm:space-y-6">
       {/* Monthly Summary */}
       <CommonCard>
         <div className="p-4 sm:p-6">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-lg sm:text-xl font-semibold">
               {walletT.monthlySummary}
             </h3>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+            <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
               {now.toLocaleString(locale, { month: 'long' })}
             </span>
           </div>
 
           <div className="mt-4 space-y-3 text-sm text-slate-700">
-            <div className="flex justify-between gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
               <span>{walletT.totalTransactions}</span>
               <span className="font-medium whitespace-nowrap tabular-nums">
                 {transactions.length}
               </span>
             </div>
 
-            <div className="flex justify-between gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
               <span>{walletT.avgTransaction}</span>
               <span className="font-medium whitespace-nowrap tabular-nums">
                 {new Intl.NumberFormat(locale, {
@@ -74,7 +75,7 @@ const monthTransactions = transactions.filter((tx: any) => {
               </span>
             </div>
 
-            <div className="flex justify-between gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
               <span>{walletT.largestIncome}</span>
               <span className="text-emerald-600 font-semibold whitespace-nowrap tabular-nums">
                 {new Intl.NumberFormat(locale, {
@@ -89,7 +90,7 @@ const monthTransactions = transactions.filter((tx: any) => {
               </span>
             </div>
 
-            <div className="flex justify-between gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
               <span>{walletT.largestExpense}</span>
               <span className="text-rose-600 font-semibold whitespace-nowrap tabular-nums">
                 {new Intl.NumberFormat(locale, {
@@ -114,9 +115,9 @@ const monthTransactions = transactions.filter((tx: any) => {
             {walletT.walletInsights}
           </h3>
 
-          <div className="grid gap-3 text-sm sm:grid-cols-1">
+          <div className="grid gap-3 sm:grid-cols-2 text-sm">
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>{walletT.availableBalance}</span>
                 <span className="font-semibold tabular-nums">
                   {new Intl.NumberFormat(locale, {
@@ -128,7 +129,7 @@ const monthTransactions = transactions.filter((tx: any) => {
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>{walletT.transactionsToday}</span>
                 <span className="font-semibold tabular-nums">
                   {todayTransactions.length}
@@ -137,7 +138,7 @@ const monthTransactions = transactions.filter((tx: any) => {
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>{walletT.monthlyGrowth}</span>
                 <span className="font-semibold tabular-nums">
                   {monthTransactions.length}

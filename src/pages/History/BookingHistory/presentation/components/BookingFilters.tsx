@@ -13,7 +13,7 @@ import {
 import type { BookingStatus } from "../../../../Booking/AvailableBooking/domain/entities/bookingstatus";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import { useLanguage } from "@/context/LanguageContext";
-import { Label } from "@/components/ui/label";
+// import { Label } from "@/components/ui/label";
 
 type Props = {
   searchTerm: string;
@@ -63,9 +63,9 @@ export function BookingFilters({
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-8">
       {/* Search Input */}
       <div className={`space-y-2 ${isRTL ? "lg:order-3" : ""}`}>
-        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+        {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
           {bookingfilters.searchPlaceholder ?? "Search"}
-        </Label>
+        </Label> */}
         <Input
           type="text"
           placeholder={bookingfilters.searchPlaceholder ?? "Search..."}
@@ -77,9 +77,9 @@ export function BookingFilters({
 
       {/* Status Filter */}
       <div className={`space-y-2 ${isRTL ? "lg:order-2" : ""}`}>
-        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+        {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
           {bookingfilters.statusPlaceholder ?? "Status"}
-        </Label>
+        </Label> */}
         <Select value={statusFilter} onValueChange={(v) => onStatusChange(v as BookingStatus | "all")}>
           <SelectTrigger className="border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white">
             <SelectValue placeholder={bookingfilters.statusPlaceholder ?? "Select status"} />
@@ -97,9 +97,9 @@ export function BookingFilters({
 
       {/* Service Filter */}
       <div className={`space-y-2 ${isRTL ? "lg:order-1" : ""}`}>
-        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+        {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
           {bookingfilters.serviceOptions?.allServices ?? "Category"}
-        </Label>
+        </Label> */}
         <Select value={serviceFilter} onValueChange={onServiceChange}>
           <SelectTrigger className="border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white">
             <SelectValue placeholder={bookingfilters.serviceOptions?.allServices ?? "All Services"} />
@@ -118,9 +118,9 @@ export function BookingFilters({
       {/* Rows Per Page (desktop only) */}
       {!isMobile && (
         <div className={`space-y-2 ${isRTL ? "lg:order-4" : ""}`}>
-          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+          {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
             {translations.common?.limit ?? "Rows"}
-          </Label>
+          </Label> */}
           <Select value={limit.toString()} onValueChange={(v) => onLimitChange(Number(v))}>
             <SelectTrigger className="border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white">
               <SelectValue placeholder="Rows per page" />

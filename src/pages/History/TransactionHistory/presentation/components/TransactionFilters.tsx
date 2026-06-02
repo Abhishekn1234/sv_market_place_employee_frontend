@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { CommonCard } from "@/components/common/CommonCard";
+import { cn } from "@/lib/utils";
 
 interface Props {
   searchTerm: string;
@@ -29,48 +29,43 @@ export default function TransactionFilters({
   const filters = translations.transactionHistory.filters;
 
   return (
-    <CommonCard
-      title={filters.filterStatus}
-      headerAlign={isRTL ? "right" : "left"}
+    <div
+      className={`
+        flex flex-col gap-4
+        md:flex-row md:items-center
+        ${isRTL ? "md:flex-row-reverse" : ""}
+      `}
     >
-      <div
-        className={`
-          flex flex-col gap-4
-          md:flex-row md:items-center
-          ${isRTL ? "md:flex-row-reverse" : ""}
-        `}
-      >
-        {/* SEARCH */}
-        <div className="relative flex-1">
-          <Search
-            className={`
-              absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400
-              ${isRTL ? "right-3" : "left-3"}
-            `}
-          />
-          <Input
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={filters.searchPlaceholder}
-            className={isRTL ? "pr-10" : "pl-10"}
-          />
-        </div>
-
-        {/* STATUS */}
-        <Select value={statusFilter} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-
-          <SelectContent align={isRTL ? "center" : "start"}>
-            {Object.entries(filters.statusOptions).map(([key, label]) => (
-              <SelectItem key={key} value={key}>
-                {String(label)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* SEARCH */}
+      <div className="relative flex-1">
+        <Search
+          className={`
+            absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400
+            ${isRTL ? "right-3" : "left-3"}
+          `}
+        />
+        <Input
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={filters.searchPlaceholder}
+          className={cn("bg-white border-slate-200", isRTL ? "pr-10" : "pl-10")}
+        />
       </div>
-    </CommonCard>
+
+      {/* STATUS */}
+      <Select value={statusFilter} onValueChange={onStatusChange}>
+        <SelectTrigger className="w-full md:w-[200px] bg-white border-slate-200">
+          <SelectValue placeholder={filters.filterStatus} />
+        </SelectTrigger>
+
+        <SelectContent align={isRTL ? "end" : "start"}>
+          {Object.entries(filters.statusOptions).map(([key, label]) => (
+            <SelectItem key={key} value={key}>
+              {String(label)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }

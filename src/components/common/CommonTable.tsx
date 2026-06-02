@@ -172,11 +172,13 @@ export function CommonTable<T>({
       </div>
 
       {/* PAGINATION */}
-    {/* PAGINATION */}
 {showPagination && (
   <Pagination
-    className="mt-6 flex w-full justify-end"
-    dir="ltr"
+    className={cn(
+      "mt-6 flex w-full",
+      isRTL ? "justify-start" : "justify-end"
+    )}
+    dir={isRTL ? "rtl" : "ltr"}
   >
     {/* Prev */}
     <PaginationPrevious

@@ -156,7 +156,7 @@ export function WalletMain({
       {/* QUICK ACTIONS */}
       <CommonCard>
         <div className="p-4 sm:p-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-lg sm:text-xl font-semibold">
                 {walletT.quickActions}
@@ -165,7 +165,7 @@ export function WalletMain({
                 {t('wallet.manageFunds')}
               </p>
             </div>
-            <div className="inline-flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <Button variant="secondary" size="sm" className="w-full sm:w-auto">
                 <ArrowUpRight /> {walletT.addFunds}
               </Button>
@@ -179,7 +179,7 @@ export function WalletMain({
 
       {/* TRANSACTIONS */}
       <CommonCard>
-        <div className="p-4 sm:p-6">
+        <div className="p-4 sm:p-6 overflow-hidden">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-lg font-semibold">
               <Receipt className="h-5 w-5" />
@@ -195,9 +195,9 @@ export function WalletMain({
               visibleTransactions.map((txn: any) => (
                 <div
                   key={txn.id}
-                  className="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-slate-100 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-slate-100 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="min-w-0 flex items-start gap-3">
                     <div
                       className={`mt-1 flex h-11 w-11 items-center justify-center rounded-2xl ${
                         txn.type === "credit"
@@ -211,18 +211,18 @@ export function WalletMain({
                         <ArrowDownRight className="h-5 w-5" />
                       )}
                     </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900 truncate">
                         {txn.description}
                       </p>
-                      <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                         <Calendar className="h-4 w-4" />
-                        {txn.date}
+                        <span>{txn.date}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-right">
+                  <div className="text-right sm:text-right">
                     <p
                       className={`text-sm font-semibold ${
                         txn.type === "credit"

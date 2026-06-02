@@ -325,6 +325,7 @@
 
     "filters": {
       "filterStatus": "تصفية حسب الحالة",
+      "searchPlaceholder": "ابحث في المعاملات...",
       "statusOptions": {
         "all": "جميع الحالات",
         "completed": "مكتمل",

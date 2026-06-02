@@ -329,6 +329,7 @@
     },
     "filters": {
       "filterStatus": "Filter by status",
+      "searchPlaceholder": "Search transactions...",
       "statusOptions": {
         "all": "All Status",
         "completed": "Completed",
