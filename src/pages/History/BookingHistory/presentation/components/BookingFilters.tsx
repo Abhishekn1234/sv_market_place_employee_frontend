@@ -127,17 +127,22 @@ export function BookingFilters({
 
       {/* Sort Filter */}
       <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-4" : ""}`}>
-        <Select value={sort} onValueChange={onSortChange}>
-          <SelectTrigger className="border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white">
-            <SelectValue placeholder={t('common.sort') ?? "Sort by"} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="schedule.startDateTime:desc">{t('common.newest') ?? "Newest"}</SelectItem>
-            <SelectItem value="schedule.startDateTime:asc">{t('common.oldest') ?? "Oldest"}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+  <Select value={sort} onValueChange={onSortChange}>
+    <SelectTrigger className="border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm transition-all focus:border-blue-500 focus:bg-white">
+      <SelectValue placeholder={t("common.sort") ?? "Sort by"} />
+    </SelectTrigger>
 
+    <SelectContent>
+      <SelectItem value="createdAt:desc">
+        {t("common.newest") ?? "Newest"}
+      </SelectItem>
+
+      <SelectItem value="createdAt:asc">
+        {t("common.oldest") ?? "Oldest"}
+      </SelectItem>
+    </SelectContent>
+  </Select>
+</div>
       {/* Rows Per Page (desktop only) */}
       {!isMobile && (
         <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-5" : ""}`}>

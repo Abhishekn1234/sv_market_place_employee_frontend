@@ -92,8 +92,8 @@ export default function TransactionFilters({
         <SelectContent align={isRTL ? "end" : "start"}>
           <SelectItem value="createdAt:desc">{t('common.newest') ?? "Newest"}</SelectItem>
           <SelectItem value="createdAt:asc">{t('common.oldest') ?? "Oldest"}</SelectItem>
-          <SelectItem value="amount:desc">{t('common.amountHigh') ?? "Amount: High to Low"}</SelectItem>
-          <SelectItem value="amount:asc">{t('common.amountLow') ?? "Amount: Low to High"}</SelectItem>
+          {/* <SelectItem value="amount:desc">{t('common.amountHigh') ?? "Amount: High to Low"}</SelectItem>
+          <SelectItem value="amount:asc">{t('common.amountLow') ?? "Amount: Low to High"}</SelectItem> */}
         </SelectContent>
       </Select>
 

@@ -14,12 +14,15 @@ import { useDebounce } from "@/utils/usedebouncer";
 
 type TransactionStatus = "all" | "completed" | "pending" | "failed";
 
+const DEFAULT_SORT = "createdAt:desc";
+const DEFAULT_LIMIT = 10;
+
 export default function TransactionHistory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<TransactionStatus>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [sort, setSort] = useState("createdAt:desc");
-  const [limit, setLimit] = useState(10);
+  const [sort, setSort] = useState(DEFAULT_SORT);
+  const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [isMobile, setIsMobile] = useState(false);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -41,6 +44,11 @@ export default function TransactionHistory() {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const debouncedStatusFilter = useDebounce(statusFilter, 300);
+useEffect(() => {
+  // Reset to first page whenever criteria changes. 
+  // We no longer clear allTransactions here to allow instant local filtering.
+  setCurrentPage(1);
+}, [debouncedSearchTerm, debouncedStatusFilter, sort, limit, isMobile]);
 
   // Use real API with pagination
   const { data: transactionsResponse, isLoading, isError } = useWalletTransactions({
@@ -64,7 +72,7 @@ export default function TransactionHistory() {
       paymentMethod: txn.type === 'CREDIT' ? 'Wallet Credit' : 'Wallet Debit',
       description: txn.note || txn.source.replace(/_/g, ' '),
     }));
-  }, [transactionsResponse]);
+  }, [transactionsResponse?.data]);
 
   // Accumulate transactions on mobile, replace on desktop/search changes
   useEffect(() => {
@@ -72,15 +80,15 @@ export default function TransactionHistory() {
       if (isMobile && currentPage > 1) {
         setIsLoadingMore(false);
         setAllTransactions((prev) => {
-          const existingIds = new Set(prev.map((t) => t.id));
-          const newTransactions = transformedTransactions.filter((t) => !existingIds.has(t.id));
+          const existingIds = new Set(prev.map((t) => String(t.id)));
+          const newTransactions = transformedTransactions.filter((t) => !existingIds.has(String(t.id)));
           return [...prev, ...newTransactions];
         });
       } else {
         setAllTransactions(transformedTransactions);
       }
     }
-  }, [transformedTransactions, currentPage, isMobile, transactionsResponse?.data]);
+  }, [transformedTransactions, currentPage, isMobile]);
 
   // Client-side filtering for additional filters
   const filteredTransactions = useMemo(() => {
@@ -88,18 +96,15 @@ export default function TransactionHistory() {
       const search = searchTerm.toLowerCase();
       const matchesSearch =
         !searchTerm ||
-        tx.id.toLowerCase().includes(search) ||
+        String(tx.id).toLowerCase().includes(search) ||
         tx.description.toLowerCase().includes(search) ||
         tx.type.toLowerCase().includes(search) ||
-        tx.status.toLowerCase().includes(search) ||
-        tx.paymentMethod.toLowerCase().includes(search);
+        String(tx.status).toLowerCase().includes(search) ||
+        String(tx.paymentMethod).toLowerCase().includes(search);
 
-      const matchesStatus =
-        statusFilter === "all" || tx.status === statusFilter; // This will now work correctly with actual API status
-
-      return matchesSearch && matchesStatus;
+      return matchesSearch;
     });
-  }, [allTransactions, searchTerm, statusFilter]);
+  }, [allTransactions, searchTerm]);
 
   // Handle load more on mobile
   const handleLoadMore = () => {
@@ -110,18 +115,14 @@ export default function TransactionHistory() {
   const handleClearFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
-    setSort("createdAt:desc");
+    setSort(DEFAULT_SORT);
+    setLimit(DEFAULT_LIMIT);
     setCurrentPage(1);
   };
 
-  // Reset pagination when search/filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter, limit, sort]);
-
   const isFilterActive = useMemo(() => {
-    return searchTerm !== "" || statusFilter !== "all" || sort !== "createdAt:desc";
-  }, [searchTerm, statusFilter, sort]);
+    return searchTerm !== "" || statusFilter !== "all" || sort !== DEFAULT_SORT || limit !== DEFAULT_LIMIT;
+  }, [searchTerm, statusFilter, sort, limit]);
 
   // Infinite scroll observer for mobile
   useEffect(() => {

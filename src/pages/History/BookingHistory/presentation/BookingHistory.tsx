@@ -30,11 +30,13 @@ export default function BookingHistory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">("all");
   const [serviceFilter, setServiceFilter] = useState<string>("all");
-  const [sort, setSort] = useState("schedule.startDateTime:desc");
+  const DEFAULT_SORT = "createdAt:desc"; // Already defined
+  const DEFAULT_LIMIT = 5; // Define DEFAULT_LIMIT for BookingHistory
+  const [sort, setSort] = useState(DEFAULT_SORT);
 
   const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(DEFAULT_LIMIT);
 
   const [isMobile, setIsMobile] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -60,7 +62,19 @@ export default function BookingHistory() {
   const pagination = data?.pagination;
 
   const [bookings, setBookings] = useState<BookingHistory[]>([]);
+useEffect(() => {
+  setPage(1);
 
+  if (isMobile) {
+    setBookings([]);
+  }
+}, [
+  debouncedSearchTerm,
+  statusFilter,
+  serviceFilter,
+  sort,
+  isMobile,
+]);
   useEffect(() => {
     if (data?.data) {
       if (isMobile && debouncedPage > 1) {
@@ -114,18 +128,25 @@ export default function BookingHistory() {
   };
 
   const isFilterActive = useMemo(() => {
-    return searchTerm !== "" || statusFilter !== "all" || serviceFilter !== "all" || sort !== "schedule.startDateTime:desc";
-  }, [searchTerm, statusFilter, serviceFilter, sort]);
+  return (
+    searchTerm !== "" ||
+    statusFilter !== "all" ||
+    serviceFilter !== "all" ||
+    sort !== DEFAULT_SORT ||
+    limit !== DEFAULT_LIMIT // Add limit to isFilterActive check
+  );
+}, [searchTerm, statusFilter, serviceFilter, sort, limit]);
 
 
 
   const handleClearFilters = () => {
-    setSearchTerm("");
-    setStatusFilter("all");
-    setServiceFilter("all");
-    setSort("schedule.startDateTime:desc");
-    setPage(1);
-  };
+  setSearchTerm("");
+  setStatusFilter("all");
+  setServiceFilter("all");
+  setSort(DEFAULT_SORT);
+  setPage(1);
+  setLimit(DEFAULT_LIMIT); // Reset limit to DEFAULT_LIMIT
+};
 
   const handleIgnore = (bookingId: string) => {
     try {
