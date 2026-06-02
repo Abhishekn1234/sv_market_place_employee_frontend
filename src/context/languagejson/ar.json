@@ -21,10 +21,18 @@
     "minutes": "دقائق",
     "close": "إغلاق",
     "loading": "جارٍ التحميل...",
-
+    "clear": "مسح",
     "confirm": "تأكيد",
     "start": "ابدأ",
+    
+    "sort": "فرز حسب",
+    "newest": "الأحدث",
+    "oldest": "الأقدم",
+    "amountHigh": "المبلغ: من الأعلى إلى الأقل",
+    "amountLow": "المبلغ: من الأقل إلى الأعلى",
     "complete": "إكمال",
+    "previous": "السابق",
+    "next": "التالي",
     "chat": "دردشة"
   },
    "availableWork": {

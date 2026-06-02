@@ -6,7 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,9 @@ interface Props {
   limit: number;
   onLimitChange: (v: number) => void;
   isMobile: boolean;
+  sort: string;
+  onSortChange: (v: string) => void;
+  onClear: () => void;
 }
 
 export default function TransactionFilters({
@@ -30,8 +34,11 @@ export default function TransactionFilters({
   limit,
   onLimitChange,
   isMobile,
+  sort,
+  onSortChange,
+  onClear,
 }: Props) {
-  const { translations, language } = useLanguage();
+  const { translations, language, t } = useLanguage();
   const isRTL = language === "AR";
 
   const filters = translations.transactionHistory.filters;
@@ -75,6 +82,19 @@ export default function TransactionFilters({
         </SelectContent>
       </Select>
 
+      {/* SORT */}
+      <Select value={sort} onValueChange={onSortChange}>
+        <SelectTrigger className="w-full md:w-[180px] bg-white border-slate-200 text-xs sm:text-sm py-2 sm:py-2.5 h-auto">
+          <SelectValue placeholder={t('common.sort') ?? "Sort by"} />
+        </SelectTrigger>
+        <SelectContent align={isRTL ? "end" : "start"}>
+          <SelectItem value="createdAt:desc">{t('common.newest') ?? "Newest"}</SelectItem>
+          <SelectItem value="createdAt:asc">{t('common.oldest') ?? "Oldest"}</SelectItem>
+          <SelectItem value="amount:desc">{t('common.amountHigh') ?? "Amount: High to Low"}</SelectItem>
+          <SelectItem value="amount:asc">{t('common.amountLow') ?? "Amount: Low to High"}</SelectItem>
+        </SelectContent>
+      </Select>
+
       {/* LIMIT - Desktop only */}
       {!isMobile && (
         <Select value={limit.toString()} onValueChange={(v) => onLimitChange(Number(v))}>
@@ -90,6 +110,16 @@ export default function TransactionFilters({
           </SelectContent>
         </Select>
       )}
+
+      {/* CLEAR BUTTON */}
+      <Button
+        variant="outline"
+        onClick={onClear}
+        className="w-full md:w-auto bg-white border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors gap-2 text-xs sm:text-sm py-2 sm:py-2.5 h-auto"
+      >
+        <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        {translations.common?.clear ?? t('common.clear') ?? "Clear"}
+      </Button>
     </div>
   );
 }

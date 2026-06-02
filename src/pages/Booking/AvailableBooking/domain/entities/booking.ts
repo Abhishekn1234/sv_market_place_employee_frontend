@@ -9,6 +9,7 @@ import type { Bookingschedule } from "./bookingschedule";
 export interface Booking {
   id: string;
    _id?:string;
+   bookingCode?:string;
   clientName: string;
   startDate?:Date;
   clientEmail: string;

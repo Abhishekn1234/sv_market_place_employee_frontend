@@ -92,6 +92,8 @@ export default function BookingHistory() {
       const matchesSearch =
         b.customer?.fullName?.toLowerCase().includes(search) ||
         b._id?.toLowerCase().includes(search) ||
+        b.booking.bookingCode?.toLowerCase().includes(search) ||
+        b.bookingId?.toLowerCase().includes(search) ||
         (typeof b.service === "object" && b.service?.name?.toLowerCase().includes(search)) ||
         (typeof b.service === "string" && String(b.service).toLowerCase().includes(search));
 
@@ -108,6 +110,13 @@ export default function BookingHistory() {
 
   const toggleExpanded = (id: string) => {
     setExpandedBooking((prev) => (prev === id ? null : id));
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setServiceFilter("all");
+    setPage(1);
   };
 
   const handleIgnore = (bookingId: string) => {
@@ -173,6 +182,7 @@ export default function BookingHistory() {
                 serviceFilter={serviceFilter}
                 onServiceChange={setServiceFilter}
                 limit={limit}
+                onClear={handleClearFilters}
                 onLimitChange={(val: number) => {
                   setLimit(val);
                   setPage(1);
@@ -218,7 +228,7 @@ export default function BookingHistory() {
                   data={filteredBookings}
                   keyExtractor={(b) => b._id}
                   currentPage={pagination?.currentPage ?? 1}
-                  totalPages={pagination?.totalPages as any}
+                  totalPages={filteredBookings.length <= 1 ? 1 : (pagination?.totalPages ?? 1)}
                   onPageChange={setPage}
                   isRTL={isRTL}
                   expandedRowKey={expandedBooking}

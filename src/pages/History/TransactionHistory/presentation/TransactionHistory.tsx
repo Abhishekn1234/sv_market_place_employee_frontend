@@ -10,6 +10,7 @@ import TransactionTable from "./components/TransactionTable";
 
 import type { Transaction } from "../domain/entities/transaction";
 import CommonSpinner from "@/components/common/CommonSpinner";
+import { useDebounce } from "@/utils/usedebouncer";
 
 type TransactionStatus = "all" | "completed" | "pending" | "failed";
 
@@ -17,6 +18,7 @@ export default function TransactionHistory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<TransactionStatus>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [sort, setSort] = useState("createdAt:desc");
   const [limit, setLimit] = useState(10);
   const [isMobile, setIsMobile] = useState(false);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
@@ -37,13 +39,16 @@ export default function TransactionHistory() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedStatusFilter = useDebounce(statusFilter, 300);
+
   // Use real API with pagination
   const { data: transactionsResponse, isLoading, isError } = useWalletTransactions({
     page: currentPage,
     limit: isMobile ? 20 : limit,
-    sort: "createdAt:desc",
-    search: searchTerm || undefined,
-    status: statusFilter === "all" ? undefined : statusFilter,
+    sort: sort,
+    search: debouncedSearchTerm || undefined,
+    status: debouncedStatusFilter === "all" ? undefined : debouncedStatusFilter,
   });
 
   // Transform API transactions to component format
@@ -63,26 +68,31 @@ export default function TransactionHistory() {
 
   // Accumulate transactions on mobile, replace on desktop/search changes
   useEffect(() => {
-    if (isMobile && currentPage > 1) {
-      setIsLoadingMore(false);
-      setAllTransactions((prev) => {
-        const existingIds = new Set(prev.map((t) => t.id));
-        const newTransactions = transformedTransactions.filter((t) => !existingIds.has(t.id));
-        return [...prev, ...newTransactions];
-      });
-    } else {
-      setAllTransactions(transformedTransactions);
+    if (transactionsResponse?.data) {
+      if (isMobile && currentPage > 1) {
+        setIsLoadingMore(false);
+        setAllTransactions((prev) => {
+          const existingIds = new Set(prev.map((t) => t.id));
+          const newTransactions = transformedTransactions.filter((t) => !existingIds.has(t.id));
+          return [...prev, ...newTransactions];
+        });
+      } else {
+        setAllTransactions(transformedTransactions);
+      }
     }
-  }, [transformedTransactions, currentPage, isMobile]);
+  }, [transformedTransactions, currentPage, isMobile, transactionsResponse?.data]);
 
   // Client-side filtering for additional filters
   const filteredTransactions = useMemo(() => {
     return allTransactions.filter((tx) => {
+      const search = searchTerm.toLowerCase();
       const matchesSearch =
         !searchTerm ||
-        tx.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tx.type.toLowerCase().includes(searchTerm.toLowerCase());
+        tx.id.toLowerCase().includes(search) ||
+        tx.description.toLowerCase().includes(search) ||
+        tx.type.toLowerCase().includes(search) ||
+        tx.status.toLowerCase().includes(search) ||
+        tx.paymentMethod.toLowerCase().includes(search);
 
       const matchesStatus =
         statusFilter === "all" || tx.status === statusFilter; // This will now work correctly with actual API status
@@ -97,10 +107,16 @@ export default function TransactionHistory() {
     setCurrentPage((prev) => prev + 1);
   };
 
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setSort("createdAt:desc");
+    setCurrentPage(1);
+  };
+
   // Reset pagination when search/filter changes
   useEffect(() => {
     setCurrentPage(1);
-    setAllTransactions([]);
   }, [searchTerm, statusFilter, limit]);
 
   // Infinite scroll observer for mobile
@@ -151,14 +167,14 @@ export default function TransactionHistory() {
         </div>
 
       
-        {isLoading && (
+        {isLoading && allTransactions.length === 0 && (
           <div className="flex justify-center py-6 sm:py-8">
             <CommonSpinner/>
           </div>
         )}
 
         {/* Error State */}
-        {isError && (
+        {isError && allTransactions.length === 0 && (
           <div className="text-center py-6 sm:py-8">
             <div className="text-xs sm:text-sm text-rose-500">
               Failed to load transactions. Please try again.
@@ -167,44 +183,41 @@ export default function TransactionHistory() {
         )}
 
         {/* SUMMARY */}
-        {!isLoading && !isError && <TransactionSummary />}
+        <TransactionSummary />
 
         {/* FILTERS */}
-        {!isLoading && !isError && (
-          <TransactionFilters
-            searchTerm={searchTerm}
-            statusFilter={statusFilter}
-            onSearchChange={setSearchTerm}
-            onStatusChange={setStatusFilter}
-            limit={limit}
-            onLimitChange={(val) => {
-              setLimit(val);
-              setCurrentPage(1);
-            }}
-            isMobile={isMobile}
-          />
-        )}
+        <TransactionFilters
+          searchTerm={searchTerm}
+          statusFilter={statusFilter}
+          onSearchChange={setSearchTerm}
+          onStatusChange={setStatusFilter}
+            sort={sort}
+            onSortChange={setSort}
+          limit={limit}
+          onClear={handleClearFilters}
+          onLimitChange={(val) => {
+            setLimit(val);
+            setCurrentPage(1);
+          }}
+          isMobile={isMobile}
+        />
 
         {/* TABLE */}
-        {!isLoading && !isError && (
-          <>
-            <TransactionTable
-              transactions={filteredTransactions}
-              currentPage={isMobile ? 1 : currentPage}
-              onPageChange={isMobile ? () => {} : setCurrentPage}
-              totalPages={isMobile ? 1 : (transactionsResponse?.pagination?.totalPages || 1)}
-              isMobile={isMobile}
-            />
+        <TransactionTable
+          transactions={filteredTransactions}
+          currentPage={isMobile ? 1 : currentPage}
+          onPageChange={isMobile ? () => {} : setCurrentPage}
+          totalPages={isMobile || filteredTransactions.length <= 1 ? 1 : (transactionsResponse?.pagination?.totalPages ?? 1)}
+          isMobile={isMobile}
+        />
 
-            {/* MOBILE INFINITE SCROLL TARGET */}
-            {isMobile && (
-              <div ref={observerTarget} className="flex flex-col items-center justify-center gap-3 py-8 min-h-[100px]">
-                {((transactionsResponse?.pagination?.currentPage || 1) < (transactionsResponse?.pagination?.totalPages || 1) || isLoadingMore) && (
-                  <CommonSpinner />
-                )}
-              </div>
+        {/* MOBILE INFINITE SCROLL TARGET */}
+        {isMobile && (
+          <div ref={observerTarget} className="flex flex-col items-center justify-center gap-3 py-8 min-h-[100px]">
+            {((transactionsResponse?.pagination?.currentPage || 1) < (transactionsResponse?.pagination?.totalPages || 1) || isLoadingMore) && (
+              <CommonSpinner />
             )}
-          </>
+          </div>
         )}
       </div>
     </div>

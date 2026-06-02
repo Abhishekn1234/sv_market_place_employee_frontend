@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
+import { RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -25,6 +27,7 @@ type Props = {
   onLimitChange: (value: number) => void;
   serviceFilter: string;
   onServiceChange: (value: string) => void;
+  onClear: () => void;
 
   services: ServiceCategory[];
   statusConfig: Record<string, { label: string }>;
@@ -39,12 +42,13 @@ export function BookingFilters({
   serviceFilter,
   onServiceChange,
   services,
+  onClear,
   limit,
   onLimitChange,
   statusConfig,
   isMobile,
 }: Props) {
-  const { translations, language } = useLanguage();
+  const { translations, language, t } = useLanguage();
   const isRTL = language === "AR";
   const bookingfilters = translations.bookingHistory;
 
@@ -60,7 +64,7 @@ export function BookingFilters({
   }, [statusConfig]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8">
       {/* Search Input */}
       <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-3" : ""}`}>
         {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
@@ -135,6 +139,19 @@ export function BookingFilters({
           </Select>
         </div>
       )}
+
+      {/* Clear Button */}
+      <div className={`flex items-end ${isRTL ? "lg:order-5" : ""}`}>
+        <Button
+          variant="outline"
+          size="default"
+          onClick={onClear}
+          className="w-full bg-white border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors gap-2 h-10"
+        >
+          <RotateCcw className="w-4 h-4" />
+          {translations.common?.clear ?? t('common.clear') ?? "Clear"}
+        </Button>
+      </div>
     </div>
   );
 }

@@ -16,6 +16,7 @@ export interface BookingHistory{
   workerId: string;
   bookingId: string;
   status: BookingStatus;
+  bookingCode?: string;
   assignedAt: string;
   startedAt: string;
   completedAt: string;
