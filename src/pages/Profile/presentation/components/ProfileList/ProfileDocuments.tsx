@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CommonCard } from "@/components/common/CommonCard";
 import { useRef } from "react";
+import { FileUp, FileCheck, FileWarning } from "lucide-react";
 import { FilePreviewWithName } from "../../../presentation/components/FilePreview/FilePreviewwithName";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -24,58 +25,56 @@ export function ProfileDocuments({
   const { theme } = useTheme();
 
   return (
-    <CommonCard
-      title="Documents"
-      contentClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-8"
-    >
+    <CommonCard title="Documents">
+      {/* ✅ Explicit grid wrapper inside the card content area */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {fileFields.map(({ label, key }) => {
         const fileUrl = fileUrls[key];
         const file = files[key];
+        const hasFile = !!(file || fileUrl);
 
         return (
           <div
             key={key}
             className={`
-              relative
-              border rounded-lg
-              p-3 sm:p-4 md:p-5
-              flex flex-col items-center justify-between
-              shadow-sm
-              min-h-[220px] sm:min-h-[260px] md:min-h-[300px]
+              relative group
+              border rounded-2xl
+              p-5
+              flex flex-col items-center
+              transition-all duration-200
+              hover:border-blue-300 hover:shadow-md
+              min-h-[280px] sm:min-h-[320px]
               ${
                 theme === "dark"
-                  ? "bg-gray-900 border-gray-700"
-                  : "bg-white border-gray-200"
+                  ? "bg-slate-950/40 border-slate-800"
+                  : "bg-slate-50/50 border-slate-200"
               }
             `}
           >
-            {/* Title */}
+            {/* Title - Premium Style */}
             <p
-              className={`text-sm sm:text-base font-medium mb-2 text-center ${
-                theme === "dark" ? "text-white" : "text-gray-900"
+              className={`text-[10px] font-bold uppercase tracking-widest mb-6 ${
+                theme === "dark" ? "text-slate-400" : "text-slate-500"
               }`}
             >
               {label}
             </p>
 
-            {/* Preview */}
-            {file || fileUrl ? (
-              <div className="flex-1 w-full flex items-center justify-center overflow-hidden">
+            {/* Preview Area */}
+            <div className="flex-1 w-full flex items-center justify-center rounded-xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 mb-4 shadow-inner">
+              {hasFile ? (
                 <FilePreviewWithName file={file} url={fileUrl} />
-              </div>
-            ) : (
-              <div
-                className={`flex-1 flex items-center justify-center text-xs sm:text-sm ${
-                  theme === "dark" ? "text-gray-300" : "text-gray-400"
-                }`}
-              >
-                No file uploaded
-              </div>
-            )}
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-slate-400">
+                  <FileWarning className="h-8 w-8 opacity-20" />
+                  <span className="text-[10px] font-medium italic">No document uploaded</span>
+                </div>
+              )}
+            </div>
 
-            {/* Upload */}
+            {/* Actions */}
             {isEditing && (
-              <>
+              <div className="w-full">
                 <Input
                   ref={(el) => {
                     inputRefs.current[key] = el;
@@ -90,18 +89,31 @@ export function ProfileDocuments({
 
                 <Button
                   type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-3 w-full"
+                  variant={hasFile ? "secondary" : "outline"}
+                  size="default"
+                  className={`w-full gap-2 font-semibold cursor-pointer ${
+                    !hasFile ? "border-slate-300 text-slate-600 hover:bg-white" : ""
+                  }`}
                   onClick={() => inputRefs.current[key]?.click()}
                 >
-                  {file || fileUrl ? "Change File" : "Upload"}
+                  {hasFile ? (
+                    <>
+                      <FileCheck className="h-4 w-4" />
+                      Change Document
+                    </>
+                  ) : (
+                    <>
+                      <FileUp className="h-4 w-4" />
+                      Upload {label}
+                    </>
+                  )}
                 </Button>
-              </>
+              </div>
             )}
           </div>
         );
       })}
+      </div>
     </CommonCard>
   );
 }

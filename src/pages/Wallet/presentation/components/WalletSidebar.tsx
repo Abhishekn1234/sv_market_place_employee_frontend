@@ -18,18 +18,15 @@ export function WalletSidebar({
   totalDebit,
   wallet,
 }: Props) {
-  console.log(transactions);
-  const { translations, language } = useLanguage();
+  const { translations } = useLanguage();
   const walletT = translations.wallet;
-  const isRTL = language === "AR";
   const currencyLabel = wallet?.currency ?? "USD";
-  console.log(isRTL);
   const now = new Date();
 
-const startOfToday = new Date(now);
-startOfToday.setHours(0, 0, 0, 0);
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
 
-const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
 // TODAY transactions
 const todayTransactions = transactions.filter((tx: any) => {
@@ -47,11 +44,16 @@ const monthTransactions = transactions.filter((tx: any) => {
       {/* Monthly Summary */}
       <CommonCard>
         <div className="p-4 sm:p-6">
-          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
-            {walletT.monthlySummary}
-          </h3>
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-lg sm:text-xl font-semibold">
+              {walletT.monthlySummary}
+            </h3>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+              {now.toLocaleString("en-US", { month: "long" })}
+            </span>
+          </div>
 
-          <div className="space-y-2 text-sm">
+          <div className="mt-4 space-y-3 text-sm text-slate-700">
             <div className="flex justify-between gap-3">
               <span>{walletT.totalTransactions}</span>
               <span className="font-medium whitespace-nowrap tabular-nums">
@@ -64,16 +66,14 @@ const monthTransactions = transactions.filter((tx: any) => {
               <span className="font-medium whitespace-nowrap tabular-nums">
                 {currencyLabel}
                 {transactions.length
-                  ? Math.round(
-                      (totalCredit + totalDebit) / transactions.length
-                    )
+                  ? Math.round((totalCredit + totalDebit) / transactions.length)
                   : 0}
               </span>
             </div>
 
             <div className="flex justify-between gap-3">
               <span>{walletT.largestIncome}</span>
-              <span className="text-green-600 font-medium whitespace-nowrap tabular-nums">
+              <span className="text-emerald-600 font-semibold whitespace-nowrap tabular-nums">
                 {currencyLabel}
                 {Math.max(
                   0,
@@ -86,7 +86,7 @@ const monthTransactions = transactions.filter((tx: any) => {
 
             <div className="flex justify-between gap-3">
               <span>{walletT.largestExpense}</span>
-              <span className="text-rose-600 font-medium whitespace-nowrap tabular-nums">
+              <span className="text-rose-600 font-semibold whitespace-nowrap tabular-nums">
                 {currencyLabel}
                 {Math.max(
                   0,
@@ -101,32 +101,38 @@ const monthTransactions = transactions.filter((tx: any) => {
       </CommonCard>
 
       {/* Wallet Insights */}
-      <CommonCard className=" text-black">
+      <CommonCard className="text-slate-900">
         <div className="p-4 sm:p-6">
-          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4">
             {walletT.walletInsights}
           </h3>
 
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between gap-3">
-              <span>{walletT.availableBalance}</span>
-              <span className="font-medium whitespace-nowrap tabular-nums">
-                {currencyLabel}{totalBalance.toLocaleString()}
-              </span>
+          <div className="grid gap-3 text-sm sm:grid-cols-1">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span>{walletT.availableBalance}</span>
+                <span className="font-semibold tabular-nums">
+                  {currencyLabel}{totalBalance.toLocaleString()}
+                </span>
+              </div>
             </div>
 
-                      <div className="flex justify-between gap-3">
-              <span>{walletT.transactionsToday}</span>
-              <span className="font-medium whitespace-nowrap">
-                {todayTransactions.length}
-              </span>
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span>{walletT.transactionsToday}</span>
+                <span className="font-semibold tabular-nums">
+                  {todayTransactions.length}
+                </span>
+              </div>
             </div>
 
-            <div className="flex justify-between gap-3">
-              <span>{walletT.monthlyGrowth}</span>
-              <span className="font-medium whitespace-nowrap">
-                {monthTransactions.length}
-              </span>
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span>{walletT.monthlyGrowth}</span>
+                <span className="font-semibold tabular-nums">
+                  {monthTransactions.length}
+                </span>
+              </div>
             </div>
           </div>
         </div>

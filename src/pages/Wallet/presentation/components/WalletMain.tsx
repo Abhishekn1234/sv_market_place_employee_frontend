@@ -1,12 +1,11 @@
 "use client";
 
 import {
-  CreditCard,
   ArrowUpRight,
   ArrowDownRight,
-  TrendingUp,
   Calendar,
   Receipt,
+  Wallet,
 } from "lucide-react";
 
 import { useLanguage } from "@/context/LanguageContext";
@@ -33,12 +32,30 @@ export function WalletMain({
   totalDebit,
   wallet,
 }: Props) {
-  const { translations,  } = useLanguage();
+  const { translations } = useLanguage();
   const walletT = translations.wallet;
-  // const isRTL = language === "AR";
 
   const currencyLabel = wallet?.currency ?? "USD";
-  const formattedBalance = `${totalBalance.toLocaleString()} ${currencyLabel}`;
+  const formattedBalance = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currencyLabel,
+    maximumFractionDigits: 2,
+  }).format(totalBalance);
+  const formattedCredit = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currencyLabel,
+    maximumFractionDigits: 2,
+  }).format(totalCredit);
+  const formattedDebit = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currencyLabel,
+    maximumFractionDigits: 2,
+  }).format(totalDebit);
+  const formattedNet = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currencyLabel,
+    maximumFractionDigits: 2,
+  }).format(totalCredit - totalDebit);
 
   const updatedAt = wallet?.updatedAt
     ? new Date(wallet.updatedAt).toLocaleString()
@@ -79,73 +96,81 @@ export function WalletMain({
     <div className="lg:col-span-2 space-y-4 sm:space-y-6">
 
       {/* BALANCE CARD */}
-      <CommonCard className="text-black">
-        <div className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-            <div>
-              <p className="text-sm">{walletT.totalBalance}</p>
-              <p className="text-2xl sm:text-4xl font-bold mt-1 sm:mt-2">
+      <CommonCard className="overflow-hidden text-white">
+        <div className="rounded-[28px] bg-linear-to-r from-slate-900 via-violet-900 to-blue-700 p-5 sm:p-7">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm uppercase tracking-[0.24em] text-slate-300">
+                {walletT.totalBalance}
+              </p>
+              <p className="mt-3 text-3xl sm:text-4xl font-bold leading-tight">
                 {formattedBalance}
               </p>
-
-              <div className="flex flex-col gap-2 mt-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="text-black text-sm">
-                    {walletT.monthlyGrowth}
-                  </span>
-                </div>
-
-                {updatedAt && (
-                  <span className="text-black text-xs sm:text-sm">
-                    Updated: {updatedAt}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <CreditCard className="w-10 h-10 sm:w-12 sm:h-12 opacity-80" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4 sm:mt-6">
-            <div className="bg-white/10 rounded-xl p-3 sm:p-4">
-              <p className="text-black text-xs sm:text-sm">{walletT.income}</p>
-              <p className="text-lg font-semibold text-black">
-                {totalCredit.toLocaleString()}
+              <p className="mt-3 text-sm text-slate-200">
+                {walletT.monthlyGrowth}
               </p>
             </div>
 
-            <div className="bg-white/10 rounded-xl p-3 sm:p-4">
-              <p className="text-black text-xs sm:text-sm">{walletT.expenses}</p>
-              <p className="text-lg font-semibold text-black">
-                {totalDebit.toLocaleString()}
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-white/10 text-slate-100 shadow-lg shadow-slate-900/20">
+              <Wallet className="h-7 w-7" />
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-slate-200">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
+                {walletT.income}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                {formattedCredit}
+              </p>
+            </div>
+            <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-slate-200">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
+                {walletT.expenses}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                {formattedDebit}
+              </p>
+            </div>
+            <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-slate-200">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
+                Net
+              </p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                {formattedNet}
               </p>
             </div>
           </div>
+
+          {updatedAt && (
+            <p className="mt-5 text-sm text-slate-300">
+              Updated: {updatedAt}
+            </p>
+          )}
         </div>
       </CommonCard>
 
-      {/* QUICK ACTIONS (UNCHANGED) */}
+      {/* QUICK ACTIONS */}
       <CommonCard>
         <div className="p-4 sm:p-6">
-          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
-            {walletT.quickActions}
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Button className="flex gap-3 p-4 border rounded-xl text-left">
-              <ArrowUpRight className="text-green-600" />
-              <div>
-                <p className="font-semibold">{walletT.addFunds}</p>
-              </div>
-            </Button>
-
-            <Button className="flex gap-3 p-4 border rounded-xl text-left">
-              <ArrowDownRight className="text-rose-600" />
-              <div>
-                <p className="font-semibold">{walletT.withdraw}</p>
-              </div>
-            </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-lg sm:text-xl font-semibold">
+                {walletT.quickActions}
+              </h3>
+              <p className="text-sm text-slate-500">
+                Manage funds, deposits, and withdrawals instantly.
+              </p>
+            </div>
+            <div className="inline-flex flex-wrap gap-2">
+              <Button variant="secondary" size="sm" className="w-full sm:w-auto">
+                <ArrowUpRight /> {walletT.addFunds}
+              </Button>
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                <ArrowDownRight /> {walletT.withdraw}
+              </Button>
+            </div>
           </div>
         </div>
       </CommonCard>
@@ -153,47 +178,76 @@ export function WalletMain({
       {/* TRANSACTIONS */}
       <CommonCard>
         <div className="p-4 sm:p-6">
-          <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-            <Receipt className="w-5 h-5" />
-            {walletT.recentTransactions}
-          </h3>
-
-          <div className="space-y-4">
-            {visibleTransactions.map((txn: any) => (
-              <div
-                key={txn.id}
-                className="flex justify-between items-center p-4 border rounded-xl"
-              >
-                <div className="flex gap-3">
-                  {txn.type === "credit" ? (
-                    <ArrowUpRight className="text-green-600" />
-                  ) : (
-                    <ArrowDownRight className="text-rose-600" />
-                  )}
-
-                  <div>
-                    <p className="font-medium">{txn.description}</p>
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <Calendar className="w-4 h-4" />
-                      {txn.date}
-                    </div>
-                  </div>
-                </div>
-
-                <p
-                  className={`font-bold ${
-                    txn.type === "credit"
-                      ? "text-green-600"
-                      : "text-rose-600"
-                  }`}
-                >
-                  {txn.type === "credit" ? "+" : "-"} SAR {txn.amount}
-                </p>
-              </div>
-            ))}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-lg font-semibold">
+              <Receipt className="h-5 w-5" />
+              {walletT.recentTransactions}
+            </div>
+            <p className="text-sm text-slate-500">
+              Showing {visibleTransactions.length} of {transactions.length}
+            </p>
           </div>
 
-          {/* 👇 AUTO TRIGGER LOADER */}
+          <div className="space-y-3 mt-4">
+            {visibleTransactions.length ? (
+              visibleTransactions.map((txn: any) => (
+                <div
+                  key={txn.id}
+                  className="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-slate-100 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`mt-1 flex h-11 w-11 items-center justify-center rounded-2xl ${
+                        txn.type === "credit"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-rose-100 text-rose-700"
+                      }`}
+                    >
+                      {txn.type === "credit" ? (
+                        <ArrowUpRight className="h-5 w-5" />
+                      ) : (
+                        <ArrowDownRight className="h-5 w-5" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        {txn.description}
+                      </p>
+                      <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                        <Calendar className="h-4 w-4" />
+                        {txn.date}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <p
+                      className={`text-sm font-semibold ${
+                        txn.type === "credit"
+                          ? "text-emerald-600"
+                          : "text-rose-600"
+                      }`}
+                    >
+                      {txn.type === "credit" ? "+" : "-"}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: currencyLabel,
+                        maximumFractionDigits: 2,
+                      }).format(txn.amount)}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {txn.type === "credit" ? walletT.credit : walletT.debit}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-500">
+                No recent transactions available.
+              </div>
+            )}
+          </div>
+
           {visibleCount < transactions.length && (
             <div ref={loaderRef} className="flex justify-center py-4">
               {loadingMore && <CommonSpinner />}

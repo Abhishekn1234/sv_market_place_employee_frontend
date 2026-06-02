@@ -57,7 +57,8 @@ export function ProfileHeader({
               <Button
                 type="button"
                 variant="ghost"
-                className="absolute bottom-0 right-0 h-8 w-8 p-0 rounded-full bg-white shadow"
+                size="icon"
+                className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-white shadow"
                 onClick={() =>
                   document.getElementById("profileImage")?.click()
                 }
@@ -127,4 +128,3 @@ export function ProfileHeader({
     </div>
   );
 }
-

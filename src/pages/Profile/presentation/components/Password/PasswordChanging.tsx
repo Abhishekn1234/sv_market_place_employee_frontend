@@ -150,8 +150,9 @@ export default function PasswordChanging({ onSuccess }: Props) {
 
         <Button
           type="submit"
+          variant="default"
           disabled={isPending}
-          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+          
         >
           {isPending && (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />

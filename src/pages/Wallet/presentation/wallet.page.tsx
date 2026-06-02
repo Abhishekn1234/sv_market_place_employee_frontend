@@ -13,7 +13,6 @@ export default function Wallet() {
 
   const { data: wallet } = useWallet();
   const { data: transactionsResponse } = useWalletTransactions({
-   
     sort: "createdAt:desc",
   });
 
@@ -43,22 +42,15 @@ export default function Wallet() {
     .reduce((a, t) => a + t.amount, 0);
 
     const user = useAuthStore.getState().user;
+  const username = user?.fullName ?? "User";
 
-    const userId = user?._id;
-    const username = user?.fullName ?? "User";
-
-     const isOwner = wallet?.workerId === userId;
-     console.log(isOwner);
   return (
     <div
       dir={isRTL ? "rtl" : "ltr"}
       className="min-h-screen px-3 py-4 sm:px-4 md:px-6"
     >
       {/* Header */}
-      <WalletHeader
-        employeeName={username}
-      
-      />
+      <WalletHeader employeeName={username} wallet={wallet} />
 
       {/* Grid layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
