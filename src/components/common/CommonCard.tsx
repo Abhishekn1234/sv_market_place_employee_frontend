@@ -41,72 +41,51 @@ export function CommonCard({
     headerAlign === "right" || isRTL ? "text-right" : "text-left";
 
   return (
-    <Card className={cn("mb-4 sm:mb-6", className)}>
-      
+    <Card className={cn("mb-4 sm:mb-6 overflow-hidden gap-0", className)}>
       {/* 🔹 Header */}
       {(title || description) && (
         <CardHeader
-          className={cn(
-            "px-4 py-3 sm:px-6 sm:py-4",
-            alignClass
-          )}
+          className={cn("border-b border-slate-100 bg-slate-50/30 px-5 py-4", alignClass)}
         >
           {title && (
-            <CardTitle className="text-base sm:text-lg font-semibold">
+            <CardTitle className="text-base font-bold text-slate-900 leading-tight">
               {title}
             </CardTitle>
           )}
           {description && (
-            <CardDescription className="text-xs sm:text-sm">
+            <CardDescription className="text-xs text-slate-500 mt-1">
               {description}
             </CardDescription>
           )}
         </CardHeader>
       )}
 
-      {/* 🔹 Label + Value */}
-      {(label || value) && (
-        <CardContent
-          className={cn(
-            "px-4 pt-2 sm:px-6 sm:pt-4",
-            alignClass,
-            contentClassName
-          )}
-        >
-          {label && (
-            <p className="text-xs sm:text-sm text-gray-500 mb-1">
-              {label}
-            </p>
-          )}
-          {value && (
-            <p className="text-sm sm:text-base font-medium text-blue-600">
-              {value}
-            </p>
-          )}
-        </CardContent>
-      )}
-
-      {/* 🔹 Children */}
-      {children && (
-        <CardContent
-          className={cn(
-            "px-4 pb-4 sm:px-6 sm:pb-6",
-            alignClass,
-            contentClassName
-          )}
-        >
-          {children}
+      {/* 🔹 Unified Content Area (Label, Value & Children) */}
+      {(label || value || children) && (
+        <CardContent className={cn("p-5", alignClass, contentClassName)}>
+          <div className="space-y-4">
+            {(label || value) && (
+              <div className="space-y-1">
+                {label && (
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    {label}
+                  </p>
+                )}
+                {value && (
+                  <div className="text-lg font-semibold text-blue-600">
+                    {value}
+                  </div>
+                )}
+              </div>
+            )}
+            {children}
+          </div>
         </CardContent>
       )}
 
       {/* 🔹 Footer */}
       {footer && (
-        <CardFooter
-          className={cn(
-            "px-4 pb-4 sm:px-6 sm:pb-6",
-            alignClass
-          )}
-        >
+        <CardFooter className={cn("border-t border-slate-100 bg-slate-50/30 px-5 py-4", alignClass)}>
           {footer}
         </CardFooter>
       )}
