@@ -38,8 +38,8 @@ export default function TransactionSummary() {
   return (
     <div
       className={`
-        grid gap-4
-        sm:grid-cols-2 lg:grid-cols-4
+        grid gap-2 sm:gap-3 md:gap-4
+        grid-cols-1 sm:grid-cols-2 lg:grid-cols-4
         ${isRTL ? "direction-rtl" : ""}
       `}
     >
@@ -98,18 +98,18 @@ function SummaryCard({
   const isRTL = language === "AR";
 
   return (
-    <CommonCard>
+    <CommonCard className="p-3 sm:p-4">
       <div
-        className={`flex items-center justify-between mb-2 ${
+        className={`flex items-center justify-between mb-2 gap-2 ${
           isRTL ? "flex-row-reverse text-right" : ""
         }`}
       >
-        <h3 className="text-sm font-medium">{title}</h3>
+        <h3 className="text-xs sm:text-sm font-medium line-clamp-1">{title}</h3>
         {icon}
       </div>
 
-      <div className="text-2xl font-semibold">{value}</div>
-      <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+      <div className="text-lg sm:text-2xl font-semibold line-clamp-1">{value}</div>
+      <p className="text-xs text-gray-500 mt-1 line-clamp-1">{subtitle}</p>
     </CommonCard>
   );
 }

@@ -105,7 +105,7 @@ export function WalletMain({
               <p className="text-sm uppercase tracking-[0.24em] text-slate-300">
                 {walletT.totalBalance}
               </p>
-              <p className="mt-3 text-3xl sm:text-4xl font-bold leading-tight">
+              <p className="mt-3 text-3xl sm:text-4xl font-bold leading-tight break-all">
                 {formattedBalance}
               </p>
               <p className="mt-3 text-sm text-slate-200">
@@ -123,7 +123,7 @@ export function WalletMain({
               <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
                 {walletT.income}
               </p>
-              <p className="mt-2 text-lg font-semibold text-white">
+              <p className="mt-2 text-lg font-semibold text-white break-all">
                 {formattedCredit}
               </p>
             </div>
@@ -131,7 +131,7 @@ export function WalletMain({
               <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
                 {walletT.expenses}
               </p>
-              <p className="mt-2 text-lg font-semibold text-white">
+              <p className="mt-2 text-lg font-semibold text-white break-all">
                 {formattedDebit}
               </p>
             </div>
@@ -139,7 +139,7 @@ export function WalletMain({
               <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
                 {t('wallet.net')}
               </p>
-              <p className="mt-2 text-lg font-semibold text-white">
+              <p className="mt-2 text-lg font-semibold text-white break-all">
                 {formattedNet}
               </p>
             </div>
@@ -161,7 +161,7 @@ export function WalletMain({
               <h3 className="text-lg sm:text-xl font-semibold">
                 {walletT.quickActions}
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 {t('wallet.manageFunds')}
               </p>
             </div>
@@ -185,17 +185,17 @@ export function WalletMain({
               <Receipt className="h-5 w-5" />
               {walletT.recentTransactions}
             </div>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               {(t as any)('wallet.showingOf', { current: visibleTransactions.length, total: transactions.length })}
             </p>
           </div>
 
-          <div className="space-y-3 mt-4">
+          <div className="flex flex-col gap-4 mt-4">
             {visibleTransactions.length ? (
               visibleTransactions.map((txn: any) => (
                 <div
                   key={txn.id}
-                  className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-slate-100 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-4 rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4 transition hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0 flex items-start gap-3">
                     <div
@@ -212,10 +212,10 @@ export function WalletMain({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-slate-900 truncate">
+                      <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">
                         {txn.description}
                       </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                         <Calendar className="h-4 w-4" />
                         <span>{txn.date}</span>
                       </div>
@@ -237,7 +237,7 @@ export function WalletMain({
                         maximumFractionDigits: 2,
                       }).format(txn.amount)}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       {txn.type === "credit" ? walletT.credit : walletT.debit}
                     </p>
                   </div>

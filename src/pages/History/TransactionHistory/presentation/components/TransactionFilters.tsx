@@ -10,11 +10,16 @@ import { Search } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
+type TransactionStatus = "all" | "completed" | "pending" | "failed";
+
 interface Props {
   searchTerm: string;
-  statusFilter: string;
+  statusFilter: TransactionStatus;
   onSearchChange: (v: string) => void;
-  onStatusChange: (v: string) => void;
+  onStatusChange: (v: TransactionStatus) => void;
+  limit: number;
+  onLimitChange: (v: number) => void;
+  isMobile: boolean;
 }
 
 export default function TransactionFilters({
@@ -22,6 +27,9 @@ export default function TransactionFilters({
   statusFilter,
   onSearchChange,
   onStatusChange,
+  limit,
+  onLimitChange,
+  isMobile,
 }: Props) {
   const { translations, language } = useLanguage();
   const isRTL = language === "AR";
@@ -31,8 +39,8 @@ export default function TransactionFilters({
   return (
     <div
       className={`
-        flex flex-col gap-4
-        md:flex-row md:items-center
+        flex flex-col gap-2 sm:gap-3
+        md:flex-row md:items-center md:gap-4
         ${isRTL ? "md:flex-row-reverse" : ""}
       `}
     >
@@ -40,7 +48,7 @@ export default function TransactionFilters({
       <div className="relative flex-1">
         <Search
           className={`
-            absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400
+            absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400
             ${isRTL ? "right-3" : "left-3"}
           `}
         />
@@ -48,13 +56,13 @@ export default function TransactionFilters({
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={filters.searchPlaceholder}
-          className={cn("bg-white border-slate-200", isRTL ? "pr-10" : "pl-10")}
+          className={cn("bg-white border-slate-200 text-xs sm:text-sm py-2 sm:py-2.5 h-auto", isRTL ? "pr-10" : "pl-10")}
         />
       </div>
 
       {/* STATUS */}
-      <Select value={statusFilter} onValueChange={onStatusChange}>
-        <SelectTrigger className="w-full md:w-[200px] bg-white border-slate-200">
+      <Select value={statusFilter} onValueChange={(value) => onStatusChange(value as TransactionStatus)}>
+        <SelectTrigger className="w-full md:w-[200px] bg-white border-slate-200 text-xs sm:text-sm py-2 sm:py-2.5 h-auto">
           <SelectValue placeholder={filters.filterStatus} />
         </SelectTrigger>
 
@@ -66,6 +74,22 @@ export default function TransactionFilters({
           ))}
         </SelectContent>
       </Select>
+
+      {/* LIMIT - Desktop only */}
+      {!isMobile && (
+        <Select value={limit.toString()} onValueChange={(v) => onLimitChange(Number(v))}>
+          <SelectTrigger className="w-full md:w-[150px] bg-white border-slate-200 text-xs sm:text-sm py-2 sm:py-2.5 h-auto">
+            <SelectValue placeholder="Rows per page" />
+          </SelectTrigger>
+          <SelectContent align={isRTL ? "end" : "start"}>
+            {[5, 10, 20, 50].map((l) => (
+              <SelectItem key={l} value={l.toString()}>
+                {l}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </div>
   );
 }

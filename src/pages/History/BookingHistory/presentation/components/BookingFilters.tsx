@@ -60,9 +60,9 @@ export function BookingFilters({
   }, [statusConfig]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8">
       {/* Search Input */}
-      <div className={`space-y-2 ${isRTL ? "lg:order-3" : ""}`}>
+      <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-3" : ""}`}>
         {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
           {bookingfilters.searchPlaceholder ?? "Search"}
         </Label> */}
@@ -76,7 +76,7 @@ export function BookingFilters({
       </div>
 
       {/* Status Filter */}
-      <div className={`space-y-2 ${isRTL ? "lg:order-2" : ""}`}>
+      <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-2" : ""}`}>
         {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
           {bookingfilters.statusPlaceholder ?? "Status"}
         </Label> */}
@@ -96,7 +96,7 @@ export function BookingFilters({
       </div>
 
       {/* Service Filter */}
-      <div className={`space-y-2 ${isRTL ? "lg:order-1" : ""}`}>
+      <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-1" : ""}`}>
         {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
           {bookingfilters.serviceOptions?.allServices ?? "Category"}
         </Label> */}
@@ -117,7 +117,7 @@ export function BookingFilters({
 
       {/* Rows Per Page (desktop only) */}
       {!isMobile && (
-        <div className={`space-y-2 ${isRTL ? "lg:order-4" : ""}`}>
+        <div className={`space-y-1.5 sm:space-y-2 ${isRTL ? "lg:order-4" : ""}`}>
           {/* <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
             {translations.common?.limit ?? "Rows"}
           </Label> */}

@@ -10,7 +10,7 @@ function Table({ className, ...props }: TableProps) {
     <div
       data-slot="table-container"
       className={cn(
-        "relative w-full overflow-x-auto rounded-lg border border-gray-200"
+        "relative w-full overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-800"
       )}
     >
       <table
@@ -30,7 +30,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
     <thead
       data-slot="table-header"
       className={cn(
-        "bg-gray-50 border-b text-gray-700 uppercase text-xs",
+        "bg-gray-50 dark:bg-slate-800/50 border-b dark:border-slate-800 text-gray-700 dark:text-slate-300 uppercase text-xs",
         className
       )}
       {...props}
@@ -65,7 +65,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
       data-slot="table-row"
-      className={cn("hover:bg-gray-50 transition-colors border-b", className)}
+      className={cn("hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors border-b dark:border-slate-800", className)}
       {...props}
     />
   );
@@ -111,4 +111,3 @@ export {
   TableCell,
   TableCaption,
 };
-

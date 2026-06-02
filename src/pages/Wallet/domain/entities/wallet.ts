@@ -41,4 +41,5 @@ export interface WalletTransactionsParams {
   limit?: number;
   sort?: string;
   search?: string;
+  status?: "completed" | "pending" | "failed" | "all";
 }

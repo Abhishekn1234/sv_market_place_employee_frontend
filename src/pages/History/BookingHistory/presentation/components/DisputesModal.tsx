@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useGetDisputes } from "@/pages/History/BookingHistory/presentation/hooks/useGetDispute";
 import { useRespondDisputes } from "@/pages/History/BookingHistory/presentation/hooks/useRespondDispute";
+import { toast } from "react-toastify";
 
 import type { Dispute } from "../../domain/entities/disputes";
 
@@ -15,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/context/LanguageContext";
 import CommonSpinner from "@/components/common/CommonSpinner";
-// import { toast } from "react-toastify";
 
 type Props = {
   bookingId: string | null;
@@ -53,7 +53,10 @@ export default function DisputeModal({
 
   // ✅ Submit response
   const handleSubmit = () => {
-    if (!selected || !response.trim()) return;
+    if (!selected || !response.trim()) {
+      toast.error(t("disputepage.enterResponse") || "Please enter a response.");
+      return;
+    }
 
     respondMutation.mutate(
       {
@@ -62,13 +65,13 @@ export default function DisputeModal({
       },
       {
         onSuccess: () => {
-          // toast.success("Response submitted successfully");
+          toast.success(t("disputepage.responseSubmitted") || "Response submitted successfully");
           setSelected(null);
           setResponse("");
         },
-        // onError: (err: any) => {
-        //     toast.error(err?.response?.data?.message || "Failed to submit response");
-        // },
+        onError: (err: any) => {
+          toast.error(err?.response?.data?.message || t("disputepage.responseFailed") || "Failed to submit response");
+        },
       }
     );
   };

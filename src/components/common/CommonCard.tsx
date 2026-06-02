@@ -45,15 +45,15 @@ export function CommonCard({
       {/* 🔹 Header */}
       {(title || description) && (
         <CardHeader
-          className={cn("border-b border-slate-100 bg-slate-50/30 px-5 py-4", alignClass)}
+          className={cn("border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/50 px-5 py-4", alignClass)}
         >
           {title && (
-            <CardTitle className="text-base font-bold text-slate-900 leading-tight">
+            <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">
               {title}
             </CardTitle>
           )}
           {description && (
-            <CardDescription className="text-xs text-slate-500 mt-1">
+            <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {description}
             </CardDescription>
           )}
@@ -67,12 +67,12 @@ export function CommonCard({
             {(label || value) && (
               <div className="space-y-1">
                 {label && (
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                     {label}
                   </p>
                 )}
                 {value && (
-                  <div className="text-lg font-semibold text-blue-600">
+                  <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                     {value}
                   </div>
                 )}
@@ -85,7 +85,7 @@ export function CommonCard({
 
       {/* 🔹 Footer */}
       {footer && (
-        <CardFooter className={cn("border-t border-slate-100 bg-slate-50/30 px-5 py-4", alignClass)}>
+        <CardFooter className={cn("border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/50 px-5 py-4", alignClass)}>
           {footer}
         </CardFooter>
       )}

@@ -143,21 +143,21 @@ export default function BookingHistory() {
   if (isError) return <div className="p-6 text-center text-red-500">Failed to load booking history</div>;
 
   return (
-    <div className="min-h-screen w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-14 py-4 sm:py-6">
+    <div className="min-h-screen w-full px-2 sm:px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-14 py-3 sm:py-6">
       {/* Premium container */}
-      <div className="rounded-3xl bg-slate-50/60 border border-slate-200/70 shadow-sm">
-        <div className="p-3 sm:p-4 md:p-6 space-y-6">
+      <div className="rounded-2xl sm:rounded-3xl">
+        <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
           {/* HEADER */}
-          <div className={`space-y-1 ${isRTL ? "text-right" : "text-left"}`}>
-            <h1 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-slate-900">
+          <div className={`space-y-0.5 sm:space-y-1 ${isRTL ? "text-right" : "text-left"}`}>
+            <h1 className="text-base sm:text-xl md:text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               {translations.bookingHistory.title}
             </h1>
-            <p className="text-sm sm:text-base text-slate-600">{translations.bookingHistory.subtitle}</p>
+            <p className="text-xs sm:text-base text-slate-600">{translations.bookingHistory.subtitle}</p>
           </div>
 
           {/* FILTER CARD */}
           <CommonCard
-            className="border-slate-200/70 bg-white shadow-sm"
+            className="border-slate-50/70 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
             title={
               <div className={`text-sm sm:text-base font-semibold ${isRTL ? "text-right" : "text-left"}`}>
                 {translations.bookingHistory.filters}
@@ -185,21 +185,21 @@ export default function BookingHistory() {
           </CommonCard>
 
           {/* TABLE CARD (filters above, table below — no desktop stats cards) */}
-          <CommonCard className="overflow-hidden border-slate-200/70 bg-white shadow-sm">
-            <div className="border-b border-slate-200/70 px-4 py-4 sm:px-6 bg-slate-50">
+          <CommonCard className="overflow-hidden  shadow-sm">
+            <div className="border-b dark:border-slate-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4 ">
               <div className={isRTL ? "text-right" : "text-left"}>
-                <h2 className="text-base sm:text-lg font-semibold text-slate-900">
+                <h2 className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-slate-100">
                   {translations.bookingHistory.title ?? "Booking history"}
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {translations.bookingHistory.subtitle ?? "Review all bookings and view details."}
                 </p>
               </div>
             </div>
 
-            <div className="p-4 sm:p-6"> {/* Adjusted padding for consistency */}
+            <div className="p-2 sm:p-3 md:p-6"> {/* Adjusted padding for consistency */}
               {isMobile ? (
-                <div className="space-y-4"> {/* Added space-y-4 for gaps between cards */}
+                <div className="space-y-3"> {/* Added space-y-3 for gaps between cards */}
                   {filteredBookings.map((booking) => (
                     <BookingCard
                       key={booking._id}

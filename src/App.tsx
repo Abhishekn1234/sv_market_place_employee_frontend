@@ -232,6 +232,7 @@ function AppContent() {
       <ToastContainer
         position="top-right"
         autoClose={5000}
+        toastStyle={{ zIndex: 99999 }}
       />
 
       <Routes>

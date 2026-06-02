@@ -234,7 +234,7 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
               </p>
             </div>
           ) : (
-            <div className="space-y-3 p-4 sm:p-6">
+            <div className="flex flex-col gap-4 p-4 sm:p-6">
               {allNotifications.map((notification) => (
                 <NotificationItem
                   notificationsTranslations={t("notifications")}

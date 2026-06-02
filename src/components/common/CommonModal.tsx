@@ -49,19 +49,20 @@ function CommonModalContent({
       <CommonModalOverlay />
       <DialogPrimitive.Content
         className={cn(
-          // Centering
-          "fixed left-1/2 top-1/2 z-50",
-          "-translate-x-1/2 -translate-y-1/2",
+          // Centering and mobile-friendly top positioning
+          "fixed left-1/2 z-50",
+          "top-4 sm:top-1/2",
+          "-translate-x-1/2 sm:-translate-y-1/2",
 
           // Width responsiveness
           "w-[95vw] sm:w-[90vw] md:w-full",
           "max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl",
 
           // Height safety
-          "max-h-[90dvh] sm:max-h-[85vh]",
+          "max-h-[calc(100dvh-2rem)]",
 
           // Layout
-          "flex flex-col",
+          "flex flex-col overflow-hidden",
 
           // Styling
           "rounded-xl sm:rounded-2xl",
@@ -108,7 +109,7 @@ function CommonModalBody({
     <div
       className={cn(
         // Scrollable content
-        "flex-1 overflow-y-auto",
+        "flex-1 min-h-0 overflow-y-auto",
         "px-4 py-3 sm:px-6 sm:py-4",
         className
       )}

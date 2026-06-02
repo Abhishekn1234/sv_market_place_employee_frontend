@@ -91,13 +91,18 @@ export const initOnMessage = async () => {
     } catch (err) {
       console.error("Foreground notification error:", err);
     }
+    console.log("Broadcasting navigation for notification:", { type: data?.type, bookingId: data?.bookingId, messageId: data?.messageId });
 
-    // Decide navigation target: if booking is REQUESTED, go to availableBooking
+    // Decide navigation target
     const bookingStatus = data?.status;
+
     const bookingId = data?.bookingId;
     const targetUrl = bookingStatus === "REQUESTED"
       ? `/availableBooking?status=requested&bookingId=${bookingId}`
-      : DEFAULT_NOTIF_URL;
+      : bookingStatus === "PAID"
+        ? DEFAULT_NOTIF_URL
+        : DEFAULT_NOTIF_URL;
+
 
     // Only navigate if not already on the target path
     try {
