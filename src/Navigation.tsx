@@ -1,39 +1,49 @@
 import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export type TabType = "profile" | "password" | "location";
 
 interface SWNavigationListenerProps {
-  setActiveTab?: (tab: TabType) => void; // optional
+  setActiveTab?: (tab: TabType) => void;
 }
 
-export default function SWNavigationListener({ setActiveTab }: SWNavigationListenerProps) {
+export default function SWNavigationListener({
+  setActiveTab,
+}: SWNavigationListenerProps) {
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
-    const onMessage = (event: MessageEvent) => {
-      const { type, payload } = event.data || {};
-      if (type === "NAVIGATE" && payload?.url) {
-        // Always set the tab if provided
-        if (payload.tab && setActiveTab) {
-          setActiveTab(payload.tab);
-        }
+    const handler = (event: MessageEvent) => {
+      const data = event.data || {};
 
-        // Only navigate if different route
-        if (location.pathname !== payload.url) {
-          navigate(payload.url, { replace: true });
-        } else {
-          // Force update for same route (optional hack)
-          window.history.replaceState({}, "", payload.url);
-        }
+      // ✅ support both formats
+      const type = data.type || data?.payload?.type;
+      const url = data.url || data?.payload?.url;
+      const tab = data.tab || data?.payload?.tab;
+
+      if (type !== "NAVIGATE" || !url) return;
+
+      // Set tab if available
+      if (tab && setActiveTab) {
+        setActiveTab(tab);
       }
+
+      // Normalize path (important for mobile)
+      const path = new URL(url, window.location.origin).pathname;
+
+      // Navigate always (no stale location check)
+      navigate(path, { replace: true });
     };
 
-    navigator.serviceWorker?.addEventListener("message", onMessage);
-    return () => navigator.serviceWorker?.removeEventListener("message", onMessage);
-  }, [navigate, setActiveTab, location.pathname]);
+    // ✅ IMPORTANT: BOTH CHANNELS
+    navigator.serviceWorker?.addEventListener("message", handler);
+    window.addEventListener("message", handler);
+
+    return () => {
+      navigator.serviceWorker?.removeEventListener("message", handler);
+      window.removeEventListener("message", handler);
+    };
+  }, [navigate, setActiveTab]);
 
   return null;
 }
-

@@ -5,6 +5,7 @@ import { useRegisterDeviceToken } from "./useRegisterToken";
 import { useUnregisterDeviceToken } from "./useUnRegisterToken";
 import { useAuthStore } from "@/core/store/auth";
 import { requestAndGetToken } from "@/components/firebase/notifications";
+import { generateDeviceId } from "../utils/generationdeviceId";
 
 export const useNotificationManager = () => {
   const {
@@ -49,7 +50,7 @@ export const useNotificationManager = () => {
         token,
         platform: "WEB",
         roleId,
-        deviceId: navigator.userAgent,
+       deviceId: generateDeviceId(),
         appId: "your-app-id",
       });
       setRegistered(true);
@@ -84,7 +85,7 @@ export const useNotificationManager = () => {
           token: newToken,
           platform: "WEB",
           roleId,
-          deviceId: navigator.userAgent,
+          deviceId: generateDeviceId(),
           appId: "your-app-id",
         });
         setRegistered(true);

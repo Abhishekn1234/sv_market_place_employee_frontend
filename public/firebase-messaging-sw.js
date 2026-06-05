@@ -27,6 +27,17 @@ self.addEventListener("message", (event) => {
 });
 
 /* =========================
+   ROUTING HELPERS
+========================= */
+
+function getBookingUrl(data, bookingId) {
+  if (data?.status === "REQUESTED") {
+    return `/availableBooking?status=requested&bookingId=${bookingId}`;
+  }
+  return `/availableWork?bookingId=${bookingId}`;
+}
+
+/* =========================
    ROUTING LOGIC
 ========================= */
 
@@ -56,28 +67,19 @@ function getNotificationContent(data = {}, notification = {}) {
     BOOKING_REQUEST: {
       title: "New booking request",
       body: "Tap to view booking request",
-      url:
-        data.status === "REQUESTED"
-          ? `/availableBooking?status=requested&bookingId=${bookingId}`
-          : `/availableWork?bookingId=${bookingId}`,
+      url: getBookingUrl(data, bookingId),
     },
 
     BOOKING_UPDATE: {
       title: "Booking status updated",
       body: "Tap to view booking",
-      url:
-        data.status === "REQUESTED"
-          ? `/availableBooking?status=requested&bookingId=${bookingId}`
-          : `/availableWork?bookingId=${bookingId}`,
+      url: getBookingUrl(data, bookingId),
     },
 
     BOOKING_UPDATED: {
       title: "Booking status updated",
       body: "Tap to view booking",
-      url:
-        data.status === "REQUESTED"
-          ? `/availableBooking?status=requested&bookingId=${bookingId}`
-          : `/availableWork?bookingId=${bookingId}`,
+      url: getBookingUrl(data, bookingId),
     },
 
     WORK_ASSIGNED: {
@@ -87,23 +89,21 @@ function getNotificationContent(data = {}, notification = {}) {
     },
 
     ADMIN_MESSAGE: {
-      title: "Admin Message",
-      body: notification?.body || data?.body || data?.message || "You received a new admin message",
+      title:
+        notification?.title ||
+        "Admin Message",
+      body:
+        notification?.body ||
+        data?.body ||
+        data?.message ||
+        "You received a new admin message",
       url: "/notifications",
     },
   };
 
   const result = map[type] || base;
 
-  // If this is a booking notification with REQUESTED status, route to availableBooking
-  if (
-    (type === "BOOKING_REQUEST" || type === "BOOKING_UPDATE" || type === "BOOKING_UPDATED") &&
-    data.status === "REQUESTED"
-  ) {
-    result.url = `/availableBooking?status=requested&bookingId=${bookingId}`;
-  }
-
-  // Admin messages (and defaults) keep notifications page
+  // Force admin fallback
   if (type === "ADMIN_MESSAGE" || !type) {
     result.url = data?.url || "/notifications";
   }
@@ -118,10 +118,6 @@ function getNotificationContent(data = {}, notification = {}) {
 function showNotification(data, notification, messageId) {
   const { title, body, url } = getNotificationContent(data, notification);
 
-  // ✅ Use messageId as the tag. 
-  // If the payload has a 'notification' block, the browser shows a native one automatically.
-  // By using the same messageId as tag, this manual showNotification (with buttons) 
-  // will REPLACE the default browser one instead of creating a second card.
   const tag = messageId || data.messageId || data.bookingId || "general";
 
   return self.registration.showNotification(title, {
@@ -147,24 +143,23 @@ function showNotification(data, notification, messageId) {
 /* =========================
    BACKGROUND MESSAGES (FCM)
 ========================= */
+
 messaging.onBackgroundMessage((payload) => {
   const data = payload?.data || {};
   const notification = payload?.notification || {};
   const messageId = payload?.messageId;
 
-  // ✅ Check if app is in foreground to avoid showing native notification 
-  // when the In-App FloatingNotification is already showing.
   self.clients
     .matchAll({ type: "window", includeUncontrolled: true })
     .then((clients) => {
       const isForeground = clients.some((client) => client.focused);
 
       if (isForeground) {
-        console.log("⏭️ App is in foreground, skipping native notification.");
+        console.log("⏭️ Foreground active, skipping notification");
         return;
       }
 
-      console.log("📥 Background Message Received, showing native notification:", messageId);
+      console.log("📥 Showing notification:", messageId);
       showNotification(data, notification, messageId);
     });
 });
@@ -192,18 +187,20 @@ self.addEventListener("notificationclick", (event) => {
         if ("focus" in client) {
           await client.focus();
 
-          // Check if client is already on the target page
-          const clientUrl = new URL(client.url).pathname;
+          const clientPath = new URL(client.url).pathname;
           let targetPath = "/notifications";
+
           try {
             targetPath = new URL(url, self.location.origin).pathname;
-          } catch (e) {}
+          } catch {}
 
-          if (!clientUrl.includes(targetPath)) {
+          if (!clientPath.includes(targetPath)) {
             client.postMessage({
               type: "NAVIGATE",
               isUserAction: true,
               url,
+              status: data.status,
+              bookingId: data.bookingId,
             });
           }
 

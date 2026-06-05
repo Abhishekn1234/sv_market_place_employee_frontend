@@ -11,9 +11,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./ProtectedRoute";
 import AppLayout from "./components/Layout/AppLayout";
 
-/* =========================
-   PAGES
-========================= */
+/* PAGES */
 import HomePage from "./pages/Home/presentation/home.page";
 import ProfileSettings from "./pages/Profile/presentation/profile.page";
 import RegisterPage from "./pages/Auth/Register/presentation/register.page";
@@ -27,7 +25,7 @@ import TransactionHistory from "./pages/History/TransactionHistory/presentation/
 import WorkingHistory from "./pages/History/WorkHistory/presentation/WorkingHistory";
 
 import ServiceSettings from "./pages/Servicesettings/presentation/servicesettings.page";
-import DocumentOnboarding from "./pages/DocumentsOnboarding/presentation/document.onboarding.page"
+import DocumentOnboarding from "./pages/DocumentsOnboarding/presentation/document.onboarding.page";
 import Wallet from "./pages/Wallet/presentation/wallet.page";
 import NotificationsPage from "./pages/Notifications/presentation/notification.page";
 
@@ -41,16 +39,12 @@ import SendOtpMobilePage from "./pages/Auth/MobileVerification/presentation/comp
 
 import Disputespage from "./pages/History/BookingHistory/presentation/components/Disputes.page";
 import CurrentWorkPage from "./pages/CurrentWork/presentation/CurrentWorkPage";
-
 import ChatWorkerPage from "./ChatCustomer/presentation/ChatWorkerPage";
 
-/* =========================
-   NOTIFICATIONS
-========================= */
+/* NOTIFICATIONS */
 import { initOnMessage } from "./components/firebase/notifications";
 import { useNotificationManager } from "./pages/Notifications/presentation/hooks/useNotificationhandler";
 import { useDynamicLocation } from "@/utils/useNotification";
-
 
 /* =========================
    APP CONTENT
@@ -66,25 +60,17 @@ function AppContent() {
     "location" | "profile" | "password"
   >("profile");
 
-  /* =========================
-     CUSTOM HOOKS
-  ========================= */
   useDynamicLocation();
   useNotificationManager();
 
-  /* =========================
-     FOREGROUND FCM
-  ========================= */
+  /* FOREGROUND FCM */
   useEffect(() => {
     if (initializedRef.current) return;
-
     initializedRef.current = true;
     initOnMessage();
   }, []);
 
-  /* =========================
-     SERVICE WORKER REGISTER
-  ========================= */
+  /* SERVICE WORKER */
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
     if (swRegisteredRef.current) return;
@@ -93,19 +79,14 @@ function AppContent() {
 
     const registerSW = async () => {
       try {
-        // Keep only one SW registration path (main.tsx). This is a no-op if already controlled.
         const reg = await navigator.serviceWorker.ready;
-
-
-        console.log("✅ SW registered:", reg);
-
-        await navigator.serviceWorker.ready;
+        console.log("SW ready:", reg);
 
         if (reg.waiting) {
           reg.waiting.postMessage({ type: "SKIP_WAITING" });
         }
       } catch (err) {
-        console.error("❌ SW registration error:", err);
+        console.error("SW error:", err);
       }
     };
 
@@ -113,128 +94,61 @@ function AppContent() {
   }, []);
 
   /* =========================
-     NAVIGATION HANDLER
+     SMART NAVIGATION
   ========================= */
 
-  useEffect(() => {
-    const allowedRoutes = [
-      "/availableBooking",
-      "/chat",
-      "/currentWork",
-      "/availableWork",
-      "/notifications",
-    ];
+  const handleNavigate = (url?: string, data?: any) => {
+    if (!url) return;
 
-    const normalize = (url: string) =>
-      url.split("?")[0];
+    let finalUrl = url;
 
-    const canNavigate = (url?: string) => {
-      if (!url) return false;
-
-      try {
-        const path = new URL(url, window.location.origin)
-          .pathname;
-
-        return allowedRoutes.some((route) =>
-          path.startsWith(route)
-        );
-      } catch {
-        return false;
-      }
-    };
-
-    const handleNavigate = (url?: string) => {
-      if (!canNavigate(url)) return;
-
-      const current =
-        window.location.pathname +
-        window.location.search;
-
-      if (normalize(current) === normalize(url!)) return;
-
-      console.log("🚀 Navigating:", url);
-      navigate(url!);
-    };
-
-    /* =========================
-       BROADCAST CHANNEL
-    ========================= */
-    const channel = new BroadcastChannel(
-      "fcm_channel"
-    );
-
-    const channelHandler = (event: MessageEvent) => {
-      const data = event.data;
-
-      console.log("📡 BroadcastChannel:", data);
-
-      if (data?.type === "NAVIGATE" && data.isUserAction) {
-        handleNavigate(data.url);
-      }
-    };
-
-    channel.addEventListener(
-      "message",
-      channelHandler
-    );
-
-    /* =========================
-       SERVICE WORKER MESSAGES
-    ========================= */
-    const swHandler = (event: MessageEvent) => {
-      const data = event.data;
-
-      console.log("📨 SW Message:", data);
-
-      if (data?.type === "NAVIGATE" && data.isUserAction) {
-        handleNavigate(data.url);
-      }
-    };
-
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.addEventListener(
-        "message",
-        swHandler
-      );
+    // 🔥 CENTRAL RULE
+    if (data?.status === "REQUESTED") {
+      finalUrl = `/availableBooking?status=requested&bookingId=${data.bookingId}`;
+    } else if (data?.bookingId) {
+      finalUrl = `/availableWork?bookingId=${data.bookingId}`;
     }
 
-    // Guarded window message handler to prevent collision with other libraries
-    const windowHandler = (e: MessageEvent) => {
-      if (e.data?.type === "NAVIGATE" && e.data?.isUserAction) swHandler(e);
-    };
-    window.addEventListener("message", windowHandler);
+    const current =
+      window.location.pathname + window.location.search;
 
-    /* =========================
-       CLEANUP
-    ========================= */
-    return () => {
-      channel.removeEventListener(
-        "message",
-        channelHandler
-      );
+    if (current === finalUrl) return;
 
-      channel.close();
+    navigate(finalUrl);
+  };
 
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.removeEventListener(
-          "message",
-          swHandler
-        );
+  useEffect(() => {
+    const channel = new BroadcastChannel("fcm_channel");
+
+    const handler = (event: MessageEvent) => {
+      const data = event.data;
+
+      if (data?.type === "NAVIGATE" && data.isUserAction) {
+        handleNavigate(data.url, data);
       }
+    };
+
+    channel.addEventListener("message", handler);
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        const data = event.data;
+        if (data?.type === "NAVIGATE" && data.isUserAction) {
+          handleNavigate(data.url, data);
+        }
+      });
+    }
+
+    return () => {
+      channel.removeEventListener("message", handler);
+      channel.close();
     };
   }, [navigate]);
 
-  /* =========================
-     ROUTES
-  ========================= */
-
+  /* ROUTES */
   return (
     <LanguageProvider>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        toastStyle={{ zIndex: 99999 }}
-      />
+      <ToastContainer position="top-right" autoClose={5000} />
 
       <Routes>
         {/* AUTH */}
@@ -267,51 +181,33 @@ function AppContent() {
         >
           <Route index element={<HomePage />} />
 
-          {/* PROFILE */}
-          <Route
-            path="settings/profile"
-            element={
-              <ProfileSettings
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-            }
-          />
+          <Route path="settings/profile" element={
+            <ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} />
+          } />
 
-          {/* HISTORY */}
           <Route path="history/booking" element={<BookingHistory />} />
           <Route path="history/transaction" element={<TransactionHistory />} />
           <Route path="history/work" element={<WorkingHistory />} />
 
-          {/* OTHER */}
           <Route path="/disputes" element={<Disputespage />} />
           <Route path="/currentWork" element={<CurrentWorkPage />} />
 
-          {/* CHAT */}
           <Route path="/chat/:bookingId" element={<ChatWorkerPage />} />
 
-          {/* WALLET */}
           <Route path="settings/wallet" element={<Wallet />} />
-
-          {/* NOTIFICATIONS */}
           <Route path="notifications" element={<NotificationsPage />} />
 
-          {/* BOOKINGS */}
           <Route path="availableWork" element={<AvailableWorkPage />} />
           <Route path="availableBooking" element={<AvailableBookingPage />} />
         </Route>
       </Routes>
 
-      {/* LOCATION TRACKER */}
       <LocationTracker />
     </LanguageProvider>
   );
 }
 
-/* =========================
-   ROOT APP
-========================= */
-
+/* ROOT */
 export default function App() {
   return (
     <ThemeProvider>
