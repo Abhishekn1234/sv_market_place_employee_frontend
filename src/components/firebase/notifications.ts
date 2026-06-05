@@ -57,7 +57,7 @@ export const initOnMessage = async () => {
     audio.play().catch(() => {});
 
     console.log("📩 Foreground message:", { data, notification });
-
+  
     const title = notification?.title || data?.title || "Notification";
     const body = notification?.body || data?.body || "You have a new update";
 
@@ -72,14 +72,17 @@ export const initOnMessage = async () => {
         } else {
           addRecentTag(tag);
 
-          const notif = new Notification(title, {
-            body,
-            icon: "/icon.jpg",
-            tag,
-            actions: [{ action: "open", title: "Open" }],
-            data: { url, type: data?.type, bookingId: data?.bookingId, messageId: data?.messageId },
-          } as NotificationOptions);
-
+         const notif = new Notification(title, {
+  body,
+  icon: "/icon.jpg",
+  tag,
+  data: {
+    url,
+    type: data?.type,
+    bookingId: data?.bookingId,
+    messageId: data?.messageId,
+  },
+});
           notif.onclick = (e: Event) => {
             e.preventDefault();
             channel.postMessage({ type: "NAVIGATE", url });

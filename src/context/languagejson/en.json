@@ -10,6 +10,8 @@
     "amountLow": "Amount: Low to High",
     "previous": "Previous",
     "next": "Next",
+      "search": "Search",
+    "limit": "Rows",
     "all": "All",
     "location": "Location",
     "edit": "Edit",
@@ -32,7 +34,10 @@
     "na": "N/A",
     "minutes": "minutes",
     "close": "Close",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "seeAll": "See All",
+    "accept": "Accept",
+    "ignore": "Ignore"
   },
   "onboarding":{
      "title": "Complete setup",
@@ -54,6 +59,16 @@
     "priceMode": "Price Mode",
     "getDirections": "Get Directions",
     "verifyOtp": "Verify OTP"
+  },
+  "availableBooking": {
+    "customer": "Customer",
+    "tier": "Tier",
+    "bookingType": "Booking Type",
+    "pricing": "Pricing",
+    "status": "Status",
+    "serviceCategory": "Service Category",
+    "getDirections": "Get Directions",
+    "cancelledMessage": "This booking was cancelled"
   },
 
   

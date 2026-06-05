@@ -3,58 +3,61 @@ import type { Message } from "@/ChatCustomer/domain/entities/chat";
 export const mergeUniqueMessages = (
   prev: Message[],
   incoming: Message[]
-) => {
+): Message[] => {
   const merged = [...prev];
 
   incoming.forEach((newMsg) => {
-    const existsIndex =
-      merged.findIndex((oldMsg) => {
-        // SAME REAL DATABASE ID
+    const existsIndex = merged.findIndex((oldMsg) => {
+      const oldMessage = String(
+        oldMsg.message ?? ""
+      ).trim();
 
-        if (
-          newMsg.id &&
-          oldMsg.id &&
-          newMsg.id === oldMsg.id
-        ) {
-          return true;
-        }
+      const newMessage = String(
+        newMsg.message ?? ""
+      ).trim();
 
-        // TEMP -> REAL MESSAGE REPLACEMENT
+      // Same DB message
+      if (
+        oldMsg.id &&
+        newMsg.id &&
+        String(oldMsg.id) === String(newMsg.id)
+      ) {
+        return true;
+      }
 
-        const oldIsTemp =
-          !String(oldMsg.id).includes("-");
+      // Temp -> Real replacement
+      const oldIsTemp = String(
+        oldMsg.id ?? ""
+      ).startsWith("temp-");
 
-        const newIsReal =
-          String(newMsg.id).length > 20;
+      const newIsReal =
+        !!newMsg.id &&
+        !String(newMsg.id).startsWith("temp-");
 
-        if (
-          oldIsTemp &&
-          newIsReal &&
-          oldMsg.text.trim() ===
-            newMsg.text.trim() &&
-          oldMsg.senderId ===
-            newMsg.senderId
-        ) {
-          return true;
-        }
+      if (
+        oldIsTemp &&
+        newIsReal &&
+        oldMessage === newMessage &&
+        oldMsg.senderId === newMsg.senderId
+      ) {
+        return true;
+      }
 
-        // SAME CONTENT + SAME USER + CLOSE TIME
+      // Same content + sender + timestamp
+      const oldTime = new Date(
+        oldMsg.createdAt ?? 0
+      ).getTime();
 
-        return (
-          oldMsg.text.trim() ===
-            newMsg.text.trim() &&
-          oldMsg.senderId ===
-            newMsg.senderId &&
-          Math.abs(
-            new Date(
-              oldMsg.createdAt || 0
-            ).getTime() -
-              new Date(
-                newMsg.createdAt || 0
-              ).getTime()
-          ) < 10000
-        );
-      });
+      const newTime = new Date(
+        newMsg.createdAt ?? 0
+      ).getTime();
+
+      return (
+        oldMessage === newMessage &&
+        oldMsg.senderId === newMsg.senderId &&
+        Math.abs(oldTime - newTime) < 10000
+      );
+    });
 
     if (existsIndex !== -1) {
       merged[existsIndex] = {
@@ -66,13 +69,15 @@ export const mergeUniqueMessages = (
     }
   });
 
-  return merged.sort(
-    (a, b) =>
-      new Date(
-        a.createdAt || 0
-      ).getTime() -
-      new Date(
-        b.createdAt || 0
-      ).getTime()
-  );
+  return merged.sort((a, b) => {
+    const aTime = new Date(
+      a.createdAt ?? 0
+    ).getTime();
+
+    const bTime = new Date(
+      b.createdAt ?? 0
+    ).getTime();
+
+    return aTime - bTime;
+  });
 };

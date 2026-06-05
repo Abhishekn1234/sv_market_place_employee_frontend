@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+import CommonSpinner from "@/components/common/CommonSpinner";
 import { CommonCard } from "@/components/common/CommonCard";
 import { CommonTable, type TableColumn } from "@/components/common/CommonTable";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export default function Disputespage() {
   const { language, t } = useLanguage();
   const isRTL = language === "AR";
 
-  const { data = [] } = useGetDisputes();
+  const { data = [], isLoading } = useGetDisputes();
   const respondMutation = useRespondDisputes();
 
   // ✅ modal state
@@ -115,6 +116,15 @@ export default function Disputespage() {
       >
         {/* ✅ Responsive Rendering */}
         {isMobile ? (
+          isLoading ? (
+            <div className="flex justify-center py-12">
+              <CommonSpinner />
+            </div>
+          ) : data.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+               {t("disputepage.noData")}
+            </div>
+          ) : (
           <div className="space-y-3">
             {data.map((row:any) => (
               <CommonCard
@@ -158,14 +168,21 @@ export default function Disputespage() {
               />
             ))}
           </div>
+          )
         ) : (
-          <CommonTable
-          currentPage={1}
-            columns={columns}
-            data={data}
-            keyExtractor={(row) => row._id}
-            isRTL={isRTL}
-          />
+          isLoading ? (
+            <div className="flex justify-center py-12">
+              <CommonSpinner />
+            </div>
+          ) : (
+            <CommonTable
+              currentPage={1}
+              columns={columns}
+              data={data}
+              keyExtractor={(row) => row._id}
+              isRTL={isRTL}
+            />
+          )
         )}
       </CommonCard>
 

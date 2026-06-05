@@ -11,6 +11,7 @@ export interface ChatMessage {
 export type Message = {
   id?: string;
   text: string;
+  message?:string;
   status?: "sent" | "delivered" | "read";
   senderId: string;
   senderName?: string;

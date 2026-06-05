@@ -51,6 +51,7 @@ import { initOnMessage } from "./components/firebase/notifications";
 import { useNotificationManager } from "./pages/Notifications/presentation/hooks/useNotificationhandler";
 import { useDynamicLocation } from "@/utils/useNotification";
 
+
 /* =========================
    APP CONTENT
 ========================= */

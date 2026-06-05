@@ -33,7 +33,12 @@
     "complete": "إكمال",
     "previous": "السابق",
     "next": "التالي",
-    "chat": "دردشة"
+      "search": "بحث",
+    "limit": "صفوف",
+    "chat": "دردشة",
+    "seeAll": "عرض الكل",
+    "accept": "قبول",
+    "ignore": "تجاهل"
   },
    "availableWork": {
     "noWorks": "لا توجد أعمال متاحة",
@@ -45,6 +50,16 @@
     "priceMode": "نوع التسعير",
     "getDirections": "الحصول على الاتجاهات",
     "verifyOtp": "التحقق من رمز OTP"
+  },
+  "availableBooking": {
+    "customer": "العميل",
+    "tier": "الفئة",
+    "bookingType": "نوع الحجز",
+    "pricing": "التسعير",
+    "status": "الحالة",
+    "serviceCategory": "فئة الخدمة",
+    "getDirections": "الحصول على الاتجاهات",
+    "cancelledMessage": "تم إلغاء هذا الحجز"
   },
   "onboarding":{
     "title": "إكمال الإعداد",

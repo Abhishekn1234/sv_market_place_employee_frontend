@@ -17,6 +17,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import CommonSpinner from "@/components/common/CommonSpinner";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/components/ui/utils";
 
@@ -39,6 +40,7 @@ interface CommonTableProps<T> {
   emptyMessage?: string;
   renderExpandedRow?: (row: T) => React.ReactNode;
   expandedRowKey?: string | null;
+  isLoading?: boolean;
 
   isRTL?: boolean;
 }
@@ -71,6 +73,7 @@ export function CommonTable<T>({
   emptyMessage,
   renderExpandedRow,
   expandedRowKey,
+  isLoading = false,
   isRTL = false,
 }: CommonTableProps<T>) {
   const { translations } = useLanguage(); // ✅ FIXED LOCATION
@@ -111,7 +114,16 @@ export function CommonTable<T>({
 
           {/* BODY */}
           <TableBody>
-            {!hasData ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length || 1}
+                  className="text-center py-10"
+                >
+                  <CommonSpinner />
+                </TableCell>
+              </TableRow>
+            ) : !hasData ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length || 1}

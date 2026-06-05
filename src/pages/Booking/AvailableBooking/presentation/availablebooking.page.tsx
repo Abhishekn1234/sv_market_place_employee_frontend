@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 
 export default function AvailableBookingPage() {
-  const { translations, language } = useLanguage();
+  const { translations, language, t } = useLanguage();
   const isRTL = language === "AR";
 
   const { data: categories } = useServiceCategory();
@@ -94,7 +94,7 @@ export default function AvailableBookingPage() {
               onClick={() => setShowAll(true)}
               className="text-primary font-medium hover:underline text-sm"
             >
-              See All
+              {t("common.seeAll")}
             </button>
           </div>
         )}
@@ -125,27 +125,27 @@ export default function AvailableBookingPage() {
                       </h3>
 
                       <p className="text-sm text-gray-500">
-                        Customer: {booking.customer?.fullName || "-"}
+                        {t("availableBooking.customer")}: {booking.customer?.fullName || "-"}
                       </p>
 
                       <p className="text-sm text-gray-500">
-                        Tier: {booking.serviceTier?.displayName || "-"}
+                        {t("availableBooking.tier")}: {booking.serviceTier?.displayName || "-"}
                       </p>
 
                       <p className="text-sm text-gray-500">
-                        Booking Type: {booking.bookingType || "-"}
+                        {t("availableBooking.bookingType")}: {booking.bookingType || "-"}
                       </p>
 
                       <p className="text-sm text-gray-500">
-                        Pricing: {booking.pricingMode || "-"}
+                        {t("availableBooking.pricing")}: {booking.pricingMode || "-"}
                       </p>
 
                       <p className="text-sm text-gray-500">
-                        Status: {booking.status || "-"}
+                        {t("availableBooking.status")}: {booking.status || "-"}
                       </p>
 
                       <p className="text-sm text-gray-500">
-                        Service Category:{" "}
+                        {t("availableBooking.serviceCategory")}:{" "}
                         {booking.service?.category
                           ? categoryMap[booking.service.category]
                           : "-"}
@@ -162,7 +162,7 @@ export default function AvailableBookingPage() {
                           }
                           className="w-full border mt-2 py-2 rounded"
                         >
-                          📍 Get Directions
+                          📍 {t("availableBooking.getDirections")}
                         </button>
                       )}
                     {/* ACTIONS */}
@@ -173,19 +173,19 @@ export default function AvailableBookingPage() {
                           onClick={() => handleAccept(booking)}
                           className="flex-1 bg-primary text-white py-2 rounded-lg text-sm disabled:opacity-50"
                         >
-                          Accept
+                          {t("common.accept")}
                         </button>
 
                         <button
                           onClick={() => handleIgnore(booking._id)}
                           className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm"
                         >
-                          Ignore
+                          {t("common.ignore")}
                         </button>
                       </div>
                     ) : (
                       <div className="pt-4 text-center text-red-500 text-sm font-medium">
-                        This booking was cancelled
+                        {t("availableBooking.cancelledMessage")}
                       </div>
                     )}
                   </CommonCard>

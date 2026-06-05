@@ -22,7 +22,7 @@ export default function SocketBookingsModal({
   const dark = theme === "dark";
 
   const requestBookings = useBookingSocketStore((s) => s.requestBookings);
-  console.log(requestBookings);
+  // console.log(requestBookings);
   const removeRequestBooking = useBookingSocketStore((s) => s.removeRequest);
   const upsertAssignedBooking = useBookingSocketStore((s) => s.upsertAssigned);
 

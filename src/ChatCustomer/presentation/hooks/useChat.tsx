@@ -2,29 +2,28 @@
 
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { useAuthStore } from "@/core/store/auth";
 import { useLocation, useNavigate } from "react-router-dom";
-// import { useLanguage } from "@/context/LanguageContext";
 
+import { useAuthStore } from "@/core/store/auth";
 import { baseURL } from "@/api/apiConfig";
 
 import { useChatMessages } from "./useChatMessages";
 import { useSendChatMessage } from "./useSendChatMessage";
+
 import type { Message } from "@/ChatCustomer/domain/entities/chat";
 import { mergeUniqueMessages } from "./mergeUniqueMessages";
 
 const SOCKET_URL = `${baseURL}/chat`;
+
 const messageCache = new Map<string, Message[]>();
 
 export function useChat(bookingId: string) {
   const { accessToken, user } = useAuthStore();
-  // const { t } = useLanguage();
+
   const navigate = useNavigate();
   const location = useLocation();
 
   const socketRef = useRef<Socket | null>(null);
-  const locationRef = useRef(location.pathname);
-
   const isInChatPage = useRef(false);
 
   const [messages, setMessages] = useState<Message[]>(
@@ -36,229 +35,219 @@ export function useChat(bookingId: string) {
 
   const myUserId = user?._id;
 
-  // =========================
-  // API GET
-  // =========================
+  // ==========================================
+  // GET CHAT HISTORY
+  // ==========================================
   const { data } = useChatMessages(bookingId);
 
-  // =========================
-  // API SEND
-  // =========================
-  const { mutateAsync: sendMessageApi } = useSendChatMessage(bookingId);
+  // ==========================================
+  // SEND MESSAGE API
+  // ==========================================
+  const { mutateAsync: sendMessageApi } =
+    useSendChatMessage(bookingId);
 
-  // =========================
-  // TRACK ROUTE
-  // =========================
+  // ==========================================
+  // TRACK CURRENT PAGE
+  // ==========================================
   useEffect(() => {
-    locationRef.current = location.pathname;
-
-    // Determine whether user is currently viewing this booking's chat.
-    // Using pathname.includes can fail due to formatting differences; extract bookingId from URL instead.
     const match = location.pathname.match(/\/chat\/([^/]+)/);
-    const currentBookingId = match?.[1];
-    isInChatPage.current = String(currentBookingId) === String(bookingId);
 
+    const currentBookingId = match?.[1];
+
+    isInChatPage.current =
+      String(currentBookingId) === String(bookingId);
   }, [location.pathname, bookingId]);
 
-  // =========================
-  // LOAD API MESSAGES
-  // =========================
+  // ==========================================
+  // LOAD HISTORY
+  // ==========================================
   useEffect(() => {
     if (!data?.data) return;
 
-    const formatted: Message[] = data.data.map((msg: any) => ({
+    const history: Message[] = data.data.map((msg: any) => ({
       id: msg._id,
       text: msg.message,
       senderId: msg.senderId,
       senderName: msg.senderName,
       createdAt: msg.createdAt,
       self: msg.senderId === myUserId,
-      status:
-        msg.status ||
-        (msg.senderId === myUserId ? "delivered" : undefined),
+      status: "delivered",
     }));
 
     setMessages((prev) => {
-      const next = mergeUniqueMessages(prev, formatted);
+      const next = mergeUniqueMessages(prev, history);
+
       messageCache.set(bookingId, next);
+
       return next;
     });
   }, [data, bookingId, myUserId]);
 
-  // =========================
+  // ==========================================
   // SOCKET CONNECTION
-  // =========================
+  // ==========================================
   useEffect(() => {
-    if (!accessToken || !bookingId) return;
+    if (!bookingId || !accessToken) return;
 
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission().catch(() => {});
-    }
-
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-      socketRef.current.removeAllListeners();
+    if ("Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission().catch(() => {});
+      }
     }
 
     const socket = io(SOCKET_URL, {
-      auth: { token: accessToken },
+      auth: {
+        token: accessToken,
+      },
       transports: ["websocket"],
       forceNew: true,
     });
 
     socketRef.current = socket;
 
+    // ==========================================
     // CONNECT
+    // ==========================================
     socket.on("connect", () => {
       setConnected(true);
 
-      socket.emit("booking.chat.join", { bookingId });
+      socket.emit("booking.chat.join", {
+        bookingId,
+      });
+
+      console.log("Joined room:", bookingId);
     });
 
+    // ==========================================
     // DISCONNECT
+    // ==========================================
     socket.on("disconnect", () => {
       setConnected(false);
     });
 
+    // ==========================================
     // ERROR
-    socket.on("connect_error", (err) => {
-      console.log("connect_error:", err.message);
+    // ==========================================
+    socket.on("connect_error", (error) => {
+      console.error("Socket Error:", error);
     });
 
-    // =========================
-    // RECEIVE MESSAGE
-    // =========================
-    socket.on("booking.chat.message", (msg: any) => {
-      const nextMessage: Message = {
-        id: msg._id || msg.id,
-        text: msg.message || msg.text,
-        senderId: msg.senderId,
-        senderName: msg.senderName,
-        createdAt: msg.createdAt,
-        self: msg.senderId === myUserId,
-        status:
-          msg.status ||
-          (msg.senderId === myUserId ? "delivered" : undefined),
-      };
+    // ==========================================
+    // RECEIVE SAVED MESSAGE
+    // EVENT: booking.chat-message
+    // ==========================================
+    socket.on("booking.chat-message", (payload: any) => {
+  console.log("booking.chat-message", payload);
 
-      setMessages((prev) => {
-        const next = mergeUniqueMessages(prev, [nextMessage]);
-        messageCache.set(bookingId, next);
-        return next;
-      });
+  const chatMessage =
+    payload?.chatMessage ??
+    payload?.payload?.chatMessage;
 
-      // =========================
-      // NOTIFICATION CONTROL
-      // =========================
-      const isSelf = nextMessage.self;
+  if (!chatMessage) {
+    console.error(
+      "chatMessage missing in payload",
+      payload
+    );
+    return;
+  }
 
-      // If user is already viewing this booking's chat, skip browser notifications.
-      if (!isSelf && !isInChatPage.current) {
+  const incomingMessage: Message = {
+    id: chatMessage.id,
+    text: chatMessage.message,
+    senderId: chatMessage.senderId,
+    senderName: chatMessage.senderName,
+    createdAt: chatMessage.createdAt,
+    self: chatMessage.senderId === myUserId,
+    status: "delivered",
+  };
 
+  setMessages((prev) => {
+    const next = mergeUniqueMessages(prev, [
+      incomingMessage,
+    ]);
 
-        const title = `New message from ${
-          nextMessage.senderName || "User"
-        }`;
+    messageCache.set(bookingId, next);
 
-        const body = nextMessage.text || "New message received";
+    return next;
+  });
 
-        const url = `/chat/${bookingId}`;
+  if (
+    incomingMessage.senderId !== myUserId &&
+    !isInChatPage.current
+  ) {
+    const title = `New message from ${
+      incomingMessage.senderName || "User"
+    }`;
 
-        if (
-          Notification.permission === "granted" &&
-          "serviceWorker" in navigator
-        ) {
-          navigator.serviceWorker.ready
-            .then((registration) =>
-              registration.showNotification(title, {
-                body,
-                icon: "/logo.png",
-                tag: nextMessage.id,
-                requireInteraction: true,
-                actions: [{ action: "open", title: "Open" }],
-                data: { url, bookingId },
-              } as NotificationOptions & {
-                actions: { action: string; title: string }[];
-              })
-            )
-            .catch(() => {
-              navigate(url);
-            });
-        }
-      }
-    });
+    const body =
+      incomingMessage.text || "New message received";
+
+    const url = `/chat/${bookingId}`;
+
+    if (
+      Notification.permission === "granted" &&
+      "serviceWorker" in navigator
+    ) {
+      navigator.serviceWorker.ready
+        .then((registration) => {
+          registration.showNotification(title, {
+            body,
+            icon: "/logo.png",
+            tag: incomingMessage.id,
+            requireInteraction: true,
+            data: {
+              bookingId,
+              url,
+            },
+          });
+        })
+        .catch(() => {
+          navigate(url);
+        });
+    }
+  }
+});
 
     return () => {
-      socket.emit("booking.chat.leave", { bookingId });
+      socket.emit("booking.chat.leave", {
+        bookingId,
+      });
 
-      socket.removeAllListeners();
+      socket.off("booking.chat-message");
       socket.disconnect();
 
       socketRef.current = null;
+
       setConnected(false);
     };
-  }, [bookingId, accessToken, myUserId, navigate]);
+  }, [
+    bookingId,
+    accessToken,
+    myUserId,
+    navigate,
+  ]);
 
-  // =========================
+  // ==========================================
   // SEND MESSAGE
-  // =========================
+  // ==========================================
   const sendMessage = async () => {
-    const text = String(input || "").trim();
-    if (!text || !socketRef.current) return;
+    const text = input.trim();
 
-    const tempId = Date.now().toString();
-
-    const optimisticMessage: Message = {
-      id: tempId,
-      text,
-      senderId: myUserId || "",
-      senderName: user?.fullName || "You",
-      createdAt: new Date().toISOString(),
-      self: true,
-      status: "sent",
-    };
-
-    setMessages((prev) => {
-      const next = mergeUniqueMessages(prev, [optimisticMessage]);
-      messageCache.set(bookingId, next);
-      return next;
-    });
+    if (!text) return;
 
     setInput("");
 
     try {
-      socketRef.current.emit("booking.chat.send", {
-        bookingId,
-        text,
+      await sendMessageApi({
+        message: text,
       });
 
-      const saved: any = await sendMessageApi({ message: text });
-
-      setMessages((prev) => {
-        const withoutTemp = prev.filter((m) => m.id !== tempId);
-
-        const finalMessage: Message = {
-          id: saved._id,
-          text: saved.message,
-          senderId: saved.senderId,
-          senderName: saved.senderName,
-          createdAt: saved.createdAt,
-          self: saved.senderId === myUserId,
-          status: "delivered",
-        };
-
-        const next = mergeUniqueMessages(withoutTemp, [finalMessage]);
-        messageCache.set(bookingId, next);
-        return next;
-      });
-    } catch (err) {
-      console.log(err);
-
-      setMessages((prev) => {
-        const next = prev.filter((m) => m.id !== tempId);
-        messageCache.set(bookingId, next);
-        return next;
-      });
+      // No optimistic update.
+      // No socket emit.
+      // Server will broadcast
+      // booking.chat-message after save.
+    } catch (error) {
+      console.error(error);
     }
   };
 

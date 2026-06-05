@@ -12,6 +12,8 @@
     "showing": "दिखा रहा है",
     "of": "में से",
     "all": "सभी",
+        "search": "खोज",
+    "limit": "पंक्तियाँ",
     "sort": "क्रमबद्ध करें",
     "previous": "पिछला",
     "next": "अगला",
@@ -43,7 +45,10 @@
     "hoursAgo": "{{count}} घंटे पहले",
     "logoutSuccess":"सफलतापूर्वक लॉग आउट हो गया",
     "inputPlaceholder": "संदेश लिखें...",
-    "Close": "बंद करें"
+    "Close": "बंद करें",
+    "seeAll": "सभी देखें",
+    "accept": "स्वीकार करें",
+    "ignore": "अनदेखा करें"
   },
   "HomePage": {
   "dashboard": "डैशबोर्ड",
@@ -338,6 +343,16 @@
     "priceMode": "मूल्य प्रकार",
     "getDirections": "दिशा प्राप्त करें",
     "verifyOtp": "ओटीपी सत्यापित करें"
+  },
+  "availableBooking": {
+    "customer": "ग्राहक",
+    "tier": "स्तर",
+    "bookingType": "बुकिंग का प्रकार",
+    "pricing": "मूल्य निर्धारण",
+    "status": "स्थिति",
+    "serviceCategory": "सेवा श्रेणी",
+    "getDirections": "दिशा-निर्देश प्राप्त करें",
+    "cancelledMessage": "यह बुकिंग रद्द कर दी गई थी"
   },
 
 

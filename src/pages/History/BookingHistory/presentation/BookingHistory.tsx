@@ -242,6 +242,11 @@ useEffect(() => {
             <div className="p-2 sm:p-3 md:p-6"> {/* Adjusted padding for consistency */}
               {isMobile ? (
                 <div className="space-y-3"> {/* Added space-y-3 for gaps between cards */}
+                  {isLoading && bookings.length === 0 && (
+                    <div className="flex justify-center py-12">
+                      <CommonSpinner />
+                    </div>
+                  )}
                   {filteredBookings.map((booking) => (
                     <BookingCard
                       key={booking._id}
@@ -264,6 +269,7 @@ useEffect(() => {
                   onPageChange={setPage}
                   isRTL={isRTL}
                   expandedRowKey={expandedBooking}
+                  isLoading={isLoading}
                   renderExpandedRow={(b) => <BookingExpandedRow booking={b} bookingCategories={categories} />}
                 />
               )}
