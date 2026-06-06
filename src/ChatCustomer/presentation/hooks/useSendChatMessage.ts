@@ -35,7 +35,7 @@ export function useSendChatMessage(bookingId: string) {
         }
       );
 
-      toast.success("Message sent");
+      // toast.success("Message sent");
     },
 
     onError: (error: any) => {

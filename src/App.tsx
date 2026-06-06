@@ -1,5 +1,5 @@
 import "./App.css";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { matchPath, Route, Routes, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 
@@ -96,26 +96,32 @@ function AppContent() {
   /* =========================
      SMART NAVIGATION
   ========================= */
+const isSameChatRoute = (url: string) => {
+  return matchPath("/chat/:bookingId", location.pathname) &&
+         url.startsWith("/chat/");
+};
+const handleNavigate = (url?: string, data?: any) => {
+  if (!url) return;
+  console.log(data);
+  let finalUrl = url;
 
-  const handleNavigate = (url?: string, data?: any) => {
-    if (!url) return;
+  if (url.includes("/availableBooking")) {
+    finalUrl = url;
+  } else if (url.includes("/chat")) {
+    finalUrl = url;
+  } else if (url.includes("/availableWork")) {
+    finalUrl = url;
+  }
 
-    let finalUrl = url;
+  if (isSameChatRoute(finalUrl)) return;
 
-    // 🔥 CENTRAL RULE
-    if (data?.status === "REQUESTED") {
-      finalUrl = `/availableBooking?status=requested&bookingId=${data.bookingId}`;
-    } else if (data?.bookingId) {
-      finalUrl = `/availableWork?bookingId=${data.bookingId}`;
-    }
+  const current = location.pathname + location.search;
+  const target = finalUrl;
 
-    const current =
-      window.location.pathname + window.location.search;
+  if (current === target) return;
 
-    if (current === finalUrl) return;
-
-    navigate(finalUrl);
-  };
+  navigate(finalUrl);
+};
 
   useEffect(() => {
     const channel = new BroadcastChannel("fcm_channel");

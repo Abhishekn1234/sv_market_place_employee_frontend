@@ -1,6 +1,9 @@
 /* =========================
    IMPORT CONFIG
 ========================= */
+/* =========================
+   IMPORT CONFIG
+========================= */
 importScripts("./firebase-config.js");
 
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
@@ -14,12 +17,10 @@ const messaging = firebase.messaging();
    LIFECYCLE
 ========================= */
 
-// Take control immediately
 self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Skip waiting (hot update support)
 self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") {
     self.skipWaiting();
@@ -27,88 +28,35 @@ self.addEventListener("message", (event) => {
 });
 
 /* =========================
-   ROUTING HELPERS
+   ROUTE DECIDER (🔥 CORE FIX)
 ========================= */
 
-function getBookingUrl(data, bookingId) {
-  if (data?.status === "REQUESTED") {
+function getSmartRoute(data = {}) {
+  const type = data?.type;
+  const status = data?.status;
+  const bookingId = data?.bookingId;
+
+  // CHAT
+  if (type === "CHAT_MESSAGE" || type === "NEW_MESSAGE") {
+    return `/chat/${bookingId}`;
+  }
+
+  // REQUESTED → AVAILABLE BOOKING
+  if (type === "BOOKING_REQUEST" || status === "REQUESTED") {
     return `/availableBooking?status=requested&bookingId=${bookingId}`;
   }
-  return `/availableWork?bookingId=${bookingId}`;
-}
 
-/* =========================
-   ROUTING LOGIC
-========================= */
-
-function getNotificationContent(data = {}, notification = {}) {
-  const type = data.type;
-  const bookingId = data.bookingId;
-
-  const base = {
-    title: notification?.title || data?.title || "Notification",
-    body: notification?.body || data?.body || "You have a new update",
-    url: "/notifications",
-  };
-
-  const map = {
-    CHAT_MESSAGE: {
-      title: notification?.title || "New chat message",
-      body: notification?.body || "You received a new message in chat",
-      url: `/chat/${bookingId}`,
-    },
-
-    NEW_MESSAGE: {
-      title: notification?.title || "New chat message",
-      body: notification?.body || "You received a new message in chat",
-      url: `/chat/${bookingId}`,
-    },
-
-    BOOKING_REQUEST: {
-      title: "New booking request",
-      body: "Tap to view booking request",
-      url: getBookingUrl(data, bookingId),
-    },
-
-    BOOKING_UPDATE: {
-      title: "Booking status updated",
-      body: "Tap to view booking",
-      url: getBookingUrl(data, bookingId),
-    },
-
-    BOOKING_UPDATED: {
-      title: "Booking status updated",
-      body: "Tap to view booking",
-      url: getBookingUrl(data, bookingId),
-    },
-
-    WORK_ASSIGNED: {
-      title: "Work assigned",
-      body: "A new work has been assigned",
-      url: "/availableWork",
-    },
-
-    ADMIN_MESSAGE: {
-      title:
-        notification?.title ||
-        "Admin Message",
-      body:
-        notification?.body ||
-        data?.body ||
-        data?.message ||
-        "You received a new admin message",
-      url: "/notifications",
-    },
-  };
-
-  const result = map[type] || base;
-
-  // Force admin fallback
-  if (type === "ADMIN_MESSAGE" || !type) {
-    result.url = data?.url || "/notifications";
+  // BOOKING UPDATE → AVAILABLE WORK
+  if (
+    type === "BOOKING_UPDATE" ||
+    type === "BOOKING_UPDATED" ||
+    status === "WORKER_ACCEPTED"
+  ) {
+    return `/availableWork?bookingId=${bookingId}`;
   }
 
-  return result;
+  // DEFAULT
+  return "/notifications";
 }
 
 /* =========================
@@ -116,24 +64,25 @@ function getNotificationContent(data = {}, notification = {}) {
 ========================= */
 
 function showNotification(data, notification, messageId) {
-  const { title, body, url } = getNotificationContent(data, notification);
+  const url = getSmartRoute(data);
+
+  const title = notification?.title || data?.title || "Notification";
+  const body = notification?.body || data?.body || "You have a new update";
 
   const tag = messageId || data.messageId || data.bookingId || "general";
+
+  console.log("🚀 FINAL ROUTE:", url);
 
   return self.registration.showNotification(title, {
     body,
     icon: "/icon.png",
     badge: "/icon.png",
     requireInteraction: true,
-    renotify: false,
     tag,
-    actions: [
-      { action: "open", title: "Open" },
-      { action: "close", title: "Close" },
-    ],
     data: {
       url,
       type: data.type,
+      status: data.status,
       bookingId: data.bookingId,
       messageId: messageId || data.messageId,
     },
@@ -141,25 +90,40 @@ function showNotification(data, notification, messageId) {
 }
 
 /* =========================
-   BACKGROUND MESSAGES (FCM)
+   BACKGROUND MESSAGE
 ========================= */
 
 messaging.onBackgroundMessage((payload) => {
+  console.log("━━━━━━━━━━━━━━━━━━━━━━");
+  console.log("🔥 FIREBASE MESSAGE RECEIVED");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━");
+
+  console.log("📩 RAW PAYLOAD:", payload);
+  console.log("📦 DATA:", payload?.data);
+  console.log("🔔 NOTIFICATION:", payload?.notification);
+
   const data = payload?.data || {};
   const notification = payload?.notification || {};
   const messageId = payload?.messageId;
 
+  console.log("🧠 PARSED:");
+  console.log("type:", data?.type);
+  console.log("status:", data?.status);
+  console.log("bookingId:", data?.bookingId);
+
   self.clients
     .matchAll({ type: "window", includeUncontrolled: true })
     .then((clients) => {
-      const isForeground = clients.some((client) => client.focused);
+      const isForeground = clients.some((c) => c.focused);
+
+      console.log("👀 Foreground active:", isForeground);
 
       if (isForeground) {
-        console.log("⏭️ Foreground active, skipping notification");
+        console.log("⏭️ Skipping notification (foreground)");
         return;
       }
 
-      console.log("📥 Showing notification:", messageId);
+      console.log("🚀 SHOWING NOTIFICATION");
       showNotification(data, notification, messageId);
     });
 });
@@ -172,7 +136,10 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const data = event.notification.data || {};
-  const url = data.url || "/notifications";
+  const url = getSmartRoute(data);
+
+  console.log("🖱 CLICK EVENT");
+  console.log("➡️ NAVIGATING TO:", url);
 
   event.waitUntil(
     (async () => {
@@ -187,22 +154,13 @@ self.addEventListener("notificationclick", (event) => {
         if ("focus" in client) {
           await client.focus();
 
-          const clientPath = new URL(client.url).pathname;
-          let targetPath = "/notifications";
-
-          try {
-            targetPath = new URL(url, self.location.origin).pathname;
-          } catch {}
-
-          if (!clientPath.includes(targetPath)) {
-            client.postMessage({
-              type: "NAVIGATE",
-              isUserAction: true,
-              url,
-              status: data.status,
-              bookingId: data.bookingId,
-            });
-          }
+          client.postMessage({
+            type: "NAVIGATE",
+            isUserAction: true,
+            url,
+            status: data.status,
+            bookingId: data.bookingId,
+          });
 
           return;
         }

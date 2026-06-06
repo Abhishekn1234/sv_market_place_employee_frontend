@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const getNotificationId = (n: any) =>
   n?._id || n?.id || n?.messageId;
@@ -27,6 +27,8 @@ const getNotificationRoute = (n: any) => {
 
 export const useForegroundNotifications = (notificationsData: any) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const shownIds = useRef(new Set<string>());
 
   useEffect(() => {
@@ -42,12 +44,31 @@ export const useForegroundNotifications = (notificationsData: any) => {
       ? notificationsData.notifications
       : [];
 
+    const isSameRoute = (url: string) => {
+      try {
+        const current = location.pathname + location.search;
+
+        const target = new URL(url, window.location.origin);
+        const normalizedTarget =
+          target.pathname + target.search;
+
+        return current === normalizedTarget;
+      } catch {
+        return false;
+      }
+    };
+
     notifications.forEach((n: any) => {
       const id = getNotificationId(n);
       if (!id) return;
 
       if (n.isRead) return;
       if (shownIds.current.has(id)) return;
+
+      const url = getNotificationRoute(n);
+
+      // ✅ KEY FIX: do not show notification if already on same page
+      if (isSameRoute(url)) return;
 
       shownIds.current.add(id);
 
@@ -61,8 +82,6 @@ export const useForegroundNotifications = (notificationsData: any) => {
         n.message ||
         n.body ||
         "You have a new notification";
-
-      const url = getNotificationRoute(n);
 
       const browserNotification = new Notification(title, {
         body,
@@ -78,5 +97,5 @@ export const useForegroundNotifications = (notificationsData: any) => {
         browserNotification.close();
       };
     });
-  }, [notificationsData, navigate]);
+  }, [notificationsData, navigate, location.pathname, location.search]);
 };

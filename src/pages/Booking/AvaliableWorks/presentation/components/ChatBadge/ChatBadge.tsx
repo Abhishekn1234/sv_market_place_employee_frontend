@@ -1,15 +1,17 @@
-import { useChatMessages } from "@/ChatCustomer/presentation/hooks/useChatMessages";
+import { useGetChatMessages } from "@/ChatCustomer/presentation/hooks/useChatMessages";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 
-export function ChatBadge({ bookingId, navigate,t }: any) {
-  const { data: messages } = useChatMessages(bookingId, 1, 100);
+export function ChatBadge({ bookingId, navigate, t }: any) {
+  const { data } = useGetChatMessages(bookingId);
 
-  const bookingMessages =
-    messages?.data?.filter(
-      (msg: any) =>
-        String(msg.bookingId) === String(bookingId) && !msg?.isRead
-    ) || [];
+  const allMessages =
+    data?.pages?.flatMap((page: any) => page?.data ?? []) ?? [];
+
+  const bookingMessages = allMessages.filter(
+    (msg: any) =>
+      String(msg.bookingId) === String(bookingId) && !msg?.isRead
+  );
 
   return (
     <div className="relative">
@@ -21,7 +23,7 @@ export function ChatBadge({ bookingId, navigate,t }: any) {
 
       <Button onClick={() => navigate(`/chat/${bookingId}`)}>
         <MessageCircle size={16} />
-         {t("common.chat")}
+        {t("common.chat")}
       </Button>
     </div>
   );

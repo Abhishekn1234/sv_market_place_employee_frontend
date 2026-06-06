@@ -7,11 +7,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/core/store/auth";
 import { baseURL } from "@/api/apiConfig";
 
-import { useChatMessages } from "./useChatMessages";
+
 import { useSendChatMessage } from "./useSendChatMessage";
 
 import type { Message } from "@/ChatCustomer/domain/entities/chat";
 import { mergeUniqueMessages } from "./mergeUniqueMessages";
+import { useGetChatMessages } from "./useChatMessages";
 
 const SOCKET_URL = `${baseURL}/chat`;
 
@@ -38,7 +39,12 @@ export function useChat(bookingId: string) {
   // ==========================================
   // GET CHAT HISTORY
   // ==========================================
-  const { data } = useChatMessages(bookingId);
+ const {
+  data,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+} = useGetChatMessages(bookingId);
 
   // ==========================================
   // SEND MESSAGE API
@@ -61,24 +67,24 @@ export function useChat(bookingId: string) {
   // ==========================================
   // LOAD HISTORY
   // ==========================================
-  useEffect(() => {
-    if (!data?.data) return;
+ useEffect(() => {
+    if (!data?.pages) return;
 
-    const history: Message[] = data.data.map((msg: any) => ({
-      id: msg._id,
-      text: msg.message,
-      senderId: msg.senderId,
-      senderName: msg.senderName,
-      createdAt: msg.createdAt,
-      self: msg.senderId === myUserId,
-      status: "delivered",
-    }));
+    const history: Message[] = data.pages.flatMap((page: any) =>
+      (page?.data ?? []).map((msg: any) => ({
+        id: msg.id ?? msg._id,
+        text: msg.message,
+        senderId: msg.senderId,
+        senderName: msg.senderName,
+        createdAt: msg.createdAt,
+        self: msg.senderId === myUserId,
+        status: "delivered",
+      }))
+    );
 
     setMessages((prev) => {
       const next = mergeUniqueMessages(prev, history);
-
       messageCache.set(bookingId, next);
-
       return next;
     });
   }, [data, bookingId, myUserId]);
@@ -115,7 +121,7 @@ export function useChat(bookingId: string) {
         bookingId,
       });
 
-      console.log("Joined room:", bookingId);
+      // console.log("Joined room:", bookingId);
     });
 
     // ==========================================
@@ -131,6 +137,9 @@ export function useChat(bookingId: string) {
     socket.on("connect_error", (error) => {
       console.error("Socket Error:", error);
     });
+    socket.on("unauthorized", () => {
+      console.error("Unauthorized");
+    });
 
     // ==========================================
     // RECEIVE SAVED MESSAGE
@@ -140,16 +149,9 @@ export function useChat(bookingId: string) {
   console.log("booking.chat-message", payload);
 
   const chatMessage =
-    payload?.chatMessage ??
-    payload?.payload?.chatMessage;
+    payload?.chatMessage ?? payload?.payload?.chatMessage;
 
-  if (!chatMessage) {
-    console.error(
-      "chatMessage missing in payload",
-      payload
-    );
-    return;
-  }
+  if (!chatMessage) return;
 
   const incomingMessage: Message = {
     id: chatMessage.id,
@@ -161,50 +163,35 @@ export function useChat(bookingId: string) {
     status: "delivered",
   };
 
+  // update UI
   setMessages((prev) => {
-    const next = mergeUniqueMessages(prev, [
-      incomingMessage,
-    ]);
-
+    const next = mergeUniqueMessages(prev, [incomingMessage]);
     messageCache.set(bookingId, next);
-
     return next;
   });
 
+  const isInChatPageRoute =
+    location.pathname === `/chat/${bookingId}`;
+
+  // ✅ ONLY send event to SW (no notification UI here)
   if (
     incomingMessage.senderId !== myUserId &&
-    !isInChatPage.current
+    !isInChatPageRoute
   ) {
-    const title = `New message from ${
-      incomingMessage.senderName || "User"
-    }`;
+    console.log("📡 Sending message to SW (no UI notification)");
 
-    const body =
-      incomingMessage.text || "New message received";
-
-    const url = `/chat/${bookingId}`;
-
-    if (
-      Notification.permission === "granted" &&
-      "serviceWorker" in navigator
-    ) {
-      navigator.serviceWorker.ready
-        .then((registration) => {
-          registration.showNotification(title, {
-            body,
-            icon: "/logo.png",
-            tag: incomingMessage.id,
-            requireInteraction: true,
-            data: {
-              bookingId,
-              url,
-            },
-          });
-        })
-        .catch(() => {
-          navigate(url);
-        });
-    }
+    navigator.serviceWorker?.controller?.postMessage({
+      type: "SOCKET_CHAT_MESSAGE",
+      payload: {
+        title: `New message from ${
+          incomingMessage.senderName || "User"
+        }`,
+        body: incomingMessage.text || "New message received",
+        bookingId,
+        chatMessageId: incomingMessage.id,
+        url: `/chat/${bookingId}`,
+      },
+    });
   }
 });
 
@@ -251,11 +238,14 @@ export function useChat(bookingId: string) {
     }
   };
 
-  return {
+   return {
     messages,
     connected,
     input,
     setInput,
     sendMessage,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 }
