@@ -136,37 +136,60 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const data = event.notification.data || {};
-  const url = getSmartRoute(data);
-
-  console.log("🖱 CLICK EVENT");
-  console.log("➡️ NAVIGATING TO:", url);
+  const url =
+    getSmartRoute(data) || "/notifications";
 
   event.waitUntil(
     (async () => {
-      if (event.action === "close") return;
-
       const clientsArr = await self.clients.matchAll({
         type: "window",
         includeUncontrolled: true,
       });
 
-      for (const client of clientsArr) {
-        if ("focus" in client) {
-          await client.focus();
+      console.log(
+        "SW Origin:",
+        self.location.origin
+      );
 
-          client.postMessage({
-            type: "NAVIGATE",
-            isUserAction: true,
-            url,
-            status: data.status,
-            bookingId: data.bookingId,
-          });
+      const sameOriginClients =
+        clientsArr.filter((client) => {
+          try {
+            return (
+              new URL(client.url).origin ===
+              self.location.origin
+            );
+          } catch {
+            return false;
+          }
+        });
 
-          return;
-        }
+      if (sameOriginClients.length > 0) {
+        const client =
+          sameOriginClients.find(
+            (c) => c.focused
+          ) || sameOriginClients[0];
+
+        await client.focus();
+
+        client.postMessage({
+          type: "NAVIGATE",
+          isUserAction: true,
+          url,
+          status: data.status,
+          bookingId: data.bookingId,
+        });
+
+        return;
       }
 
-      await self.clients.openWindow(url);
+      const targetUrl = new URL(
+        url,
+        self.location.origin
+      ).href;
+
+      await self.clients.openWindow(
+        targetUrl
+      );
     })()
   );
 });
