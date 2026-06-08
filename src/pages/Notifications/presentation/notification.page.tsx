@@ -3,81 +3,77 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 
 import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/ThemeContext";
 
 import NotificationsHeader from "./components/NotificationHeader";
 import NotificationItem from "./components/NotificationItem";
-import { useTheme } from "@/context/ThemeContext";
 
-import { useNotifications } from "./hooks/useNotification";
 import { useMarkAsRead } from "./hooks/useMarkasRead";
 import { useMarkAllRead } from "./hooks/useMarkAllRead";
-import CommonSpinner from "@/components/common/CommonSpinner";
+import { useGetNotifications } from "./hooks/useGetNotifications";
 
+import CommonSpinner from "@/components/common/CommonSpinner";
 import { CATEGORY_MAP } from "./utils/typemap";
 
 export default function NotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
-
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [page, setPage] = useState(1);
 
   const { t } = useLanguage();
   const { theme } = useTheme();
 
-const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRead();
-  const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllRead();
+  const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } =
+    useMarkAsRead();
+
+  const { mutate: markAllRead, isPending: isMarkingAll } =
+    useMarkAllRead();
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   // =========================
-  // API (NO LIMIT)
+  // INFINITE QUERY
   // =========================
-  const { data, isLoading, isFetching } = useNotifications({
-    page,
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useGetNotifications({
+    limit: 20,
     unreadOnly: filter === "unread" ? true : undefined,
     type: CATEGORY_MAP[selectedCategory],
   });
 
-  const notifications = data?.data;
-  const pagination = data?.pagination;
-  const totalPages = pagination?.totalPages || 1;
+  // =========================
+  // FLATTEN DATA
+  // =========================
+  const notifications =
+    data?.pages.flatMap((page) => page.data) ?? [];
+
+  const lastPage = data?.pages?.[data.pages.length - 1];
+  const pagination = lastPage?.pagination;
+
+  const totalCount = pagination?.totalItems ?? 0;
 
   // =========================
-  // ACCUMULATED LIST
-  // =========================
-  const [allNotifications, setAllNotifications] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (notifications === undefined) return;
-
-    if (page === 1) {
-      setAllNotifications(notifications);
-    } else {
-      setAllNotifications((prev) => [...prev, ...notifications]);
-    }
-  }, [notifications, page]);
-
-  useEffect(() => {
-    setPage(1);
-    setSelectedIds([]);
-    setAllNotifications([]);
-  }, [filter, selectedCategory]);
-
-  // =========================
-  // UNREAD
+  // FILTERED DERIVED DATA
   // =========================
   const unreadNotifications = useMemo(
-    () => allNotifications.filter((n) => !n.isRead),
-    [allNotifications]
+    () => notifications.filter((n) => !n.isRead),
+    [notifications]
   );
 
+  const readCount = notifications.length - unreadNotifications.length;
   const unreadCount = unreadNotifications.length;
-  const readCount = allNotifications.length - unreadCount;
 
   // =========================
   // SELECT LOGIC
   // =========================
   const handleSelectNotification = (id: string) => {
-    const target = allNotifications.find((n) => n._id === id);
+    const target = notifications.find((n) => n._id === id);
     if (!target || target.isRead) return;
 
     setSelectedIds((prev) =>
@@ -104,69 +100,72 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
   };
 
   // =========================
-  // MARK AS READ (SELECTED ONLY)
+  // MARK SELECTED AS READ
   // =========================
- const markSelectedAsRead = async () => {
-  const idsToMark = [...selectedIds];
+  const markSelectedAsRead = async () => {
+    if (!selectedIds.length) return;
 
-  if (!idsToMark.length) return;
-
-  await Promise.all(
-    idsToMark.map((id) => markAsReadApi(id))
-  );
-
-  setAllNotifications((prev) =>
-    prev.map((n) =>
-      idsToMark.includes(n._id) ? { ...n, isRead: true } : n
-    )
-  );
-
-  setSelectedIds([]);
-};
-  // =========================
-  // MARK ALL READ (ONLY WHEN SELECT ALL MODE)
-  // =========================
-  const handleMarkAllAsRead = async () => {
-    await markAllRead();
-
-    setAllNotifications((prev) =>
-      prev.map((n) => ({ ...n, isRead: true }))
+    await Promise.all(
+      selectedIds.map((id) => markAsReadApi(id))
     );
 
     setSelectedIds([]);
   };
 
   // =========================
-  // INFINITE SCROLL
+  // MARK ALL AS READ
   // =========================
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const handleMarkAllAsRead = async () => {
+    await markAllRead();
+    setSelectedIds([]);
+  };
 
+  // =========================
+  // LOAD MORE
+  // =========================
   const loadMore = useCallback(() => {
-    if (!isFetching && page < totalPages) {
-      setPage((p) => p + 1);
-    }
-  }, [isFetching, page, totalPages]);
+    if (!hasNextPage || isFetchingNextPage) return;
+    fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // =========================
+  // INTERSECTION OBSERVER
+  // =========================
   useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect();
+    const el = loadMoreRef.current;
+    if (!el) return;
 
-    observerRef.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) loadMore();
-    });
+    observerRef.current?.disconnect();
 
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
+    observerRef.current = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          loadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "200px",
+        threshold: 0,
+      }
+    );
+
+    observerRef.current.observe(el);
 
     return () => observerRef.current?.disconnect();
   }, [loadMore]);
 
-  if (isLoading && page === 1) return <CommonSpinner />;
+  // =========================
+  // LOADING STATE
+  // =========================
+  if (isLoading) return <CommonSpinner />;
 
+  // =========================
+  // UI
+  // =========================
   return (
     <div
-      className={`min-h-screen py-6 px-4 sm:px-6 lg:px-8 ${
+      className={`py-6 px-4 sm:px-6 lg:px-8 ${
         theme === "dark"
           ? "bg-slate-950 text-white"
           : "bg-slate-0 text-slate-900"
@@ -174,46 +173,37 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
     >
       <div className="max-w-7xl mx-auto space-y-6">
 
-        <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-900/95 dark:shadow-none">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-600">
-                {t("notifications.title")}
-              </p>
-              <h1 className="text-3xl font-semibold tracking-tight">
+        {/* HEADER STATS */}
+        <div className="rounded-3xl border border-slate-200 bg-white/90 p-6">
+          <div className="flex justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold">
                 {t("notifications.title")}
               </h1>
-              <p className="max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-slate-500">
                 {t("notifications.subtitle")}
               </p>
             </div>
 
-            <div className="grid w-full gap-3 sm:grid-cols-2 lg:w-auto">
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-center dark:border-slate-800 dark:bg-slate-950">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                  {t("notifications.unread")}
-                </p>
-                <p className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">
-                  {unreadCount}
-                </p>
+            <div className="flex gap-4">
+              <div>
+                <p className="text-xs">Unread</p>
+                <p className="text-xl font-bold">{unreadCount}</p>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-center dark:border-slate-800 dark:bg-slate-950">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                  {t("notifications.total")}
-                </p>
-                <p className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">
-                  {allNotifications.length}
-                </p>
+              <div>
+                <p className="text-xs">Total</p>
+                <p className="text-xl font-bold">{totalCount}</p>
               </div>
             </div>
           </div>
         </div>
 
+        {/* HEADER CONTROLS */}
         <NotificationsHeader
           unreadCount={unreadCount}
           readCount={readCount}
-          totalCount={allNotifications.length}
+          totalCount={totalCount}
           filter={filter}
           setFilter={setFilter}
           selectedCategory={selectedCategory}
@@ -223,37 +213,45 @@ const { mutateAsync: markAsReadApi, isPending: isMarkingSelected } = useMarkAsRe
           selectedNotificationIds={selectedIds}
           isPending={isMarkingSelected || isMarkingAll}
           toggleSelectAll={toggleSelectAll}
-          currentPageUnreadCount={unreadNotifications.length}
+          currentPageUnreadCount={unreadCount}
         />
 
-       
-          {allNotifications.length === 0 ? (
-            <div className="p-8 text-center">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {t("notifications.noNotifications")}
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4 p-4 sm:p-6">
-              {allNotifications.map((notification) => (
-                <NotificationItem
-                  notificationsTranslations={t("notifications")}
-                  key={notification._id}
-                  notification={notification}
-                  markAsRead={markAsReadApi}
-                  isSelected={selectedIds.includes(notification._id)}
-                  onSelect={handleSelectNotification}
-                />
-              ))}
+        {/* LIST */}
+        {notifications.length === 0 ? (
+          <div className="text-center p-8 text-slate-500">
+            No notifications
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4 p-4 sm:p-6">
+            {notifications.map((notification) => (
+              <NotificationItem
+                key={notification._id}
+                notification={notification}
+                notificationsTranslations={t("notifications")}
+                markAsRead={markAsReadApi}
+                isSelected={selectedIds.includes(notification._id)}
+                onSelect={handleSelectNotification}
+              />
+            ))}
 
-              {page < totalPages && (
-                <div ref={loadMoreRef} className="flex justify-center py-6">
-                  <CommonSpinner />
-                </div>
-              )}
-            </div>
-          )}
-       
+            {/* LOADER */}
+            {hasNextPage && (
+              <div
+                ref={loadMoreRef}
+                className="h-20 flex items-center justify-center"
+              >
+                {isFetchingNextPage && <CommonSpinner />}
+              </div>
+            )}
+
+            {/* END */}
+            {!hasNextPage && notifications.length > 0 && (
+              <div className="text-center text-sm text-slate-500 py-4">
+                No more notifications
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

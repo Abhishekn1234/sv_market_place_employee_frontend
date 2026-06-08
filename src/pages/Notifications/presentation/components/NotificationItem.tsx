@@ -17,6 +17,7 @@ import { getTypeIcon } from "../utils/gettypeicon";
 import { getTypeColor } from "../utils/gettypecolor";
 
 import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
+import { formatNotificationDate } from "../utils/formaatnotificationtodaytime";
 
 type Props = {
   notification: Notification;
@@ -29,11 +30,11 @@ type Props = {
 
 export default function NotificationItem({
   notification,
-  // markAsRead,
+  markAsRead,
   notificationsTranslations,
   isSelected,
   onSelect,
-  // onMarkedRead,
+  onMarkedRead,
 }: Props) {
   const { theme } = useTheme();
   // const { translations } = useLanguage();
@@ -44,7 +45,7 @@ export default function NotificationItem({
   // =========================
   // LOCAL HANDLED STATE
   // =========================
-  const [handled, ] = useState(false);
+  const [handled, setHandled] = useState(false);
 
   const isDisabled = isRead || handled;
 
@@ -81,25 +82,31 @@ export default function NotificationItem({
   // =========================
   // MARK AS READ
   // =========================
-  // const handleMarkRead = async () => {
-  //   if (isDisabled) return;
+  const handleMarkRead = async () => {
+    if (isDisabled) return;
 
-  //   try {
-  //     setHandled(true);
+    setHandled(true);
 
-  //     await Promise.resolve(markAsRead(notification._id));
+    try {
+      await Promise.resolve(markAsRead(notification._id));
 
-  //     onMarkedRead?.(notification._id);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+      onMarkedRead?.(notification._id);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to mark notification as read.");
+    } finally {
+      setHandled(false);
+    }
+  };
 
   // =========================
   // NAVIGATE
   // =========================
   const handleNavigate = () => {
     if (isDisabled) return;
+
+    // Mark as read before navigating
+    handleMarkRead();
 
     const type = notification.type;
     const bookingId = notification.bookingId;
@@ -161,19 +168,11 @@ export default function NotificationItem({
   const message =
     notification.message || notificationsTranslations.defaultMessage;
 
-  const formattedDate = new Date(notification.createdAt).toLocaleString(
-    undefined,
-    {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }
-  );
+ const formattedDate = formatNotificationDate(notification.createdAt);
 
   return (
     <div
-      onClick={!isDisabled ? handleNavigate : undefined}
+      onClick={handleNavigate}
       className={`group flex flex-col gap-4 rounded-3xl border bg-white p-4 shadow-sm transition-all duration-200 sm:flex-row sm:items-center sm:justify-between sm:p-5
         ${
           isSelected

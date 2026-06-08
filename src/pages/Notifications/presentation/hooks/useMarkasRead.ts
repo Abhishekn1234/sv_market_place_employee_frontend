@@ -1,15 +1,13 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { NotificationRepositoryImpl } from "../../data/repositories/NotificationRepoImpl";
 import { MarkNotificationReadUseCase } from "../../domain/usecase/GetReasdCountUsecase";
 import { toast } from "react-toastify";
-import { useAuthStore } from "@/core/store/auth";
-
 
 const repo = new NotificationRepositoryImpl();
 const useCase = new MarkNotificationReadUseCase(repo);
 
 export const useMarkAsRead = () => {
-  const markAsRead = useAuthStore((s) => s.markAsRead);
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => useCase.execute(id),
@@ -17,17 +15,22 @@ export const useMarkAsRead = () => {
     onSuccess: (_, id) => {
       toast.success("Notification marked as read ✅");
 
-      // ✅ instant UI update
-      markAsRead(id);
-    },
+      queryClient.setQueriesData(
+        { queryKey: ["notifications"] },
+        (old: any) => {
+          if (!old) return old;
 
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to mark notification as read";
-
-      toast.error(message);
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              data: page.data.map((n: any) =>
+                n._id === id ? { ...n, isRead: true } : n
+              ),
+            })),
+          };
+        }
+      );
     },
   });
 };
