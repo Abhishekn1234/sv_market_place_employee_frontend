@@ -45,7 +45,7 @@ export const useHomeCards = () => {
     },
     {
       title: homeTranslations.notifications,
-      value: notificationData?.pagination.totalItems,
+      value: notificationData?.pages.flatMap((data)=>data.pagination.totalItems),
       icon: Bell,
       bg: "bg-red-100",
       text: "text-red-600",
