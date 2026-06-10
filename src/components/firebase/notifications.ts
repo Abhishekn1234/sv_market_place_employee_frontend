@@ -16,8 +16,11 @@ export const requestAndGetToken = async (): Promise<string | null> => {
       if (permission !== "granted") return null;
     }
 
+    const registration = await navigator.serviceWorker.ready;
+
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: registration,
     });
 
     console.log("✅ FCM Token:", token);
