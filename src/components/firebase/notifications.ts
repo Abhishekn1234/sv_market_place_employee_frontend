@@ -51,20 +51,20 @@ export const initOnMessage = async () => {
  onMessage(messaging, (payload) => {
   const data = payload?.data || {};
   const notification = payload?.notification || {};
+console.log(data,notification);
+  // console.log("━━━━━━━━━━━━━━━━━━━━━━");
+  // console.log("⚡ FOREGROUND FCM RECEIVED (LOG ONLY)");
+  // console.log("━━━━━━━━━━━━━━━━━━━━━━");
 
-  console.log("━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("⚡ FOREGROUND FCM RECEIVED (LOG ONLY)");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━");
+  // console.log("📩 FULL PAYLOAD:", payload);
+  // console.log("📦 DATA:", data);
+  // console.log("🔔 NOTIFICATION:", notification);
 
-  console.log("📩 FULL PAYLOAD:", payload);
-  console.log("📦 DATA:", data);
-  console.log("🔔 NOTIFICATION:", notification);
-
-  console.log("🧠 PARSED:");
-  console.log("type:", data?.type);
-  console.log("status:", data?.status);
-  console.log("bookingId:", data?.bookingId);
-  console.log("messageId:", data?.messageId);
+  // console.log("🧠 PARSED:");
+  // console.log("type:", data?.type);
+  // console.log("status:", data?.status);
+  // console.log("bookingId:", data?.bookingId);
+  // console.log("messageId:", data?.messageId);
 
   // ❌ NO NOTIFICATION CREATION HERE
   // ❌ NO AUDIO
