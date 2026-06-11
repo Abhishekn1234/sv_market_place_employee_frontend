@@ -72,30 +72,30 @@ export const useForegroundNotifications = (notificationsData: any) => {
 
       shownIds.current.add(id);
 
-      const title =
-        n.title ||
-        (n.type === "ADMIN_MESSAGE"
-          ? "Admin Message"
-          : "Notification");
+      // const title =
+      //   n.title ||
+      //   (n.type === "ADMIN_MESSAGE"
+      //     ? "Admin Message"
+      //     : "Notification");
 
-      const body =
-        n.message ||
-        n.body ||
-        "You have a new notification";
+      // const body =
+      //   n.message ||
+      //   n.body ||
+      //   "You have a new notification";
 
-      const browserNotification = new Notification(title, {
-        body,
-        icon: "/logo.png",
-        badge: "/logo.png",
-        tag: id,
-        data: { url },
-      });
+      // const browserNotification = new Notification(title, {
+      //   body,
+      //   icon: "/logo.png",
+      //   badge: "/logo.png",
+      //   tag: id,
+      //   data: { url },
+      // });
 
-      browserNotification.onclick = () => {
-        window.focus();
-        navigate(url);
-        browserNotification.close();
-      };
+      // browserNotification.onclick = () => {
+      //   window.focus();
+      //   navigate(url);
+      //   browserNotification.close();
+      // };
     });
   }, [notificationsData, navigate, location.pathname, location.search]);
 };

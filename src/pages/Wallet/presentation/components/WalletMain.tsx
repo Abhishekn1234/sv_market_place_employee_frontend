@@ -63,13 +63,13 @@ export function WalletMain({
     ? new Date(wallet.updatedAt).toLocaleString()
     : null;
 
-  const [visibleCount, setVisibleCount] = useState(5);
+  const [visibleCount, setVisibleCount] = useState(10);
   const [loadingMore, setLoadingMore] = useState(false);
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   const visibleTransactions = transactions.slice(0, visibleCount);
-
+ 
   // ✅ AUTO LOAD MORE (NO BUTTON)
   useEffect(() => {
     const observer = new IntersectionObserver(

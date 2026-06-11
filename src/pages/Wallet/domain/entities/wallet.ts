@@ -16,6 +16,7 @@ export type WalletTransactionSource =
 
 export interface WalletTransaction {
   id: string;
+  _id?: number;
   type: WalletTransactionType;   
   source: WalletTransactionSource; 
   amount: number;

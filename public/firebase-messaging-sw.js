@@ -36,17 +36,23 @@ function getSmartRoute(data = {}) {
   const status = data?.status;
   const bookingId = data?.bookingId;
 
-  // CHAT
   if (type === "CHAT_MESSAGE" || type === "NEW_MESSAGE") {
     return `/chat/${bookingId}`;
   }
 
-  // REQUESTED → AVAILABLE BOOKING
+  if (
+    status === "PAID" ||
+    status === "INVOICE_GENERATED" ||
+    status === "PAYMENT_PENDING" ||
+    status === "COMPLETED"
+  ) {
+    return "/notifications";
+  }
+
   if (type === "BOOKING_REQUEST" || status === "REQUESTED") {
     return `/availableBooking?status=requested&bookingId=${bookingId}`;
   }
 
-  // BOOKING UPDATE → AVAILABLE WORK
   if (
     type === "BOOKING_UPDATE" ||
     type === "BOOKING_UPDATED" ||
@@ -55,7 +61,6 @@ function getSmartRoute(data = {}) {
     return `/availableWork?bookingId=${bookingId}`;
   }
 
-  // DEFAULT
   return "/notifications";
 }
 
@@ -71,7 +76,7 @@ function showNotification(data, notification, messageId) {
 
   const tag = messageId || data.messageId || data.bookingId || "general";
 
-  console.log("🚀 FINAL ROUTE:", url);
+  // console.log("🚀 FINAL ROUTE:", url);
 
   return self.registration.showNotification(title, {
     body,
@@ -94,22 +99,22 @@ function showNotification(data, notification, messageId) {
 ========================= */
 
 messaging.onBackgroundMessage((payload) => {
-  console.log("━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("🔥 FIREBASE MESSAGE RECEIVED");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━");
+  // console.log("━━━━━━━━━━━━━━━━━━━━━━");
+  // console.log("🔥 FIREBASE MESSAGE RECEIVED");
+  // console.log("━━━━━━━━━━━━━━━━━━━━━━");
 
-  console.log("📩 RAW PAYLOAD:", payload);
-  console.log("📦 DATA:", payload?.data);
-  console.log("🔔 NOTIFICATION:", payload?.notification);
+  // console.log("📩 RAW PAYLOAD:", payload);
+  // console.log("📦 DATA:", payload?.data);
+  // console.log("🔔 NOTIFICATION:", payload?.notification);
 
   const data = payload?.data || {};
   const notification = payload?.notification || {};
   const messageId = payload?.messageId;
 
-  console.log("🧠 PARSED:");
-  console.log("type:", data?.type);
-  console.log("status:", data?.status);
-  console.log("bookingId:", data?.bookingId);
+  // console.log("🧠 PARSED:");
+  // console.log("type:", data?.type);
+  // console.log("status:", data?.status);
+  // console.log("bookingId:", data?.bookingId);
 
   self.clients
     .matchAll({ type: "window", includeUncontrolled: true })
@@ -123,7 +128,7 @@ messaging.onBackgroundMessage((payload) => {
         return;
       }
 
-      console.log("🚀 SHOWING NOTIFICATION");
+      // console.log("🚀 SHOWING NOTIFICATION");
       showNotification(data, notification, messageId);
     });
 });

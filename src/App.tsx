@@ -80,7 +80,7 @@ function AppContent() {
     const registerSW = async () => {
       try {
         const reg = await navigator.serviceWorker.ready;
-        console.log("SW ready:", reg);
+        // console.log("SW ready:", reg);
 
         if (reg.waiting) {
           reg.waiting.postMessage({ type: "SKIP_WAITING" });

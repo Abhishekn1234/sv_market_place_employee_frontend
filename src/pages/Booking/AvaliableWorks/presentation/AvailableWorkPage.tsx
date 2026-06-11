@@ -47,7 +47,7 @@ export default function AvailableWorkPage() {
     const id = b.booking?._id || b._id;
     map.set(id, b);
   });
-  console.log("API Assigned:", assignedFromApi);
+  // console.log("API Assigned:", assignedFromApi);
 
   // ✅ SOCKET OVERRIDE (MERGED, NOT REPLACED)
   socketBookings.forEach((b) => {

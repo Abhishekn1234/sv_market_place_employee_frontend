@@ -19,7 +19,7 @@ export default function Wallet() {
   const apiTransactions = transactionsResponse?.data || [];
 
   const transactions: Transaction[] = apiTransactions.map((txn, index) => ({
-    id: parseInt(txn.id) || index + 1,
+    id: Number(txn._id) || index + 1,
     type: txn.type === "CREDIT" ? "credit" : "debit",
     amount: txn.amount,
     description: txn.note || txn.source || t("wallet.transaction"),

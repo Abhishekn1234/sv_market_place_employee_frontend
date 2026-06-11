@@ -3,15 +3,9 @@
 import { useState } from "react";
 import type { Notification } from "../../domain/entities/notification";
 
-// import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
-// import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-
-import { useTheme } from "@/context/ThemeContext";
-// import { useLanguage } from "@/context/LanguageContext";
 
 import { getTypeIcon } from "../utils/gettypeicon";
 import { getTypeColor } from "../utils/gettypecolor";
@@ -36,15 +30,10 @@ export default function NotificationItem({
   onSelect,
   onMarkedRead,
 }: Props) {
-  const { theme } = useTheme();
-  // const { translations } = useLanguage();
   const navigate = useNavigate();
 
   const isRead = notification.isRead;
 
-  // =========================
-  // LOCAL HANDLED STATE
-  // =========================
   const [handled, setHandled] = useState(false);
 
   const isDisabled = isRead || handled;
@@ -55,14 +44,8 @@ export default function NotificationItem({
     "WORK_COMPLETED_PENDING",
   ] as const;
 
-  // =========================
-  // ASSIGNED WORKS
-  // =========================
   const { assignedWorks } = useAssign();
 
-  // =========================
-  // SELECT
-  // =========================
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -79,9 +62,6 @@ export default function NotificationItem({
     );
   };
 
-  // =========================
-  // MARK AS READ
-  // =========================
   const handleMarkRead = async () => {
     if (isDisabled) return;
 
@@ -99,13 +79,9 @@ export default function NotificationItem({
     }
   };
 
-  // =========================
-  // NAVIGATE
-  // =========================
   const handleNavigate = () => {
     if (isDisabled) return;
 
-    // Mark as read before navigating
     handleMarkRead();
 
     const type = notification.type;
@@ -119,14 +95,13 @@ export default function NotificationItem({
         (notification as any).bookingStatus ||
         ""
     ).toUpperCase();
-    
+
     const isRequested = bookingStatus === "REQUESTED";
 
     const isAllowed = booking?.status
       ? ALLOWED_STATUSES.includes(booking.status as any)
       : false;
 
-    // CHAT
     if (type.startsWith("CHAT")) {
       if (!booking) {
         toast.error("Booking not found or already finished.");
@@ -137,7 +112,6 @@ export default function NotificationItem({
       return;
     }
 
-    // BOOKING REQUEST
     if (
       type === "BOOKING_REQUEST" ||
       type.startsWith("BOOKING")
@@ -168,34 +142,44 @@ export default function NotificationItem({
   const message =
     notification.message || notificationsTranslations.defaultMessage;
 
- const formattedDate = formatNotificationDate(notification.createdAt);
+  const formattedDate = formatNotificationDate(
+    notification.createdAt
+  );
 
   return (
     <div
       onClick={handleNavigate}
-      className={`group flex flex-col gap-4 rounded-3xl border bg-white p-4 shadow-sm transition-all duration-200 sm:flex-row sm:items-center sm:justify-between sm:p-5
+      className={`group flex flex-col gap-4 rounded-3xl border bg-white dark:bg-slate-900 p-4 shadow-sm transition-all duration-200 sm:flex-row sm:items-center sm:justify-between sm:p-5
         ${
           isSelected
-            ? "border-blue-500 ring-2 ring-blue-500/20"
-            : theme === "dark"
-            ? "border-slate-800 bg-slate-950 shadow-slate-900/20"
-            : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white"
+            ? "border-blue-400 ring-2 ring-blue-500/20"
+            : "border-slate-200 dark:border-slate-700"
         }
-        ${isDisabled ? "cursor-not-allowed opacity-70" : "cursor-pointer"}
+        ${
+          isDisabled
+            ? "cursor-not-allowed opacity-70"
+            : "cursor-pointer"
+        }
       `}
     >
       <div className="flex flex-1 items-start gap-4 min-w-0">
         <div
           onClick={handleSelect}
-          className={isDisabled ? "cursor-not-allowed" : "cursor-pointer"}
+          className={
+            isDisabled
+              ? "cursor-not-allowed"
+              : "cursor-pointer"
+          }
         >
-          <Checkbox checked={isSelected} disabled={isDisabled} />
+          <Checkbox
+            checked={isSelected}
+            disabled={isDisabled}
+          />
         </div>
 
         <div
           className={`flex h-12 w-12 items-center justify-center rounded-3xl border text-white ${getTypeColor(
-            notification.type,
-            theme
+            notification.type
           )}`}
         >
           {getTypeIcon(notification.type)}
@@ -204,33 +188,25 @@ export default function NotificationItem({
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <h3
-                className={`font-semibold tracking-tight ${
-                  theme === "dark"
-                    ? "text-slate-100"
-                    : "text-slate-900"
-                }`}
-              >
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {title}
               </h3>
-              <p
-                className={`mt-1 text-sm leading-6 ${
-                  theme === "dark"
-                    ? "text-slate-400"
-                    : "text-slate-600"
-                }`}
-              >
+
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 {message}
               </p>
             </div>
 
             <div className="mt-2 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 sm:mt-0">
               <span>{formattedDate}</span>
-              <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
-                isRead
-                  ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                  : "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
-              }`}>
+
+              <span
+                className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
+                  isRead
+                    ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                    : "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
+                }`}
+              >
                 {isRead ? "Read" : "Unread"}
               </span>
             </div>

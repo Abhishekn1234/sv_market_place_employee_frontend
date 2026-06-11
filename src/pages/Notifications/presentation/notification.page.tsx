@@ -174,7 +174,7 @@ export default function NotificationsPage() {
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* HEADER STATS */}
-        <div className="rounded-3xl border border-slate-200 bg-white/90 p-6">
+        <div className="rounded-3xl border border-slate-200 bg-white/90 dark::border-slate-800 dark:bg-slate-900/90 dark:shadow-none p-6">
           <div className="flex justify-between">
             <div>
               <h1 className="text-2xl font-semibold">
@@ -247,7 +247,7 @@ export default function NotificationsPage() {
             {/* END */}
             {!hasNextPage && notifications.length > 0 && (
               <div className="text-center text-sm text-slate-500 py-4">
-                No more notifications
+                {t("notifications.end")}
               </div>
             )}
           </div>
