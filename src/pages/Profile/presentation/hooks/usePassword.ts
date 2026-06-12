@@ -4,6 +4,7 @@ import { UpdatePasswordUsecase } from "../../domain/usecase/UpdatePasswordusecas
 import type { Profile } from "../../domain/entities/profile";
 
 import type { UpdatePassword } from "../../domain/entities/updatepassword";
+import { toast } from "react-toastify";
 
 export function usePassword() {
   const queryClient = useQueryClient();
@@ -22,5 +23,12 @@ export function usePassword() {
     onSuccess: (data) => {
       queryClient.setQueryData(["profile"], data);
     },
+    onError: (err: any) => {
+  toast.error(
+    err?.response?.data?.message ||
+    err?.message ||
+    "OTP Verification Failed"
+  );
+},
   });
 }

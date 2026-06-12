@@ -23,12 +23,14 @@ export function useSendOtpMobile() {
         toast.error("Failed to get OTP hash from server");
       }
     },
-    onError: (err: unknown) => {
-      if (err instanceof Error) {
-        toast.error(`OTP ERROR: ${err.message}`);
-      } else {
-        toast.error(`OTP ERROR: ${String(err)}`);
-      }
-    },
+  onError: (err: any) => {
+  console.error("OTP ERROR:", err);
+
+  toast.error(
+    err?.response?.data?.message ||
+    err?.message ||
+    "Something went wrong"
+  );
+},
   });
 }

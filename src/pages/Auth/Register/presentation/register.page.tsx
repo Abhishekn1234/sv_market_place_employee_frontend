@@ -6,7 +6,7 @@ import { useRegister } from "./hooks/useRegister";
 import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOffIcon, User, Mail, KeyRound, PhoneCallIcon } from "lucide-react";
 import { toast } from "react-toastify";
-import { COUNTRIES } from "./components/phonenumberformat";
+
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/core/store/auth";
 import CommonSpinner from "@/components/common/CommonSpinner";
@@ -21,29 +21,11 @@ export default function RegisterPage() {
     confirmPassword: "",
     phone:""
   });
-  const [country, setCountry] = useState(COUNTRIES[0]); // default India
+
 
   const navigate = useNavigate();
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value.replace(/\D/g, "");
+ 
 
-  if (value.length <= country.max) {
-    setFormData(prev => ({
-      ...prev,
-      phone: value,
-    }));
-  }
-};
-const handleCountryChange = (iso: string) => {
-  const selected = COUNTRIES.find(c => c.iso === iso)!;
-  setCountry(selected);
-
-  // Reset phone when country changes
-  setFormData(prev => ({
-    ...prev,
-    phone: "",
-  }));
-};
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
@@ -70,6 +52,7 @@ const handleCountryChange = (iso: string) => {
   };
 
   const handleRegister = () => {
+    console.log(formData);
   if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone) {
     toast.error("Please fill in all fields!");
     return;
@@ -328,26 +311,17 @@ const handleCountryChange = (iso: string) => {
 
                 <div className="flex">
                   
-                  <select
-                    value={country.iso}
-                    onChange={(e) => handleCountryChange(e.target.value)}
-                    className="h-12 rounded-l-lg border  px-3  text-sm"
-                  >
-                    {COUNTRIES.map(c => (
-                      <option key={c.iso} value={c.iso}>
-                        {c.flag} {c.code}
-                      </option>
-                    ))}
-                  </select>
+                
 
               
                   <div className="relative flex-1">
                     <PhoneCallIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                     <Input
                       type="tel"
+                      name="phone"
                       value={formData.phone}
-                      onChange={handlePhoneChange}
-                      placeholder={`${country.max} digit number`}
+                      onChange={handleChange}
+                      
                       className="h-12 w-full pl-10 rounded-l-none"
                       inputMode="numeric"
                     />

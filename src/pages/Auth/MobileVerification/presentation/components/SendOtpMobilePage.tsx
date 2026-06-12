@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSendOtpMobile } from "../hooks/useSendOtpMobile";
+import { Input } from "@/components/ui/input";
 
 export default function SendOtpMobilePage() {
   const [mobile, setMobile] = useState("");
@@ -24,7 +25,7 @@ export default function SendOtpMobilePage() {
         <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-2">
           Mobile Number
         </label>
-        <input
+        <Input
           type="tel"
           id="mobile"
           name="mobile"

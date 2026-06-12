@@ -3,6 +3,7 @@ import { ProfileRepoImplementation } from "../../data/repositories/ProfileImpl";
 import { UpdateProfileUsecase } from "../../domain/usecase/UpdateProfileusecase";
 import type {  ProfileUpdate } from "../../domain/entities/profileupdate";
 import { useAuthStore } from "@/core/store/auth";
+import { toast } from "react-toastify";
 
 const repo = new ProfileRepoImplementation();
 const usecase = new UpdateProfileUsecase(repo);
@@ -50,6 +51,13 @@ export function useUpdateProfile() {
               
         });
 
+    },
+        onError: (err: any) => {
+      toast.error(
+        err?.response?.data?.message ||
+        err?.message ||
+        "OTP Verification Failed"
+      );
     },
   });
 }

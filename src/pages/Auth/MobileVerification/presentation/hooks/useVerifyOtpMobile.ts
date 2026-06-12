@@ -18,12 +18,12 @@ export function useVerifyOtpMobile() {
       toast.success("Mobile OTP verified successfully");
       navigate("/login");
     },
-    onError: (err: unknown) => {
-      if (err instanceof Error) {
-        toast.error(`OTP Verification Error: ${err.message}`);
-      } else {
-        toast.error(`OTP Verification Error: ${String(err)}`);
-      }
-    },
+ onError: (err: any) => {
+  toast.error(
+    err?.response?.data?.message ||
+    err?.message ||
+    "OTP Verification Failed"
+  );
+},
   });
 }
