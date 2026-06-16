@@ -145,14 +145,15 @@ const normalizedWorkList = useMemo(() => {
             <div className="mt-4 space-y-2">
               {coordinates && (
                 <Button
-                  variant="outline"
-                  onClick={() =>
-                    window.open(
-                      `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}`
-                    )
-                  }
-                  className="w-full"
-                >
+                    variant="outline"
+                    onClick={() =>
+                      window.open(
+                        `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`,
+                        "_blank"
+                      )
+                    }
+                    className="w-full"
+                  >
                   <MapPin size={16} />
                   {t("availableWork.getDirections")}
                 </Button>

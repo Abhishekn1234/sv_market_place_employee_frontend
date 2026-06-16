@@ -281,35 +281,36 @@ export default function AppHeader({
               <span>{language}</span>
             </Button>
 
-            {langDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-36 bg-white border rounded-md shadow-lg z-50">
-                {languages.map((lang) => (
-                  <Button
-                    key={lang.code}
-                    variant="ghost"
-                    onClick={() => {
-                      setLanguage(
-                        lang.code as
-                          | "EN"
-                          | "AR"
-                          | "HI"
-                      );
-
-                      setLangDropdownOpen(
-                        false
-                      );
-                    }}
-                    className="flex items-center gap-2 w-full px-4 py-2 hover:bg-gray-100"
-                  >
-                    <span>
-                      {lang.icon}
-                    </span>
-
-                    {lang.label}
-                  </Button>
-                ))}
-              </div>
-            )}
+          {langDropdownOpen && (
+       <div
+    className="
+      absolute right-0 mt-2 w-36
+      bg-white dark:bg-gray-900
+      border border-gray-200 dark:border-gray-700
+      rounded-md shadow-lg
+      z-50
+    "
+  >
+    {languages.map((lang) => (
+      <Button
+        key={lang.code}
+        variant="ghost"
+        onClick={() => {
+          setLanguage(lang.code as "EN" | "AR" | "HI");
+          setLangDropdownOpen(false);
+        }}
+        className="
+          flex items-center gap-2 w-full px-4 py-2
+          text-gray-900 dark:text-gray-100
+          hover:bg-gray-100 dark:hover:bg-gray-800
+        "
+      >
+        <span>{lang.icon}</span>
+        {lang.label}
+      </Button>
+    ))}
+          </div>
+         )}
           </div>
 
           {/* PROFILE */}

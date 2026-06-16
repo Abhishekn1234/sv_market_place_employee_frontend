@@ -7,11 +7,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
+// Register only ONE service worker for FCM push handling.
+// This prevents double notifications caused by multiple SW registrations.
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/firebase-messaging-sw.js").then(() => {
-    console.log("✅ Firebase messaging SW registered");
-  });
+  navigator.serviceWorker
+    .register("/firebase-messaging-sw.js")
+    .then(() => {
+      console.log("✅ Firebase messaging SW registered");
+    })
+    .catch((err) => {
+      console.error("❌ Firebase messaging SW register failed:", err);
+    });
 }
+
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

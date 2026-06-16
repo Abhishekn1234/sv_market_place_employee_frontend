@@ -45,6 +45,7 @@
     "description": "Your progress updates automatically based on your profile.",
     "progress": "Progress",
     "completed": "Completed",
+    "completenow":"Complete now",
     "waiting": "Waiting for update...",
     "finished": "Setup completed automatically"
   },

@@ -5,50 +5,11 @@ import { TrendingUp, Wallet, ReceiptText, Coins } from "lucide-react";
 import { useGetMyWalletStatistics } from "../hooks/useStats";
 import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
-import { CommonCard } from "@/components/common/CommonCard";
+
 import CommonSpinner from "@/components/common/CommonSpinner";
-
-type RevenueFilter =
-  | "today"
-  | "7_days"
-  | "30_days"
-  | "3_months"
-  | "all";
-
-
-
-function Card({
-  title,
-  value,
-  icon: Icon,
-  sub,
-}: {
-  title: string;
-  value: string | number | React.ReactNode;
-  icon: any;
-  sub?: string;
-}) {
- return (
-  <CommonCard
-    title={
-      <div className="flex items-center justify-between w-full">
-        <p className="text-sm text-gray-500">{title}</p>
-        <Icon className="h-4 w-4 text-gray-400" />
-      </div>
-    }
-    value={
-      <h2 className="text-xl font-semibold text-gray-900">
-        {value ?? "-"}
-      </h2>
-    }
-    description={
-      sub ? <p className="text-xs text-gray-400">{sub}</p> : undefined
-    }
-    className="rounded-2xl shadow-sm border bg-white"
-    contentClassName="pt-0"
-  />
-);
-}
+import type { RevenueFilter } from "../../domain/entities/revenuetype";
+import { Card } from "./HomeCard";
+import { getRevenueFilters } from "../helpers/filtershome";
 
 export default function WalletDashboard() {
   const [revenueFilter, setRevenueFilter] =
@@ -56,14 +17,7 @@ export default function WalletDashboard() {
   const {translations} = useLanguage();
   const { data: walletStats, isLoading } =
     useGetMyWalletStatistics(revenueFilter);
-    
-const filters: { label: string; value: RevenueFilter }[] = [
-  { label: translations.HomePage.stats.filters.today, value: "today" },
-  { label: translations.HomePage.stats.filters["7_days"], value: "7_days" },
-  { label: translations.HomePage.stats.filters["30_days"], value: "30_days" },
-  { label: translations.HomePage.stats.filters["3_months"], value: "3_months" },
-  { label: translations.HomePage.stats.filters.all, value: "all" },
-];
+const filters = getRevenueFilters(translations);
   const avgPerTxn = useMemo(() => {
     if (!walletStats?.transactionCount) return 0;
     return (

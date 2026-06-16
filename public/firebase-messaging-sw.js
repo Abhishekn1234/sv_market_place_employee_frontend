@@ -1,13 +1,15 @@
 /* =========================
    IMPORT CONFIG
 ========================= */
-/* =========================
-   IMPORT CONFIG
-========================= */
+
 importScripts("./firebase-config.js");
 
-importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js");
+importScripts(
+  "https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"
+);
+importScripts(
+  "https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"
+);
 
 firebase.initializeApp(self.FIREBASE_CONFIG);
 
@@ -28,7 +30,7 @@ self.addEventListener("message", (event) => {
 });
 
 /* =========================
-   ROUTE DECIDER (🔥 CORE FIX)
+   ROUTE DECIDER
 ========================= */
 
 function getSmartRoute(data = {}) {
@@ -36,31 +38,70 @@ function getSmartRoute(data = {}) {
   const status = data?.status;
   const bookingId = data?.bookingId;
 
-  if (type === "CHAT_MESSAGE" || type === "NEW_MESSAGE") {
-    return `/chat/${bookingId}`;
-  }
+  console.log("📍 Route Decision:", {
+    type,
+    status,
+    bookingId,
+  });
 
+  /**
+   * PAYMENT RELATED
+   * ALWAYS GO TO NOTIFICATIONS
+   */
   if (
-    status === "PAID" ||
-    status === "INVOICE_GENERATED" ||
-    status === "PAYMENT_PENDING" ||
-    status === "COMPLETED"
+    [
+      "PAID",
+      "INVOICE_GENERATED",
+      "PAYMENT_PENDING",
+      "COMPLETED",
+    ].includes(status)
   ) {
     return "/notifications";
   }
 
-  if (type === "BOOKING_REQUEST" || status === "REQUESTED") {
-    return `/availableBooking?status=requested&bookingId=${bookingId}`;
+  /**
+   * CHAT
+   */
+  if (
+    type === "CHAT_MESSAGE" ||
+    type === "NEW_MESSAGE"
+  ) {
+    return bookingId
+      ? `/chat/${bookingId}`
+      : "/notifications";
   }
 
+  /**
+   * NEW BOOKING REQUEST
+   */
+  if (
+    type === "BOOKING_REQUEST" ||
+    status === "REQUESTED"
+  ) {
+    return bookingId
+      ? `/availableBooking?status=requested&bookingId=${bookingId}`
+      : "/availableBooking?status=requested";
+  }
+
+  /**
+   * WORK UPDATES
+   * NOTE:
+   * PAID status already returned above,
+   * so it will never reach here.
+   */
   if (
     type === "BOOKING_UPDATE" ||
     type === "BOOKING_UPDATED" ||
     status === "WORKER_ACCEPTED"
   ) {
-    return `/availableWork?bookingId=${bookingId}`;
+    return bookingId
+      ? `/availableWork?bookingId=${bookingId}`
+      : "/availableWork";
   }
 
+  /**
+   * DEFAULT
+   */
   return "/notifications";
 }
 
@@ -68,133 +109,189 @@ function getSmartRoute(data = {}) {
    SHOW NOTIFICATION
 ========================= */
 
-function showNotification(data, notification, messageId) {
+function showNotification(
+  data,
+  notification,
+  messageId
+) {
   const url = getSmartRoute(data);
 
-  const title = notification?.title || data?.title || "Notification";
-  const body = notification?.body || data?.body || "You have a new update";
+  const title =
+    notification?.title ||
+    data?.title ||
+    "Notification";
 
-  const tag = messageId || data.messageId || data.bookingId || "general";
+  const body =
+    notification?.body ||
+    data?.body ||
+    "You have a new update";
 
-  // console.log("🚀 FINAL ROUTE:", url);
+  const tag =
+    messageId ||
+    data?.messageId ||
+    data?.bookingId ||
+    "general";
 
-  return self.registration.showNotification(title, {
-    body,
-    icon: "/icon.png",
-    badge: "/icon.png",
-    requireInteraction: true,
-    tag,
-    data: {
-      url,
-      type: data.type,
-      status: data.status,
-      bookingId: data.bookingId,
-      messageId: messageId || data.messageId,
-    },
-  });
+  console.log("🚀 Final Route:", url);
+
+  return self.registration.showNotification(
+    title,
+    {
+      body,
+      icon: "/icon.png",
+      badge: "/icon.png",
+      requireInteraction: true,
+      tag,
+      data: {
+        url,
+        type: data?.type,
+        status: data?.status,
+        bookingId: data?.bookingId,
+        messageId:
+          messageId || data?.messageId,
+      },
+    }
+  );
 }
 
 /* =========================
    BACKGROUND MESSAGE
 ========================= */
 
-messaging.onBackgroundMessage((payload) => {
-  // console.log("━━━━━━━━━━━━━━━━━━━━━━");
-  // console.log("🔥 FIREBASE MESSAGE RECEIVED");
-  // console.log("━━━━━━━━━━━━━━━━━━━━━━");
+messaging.onBackgroundMessage(
+  async (payload) => {
+    console.log(
+      "━━━━━━━━━━━━━━━━━━━━━━"
+    );
+    console.log(
+      "🔥 FIREBASE MESSAGE RECEIVED"
+    );
+    console.log(
+      "━━━━━━━━━━━━━━━━━━━━━━"
+    );
 
-  // console.log("📩 RAW PAYLOAD:", payload);
-  // console.log("📦 DATA:", payload?.data);
-  // console.log("🔔 NOTIFICATION:", payload?.notification);
+    console.log("📩 RAW PAYLOAD:", payload);
+    console.log("📦 DATA:", payload?.data);
+    console.log(
+      "🔔 NOTIFICATION:",
+      payload?.notification
+    );
 
-  const data = payload?.data || {};
-  const notification = payload?.notification || {};
-  const messageId = payload?.messageId;
+    const data = payload?.data || {};
+    const notification =
+      payload?.notification || {};
+    const messageId = payload?.messageId;
 
-  // console.log("🧠 PARSED:");
-  // console.log("type:", data?.type);
-  // console.log("status:", data?.status);
-  // console.log("bookingId:", data?.bookingId);
-
-  self.clients
-    .matchAll({ type: "window", includeUncontrolled: true })
-    .then((clients) => {
-      const isForeground = clients.some((c) => c.focused);
-
-      console.log("👀 Foreground active:", isForeground);
-
-      if (isForeground) {
-        console.log("⏭️ Skipping notification (foreground)");
-        return;
-      }
-
-      // console.log("🚀 SHOWING NOTIFICATION");
-      showNotification(data, notification, messageId);
-    });
-});
-
-/* =========================
-   CLICK HANDLER
-========================= */
-
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-
-  const data = event.notification.data || {};
-  const url =
-    getSmartRoute(data) || "/notifications";
-
-  event.waitUntil(
-    (async () => {
-      const clientsArr = await self.clients.matchAll({
+    const clientsArr =
+      await self.clients.matchAll({
         type: "window",
         includeUncontrolled: true,
       });
 
+    const isForeground =
+      clientsArr.some(
+        (client) =>
+          client.visibilityState ===
+          "visible"
+      );
+
+    console.log(
+      "👀 Foreground Active:",
+      isForeground
+    );
+
+    if (isForeground) {
       console.log(
-        "SW Origin:",
-        self.location.origin
+        "⏭️ Skipping notification (foreground)"
       );
+      return;
+    }
 
-      const sameOriginClients =
-        clientsArr.filter((client) => {
-          try {
-            return (
-              new URL(client.url).origin ===
-              self.location.origin
-            );
-          } catch {
-            return false;
-          }
-        });
+    await showNotification(
+      data,
+      notification,
+      messageId
+    );
+  }
+);
 
-      if (sameOriginClients.length > 0) {
-        const client =
-          sameOriginClients.find(
-            (c) => c.focused
-          ) || sameOriginClients[0];
+/* =========================
+   NOTIFICATION CLICK
+========================= */
 
-        await client.focus();
+self.addEventListener(
+  "notificationclick",
+  (event) => {
+    event.notification.close();
 
-        client.postMessage({
-          type: "NAVIGATE",
-          isUserAction: true,
+    const data =
+      event.notification.data || {};
+
+    const url =
+      data.url ||
+      getSmartRoute(data) ||
+      "/notifications";
+
+    console.log(
+      "🔔 Notification Clicked"
+    );
+    console.log("📍 Redirect URL:", url);
+
+    event.waitUntil(
+      (async () => {
+        const clientsArr =
+          await self.clients.matchAll({
+            type: "window",
+            includeUncontrolled: true,
+          });
+
+        const sameOriginClients =
+          clientsArr.filter(
+            (client) => {
+              try {
+                return (
+                  new URL(client.url)
+                    .origin ===
+                  self.location.origin
+                );
+              } catch {
+                return false;
+              }
+            }
+          );
+
+        if (
+          sameOriginClients.length > 0
+        ) {
+          const client =
+            sameOriginClients.find(
+              (c) => c.focused
+            ) ||
+            sameOriginClients[0];
+
+          await client.focus();
+
+          client.postMessage({
+            type: "NAVIGATE",
+            isUserAction: true,
+            url,
+            status: data.status,
+            bookingId:
+              data.bookingId,
+          });
+
+          return;
+        }
+
+        const targetUrl = new URL(
           url,
-          status: data.status,
-          bookingId: data.bookingId,
-        });
+          self.location.origin
+        ).href;
 
-        return;
-      }
-
-      const targetUrl = new URL(
-        url,
-        self.location.origin
-      ).href;
-
-      await self.clients.openWindow(
-        targetUrl
-      );
-    })()
-  );
-});
+        await self.clients.openWindow(
+          targetUrl
+        );
+      })()
+    );
+  }
+);

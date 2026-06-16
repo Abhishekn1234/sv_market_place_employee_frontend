@@ -140,14 +140,15 @@ export default function HomeStats() {
                 isRTL ? "flex-row-reverse" : ""
               }`}
             >
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-gray-500 truncate">
-                  {card.title}
-                </p>
-                <p className="text-lg sm:text-xl font-bold truncate">
-                  {card.value}
-                </p>
-              </div>
+             <div className="min-w-0">
+  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+    {card.title}
+  </p>
+
+  <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+    {card.value}
+  </p>
+</div>
 
               <div className={`h-10 w-10 flex items-center justify-center rounded-xl ${card.bg}`}>
                 <card.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${card.text}`} />

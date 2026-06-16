@@ -106,9 +106,9 @@ export default function NotificationsHeader({
     try {
       await Promise.resolve(markSelectedAsRead());
 
-      toast.success(
-        t("notifications.markSelectedSuccess")
-      );
+      // toast.success(
+      //   t("notifications.markSelectedSuccess")
+      // );
     } catch (error) {
       console.error(error);
 

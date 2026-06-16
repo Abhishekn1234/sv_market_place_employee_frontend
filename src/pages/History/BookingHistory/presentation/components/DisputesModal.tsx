@@ -64,8 +64,8 @@ export default function DisputeModal({
         response,
       },
       {
-        onSuccess: () => {
-          toast.success(t("disputepage.responseSubmitted") || "Response submitted successfully");
+        onSuccess: (err:any) => {
+          toast.success(err?.response?.data?.message||t("disputepage.responseSubmitted") || "Response submitted successfully");
           setSelected(null);
           setResponse("");
         },
