@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 function CommonModal({
   open,
@@ -16,12 +18,18 @@ function CommonModal({
   );
 }
 
+/* =========================
+   TRIGGER
+========================= */
 function CommonModalTrigger(
   props: React.ComponentProps<typeof DialogPrimitive.Trigger>
 ) {
   return <DialogPrimitive.Trigger {...props} />;
 }
 
+/* =========================
+   OVERLAY
+========================= */
 function CommonModalOverlay({
   className,
   ...props
@@ -29,7 +37,7 @@ function CommonModalOverlay({
   return (
     <DialogPrimitive.Overlay
       className={cn(
-        "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm",
+        "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         className
@@ -39,6 +47,9 @@ function CommonModalOverlay({
   );
 }
 
+/* =========================
+   CONTENT
+========================= */
 function CommonModalContent({
   className,
   children,
@@ -47,29 +58,27 @@ function CommonModalContent({
   return (
     <DialogPrimitive.Portal>
       <CommonModalOverlay />
+
       <DialogPrimitive.Content
         className={cn(
-          // Centering and mobile-friendly top positioning
-          "fixed left-1/2 z-50",
-          "top-4 sm:top-1/2",
-          "-translate-x-1/2 sm:-translate-y-1/2",
+          "fixed left-1/2 top-1/2 z-50",
 
-          // Width responsiveness
-          "w-[95vw] sm:w-[90vw] md:w-full",
-          "max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl",
+          // ✅ CRITICAL FIX: safe centering on small screens
+          "-translate-x-1/2 -translate-y-1/2",
 
-          // Height safety
-          "max-h-[calc(100dvh-2rem)]",
+          // ✅ width safety for 320–375px screens
+          "w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] sm:max-w-lg md:max-w-xl lg:max-w-2xl",
 
-          // Layout
+          // height safety
+          "max-h-[90dvh]",
+
+          // layout
           "flex flex-col overflow-hidden",
 
-          // Styling
-          "rounded-xl sm:rounded-2xl",
-          "border bg-background shadow-2xl",
-          "focus:outline-none",
+          // styling
+          "rounded-xl sm:rounded-2xl border bg-background shadow-2xl",
 
-          // Animations
+          // animations
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95",
 
@@ -83,24 +92,50 @@ function CommonModalContent({
   );
 }
 
+/* =========================
+   HEADER (WITH CLOSE BUTTON)
+========================= */
 function CommonModalHeader({
   className,
+  children,
+  onClose,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { onClose?: () => void }) {
   return (
     <div
       className={cn(
-        // Sticky header for long content
-        "shrink-0",
-        "px-4 py-3 sm:px-6 sm:py-4",
+        "relative shrink-0",
+        "px-4 sm:px-6 py-3 sm:py-4",
         "border-b",
         className
       )}
       {...props}
-    />
+    >
+      {children}
+
+      {/* Close Button */}
+      <DialogPrimitive.Close asChild>
+        <Button
+          onClick={onClose}
+          className={cn(
+            "absolute right-3 top-3 sm:right-4 sm:top-4",
+            "h-9 w-9 rounded-md",
+            "flex items-center justify-center",
+            "hover:bg-muted transition",
+            "focus:outline-none focus:ring-2 focus:ring-ring"
+          )}
+          variant="ghost"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </DialogPrimitive.Close>
+    </div>
   );
 }
 
+/* =========================
+   BODY
+========================= */
 function CommonModalBody({
   className,
   ...props
@@ -108,9 +143,8 @@ function CommonModalBody({
   return (
     <div
       className={cn(
-        // Scrollable content
         "flex-1 min-h-0 overflow-y-auto",
-        "px-4 py-3 sm:px-6 sm:py-4",
+        "px-4 sm:px-6 py-3 sm:py-4",
         className
       )}
       {...props}
@@ -118,6 +152,9 @@ function CommonModalBody({
   );
 }
 
+/* =========================
+   FOOTER
+========================= */
 function CommonModalFooter({
   className,
   ...props
@@ -125,9 +162,8 @@ function CommonModalFooter({
   return (
     <div
       className={cn(
-        // Sticky footer for actions
         "shrink-0",
-        "px-4 py-3 sm:px-6 sm:py-4",
+        "px-4 sm:px-6 py-3 sm:py-4",
         "border-t",
         "flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end",
         className
@@ -137,6 +173,9 @@ function CommonModalFooter({
   );
 }
 
+/* =========================
+   EXPORTS
+========================= */
 CommonModal.Trigger = CommonModalTrigger;
 CommonModal.Content = CommonModalContent;
 CommonModal.Header = CommonModalHeader;

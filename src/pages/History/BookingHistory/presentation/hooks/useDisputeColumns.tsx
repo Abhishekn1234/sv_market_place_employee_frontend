@@ -1,6 +1,7 @@
 import type { TableColumn } from "@/components/common/CommonTable";
 import type { Dispute } from "../../domain/entities/disputes";
 import { Button } from "@/components/ui/button";
+
 type Params = {
   onSelect: (d: Dispute) => void;
   formatDate: (date: string) => string;
@@ -16,7 +17,7 @@ export const getDisputeColumns = ({
     key: "reason",
     header: t("disputepage.reason"),
     render: (d) => (
-      <span className="text-sm">{d.reason}</span>
+      <span className="text-sm">{d.reasonType}</span>
     ),
   },
   {
@@ -31,19 +32,20 @@ export const getDisputeColumns = ({
   {
     key: "status",
     header: t("disputepage.status"),
-    render: (d) => (
-      <span
-        className={`text-xs px-2 py-1 rounded-full ${
-          d.status === "IN_REVIEW"
-            ? "bg-yellow-100 text-yellow-700"
-            : d.status === "RESOLVED"
-            ? "bg-green-100 text-green-700"
-            : "bg-red-100 text-red-700"
-        }`}
-      >
-        {d.status}
-      </span>
-    ),
+    render: (d) => {
+      const statusClass =
+        d.status === "IN_REVIEW"
+          ? "bg-yellow-100 text-yellow-700"
+          : d.status === "RESOLVED"
+          ? "bg-green-100 text-green-700"
+          : "bg-red-100 text-red-700";
+
+      return (
+        <span className={`text-xs px-2 py-1 rounded-full ${statusClass}`}>
+          {d.status}
+        </span>
+      );
+    },
   },
   {
     key: "workerResponse",
@@ -72,10 +74,7 @@ export const getDisputeColumns = ({
     key: "actions",
     header: t("disputepage.actions"),
     render: (d) => (
-      <Button
-        onClick={() => onSelect(d)}
-        className="text-xs"
-      >
+      <Button onClick={() => onSelect(d)} className="text-xs">
         {t("disputepage.respond")}
       </Button>
     ),

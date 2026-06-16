@@ -12,10 +12,12 @@ import { CommonModal } from "@/components/common/CommonModal";
 import { getDisputeColumns } from "../hooks/useDisputeColumns";
 import { formatDate } from "@/pages/Activity/RecentActivity/presentation/helpers/formatdate";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+
 import { useLanguage } from "@/context/LanguageContext";
 import CommonSpinner from "@/components/common/CommonSpinner";
+import { useQueryClient } from "@tanstack/react-query";
+import DisputesMobileCards from "./DisputesMobileCards";
+import BookingDisputeRespondModal from "./BookingDisputeRespondModal";
 
 type Props = {
   bookingId: string | null;
@@ -24,37 +26,37 @@ type Props = {
 };
 
 export default function DisputeModal({
-//   bookingId,
   open,
   onClose,
 }: Props) {
-  // ✅ Fetch disputes (recommended: pass bookingId to API)
   const { data: disputes = [], isLoading } = useGetDisputes();
-  const {t}=useLanguage();
+  const { t } = useLanguage();
   const respondMutation = useRespondDisputes();
 
   const [selected, setSelected] = useState<Dispute | null>(null);
   const [response, setResponse] = useState("");
-
-  // ✅ Reset state when modal closes
+  const [responseOpen, setResponseOpen] = useState(false);
+  const queryClient=useQueryClient();
   useEffect(() => {
     if (!open) {
       setSelected(null);
       setResponse("");
+      setResponseOpen(false);
     }
   }, [open]);
 
-  // ✅ Columns
   const columns = getDisputeColumns({
-    onSelect: setSelected,
+    onSelect: (d) => {
+      setSelected(d);
+      setResponseOpen(true);
+    },
     formatDate,
-    t:t
+    t,
   });
 
-  // ✅ Submit response
   const handleSubmit = () => {
     if (!selected || !response.trim()) {
-      toast.error(t("disputepage.enterResponse") || "Please enter a response.");
+      toast.error(t("disputepage.enterResponse"));
       return;
     }
 
@@ -64,90 +66,100 @@ export default function DisputeModal({
         response,
       },
       {
-        onSuccess: (err:any) => {
-          toast.success(err?.response?.data?.message||t("disputepage.responseSubmitted") || "Response submitted successfully");
-          setSelected(null);
-          setResponse("");
-        },
+       onSuccess: () => {
+        queryClient.setQueryData(["disputes"], (old: Dispute[] = []) => {
+    if (!Array.isArray(old)) return old;
+
+    return old.map((d) =>
+      d._id === selected?._id
+        ? {
+            ...d,
+            workerResponse: response, // ✅ instant UI update
+            status: "RESOLVED", // optional but recommended
+          }
+        : d
+    );
+      });
+
+      setSelected(null);
+      setResponse("");
+      setResponseOpen(false);
+       },
         onError: (err: any) => {
-          toast.error(err?.response?.data?.message || t("disputepage.responseFailed") || "Failed to submit response");
+          toast.error(
+            err?.response?.data?.message ||
+              t("disputepage.responseFailed") ||
+              "Failed to submit response"
+          );
         },
       }
     );
   };
 
   return (
-    <CommonModal open={open} onOpenChange={onClose}>
-      <CommonModal.Content>
-        
-        {/* HEADER */}
-        <CommonModal.Header>
-          <h2 className="text-lg font-semibold"> {t('disputepage.title')}</h2>
-        </CommonModal.Header>
+    <>
+      {/* =========================
+          MAIN DISPUTE LIST MODAL
+      ========================= */}
+      <CommonModal open={open} onOpenChange={onClose}>
+        <CommonModal.Content>
+          <CommonModal.Header>
+            <h2 className="text-lg font-semibold">
+              {t("disputepage.title")}
+            </h2>
+          </CommonModal.Header>
 
-        {/* BODY */}
-        <CommonModal.Body>
-          {isLoading && <CommonSpinner/>}
+          <CommonModal.Body>
+            {isLoading && <CommonSpinner />}
 
-          {!isLoading && disputes.length === 0 && (
-            <p className="text-gray-500 text-sm">
-             {t('disputepage.noData')}
-            </p>
-          )}
+            {!isLoading && disputes.length === 0 && (
+              <p className="text-gray-500 text-sm">
+                {t("disputepage.noData")}
+              </p>
+            )}
 
-          {!isLoading && disputes.length > 0 && (
-            <CommonTable<Dispute>
-             
-              columns={columns}
-              data={disputes}
-              keyExtractor={(d) => d._id}
-            />
-          )}
-
-          {/* RESPONSE SECTION */}
-          {selected && (
-            <div className="mt-6 border-t pt-5 space-y-4">
-              <Label className="text-sm font-semibold text-slate-700">
-                {t('disputepage.response')}: {selected.reason}
-              </Label>
-
-              <Textarea
-                value={response}
-                onChange={(e) => setResponse(e.target.value)}
-                className="w-full border-slate-200 shadow-sm rounded-lg p-3 text-sm focus:ring-blue-500/20"
-                rows={4}
-                placeholder={t('common.inputPlaceholder')}
-              />
-
-              <Button
-                onClick={handleSubmit}
-                disabled={
-                  respondMutation.isPending || !response.trim() || !selected
-                }
-                variant="default"
-                className="w-full sm:w-auto"
-              >
-                {respondMutation.isPending
-                  ?<CommonSpinner size="sm" />
-                  : t("disputepage.respond")}
-              </Button>
+            {/* DESKTOP TABLE */}
+            <div className="hidden md:block">
+              {!isLoading && disputes.length > 0 && (
+                <CommonTable<Dispute>
+                  columns={columns}
+                  data={disputes}
+                  keyExtractor={(d) => d._id}
+                />
+              )}
             </div>
-          )}
-        </CommonModal.Body>
 
-        {/* FOOTER */}
-        <CommonModal.Footer>
-          <Button
-            variant="outline"
-            size="default"
-            onClick={onClose}
-            className="text-sm "
-          >
-            {t('common.cancel')}
-          </Button>
-        </CommonModal.Footer>
+            {/* MOBILE CARDS */}
+             <DisputesMobileCards
+              disputes={disputes}
+              isLoading={isLoading}
+              t={t}
+              setSelected={setSelected}
+              setResponseOpen={setResponseOpen}
+             />
+          </CommonModal.Body>
 
-      </CommonModal.Content>
-    </CommonModal>
+          <CommonModal.Footer>
+            <Button variant="outline" onClick={onClose}>
+              {t("common.cancel")}
+            </Button>
+          </CommonModal.Footer>
+        </CommonModal.Content>
+      </CommonModal>
+
+      {/* =========================
+          RESPONSE MODAL
+      ========================= */}
+      <BookingDisputeRespondModal
+  open={responseOpen}
+  setOpen={setResponseOpen}
+  selected={selected}
+  response={response}
+  setResponse={setResponse}
+  handleSubmit={handleSubmit}
+  isPending={respondMutation.isPending}
+  t={t}
+   />
+    </>
   );
 }

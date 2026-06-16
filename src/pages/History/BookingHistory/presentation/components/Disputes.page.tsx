@@ -20,6 +20,7 @@ export default function Disputespage() {
   const isRTL = language === "AR";
 
   const { data = [], isLoading } = useGetDisputes();
+  console.log(data);
   const respondMutation = useRespondDisputes();
 
   // ✅ modal state
@@ -58,7 +59,7 @@ export default function Disputespage() {
           setResponse("");
         },
         onError: (err: any) => {
-          toast.error(err?.message || "Failed to submit response");
+          toast.error(err?.response?.data?.message || "Failed to submit response");
         },
       }
     );
@@ -76,7 +77,7 @@ export default function Disputespage() {
     },
     {
       key: "reason",
-      header: t("disputepage.reason"),
+      header: t("disputepage.reasonType"),
     },
     {
       key: "status",
@@ -138,7 +139,7 @@ export default function Disputespage() {
                     </p>
                     <p>
                       <strong>{t("disputepage.reason")}:</strong>{" "}
-                      {row.reason}
+                      {row.reasonType}
                     </p>
 
                     {/* Status */}

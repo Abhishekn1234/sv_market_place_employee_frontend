@@ -26,50 +26,41 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     // Phone Input
-    if (type === "tel") {
-      return (
-        <PhoneInput
-          country="in"
-          value={
-            typeof value === "string"
-              ? value.replace(/[^\d]/g, "")
-              : ""
-          }
-          onChange={(phone, country: any) => {
-            const dialCode = country?.dialCode || "";
+  if (type === "tel") {
+  return (
+    <PhoneInput
+      country="in"
+      value={typeof value === "string" ? value : ""}
+      onChange={(phone, country: any) => {
+      const dialCode = country?.dialCode || "";
 
-            const localNumber = phone.startsWith(dialCode)
-              ? phone.slice(dialCode.length)
-              : phone;
+      const formattedPhone = `+${dialCode}-${phone}`;
 
-            const formattedPhone = `+${dialCode}-${localNumber}`;
-
-            onChange?.({
-              target: {
-                name: name || "",
-                value: formattedPhone,
-              },
-            } as React.ChangeEvent<HTMLInputElement>);
-          }}
-          inputProps={{
-            id,
-            name,
-            required,
-            disabled,
-          }}
-          containerClass="!w-full"
-          inputClass="
-            !w-full
-            !h-10
-            !rounded-lg
-            !border
-            !border-slate-300
-            !pl-12
-          "
-        />
-      );
-    }
-
+       onChange?.({
+        target: {
+        name: name || "",
+        value: formattedPhone,
+      },
+      } as React.ChangeEvent<HTMLInputElement>);
+      }}
+      inputProps={{
+        id,
+        name,
+        required,
+        disabled,
+      }}
+      containerClass="!w-full"
+      inputClass="
+        !w-full
+        !h-10
+        !rounded-lg
+        !border
+        !border-slate-300
+        !pl-12
+      "
+    />
+  );
+}
     return (
       <input
         ref={ref}
