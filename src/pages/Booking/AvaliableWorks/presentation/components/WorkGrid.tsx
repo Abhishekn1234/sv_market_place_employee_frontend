@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { CommonCard } from "@/components/common/CommonCard";
 import { reverseGeocode } from "@/components/common/CommonMap";
-import { MapPin,  Timer } from "lucide-react";
+import { MapPin, MessageCircle, Timer } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   getBookingId,
@@ -15,8 +15,8 @@ import {
 import type { DisplayWork, WorkGridProps } from "../types/workPresentation.types";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
-// import { useChatMessages } from "@/ChatCustomer/presentation/hooks/useChatMessages";
-import { ChatBadge } from "./ChatBadge/ChatBadge";
+// import { ChatBadge } from "./ChatBadge/ChatBadge";
+import { isHidden } from "../helpers/hiddenstatus";
 
 export default function WorkGrid({
   workList,
@@ -29,29 +29,20 @@ export default function WorkGrid({
 }: WorkGridProps) {
   const [locations, setLocations] = useState<Record<string, string>>({});
   const { t } = useLanguage();
-const navigate = useNavigate();
-  // ✅ Normalize
-  const HIDDEN_STATUSES = [
-  "UNKNOWN",
-  "CUSTOMER_CANCELLED",
-  "WORKER_CANCELLED",
-  "COMPLETED",
-];
+  const navigate = useNavigate();
 
+ 
 const normalizedWorkList = useMemo(() => {
   return normalizeAssignedWorks(workList).filter(
-    (work) => !HIDDEN_STATUSES.includes(work.status)
+    (work) => !isHidden(work)
   );
 }, [workList]);
 
-
-  // ✅ Fetch location (FIXED with bookingId)
   useEffect(() => {
     if (!normalizedWorkList.length) return;
 
     normalizedWorkList.forEach((work) => {
-      const id = getBookingId(work); // ✅ ALWAYS USE THIS
-
+      const id = getBookingId(work);
       if (!id || locations[id]) return;
 
       const coordinates = getWorkCoordinates(getWorkLocation(work));
@@ -59,10 +50,7 @@ const normalizedWorkList = useMemo(() => {
 
       reverseGeocode(coordinates.lat, coordinates.lng)
         .then((address) =>
-          setLocations((prev) => ({
-            ...prev,
-            [id]: address,
-          }))
+          setLocations((prev) => ({ ...prev, [id]: address }))
         )
         .catch(() =>
           setLocations((prev) => ({
@@ -84,161 +72,202 @@ const normalizedWorkList = useMemo(() => {
   const renderedIds = new Set<string>();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {normalizedWorkList.map((work: any) => {
-        const id = getBookingId(work); // ✅ SINGLE SOURCE OF TRUTH
+    <div className="mt-8 px-4 lg:px-6">
+     
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
+          {normalizedWorkList.map((work: any) => {
+            const id = getBookingId(work);
+            if (renderedIds.has(id)) return null;
+            renderedIds.add(id);
 
-        if (renderedIds.has(id)) return null;
-        renderedIds.add(id);
+            const categoryName =
+              categories.find((c) => c._id === work.service?.category)
+                ?.name || t("common.na");
 
-        const categoryName =
-          categories.find((c) => c._id === work.service?.category)?.name ||
-          t("common.na");
+            const coordinates = getWorkCoordinates(
+              getWorkLocation(work)
+            );
 
-        const coordinates = getWorkCoordinates(getWorkLocation(work));
+            return (
+                <CommonCard
+          key={id}
+          className="relative flex flex-col rounded-xl border bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all"
+        >
 
-        return (
-          <CommonCard
-            key={id} // ✅ FIXED
-            className="flex flex-col justify-between p-4 rounded-2xl shadow-sm hover:shadow-md transition"
-          >
-            <div className="space-y-2 text-sm">
-              <h3 className="font-semibold text-base truncate">
-                {work.service?.name || t("common.na")}
-              </h3>
+          
 
-              <p className="text-gray-600 truncate">
-                {t("availableWork.customer")}: {work.customer?.fullName || t("common.na")}
+          {/* HEADER */}
+          <div className="p-2 border-b">
+            <h3 className="font-semibold text-sm line-clamp-1">
+              {work.service?.name || t("common.na")}
+            </h3>
+            <p className="text-[11px] text-muted-foreground">
+              {categoryName}
+            </p>
+          </div>
+
+          {/* BODY */}
+          <div className="p-2 space-y-2 text-[11px]">
+
+            {/* CUSTOMER */}
+            <div className="rounded-md bg-muted/30 p-2 space-y-1">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase">
+                {t("availableWork.customer")}
               </p>
 
-              <p className="text-gray-500 text-xs line-clamp-2">
-                {t("availableWork.location")}: {locations[id] || t("common.fetchingLocation")} {/* ✅ FIX */}
-              </p>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("availableBookings.name")}</span>
+                <span className="font-medium text-right">
+                  {work.customer?.fullName || t("common.na")}
+                </span>
+              </div>
 
-              <p className="text-xs text-gray-500">
-                {t("availableWork.category")}: {categoryName}
-              </p>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("availableBookings.email")}</span>
+                <span className="text-right break-all max-w-[170px]">
+                  {work.customer?.email || t("common.na")}
+                </span>
+              </div>
 
-              <p className="text-xs font-medium text-green-600">
-                {t("availableWork.workerPoolAmount")}: {getWorkerAmount(work)}{" "}
-                {work.booking?.currency}
-              </p>
-
-              <p className="text-xs text-gray-500">
-                {t("availableWork.priceMode")}:{" "}
-                {String(
-                  work.pricingMode ?? work.booking?.pricingMode ?? t("common.na")
-                )}
-              </p>
-
-              <p className="text-xs font-medium">{t("HomePage.bookingStatus")}: {work.status}</p>
-
-              {/* ✅ TIMER FIX */}
-              {isActiveWork(work) && timers[id] && (
-                <p className="flex items-center gap-1 text-green-600 font-semibold text-sm">
-                  <Timer size={14} />
-                  {timers[id]}
-                </p>
-              )}
-            </div>
-
-            <div className="mt-4 space-y-2">
-              {coordinates && (
-                <Button
-                    variant="outline"
-                    onClick={() =>
-                      window.open(
-                        `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`,
-                        "_blank"
-                      )
-                    }
-                    className="w-full"
-                  >
-                  <MapPin size={16} />
-                  {t("availableWork.getDirections")}
-                </Button>
-              )}
-
-              <div className="flex gap-2">
-                {canStartOrCancel(work) && (
-                  <>
-                    <Button className="flex-1" onClick={() => onStart(work)}>
-                      {t("common.start")}
-                    </Button>
-
-                    <Button
-                      variant="destructive"
-                      className="flex-1"
-                      onClick={() => onCancel(work)}
-                    >
-                      {t("common.cancel")}
-                    </Button>
-                     <ChatBadge
-                                bookingId={work.bookingId}
-                                t={t}
-                                work={work}
-                                navigate={navigate}
-                              />
-                  </>
-                )}
-               
-
-                {work.status === "WORK_COMPLETED_PENDING" && (
-                  <>
-                  <div className="flex items-center gap-3 w-full">
-                  <Button className="flex-1" onClick={() => onVerify(work)}>
-                    {t("availableWork.verifyOtp")}
-                  </Button>
-                   <ChatBadge
-                                bookingId={work.bookingId}
-                                t={t}
-                                work={work}
-                                navigate={navigate}
-                              />
-                              </div>
-                  </>
-                  
-                  
-                )}
-
-                {/* ✅ COMPLETE FIX */}
-               {isActiveWork(work) && (
-                    <div className="flex items-center gap-3 w-full">
-                      <Button
-                        className="flex-1"
-                        onClick={() =>
-                          onComplete({
-                            ...work,
-                            elapsedTime: timers[id] || "00:00:00",
-                          })
-                        }
-                      >
-                        {t("common.complete")}
-                      </Button>
-
-                      <ChatBadge
-                        bookingId={work.bookingId}
-                        t={t}
-                        work={work}
-                        navigate={navigate}
-                      />
-                    </div>
-                  )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("availableBookings.phone")}</span>
+                <span className="text-right">
+                  {work.customer?.phone || t("common.na")}
+                </span>
               </div>
             </div>
-          </CommonCard>
-        );
-      })}
+
+            {/* ESTIMATES */}
+            <div className="flex justify-between text-[10px] border-b pb-1">
+              <span className="text-muted-foreground uppercase">
+                {work.booking?.schedule?.estimatedDays
+                  ? t("availableBookings.EstimatedDays")
+                  : t("availableBookings.EstimatedHours")}
+              </span>
+
+              <span>
+                {work.booking?.schedule?.estimatedDays
+                  ? `${work.booking?.schedule?.estimatedDays} days`
+                  : `${work.booking?.schedule?.estimatedHours} hrs`}
+              </span>
+            </div>
+
+            {/* EARNINGS */}
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground uppercase text-[10px]">
+                {t("availableBookings.You Earn")}
+              </span>
+
+              <span className="font-semibold text-green-600 text-sm">
+                {getWorkerAmount(work)} {work.booking?.currency}
+              </span>
+            </div>
+
+            {/* NOTE */}
+            <div className="text-[10px] text-muted-foreground">
+              {work.booking?.schedule?.estimatedDays
+                ? t("availableBookings.dailyNote")
+                : t("availableBookings.hourlyNote")}
+            </div>
+
+            {/* TIMER */}
+            {isActiveWork(work) && timers[id] && (
+              <div className="flex items-center gap-1 text-green-700 text-[10px] font-medium">
+                <Timer size={12} />
+                {timers[id]}
+              </div>
+            )}
+
+            {/* MAP BUTTON */}
+            {coordinates && (
+              <button
+                onClick={() =>
+                  window.open(
+                    `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}`,
+                    "_blank"
+                  )
+                }
+                className="w-full text-[11px] border rounded-md py-1 mt-1 flex items-center justify-center gap-1"
+              >
+                <MapPin size={14} />
+                {t("availableWork.getDirections")}
+              </button>
+            )}
+          </div>
+
+          {/* ACTIONS */}
+        <div className="p-2 border-t grid grid-cols-3 gap-1">
+
+          {canStartOrCancel(work) && (
+            <>
+              <Button
+                size="sm"
+                onClick={() => onStart(work)}
+                className="h-7 w-full text-[11px]"
+              >
+                {t("common.start")}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => onCancel(work)}
+                className="h-7 w-full text-[11px]"
+              >
+                {t("common.cancel")}
+              </Button>
+
+              <Button
+                size="sm"
+                onClick={() => navigate(`/chat/${work.bookingId}`)}
+                className="h-7 w-full text-[11px] flex items-center justify-center gap-1"
+              >
+                <MessageCircle size={14} />
+                {t("common.chat")}
+              </Button>
+            </>
+          )}
+
+          {isActiveWork(work) && (
+            <Button
+              size="sm"
+              className="h-7 w-full text-[11px] col-span-3"
+              onClick={() =>
+                onComplete({
+                  ...work,
+                  elapsedTime: timers[id] || "00:00:00",
+                })
+              }
+            >
+              {t("common.complete")}
+            </Button>
+          )}
+
+          {work.status === "WORK_COMPLETED_PENDING" && (
+            <Button
+              size="sm"
+              className="h-7 w-full text-[11px] col-span-3"
+              onClick={() => onVerify(work)}
+            >
+              {t("availableWork.verifyOtp")}
+            </Button>
+          )}
+
+        </div>
+
+        </CommonCard>
+            );
+          })}
+        </div>
+      
     </div>
   );
 }
 
-// ✅ unchanged
 function canStartOrCancel(work: DisplayWork) {
   return ["ASSIGNED", "WORKER_ACCEPTED"].includes(work.status);
 }
 
-// ✅ unchanged
 function isActiveWork(work: DisplayWork) {
   return ["STARTED", "IN_PROGRESS"].includes(work.status);
 }

@@ -215,9 +215,15 @@ export function WalletMain({
                       <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">
                         {txn.description}
                       </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                         <Calendar className="h-4 w-4" />
-                        <span>{txn.date}</span>
+                        <span>
+                          {new Date(txn.date).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
                       </div>
                     </div>
                   </div>

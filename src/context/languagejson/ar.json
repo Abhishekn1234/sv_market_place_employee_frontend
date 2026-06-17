@@ -32,6 +32,7 @@
     "amountLow": "المبلغ: من الأقل إلى الأعلى",
     "complete": "إكمال",
     "previous": "السابق",
+    "date":"التاريخ",
     "next": "التالي",
       "search": "بحث",
     "limit": "صفوف",
@@ -634,28 +635,41 @@
   "notifications": "الإشعارات"
 },
 "availableBookings": {
-    "title": "الحجوزات المتاحة",
-    "searchService": "البحث عن خدمة",
-    "serviceTier": "فئة الخدمة",
-    "status": "الحالة",
-    "all": "الكل",
-    "basic": "أساسي",
-    "premium": "مميز",
-    "pending": "قيد الانتظار",
-    "confirmed": "مؤكد",
-    "completed": "مكتمل",
-    "cancelled": "ملغى",
-    "customer": "العميل",
-    "service": "الخدمة",
-    "tier": "الفئة",
-    "date": "التاريخ",
-  
+  "title": "الحجوزات المتاحة",
+  "searchService": "البحث عن خدمة",
+  "serviceTier": "فئة الخدمة",
+  "status": "الحالة",
+  "all": "الكل",
+   "hourlyNote": "هذا معدل بالساعة مبدئي. قد يختلف المبلغ النهائي حسب عدد ساعات العمل الفعلية.",
+  "EstimatedDays": "الأيام المقدّرة",
+  "dailyNote": "قد يختلف هذا المبلغ حسب ساعات العمل اليومية",
+  "EstimatedHours": "الساعات المقدّرة",
+  "basic": "أساسي",
   "standard": "قياسي",
-
+  "premium": "مميز",
   "enterprise": "مؤسسي",
-    "rowsPerPage": "عدد الصفوف لكل صفحة",
-    "noBookings": "لا توجد حجوزات متاحة"
-  },
+
+  "pending": "قيد الانتظار",
+  "confirmed": "مؤكد",
+  "completed": "مكتمل",
+  "cancelled": "ملغى",
+
+  "customer": "العميل",
+  "customerDetails": "تفاصيل العميل",
+  "callCustomer": "اتصل بالعميل",
+  "name": "الاسم",
+  "email": "البريد الإلكتروني",
+  "phone": "رقم الهاتف",
+
+  "service": "الخدمة",
+  "tier": "الفئة",
+  "date": "التاريخ",
+
+  "You Earn": "أنت تكسب",
+
+  "rowsPerPage": "عدد الصفوف لكل صفحة",
+  "noBookings": "لا توجد حجوزات متاحة"
+},
   "currentBookings": {
     "title": "الحجوزات الحالية",
     "subtitle": "عرض وإدارة الحجوزات المخصصة لك",

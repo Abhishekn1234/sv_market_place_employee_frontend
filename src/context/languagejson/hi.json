@@ -13,6 +13,7 @@
     "showing": "दिखा रहा है",
     "of": "में से",
     "all": "सभी",
+    "date":"तारीख",
         "search": "खोज",
     "limit": "पंक्तियाँ",
     "sort": "क्रमबद्ध करें",
@@ -345,17 +346,26 @@
     "getDirections": "दिशा प्राप्त करें",
     "verifyOtp": "ओटीपी सत्यापित करें"
   },
-  "availableBooking": {
-    "customer": "ग्राहक",
-    "tier": "स्तर",
-    "bookingType": "बुकिंग का प्रकार",
-    "pricing": "मूल्य निर्धारण",
-    "status": "स्थिति",
-    "serviceCategory": "सेवा श्रेणी",
-    "getDirections": "दिशा-निर्देश प्राप्त करें",
-    "cancelledMessage": "यह बुकिंग रद्द कर दी गई थी"
-  },
+"availableBooking": {
+  "customer": "ग्राहक",
+  "customerDetails": "ग्राहक विवरण",
+  "callCustomer": "ग्राहक को कॉल करें",
 
+  "name": "नाम",
+  "email": "ईमेल",
+  "phone": "फोन नंबर",
+
+  "tier": "स्तर",
+  "bookingType": "बुकिंग का प्रकार",
+  "pricing": "मूल्य निर्धारण",
+  "You Earn": "आप की कमाई",
+
+  "status": "स्थिति",
+  "serviceCategory": "सेवा श्रेणी",
+
+  "getDirections": "दिशा-निर्देश प्राप्त करें",
+  "cancelledMessage": "यह बुकिंग रद्द कर दी गई थी"
+},
 
 "workHistory": {
   "pageTitle": "कार्य इतिहास",
@@ -618,7 +628,16 @@
     "title": "उपलब्ध बुकिंग्स",
     "searchService": "सेवा खोजें",
     "serviceTier": "सेवा स्तर",
+    "EstimatedDays": "अनुमानित दिन",
+    "dailyNote": "यह राशि दैनिक कार्य घंटों के आधार पर बदल सकती है",
+  "EstimatedHours": "अनुमानित घंटे",
+  "name": "नाम",
+  "email": "ईमेल",
+  "phone": "फोन नंबर",
     "status": "स्थिति",
+    "hourlyNote": "यह एक प्रारंभिक प्रति घंटे की दर है। अंतिम भुगतान वास्तविक कार्य घंटों के आधार पर बदल सकता है।",
+     "You Earn": "आप की कमाई",
+     "callCustomer":"ग्राहक को कॉल करें",
     "all": "सभी",
     "basic": "बेसिक",
     "premium": "प्रीमियम",

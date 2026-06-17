@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   User,
   Phone,
-  MapPin,
+  // MapPin,
   Briefcase,
   Layers,
   Wrench,
@@ -11,6 +11,7 @@ import {
   Calendar,
   Hourglass,
   Clock,
+  Mail,
 } from "lucide-react";
 import { reverseGeocode } from "@/components/common/CommonMap";
 import { useLanguage } from "@/context/LanguageContext";
@@ -29,10 +30,10 @@ const geoCache = new Map<string, string>();
 
 export function BookingExpandedRow({ booking, bookingCategories }: Props) {
   const { formatSmartDate } = useStringUtils();
-  const [locationName, setLocationName] = useState<string>("—");
+  const [,setLocationName] = useState<string>("—");
   const { translations } = useLanguage();
   const expandedLabels = translations.bookingHistory.expandedRow;
-
+// locationName,
   useEffect(() => {
     if (
       booking.booking.location &&
@@ -94,10 +95,14 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
               <Phone className="h-4 w-4 text-slate-400 shrink-0" />
               <span className="text-sm">{booking.customer.phone}</span>
             </div>
-            <div className="flex items-start gap-3 text-slate-600">
+            <div className="flex items-center gap-3 text-slate-600">
+              <Mail className="h-4 w-4 text-slate-400 shrink-0" />
+              <span className="text-sm">{booking.customer.email}</span>
+              </div>
+            {/* <div className="flex items-start gap-3 text-slate-600">
               <MapPin className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <span className="text-sm break-words leading-relaxed">{locationName}</span>
-            </div>
+            </div> */}
           </div>
         </div>
 

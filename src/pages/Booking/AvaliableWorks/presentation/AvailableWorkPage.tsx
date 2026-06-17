@@ -20,7 +20,7 @@ import type {
   WorkModalType,
   WorkTimerMap,
 } from "./types/workPresentation.types";
-import CommonSpinner from "@/components/common/CommonSpinner";
+// import CommonSpinner from "@/components/common/CommonSpinner";
 
 export default function AvailableWorkPage() {
   const { language, t } = useLanguage();
@@ -145,7 +145,8 @@ export default function AvailableWorkPage() {
   if (socketBookings.length === 0 && isLoading) {
     return (
       <CommonCard title={t("sidebar.assignedWork")} className="mt-6">
-       <CommonSpinner size="md" color="black"/>
+       {/* <CommonSpinner size="md" color="black"/> */}
+       <span>{t("common.noData")}</span>
       </CommonCard>
     );
   }

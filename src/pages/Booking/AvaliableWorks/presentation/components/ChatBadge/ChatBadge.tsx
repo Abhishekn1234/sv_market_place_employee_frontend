@@ -21,10 +21,14 @@ export function ChatBadge({ bookingId, navigate, t }: any) {
         </span>
       )}
 
-      <Button onClick={() => navigate(`/chat/${bookingId}`)}>
-        <MessageCircle size={16} />
-        {t("common.chat")}
-      </Button>
+     <Button
+  size="sm"
+  onClick={() => navigate(`/chat/${bookingId}`)}
+  className="h-7 text-[11px] px-2 flex items-center gap-1"
+>
+  <MessageCircle size={10} />
+  {t("common.chat")}
+</Button>
     </div>
   );
 }

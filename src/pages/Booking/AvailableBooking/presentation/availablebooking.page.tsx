@@ -1,52 +1,109 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { CommonCard } from "@/components/common/CommonCard";
 import { useLanguage } from "@/context/LanguageContext";
-import { useAvailableBookings } from "@/core/Websocket/presentation/hooks/useGet";
 import { useAccept } from "@/core/Websocket/presentation/hooks/useAccept";
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
 import { useNavigate } from "react-router-dom";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
-
+import { formatScheduleDate } from "./helpers/formatScheduledatetime";
+import { Button } from "@/components/ui/button";
+import { toast } from "react-toastify";
+import { useAvailableBookings } from "@/core/Websocket/presentation/hooks/useGet";
 export default function AvailableBookingPage() {
   const { translations, language, t } = useLanguage();
   const isRTL = language === "AR";
 
-  const { data: categories } = useServiceCategory();
-  const { bookings, removeBooking } = useAvailableBookings();
-  const { mutate: acceptWork, isPending } = useAccept();
-  const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
-  const removeRequest = useBookingSocketStore((state) => state.removeRequest);
-
-  const [showAll, setShowAll] = useState(false);
-  const [page, setPage] = useState(1);
-  const limit = 8;
   const navigate = useNavigate();
+
+  const { data: categories } = useServiceCategory();
+  const { mutate: acceptWork, isPending } = useAccept();
+
+  const [visibleCount, setVisibleCount] = useState(8);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const {
+    bookings: apiBookings,
+  } = useAvailableBookings();
+
+  const socketBookings = useBookingSocketStore(
+    (state) => state.requestBookings
+  );
+
+  const removeBooking = useBookingSocketStore((state) => state.removeRequest);
+  const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
+
+  const [ignoredIds, setIgnoredIds] = useState<string[]>([]);
 
   const categoryMap = useMemo(() => {
     if (!categories) return {};
     return Object.fromEntries(categories.map((c) => [c._id, c.name]));
   }, [categories]);
-  const getLatLng = (location?: {
-  type: "Point";
-  coordinates: number[];
-}) => {
-  if (!location?.coordinates || location.coordinates.length < 2) {
-    return null;
-  }
 
-  const [lng, lat] = location.coordinates;
+  const getLatLng = (location?: { type: "Point"; coordinates: number[] }) => {
+    if (!location?.coordinates || location.coordinates.length < 2) return null;
+    const [lng, lat] = location.coordinates;
+    return { lat, lng };
+  };
 
-  return { lat, lng };
-};
+  const normalizedBookings = useMemo(() => {
+    const merged = [...apiBookings];
 
+    socketBookings.forEach((socketBooking: any) => {
+      const booking = socketBooking.booking ?? socketBooking;
 
+      const exists = merged.find((b: any) => b._id === booking._id);
 
-  const visibleBookings = showAll ? bookings : bookings.slice(0, 8);
-  const totalPages = Math.ceil(visibleBookings.length / limit);
-  const start = (page - 1) * limit;
-  const paginated = visibleBookings.slice(start, start + limit);
+      if (!exists) {
+        merged.unshift(booking);
+      }
+    });
+
+    return merged.filter((b: any) => !ignoredIds.includes(b._id));
+  }, [apiBookings, socketBookings, ignoredIds]);
+
+  // ✅ RESET when data changes
+  useEffect(() => {
+    setVisibleCount(8);
+    setHasMore(true);
+  }, [normalizedBookings.length]);
+
+  // ✅ INFINITE SCROLL
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+
+      const isNearBottom = scrollTop + windowHeight >= fullHeight - 200;
+
+      if (!isNearBottom || loadingMore || !hasMore) return;
+
+      setLoadingMore(true);
+
+      setTimeout(() => {
+        setVisibleCount((prev) => {
+          const next = prev + 4;
+
+          if (next >= normalizedBookings.length) {
+            setHasMore(false);
+            return normalizedBookings.length;
+          }
+
+          return next;
+        });
+
+        setLoadingMore(false);
+      }, 500);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [normalizedBookings.length, loadingMore, hasMore]);
+
+  const visibleBookings = normalizedBookings.slice(0, visibleCount);
 
   const handleAccept = (booking: any) => {
     const bookingId = booking._id;
@@ -66,153 +123,206 @@ export default function AvailableBookingPage() {
             _id: bookingId,
             status: "WORKER_ACCEPTED",
           });
-          removeRequest(bookingId);
+
           removeBooking(bookingId);
+
           navigate("/availableWork");
         },
         onError: (err) => {
-          console.error("Failed to accept work", err);
+          console.error("Failed to accept booking", err);
         },
       }
     );
   };
 
   const handleIgnore = (bookingId: string) => {
-    removeBooking(bookingId);
+    setIgnoredIds((prev) => [...prev, bookingId]);
+    toast.success("Booking hidden");
   };
 
   return (
     <div className="mt-8 px-4 lg:px-6">
       <CommonCard
-        title={translations?.sidebar.availableBooking || "Available Booking"}
+        title={
+          translations?.sidebar?.availableBooking || "Available Booking"
+        }
         headerAlign={isRTL ? "right" : "left"}
       >
-        {/* SEE ALL BUTTON */}
-        {bookings.length > 8 && !showAll && (
-          <div className={`flex justify-end mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-            <button
-              onClick={() => setShowAll(true)}
-              className="text-primary font-medium hover:underline text-sm"
-            >
-              {t("common.seeAll")}
-            </button>
+        {normalizedBookings.length === 0 && (
+          <div className="text-center py-16 text-gray-500">
+            {translations?.common?.noData || "No bookings available"}
           </div>
         )}
 
-        {/* NO DATA */}
-        {bookings.length === 0 && (
-          <div className="text-center py-16 text-gray-500">{translations.common.noData}</div>
-        )}
-
-        {/* BOOKINGS GRID */}
-        {bookings.length > 0 && (
-         
+        {normalizedBookings.length > 0 && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {paginated.map((booking) => {
-                const status = booking.status?.trim()?.toUpperCase();
-                 const coords = getLatLng(booking.location);
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
+              {visibleBookings.map((booking: any) => {
+                const coords = getLatLng(booking.location);
+                 const isScheduled =
+                 String(booking.bookingType).toUpperCase().includes("SCHEDULE");
                 return (
-                  <CommonCard
-                    key={booking._id}
-                    className="flex flex-col justify-between shadow-sm hover:shadow-lg transition p-4"
-                    contentClassName="space-y-2"
-                  >
-                    {/* BOOKING DETAILS */}
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-base">
-                        {booking.service?.name}
-                      </h3>
+                <CommonCard
+                  key={booking._id}
+                  className="relative flex flex-col rounded-xl border bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all"
+                >
 
-                      <p className="text-sm text-gray-500">
-                        {t("availableBooking.customer")}: {booking.customer?.fullName || "-"}
+                  {/* HEADER */}
+                  <div className="p-2 border-b">
+                    <h3 className="font-semibold text-sm line-clamp-1">
+                      {booking.service?.name || "-"}
+                    </h3>
+
+                    <p className="text-[11px] text-muted-foreground">
+                      {booking.service?.category ? categoryMap[booking.service.category] : "-"}
+                    </p>
+                  </div>
+
+                  {/* BODY */}
+                  <div className="p-2 space-y-2 text-[11px]">
+
+                    {/* CUSTOMER */}
+                    <div className="rounded-md bg-muted/30 p-2 space-y-1">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase">
+                        {t("availableBooking.customer")}
                       </p>
 
-                      <p className="text-sm text-gray-500">
-                        {t("availableBooking.tier")}: {booking.serviceTier?.displayName || "-"}
-                      </p>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{t("availableBookings.name")}</span>
+                        <span className="font-medium text-right">
+                          {booking.customer?.fullName || "-"}
+                        </span>
+                      </div>
 
-                      <p className="text-sm text-gray-500">
-                        {t("availableBooking.bookingType")}: {booking.bookingType || "-"}
-                      </p>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{t("availableBookings.email")}</span>
+                        <span className="text-right break-all max-w-[160px]">
+                          {booking.customer?.email || "-"}
+                        </span>
+                      </div>
 
-                      <p className="text-sm text-gray-500">
-                        {t("availableBooking.pricing")}: {booking.pricingMode || "-"}
-                      </p>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{t("availableBookings.phone")}</span>
+                        <span className="text-right">
+                          {booking.customer?.phone || "-"}
+                        </span>
+                      </div>
 
-                      <p className="text-sm text-gray-500">
-                        {t("availableBooking.status")}: {booking.status || "-"}
-                      </p>
-
-                      <p className="text-sm text-gray-500">
-                        {t("availableBooking.serviceCategory")}:{" "}
-                        {booking.service?.category
-                          ? categoryMap[booking.service.category]
-                          : "-"}
-                      </p>
-                    </div>
-                  
-                      {coords && (
-                        <button
-                          onClick={() =>
-                            window.open(
-                              `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`,
-                              "_blank"
-                            )
-                          }
-                          className="w-full border mt-2 py-2 rounded"
+                      {booking.customer?.phone && (
+                        <a
+                          href={`tel:${booking.customer.phone}`}
+                          className="mt-1 block text-center bg-green-600 text-white rounded-md py-1 text-[11px]"
                         >
-                          📍 {t("availableBooking.getDirections")}
-                        </button>
+                          📞 {t("availableBookings.callCustomer")}
+                        </a>
                       )}
-                    {/* ACTIONS */}
-                    {status !== "WORKER_CANCELLED" ? (
-                      <div className="flex gap-2 pt-4">
-                        <button
-                          disabled={isPending}
-                          onClick={() => handleAccept(booking)}
-                          className="flex-1 bg-primary text-white py-2 rounded-lg text-sm disabled:opacity-50"
-                        >
-                          {t("common.accept")}
-                        </button>
+                    </div>
 
-                        <button
-                          onClick={() => handleIgnore(booking._id)}
-                          className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm"
-                        >
-                          {t("common.ignore")}
-                        </button>
+                    {/* DETAILS */}
+                    <div className="space-y-1">
+
+                      {/* Estimated */}
+                      {(booking.schedule?.estimatedHours || booking.schedule?.estimatedDays) && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">
+                            {booking.schedule?.estimatedDays
+                              ? t("availableBookings.EstimatedDays")
+                              : t("availableBookings.EstimatedHours")}
+                          </span>
+
+                          <span className="font-medium text-blue-600">
+                            {booking.schedule?.estimatedDays
+                              ? `${booking.schedule.estimatedDays} days`
+                              : `${booking.schedule.estimatedHours} hrs`}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Type */}
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          {t("availableBooking.bookingType")}
+                        </span>
+                        <span className="font-medium">
+                          {booking.bookingType || "-"}
+                        </span>
                       </div>
-                    ) : (
-                      <div className="pt-4 text-center text-red-500 text-sm font-medium">
-                        {t("availableBooking.cancelledMessage")}
+
+                      {/* Earnings */}
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground uppercase text-[10px]">
+                          {t("availableBookings.You Earn")}
+                        </span>
+
+                        <span className="font-semibold text-green-600">
+                          {booking.currency} {booking.workerPoolAmount ?? 0}
+                        </span>
                       </div>
+
+                      {/* NOTE */}
+                      <p className="text-[10px] text-muted-foreground">
+                        {t("availableBookings.hourlyNote")}
+                      </p>
+
+                      {/* DATE */}
+                      {isScheduled && (
+                        <div className="flex justify-between border-t pt-1">
+                          <span className="text-muted-foreground">
+                            {t("common.date")}
+                          </span>
+
+                          <span className="font-medium">
+                            {formatScheduleDate(booking.schedule?.startDateTime)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* MAP */}
+                    {coords && (
+                      <button
+                        onClick={() =>
+                          window.open(
+                            `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`,
+                            "_blank"
+                          )
+                        }
+                        className="w-full flex items-center justify-center gap-1 border rounded-md py-1 text-[11px]"
+                      >
+                        📍 {t("availableBooking.getDirections")}
+                      </button>
                     )}
-                  </CommonCard>
+                  </div>
+
+                  {/* FOOTER */}
+                  <div className="p-2 border-t grid grid-cols-2 gap-1">
+
+                    <Button
+                      disabled={isPending}
+                      onClick={() => handleAccept(booking)}
+                      className="h-7 text-[11px]"
+                    >
+                      {t("common.accept")}
+                    </Button>
+
+                    <Button
+                      onClick={() => handleIgnore(booking._id)}
+                      className="h-7 text-[11px] dark:bg-slate-800"
+                    >
+                      {t("common.ignore")}
+                    </Button>
+
+                  </div>
+
+                </CommonCard>
                 );
               })}
             </div>
 
-            {/* PAGINATION */}
-            {totalPages > 1 && (
-              <div
-                className={`flex justify-center gap-2 pt-6 ${
-                  isRTL ? "flex-row-reverse" : ""
-                }`}
-              >
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i + 1)}
-                    className={`px-3 py-1 rounded-md text-sm ${
-                      page === i + 1
-                        ? "bg-primary text-white"
-                        : "bg-gray-100 hover:bg-gray-200"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
+            {/* Spinner */}
+            {loadingMore && (
+              <div className="flex justify-center py-10">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
               </div>
             )}
           </>

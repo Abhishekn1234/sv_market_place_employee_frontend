@@ -8,6 +8,13 @@ import type { BookingStatus } from "../../../../Booking/AvailableBooking/domain/
 export interface BookingHistoryResponse {
   data: BookingHistory[];
   pagination:BookingHistoryPagination;
+  page?:number;
+  
+  totalItems?:number;
+  totalPages?:number;
+  currentPage?:number;
+  hasNextPage?:boolean;
+  hasPrevPage?:boolean;
 }
 export interface BookingHistoryPagination { totalItems: number; totalPages: number; currentPage: number; hasNextPage: boolean; hasPrevPage: boolean; }
 export interface BookingHistoryQueryParams{ page?:number; limit?:number; sort?:string; search?:string; }

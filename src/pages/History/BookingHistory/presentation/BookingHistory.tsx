@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { useLanguage } from "@/context/LanguageContext";
 import { useStatusConfig } from "./hooks/statusconfig";
 import { useBookingColumns } from "./hooks/useColumns";
-import { useGetBookingHistory } from "./hooks/useGetBookingHistory";
+import { useGetBookingHistory, useGetBookingHistoryInfinite } from "./hooks/useGetBookingHistory";
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
 
 import { BookingFilters } from "./components/BookingFilters";
@@ -26,7 +26,7 @@ export default function BookingHistory() {
   const isRTL = language === "AR";
   const statusConfig = useStatusConfig();
   const { data: categories = [] } = useServiceCategory();
-
+  const [ignoredIds, setIgnoredIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">("all");
   const [serviceFilter, setServiceFilter] = useState<string>("all");
@@ -49,45 +49,43 @@ export default function BookingHistory() {
   }, []);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const debouncedPage = useDebounce(page, 300);
+  
   const debouncedLimit = useDebounce(limit, 300);
 
-  const { data, isError, isLoading } = useGetBookingHistory({
-    page: debouncedPage,
-    limit: isMobile ? 10 : debouncedLimit,
-    search: debouncedSearchTerm,
-    sort: sort,
-  });
-
-  const pagination = data?.pagination;
-
-  const [bookings, setBookings] = useState<BookingHistory[]>([]);
-useEffect(() => {
-  setPage(1);
-
-  if (isMobile) {
-    setBookings([]);
-  }
-}, [
-  debouncedSearchTerm,
-  statusFilter,
-  serviceFilter,
+const desktopQuery = useGetBookingHistory({
+  page,
+  limit: debouncedLimit,
+  search: debouncedSearchTerm,
   sort,
-  isMobile,
-]);
-  useEffect(() => {
-    if (data?.data) {
-      if (isMobile && debouncedPage > 1) {
-        setBookings((prev) => {
-          const existingIds = new Set(prev.map((b) => b._id));
-          const newItems = data.data.filter((b: BookingHistory) => !existingIds.has(b._id));
-          return [...prev, ...newItems];
-        });
-      } else {
-        setBookings(data.data);
-      }
-    }
-  }, [data, isMobile, debouncedPage]);
+});
+
+const mobileQuery = useGetBookingHistoryInfinite({
+  limit: 10,
+  search: debouncedSearchTerm,
+  sort,
+});
+
+const isLoading = isMobile
+  ? mobileQuery.isLoading
+  : desktopQuery.isLoading;
+
+const isError = isMobile
+  ? mobileQuery.isError
+  : desktopQuery.isError;
+
+const pagination = desktopQuery.data?.pagination;
+
+const bookings = useMemo<BookingHistory[]>(() => {
+  if (!isMobile) {
+    return desktopQuery.data?.data ?? [];
+  }
+
+  return (
+    mobileQuery.data?.pages.flatMap(
+      (page) => page.data ?? []
+    ) ?? []
+  );
+}, [isMobile, desktopQuery.data, mobileQuery.data]);
 
   const normalize = (value?: string) => value?.toLowerCase().replace(/\s|-/g, "");
 
@@ -99,29 +97,47 @@ useEffect(() => {
     setOpenDisputeModal(true);
   };
 
-  const filteredBookings = useMemo(() => {
-    return bookings.filter((b) => {
-      const search = searchTerm.toLowerCase();
+ const filteredBookings = useMemo(() => {
+  return bookings.filter((b) => {
+    if (ignoredIds.includes(b._id)) {
+      return false;
+    }
 
-      const matchesSearch =
-        !search ||
-        b.customer?.fullName?.toLowerCase().includes(search) ||
-        b._id?.toLowerCase().includes(search) ||
-        b.booking.bookingCode?.toLowerCase().includes(search) ||
-        b.bookingId?.toLowerCase().includes(search) ||
-        (typeof b.service === "object" && b.service?.name?.toLowerCase().includes(search)) ||
-        (typeof b.service === "string" && String(b.service).toLowerCase().includes(search));
+    const search = searchTerm.toLowerCase();
 
-      const matchesStatus =
-        statusFilter === "all" || normalize(b.status) === normalize(String(statusFilter));
+    const matchesSearch =
+      !search ||
+      b.customer?.fullName?.toLowerCase().includes(search) ||
+      b._id?.toLowerCase().includes(search) ||
+      b.booking.bookingCode?.toLowerCase().includes(search) ||
+      b.bookingId?.toLowerCase().includes(search) ||
+      (typeof b.service === "object" &&
+        b.service?.name?.toLowerCase().includes(search)) ||
+      (typeof b.service === "string" &&
+        String(b.service).toLowerCase().includes(search));
 
-      const matchesService =
-        serviceFilter === "all" ||
-        (typeof b.service === "object" && b.service?.category === serviceFilter);
+    const matchesStatus =
+      statusFilter === "all" ||
+      normalize(b.status) === normalize(String(statusFilter));
 
-      return matchesSearch && matchesStatus && matchesService;
-    });
-  }, [bookings, searchTerm, statusFilter, serviceFilter]);
+    const matchesService =
+      serviceFilter === "all" ||
+      (typeof b.service === "object" &&
+        b.service?.category === serviceFilter);
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesService
+    );
+  });
+}, [
+  bookings,
+  ignoredIds,
+  searchTerm,
+  statusFilter,
+  serviceFilter,
+]);
 
   const toggleExpanded = (id: string) => {
     setExpandedBooking((prev) => (prev === id ? null : id));
@@ -148,14 +164,10 @@ useEffect(() => {
   setLimit(DEFAULT_LIMIT); // Reset limit to DEFAULT_LIMIT
 };
 
-  const handleIgnore = (bookingId: string) => {
-    try {
-      setBookings((prev) => prev.filter((b) => b._id !== bookingId));
-      toast.success("Booking ignored successfully");
-    } catch {
-      toast.error("Failed to ignore booking");
-    }
-  };
+ const handleIgnore = (bookingId: string) => {
+  setIgnoredIds((prev) => [...prev, bookingId]);
+  toast.success("Booking ignored successfully");
+};
 
   const columns = useBookingColumns({
     expandedBooking,
@@ -164,24 +176,39 @@ useEffect(() => {
     onOpenDisputes: handleOpenDisputes,
   });
 
-  useEffect(() => {
-    if (!observerTarget.current || !isMobile) return;
-    const el = observerTarget.current;
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && pagination?.currentPage && pagination.currentPage < (pagination.totalPages ?? 0)) {
-          setPage((p) => p + 1);
-        }
-      });
-    });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [observerTarget, isMobile, pagination]);
+useEffect(() => {
+  if (!isMobile) return;
+  if (!observerTarget.current) return;
 
+const observer = new IntersectionObserver(
+  (entries) => {
+    const first = entries[0];
+
+    if (
+      first.isIntersecting &&
+      mobileQuery.hasNextPage &&
+      !mobileQuery.isFetchingNextPage
+    ) {
+      mobileQuery.fetchNextPage();
+    }
+  },
+  {
+    threshold: 0,
+    rootMargin: "300px",
+  }
+);
+  observer.observe(observerTarget.current);
+
+  return () => observer.disconnect();
+}, [
+  isMobile,
+  mobileQuery.hasNextPage,
+  mobileQuery.isFetchingNextPage,
+]);
   if (isError) return <div className="p-6 text-center text-red-500">Failed to load booking history</div>;
 
   return (
-    <div className="min-h-screen w-full px-2 sm:px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-14 py-3 sm:py-6">
+    <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-14 py-3 sm:py-6">
       {/* Premium container */}
       <div className="rounded-2xl sm:rounded-3xl">
         <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
@@ -277,16 +304,16 @@ useEffect(() => {
           </CommonCard>
 
           {/* MOBILE INFINITE SCROLL UI */}
-          {isMobile && (
-            <div ref={observerTarget} className="py-6 flex flex-col items-center gap-2">
-              {isLoading && (
-                <>
-                  <CommonSpinner />
-                  <p className="text-xs text-muted-foreground">{translations.common.loading}</p>
-                </>
-              )}
-            </div>
-          )}
+         {isMobile && (
+  <div
+    ref={observerTarget}
+    className="py-6 flex justify-center"
+  >
+    {mobileQuery.isFetchingNextPage && (
+      <CommonSpinner />
+    )}
+  </div>
+)}
         </div>
       </div>
 

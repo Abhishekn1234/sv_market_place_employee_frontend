@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { initializeSocket } from "../components/socket";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
+import { BookingEvents } from "@/components/common/BookingEvents";
+
 
 /* ================= NORMALIZER ================= */
 
@@ -20,6 +22,7 @@ const normalize = (data: any): Booking | null => {
 
 const isCancelledStatus = (status?: string) => {
   const normalized = String(status ?? "").trim().toUpperCase();
+
   return [
     "CUSTOMER_CANCELLED",
     "WORKER_CANCELLED",
@@ -61,29 +64,63 @@ export function useBookingSocket() {
     });
 
     const removeBooking = (id: string) => {
-      removeRequest(String(id));
-      removeAssigned(String(id));
+      removeRequest(id);
+      removeAssigned(id);
     };
 
     const onUpsert = (data: any) => {
-      const b = normalize(data);
-      if (!b) return;
+      const booking = normalize(data);
 
-      if (isCancelledStatus(b.status)) {
-        removeBooking(String(b._id));
+      if (!booking) return;
+
+      if (isCancelledStatus(booking.status)) {
+        removeBooking(String(booking._id));
         return;
       }
 
-      upsertRequest(b);
+      upsertRequest(booking);
     };
 
-    // REQUEST EVENTS ONLY (for modal)
-    socket.on("booking.created", onUpsert);
+    const onRemove = (data: any) => {
+      const id =
+        data?.bookingId ||
+        data?.booking?._id ||
+        data?._id;
+
+      if (!id) return;
+
+      removeBooking(String(id));
+    };
+
+    /* ================= REQUEST EVENTS ================= */
+
+    socket.on(BookingEvents.CREATED, onUpsert);
+
+    /* ================= REMOVE EVENTS ================= */
+
+    socket.on(BookingEvents.CANCELLED_BY_CUSTOMER, onRemove);
+    socket.on(BookingEvents.CANCELLED_BY_WORKER, onRemove);
+    socket.on(BookingEvents.CANCELLEDLED_BY_PLATFORM, onRemove);
+    socket.on(BookingEvents.EXPIRED, onRemove);
 
     return () => {
       console.log("[Socket] cleanup");
+
+      socket.off(BookingEvents.CREATED, onUpsert);
+
+      socket.off(BookingEvents.CANCELLED_BY_CUSTOMER, onRemove);
+      socket.off(BookingEvents.CANCELLED_BY_WORKER, onRemove);
+      socket.off(BookingEvents.CANCELLEDLED_BY_PLATFORM, onRemove);
+      socket.off(BookingEvents.EXPIRED, onRemove);
+
       socket.disconnect();
       socket = null;
     };
-  }, [upsertRequest, removeRequest, upsertAssigned, removeAssigned, setConnected]);
+  }, [
+    upsertRequest,
+    removeRequest,
+    upsertAssigned,
+    removeAssigned,
+    setConnected,
+  ]);
 }

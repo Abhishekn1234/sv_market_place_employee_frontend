@@ -9,7 +9,6 @@ type State = {
 
   setConnected: (v: boolean) => void;
 
-  // ✅ IMPORTANT: hydration from API
   setAssignedBookings: (list: Booking[]) => void;
 
   upsertRequest: (b: Booking) => void;
@@ -19,33 +18,42 @@ type State = {
   removeAssigned: (id: string) => void;
 };
 
+// ✅ SAFE ID RESOLVER
 const getId = (b: any) =>
-  b?._id || b?.bookingId || b?.booking?._id;
+  b?._id || b?.booking?._id || b?.bookingId || null;
 
-export const useBookingSocketStore = create<State>((set, _get) => ({
+const normalizeId = (id: any) => (id ? String(id) : null);
+
+export const useBookingSocketStore = create<State>((set) => ({
   requestBookings: [],
   assignedBookings: [],
   connected: false,
 
   setConnected: (v) => set({ connected: v }),
 
-  // ✅ HYDRATION (API → STORE)
+  // ✅ HYDRATION FROM API
   setAssignedBookings: (list) =>
     set(() => ({
-      assignedBookings: list,
+      assignedBookings: Array.isArray(list) ? list : [],
     })),
+
+  // =========================
+  // REQUEST BOOKINGS
+  // =========================
 
   upsertRequest: (b) =>
     set((state) => {
-      const id = getId(b);
+      const id = normalizeId(getId(b));
+      if (!id) return state;
+
       const exists = state.requestBookings.some(
-        (x) => getId(x) === id
+        (x) => normalizeId(getId(x)) === id
       );
 
       return {
         requestBookings: exists
           ? state.requestBookings.map((x) =>
-              getId(x) === id ? { ...x, ...b } : x
+              normalizeId(getId(x)) === id ? { ...x, ...b } : x
             )
           : [b, ...state.requestBookings],
       };
@@ -54,37 +62,59 @@ export const useBookingSocketStore = create<State>((set, _get) => ({
   removeRequest: (id) =>
     set((state) => ({
       requestBookings: state.requestBookings.filter(
-        (x) => getId(x) !== id
+        (x) => normalizeId(getId(x)) !== normalizeId(id)
       ),
     })),
 
+  // =========================
+  // ASSIGNED BOOKINGS (FIXED)
+  // =========================
+
   upsertAssigned: (b) =>
     set((state) => {
-      const id = getId(b);
+      const id = normalizeId(getId(b));
       if (!id) return state;
-
-      const exists = state.assignedBookings.some(
-        (x) => getId(x) === id
-      );
 
       const normalized = {
         ...b,
-        _id: String(id),
+        _id: id,
+        booking: {
+          ...b.booking,
+        },
       };
+
+      const exists = state.assignedBookings.some(
+        (x) => normalizeId(getId(x)) === id
+      );
 
       return {
         assignedBookings: exists
-          ? state.assignedBookings.map((x) =>
-              getId(x) === id ? { ...x, ...normalized } : x
-            )
+          ? state.assignedBookings.map((x) => {
+              const xId = normalizeId(getId(x));
+
+              if (xId !== id) return x;
+
+              return {
+                ...x,
+                ...normalized,
+                booking: {
+                  ...x.booking,
+                  ...normalized.booking,
+                },
+              };
+            })
           : [normalized, ...state.assignedBookings],
       };
     }),
 
+  // =========================
+  // REMOVE (INSTANT UI UPDATE)
+  // =========================
+
   removeAssigned: (id) =>
     set((state) => ({
       assignedBookings: state.assignedBookings.filter(
-        (x) => getId(x) !== id
+        (x) => normalizeId(getId(x)) !== normalizeId(id)
       ),
     })),
 }));
