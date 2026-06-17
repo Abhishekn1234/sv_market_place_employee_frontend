@@ -173,17 +173,17 @@ export default function AvailableBookingPage() {
                       {booking.service?.name || "-"}
                     </h3>
 
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-[13px] text-muted-foreground">
                       {booking.service?.category ? categoryMap[booking.service.category] : "-"}
                     </p>
                   </div>
 
                   {/* BODY */}
-                  <div className="p-2 space-y-2 text-[11px]">
+                  <div className="p-2 space-y-2 text-[13px]">
 
                     {/* CUSTOMER */}
                     <div className="rounded-md bg-muted/30 p-2 space-y-1">
-                      <p className="text-[10px] font-semibold text-muted-foreground uppercase">
+                      <p className="text-[13px] font-semibold text-muted-foreground uppercase">
                         {t("availableBooking.customer")}
                       </p>
 
@@ -211,7 +211,7 @@ export default function AvailableBookingPage() {
                       {booking.customer?.phone && (
                         <a
                           href={`tel:${booking.customer.phone}`}
-                          className="mt-1 block text-center bg-green-600 text-white rounded-md py-1 text-[11px]"
+                          className="mt-1 block text-center bg-green-600 text-white rounded-md py-1 text-[13px]"
                         >
                           📞 {t("availableBookings.callCustomer")}
                         </a>
@@ -250,7 +250,7 @@ export default function AvailableBookingPage() {
 
                       {/* Earnings */}
                       <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground uppercase text-[10px]">
+                        <span className="text-muted-foreground uppercase text-[13px]">
                           {t("availableBookings.You Earn")}
                         </span>
 
@@ -260,7 +260,7 @@ export default function AvailableBookingPage() {
                       </div>
 
                       {/* NOTE */}
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-[13px] text-muted-foreground">
                         {t("availableBookings.hourlyNote")}
                       </p>
 
@@ -280,17 +280,18 @@ export default function AvailableBookingPage() {
 
                     {/* MAP */}
                     {coords && (
-                      <button
+                      <Button
+                      variant="ghost"
                         onClick={() =>
                           window.open(
                             `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`,
                             "_blank"
                           )
                         }
-                        className="w-full flex items-center justify-center gap-1 border rounded-md py-1 text-[11px]"
+                        className="w-full flex items-center justify-center gap-1 border rounded-md py-1 text-[13px]"
                       >
                         📍 {t("availableBooking.getDirections")}
-                      </button>
+                      </Button>
                     )}
                   </div>
 
@@ -300,14 +301,14 @@ export default function AvailableBookingPage() {
                     <Button
                       disabled={isPending}
                       onClick={() => handleAccept(booking)}
-                      className="h-7 text-[11px]"
+                      className="h-7 text-[13px]"
                     >
                       {t("common.accept")}
                     </Button>
 
                     <Button
                       onClick={() => handleIgnore(booking._id)}
-                      className="h-7 text-[11px] dark:bg-slate-800"
+                      className="h-7 text-[13px] dark:bg-slate-800"
                     >
                       {t("common.ignore")}
                     </Button>

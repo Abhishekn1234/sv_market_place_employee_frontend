@@ -16,6 +16,7 @@ import type { DisplayWork, WorkGridProps } from "../types/workPresentation.types
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
 // import { ChatBadge } from "./ChatBadge/ChatBadge";
+// import { Badge } from "@/components/ui/badge";
 import { isHidden } from "../helpers/hiddenstatus";
 
 export default function WorkGrid({
@@ -101,17 +102,17 @@ const normalizedWorkList = useMemo(() => {
             <h3 className="font-semibold text-sm line-clamp-1">
               {work.service?.name || t("common.na")}
             </h3>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               {categoryName}
             </p>
           </div>
 
           {/* BODY */}
-          <div className="p-2 space-y-2 text-[11px]">
+          <div className="p-2 space-y-2 text-[13px]">
 
             {/* CUSTOMER */}
             <div className="rounded-md bg-muted/30 p-2 space-y-1">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase">
+              <p className="text-[13px] font-semibold text-muted-foreground uppercase">
                 {t("availableWork.customer")}
               </p>
 
@@ -138,7 +139,7 @@ const normalizedWorkList = useMemo(() => {
             </div>
 
             {/* ESTIMATES */}
-            <div className="flex justify-between text-[10px] border-b pb-1">
+            <div className="flex justify-between text-[13px] border-b pb-1">
               <span className="text-muted-foreground uppercase">
                 {work.booking?.schedule?.estimatedDays
                   ? t("availableBookings.EstimatedDays")
@@ -154,7 +155,7 @@ const normalizedWorkList = useMemo(() => {
 
             {/* EARNINGS */}
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground uppercase text-[10px]">
+              <span className="text-muted-foreground uppercase text-[13px]">
                 {t("availableBookings.You Earn")}
               </span>
 
@@ -164,7 +165,8 @@ const normalizedWorkList = useMemo(() => {
             </div>
 
             {/* NOTE */}
-            <div className="text-[10px] text-muted-foreground">
+            <div className="text-[13px] text-muted-foreground bg-gray-100 p-2 rounded-md">
+             
               {work.booking?.schedule?.estimatedDays
                 ? t("availableBookings.dailyNote")
                 : t("availableBookings.hourlyNote")}
@@ -172,7 +174,7 @@ const normalizedWorkList = useMemo(() => {
 
             {/* TIMER */}
             {isActiveWork(work) && timers[id] && (
-              <div className="flex items-center gap-1 text-green-700 text-[10px] font-medium">
+              <div className="flex items-center gap-1 text-green-700 text-[13px] font-medium">
                 <Timer size={12} />
                 {timers[id]}
               </div>
@@ -180,18 +182,19 @@ const normalizedWorkList = useMemo(() => {
 
             {/* MAP BUTTON */}
             {coordinates && (
-              <button
+              <Button
+              variant="ghost"
                 onClick={() =>
                   window.open(
                     `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}`,
                     "_blank"
                   )
                 }
-                className="w-full text-[11px] border rounded-md py-1 mt-1 flex items-center justify-center gap-1"
+                className="w-full text-[13px] border rounded-md py-1 mt-1 flex items-center justify-center gap-1"
               >
                 <MapPin size={14} />
                 {t("availableWork.getDirections")}
-              </button>
+              </Button>
             )}
           </div>
 
@@ -203,7 +206,7 @@ const normalizedWorkList = useMemo(() => {
               <Button
                 size="sm"
                 onClick={() => onStart(work)}
-                className="h-7 w-full text-[11px]"
+                className="h-7 w-full text-[13px]"
               >
                 {t("common.start")}
               </Button>
@@ -212,7 +215,7 @@ const normalizedWorkList = useMemo(() => {
                 size="sm"
                 variant="destructive"
                 onClick={() => onCancel(work)}
-                className="h-7 w-full text-[11px]"
+                className="h-7 w-full text-[13px]"
               >
                 {t("common.cancel")}
               </Button>
@@ -220,7 +223,7 @@ const normalizedWorkList = useMemo(() => {
               <Button
                 size="sm"
                 onClick={() => navigate(`/chat/${work.bookingId}`)}
-                className="h-7 w-full text-[11px] flex items-center justify-center gap-1"
+                className="h-7 w-full text-[13px] flex items-center justify-center gap-1"
               >
                 <MessageCircle size={14} />
                 {t("common.chat")}
@@ -231,7 +234,7 @@ const normalizedWorkList = useMemo(() => {
           {isActiveWork(work) && (
             <Button
               size="sm"
-              className="h-7 w-full text-[11px] col-span-3"
+              className="h-7 w-full text-[13px] col-span-3"
               onClick={() =>
                 onComplete({
                   ...work,
@@ -246,7 +249,7 @@ const normalizedWorkList = useMemo(() => {
           {work.status === "WORK_COMPLETED_PENDING" && (
             <Button
               size="sm"
-              className="h-7 w-full text-[11px] col-span-3"
+              className="h-7 w-full text-[13px] col-span-3"
               onClick={() => onVerify(work)}
             >
               {t("availableWork.verifyOtp")}
