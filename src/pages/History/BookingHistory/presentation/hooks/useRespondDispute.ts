@@ -3,6 +3,8 @@ import { DisputesRepoImpl } from "../../data/repositories/DisputesRepoImpl";
 import { RespondDisputesUsecase } from "../../domain/usecase/RespondDisputesUsecase";
 import type { DisputesRespond } from "../../domain/entities/disputesrespond";
 import { toast } from "react-toastify";
+import { initializeSocket } from "@/core/Websocket/presentation/components/socket";
+import { BookingEvents } from "@/components/common/BookingEvents";
 
 export function useRespondDisputes() {
   const queryClient = useQueryClient();
@@ -15,9 +17,9 @@ export function useRespondDisputes() {
       usecase.execute(payload),
 
     onSuccess: (res: any, variables) => {
-      // support multiple API shapes
       const updated = res?.dispute ?? res;
-
+      //  console.log(updated);
+      // Update cache instantly
       queryClient.setQueryData(["disputes"], (old: any[] = []) => {
         if (!Array.isArray(old)) return old;
 
@@ -25,11 +27,29 @@ export function useRespondDisputes() {
           d._id === (updated?._id || variables.disputeId)
             ? {
                 ...d,
-                workerResponse: variables.response, // 🔥 guaranteed instant UI update
-                status: "RESOLVED",
+                ...updated,
+                workerResponse:
+                  updated?.workerResponse ??
+                  variables.response,
               }
             : d
         );
+      });
+
+      
+      const socket = initializeSocket("/workers/assigned-updates");
+
+      // Choose event based on dispute status
+      const event =
+        updated?.status === "RESOLVED"
+          ? BookingEvents.DISPUTE_RESOLVED
+          : BookingEvents.DISPUTE_RESPONDED;
+ 
+      socket.emit(event, {
+        disputeId: updated?._id ?? variables.disputeId,
+        status: updated?.status,
+        response: variables.response,
+        dispute: updated,
       });
 
       toast.success("Response submitted successfully");

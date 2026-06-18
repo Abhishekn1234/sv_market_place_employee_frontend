@@ -232,9 +232,11 @@ const normalizedWorkList = useMemo(() => {
           )}
 
           {isActiveWork(work) && (
+            <>
+          <div className="flex gap-3">
             <Button
               size="sm"
-              className="h-7 w-full text-[13px] col-span-3"
+              className="h-7 text-[13px]"
               onClick={() =>
                 onComplete({
                   ...work,
@@ -244,6 +246,18 @@ const normalizedWorkList = useMemo(() => {
             >
               {t("common.complete")}
             </Button>
+
+            <Button
+              size="sm"
+              onClick={() => navigate(`/chat/${work.bookingId}`)}
+              className="h-7 text-[13px] flex items-center gap-1"
+            >
+              <MessageCircle size={14} />
+              {t("common.chat")}
+            </Button>
+          </div>
+            
+            </>
           )}
 
           {work.status === "WORK_COMPLETED_PENDING" && (

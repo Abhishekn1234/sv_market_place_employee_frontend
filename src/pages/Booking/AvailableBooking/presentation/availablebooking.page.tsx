@@ -146,6 +146,7 @@ export default function AvailableBookingPage() {
         title={
           translations?.sidebar?.availableBooking || "Available Booking"
         }
+        
         headerAlign={isRTL ? "right" : "left"}
       >
         {normalizedBookings.length === 0 && (

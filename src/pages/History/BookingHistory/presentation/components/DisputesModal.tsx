@@ -109,35 +109,37 @@ export default function DisputeModal({
             </h2>
           </CommonModal.Header>
 
-          <CommonModal.Body>
-            {isLoading && <CommonSpinner />}
+        <CommonModal.Body className="max-h-[70vh] overflow-y-auto">
+  {isLoading && <CommonSpinner />}
 
-            {!isLoading && disputes.length === 0 && (
-              <p className="text-gray-500 text-sm">
-                {t("disputepage.noData")}
-              </p>
-            )}
+  {!isLoading && disputes.length === 0 && (
+    <p className="text-gray-500 text-sm">
+      {t("disputepage.noData")}
+    </p>
+  )}
 
-            {/* DESKTOP TABLE */}
-            <div className="hidden md:block">
-              {!isLoading && disputes.length > 0 && (
-                <CommonTable<Dispute>
-                  columns={columns}
-                  data={disputes}
-                  keyExtractor={(d) => d._id}
-                />
-              )}
-            </div>
+  {/* Desktop Table */}
+  <div className="hidden md:block">
+    {!isLoading && disputes.length > 0 && (
+      <CommonTable<Dispute>
+        columns={columns}
+        data={disputes}
+        keyExtractor={(d) => d._id}
+      />
+    )}
+  </div>
 
-            {/* MOBILE CARDS */}
-             <DisputesMobileCards
-              disputes={disputes}
-              isLoading={isLoading}
-              t={t}
-              setSelected={setSelected}
-              setResponseOpen={setResponseOpen}
-             />
-          </CommonModal.Body>
+  {/* Mobile Cards */}
+  {!isLoading && disputes.length > 0 && (
+    <DisputesMobileCards
+      disputes={disputes}
+      isLoading={isLoading}
+      t={t}
+      setSelected={setSelected}
+      setResponseOpen={setResponseOpen}
+    />
+  )}
+</CommonModal.Body>
 
           <CommonModal.Footer>
             <Button variant="outline" onClick={onClose}>

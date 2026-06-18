@@ -13,7 +13,7 @@ import {
   FINAL_WORK_STATUSES,
   normalizeAssignedWorks,
 } from "./helpers/workPresentation.helpers";
-import type { Booking } from "../../AvailableBooking/domain/entities/booking";
+// import type { Booking } from "../../AvailableBooking/domain/entities/booking";
 import type {
   CancelableWork,
   DisplayWork,
@@ -142,19 +142,25 @@ export default function AvailableWorkPage() {
     setModalType(null);
   };
 
-  if (socketBookings.length === 0 && isLoading) {
-    return (
-      <CommonCard title={t("sidebar.assignedWork")} className="mt-6">
-       {/* <CommonSpinner size="md" color="black"/> */}
-       <span>{t("common.noData")}</span>
-      </CommonCard>
-    );
-  }
-
+ if (socketBookings.length === 0 && isLoading) {
   return (
+    <div className="mt-8 px-4 lg:px-6">
+      <CommonCard
+        title={t("sidebar.assignedWork")}
+        headerAlign={isRTL ? "right" : "left"}
+      >
+        <div className="text-center py-16 text-gray-500">
+          {t("common.noData")}
+        </div>
+      </CommonCard>
+    </div>
+  );
+}
+
+return (
+  <div className="mt-8 px-4 lg:px-6">
     <CommonCard
       title={t("sidebar.assignedWork")}
-      className="mt-6"
       headerAlign={isRTL ? "right" : "left"}
     >
       <WorkGrid
@@ -174,11 +180,12 @@ export default function AvailableWorkPage() {
         cancelConfirmWork={cancelConfirmWork}
         setCancelConfirmWork={setCancelConfirmWork}
         cancelMutation={cancelMutation}
-        onCancelSuccess={(updatedBooking: Booking) => {
-          const bookingId = updatedBooking?._id || updatedBooking?._id;
+        onCancelSuccess={(updatedBooking) => {
+          const bookingId = updatedBooking?._id;
           if (bookingId) removeAssigned(bookingId);
         }}
       />
     </CommonCard>
-  );
+  </div>
+);
 }
