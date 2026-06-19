@@ -192,7 +192,8 @@ export default function AppHeader({
 
       {/* HEADER */}
       <header
-        className={`flex items-center px-4 py-3 border-b transition-all ${
+  dir={isRTL ? "rtl" : "ltr"}
+  className={`flex items-center px-4 py-3 border-b transition-all ${
           theme === "dark"
             ? "border-gray-800 bg-gray-900 text-gray-100"
             : "border-gray-200 bg-gray-50 text-gray-900"
@@ -214,44 +215,39 @@ export default function AppHeader({
         <div className="flex-1" />
 
         {/* RIGHT */}
-        <div className="flex items-center gap-4">
+       <div
+  className={`flex items-center gap-4 ${
+    isRTL ? "flex-row-reverse" : ""
+  }`}
+>
           {/* STATUS */}
           <div
-            className={`flex items-center gap-3 ${
-              isRTL
-                ? "flex-row-reverse"
-                : ""
-            }`}
-          >
-            <Switch
-              checked={isOnline}
-              onCheckedChange={
-                handleToggle
-              }
-              disabled={
-                loading ||
-                !workerStatus
-              }
-            />
+  className={`flex items-center gap-3 ${
+    isRTL ? "justify-end" : ""
+  }`}
+>
+  <span
+    className={`text-sm font-medium whitespace-nowrap ${
+      isOnline
+        ? "text-green-600"
+        : "text-gray-500"
+    }`}
+  >
+    {workerStatus ? (
+      isOnline
+        ? homeTranslations.online
+        : homeTranslations.offline
+    ) : (
+      <CommonSpinner />
+    )}
+  </span>
 
-            <span
-              className={`text-sm font-medium ${
-                isOnline
-                  ? "text-green-600"
-                  : "text-gray-500"
-              }`}
-            >
-              {workerStatus ? (
-                isOnline ? (
-                  homeTranslations.online
-                ) : (
-                  homeTranslations.offline
-                )
-              ) : (
-                <CommonSpinner />
-              )}
-            </span>
-          </div>
+  <Switch
+    checked={isOnline}
+    onCheckedChange={handleToggle}
+    disabled={loading || !workerStatus}
+  />
+</div>
 
           {/* THEME */}
           <Button
@@ -269,28 +265,28 @@ export default function AppHeader({
           {/* LANGUAGE */}
           <div className="relative">
             <Button
-              variant="ghost"
-              onClick={() =>
-                setLangDropdownOpen(
-                  !langDropdownOpen
-                )
-              }
-            >
-              <Globe className="h-5 w-5" />
-
-              <span>{language}</span>
-            </Button>
+  variant="ghost"
+  onClick={() =>
+    setLangDropdownOpen(!langDropdownOpen)
+  }
+  className={`flex items-center gap-2 ${
+    isRTL ? "flex-row-reverse" : ""
+  }`}
+>
+  <Globe className="h-5 w-5" />
+  <span>{language}</span>
+</Button>
 
           {langDropdownOpen && (
        <div
-    className="
-      absolute right-0 mt-2 w-36
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-700
-      rounded-md shadow-lg
-      z-50
-    "
-  >
+  className={`
+    absolute mt-2 w-36
+    ${isRTL ? "left-0" : "right-0"}
+    bg-white dark:bg-gray-900
+    border border-gray-200 dark:border-gray-700
+    rounded-md shadow-lg z-50
+  `}
+>
     {languages.map((lang) => (
       <Button
         key={lang.code}
@@ -299,11 +295,12 @@ export default function AppHeader({
           setLanguage(lang.code as "EN" | "AR" | "HI");
           setLangDropdownOpen(false);
         }}
-        className="
-          flex items-center gap-2 w-full px-4 py-2
-          text-gray-900 dark:text-gray-100
-          hover:bg-gray-100 dark:hover:bg-gray-800
-        "
+       className={`
+  flex items-center gap-2 w-full px-4 py-2
+  ${isRTL ? "flex-row-reverse text-right" : ""}
+  text-gray-900 dark:text-gray-100
+  hover:bg-gray-100 dark:hover:bg-gray-800
+`}
       >
         <span>{lang.icon}</span>
         {lang.label}
@@ -322,7 +319,9 @@ export default function AppHeader({
                   (p) => !p
                 )
               }
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
             >
               {profileImage ? (
                 <img
@@ -344,10 +343,22 @@ export default function AppHeader({
             </Button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-50">
+             <div
+                        className={`
+                          absolute mt-2 w-48
+                          ${isRTL ? "left-0" : "right-0"}
+                          bg-white dark:bg-gray-900
+                          border border-gray-200 dark:border-gray-700
+                          rounded-md shadow-lg z-50
+                        `}
+                      >
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-4 py-2"
+                  className={`w-full px-4 py-2 ${
+                          isRTL
+                            ? "justify-end flex-row-reverse"
+                            : "justify-start"
+                        }`}
                   onClick={() =>
                     navigate(
                       "/settings/profile"

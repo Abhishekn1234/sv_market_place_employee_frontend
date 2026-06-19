@@ -3,7 +3,7 @@
 export type HomePageTranslations = {
   dashboard: string;
   welcome?: string;
- 
+  months: Record<string, string>;
 stats:{
   title: string;
   subtitle: string;

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { NotificationRepositoryImpl } from "../../data/repositories/NotificationRepoImpl";
 import { MarkAllNotificationsReadUseCase } from "../../domain/usecase/MarkAllReadUsecase";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 const repo = new NotificationRepositoryImpl();
 const useCase = new MarkAllNotificationsReadUseCase(repo);
@@ -33,7 +33,7 @@ export const useMarkAllRead = () => {
     mutationFn: () => useCase.execute(),
 
     onSuccess: () => {
-      toast.success("All notifications marked as read");
+      // toast.success("All notifications marked as read");
 
       markAllOptimistically();
     },

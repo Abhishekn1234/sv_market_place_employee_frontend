@@ -28,10 +28,6 @@ import WalletDashboard from "./RevenueCards";
 
 
 
-const MONTHS = [
-  "Jan","Feb","Mar","Apr","May","Jun",
-  "Jul","Aug","Sep","Oct","Nov","Dec",
-];
 
 export default function HomeStats() {
   const { translations, language } = useLanguage();
@@ -59,7 +55,7 @@ export default function HomeStats() {
     "WORKER_ACCEPTED",
     "WORK_STARTED",
   ];
-
+  
   const completedCount = bookings.filter((b) =>
     completedStatuses.includes(b.status)
   ).length;
@@ -73,21 +69,46 @@ export default function HomeStats() {
   ).length;
 
   // ================= MONTHLY BOOKINGS =================
-  const monthlyBookings = useMemo(() => {
-    const counts = Array(12).fill(0);
+const MONTHS = useMemo(() => {
+  const months = translations?.HomePage?.months;
 
-    bookings.forEach((b) => {
-      const date = new Date(b.assignedAt || b.completedAt);
-      if (isNaN(date.getTime())) return;
+  if (!months) return [];
 
+  // If months is an array
+  if (Array.isArray(months)) {
+    return months;
+  }
+
+  // If months is an object with keys 1-12
+  return Array.from(
+    { length: 12 },
+    (_, index:any) =>
+      months[String(index + 1)] ??
+      months[index + 1] ??
+      ""
+  );
+}, [translations, language]);
+
+const monthlyBookings = useMemo(() => {
+  const counts = Array(12).fill(0);
+
+  bookings.forEach((b) => {
+    const date = new Date(b.assignedAt || b.completedAt);
+
+    if (!isNaN(date.getTime())) {
       counts[date.getMonth()]++;
-    });
+    }
+  });
 
-    return MONTHS.map((m, i) => ({
-      month: m,
-      bookings: counts[i],
-    }));
-  }, [bookings]);
+  return MONTHS.map((month, index) => ({
+    month,
+    bookings: counts[index],
+  }));
+}, [bookings, MONTHS]);
+
+console.log("Language:", language);
+console.log("Months:", MONTHS);
+console.log("Chart Data:", monthlyBookings);
 
   // ================= STATS =================
   const statCards = [
@@ -140,15 +161,15 @@ export default function HomeStats() {
                 isRTL ? "flex-row-reverse" : ""
               }`}
             >
-             <div className="min-w-0">
-  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
-    {card.title}
-  </p>
+                          <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+                  {card.title}
+                </p>
 
-  <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
-    {card.value}
-  </p>
-</div>
+                <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                  {card.value}
+                </p>
+              </div>
 
               <div className={`h-10 w-10 flex items-center justify-center rounded-xl ${card.bg}`}>
                 <card.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${card.text}`} />
@@ -162,27 +183,42 @@ export default function HomeStats() {
 
       {/* ================= CHARTS ================= */}
       <div className="flex flex-col gap-6 w-full min-w-0">
-        <CommonCard title={translations.HomePage.monthlyBookings}>
-          <div className="h-[260px] sm:h-[320px] md:h-[380px] w-full min-w-0 overflow-hidden">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyBookings}>
-                <CartesianGrid strokeDasharray="3 3" />
-               <XAxis
-                    dataKey="month"
-                    tick={{ fontSize: 10 }}
-                    interval={0}
-                    angle={-15}
-                    textAnchor="end"
-                    height={50}
-                    tickMargin={10}
-                  />
-                <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip />
-                <Bar dataKey="bookings" fill="#6366f1" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CommonCard>
+       <CommonCard title={translations.HomePage.monthlyBookings}>
+  <div className="h-[260px] sm:h-[320px] md:h-[380px] w-full min-w-0 overflow-hidden">
+    <ResponsiveContainer
+      key={`container-${language}`}
+      width="100%"
+      height="100%"
+    >
+      <BarChart
+        key={`chart-${language}`}
+        data={monthlyBookings}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+
+        <XAxis
+          dataKey="month"
+          tick={{ fontSize: 10 }}
+          interval={0}
+          angle={-15}
+          textAnchor="end"
+          height={50}
+          tickMargin={10}
+        />
+
+        <YAxis tick={{ fontSize: 10 }} />
+
+        <Tooltip />
+
+        <Bar
+          dataKey="bookings"
+          fill="#6366f1"
+          radius={[6, 6, 0, 0]}
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</CommonCard>
       </div>
       </div>
     </div>

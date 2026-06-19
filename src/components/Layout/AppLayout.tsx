@@ -24,19 +24,23 @@ export default function AppLayout() {
 
   /* ================= SOCKETS ================= */
 
-  // Live booking requests
   useBookingSocket();
-
-  // Assigned bookings socket initialization
   useAssignedSocketInit();
-
-  // Assigned booking event listeners
   useAssignedSocket();
+
+  /* ================= RTL ================= */
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = language.toLowerCase();
+  }, [isRTL, language]);
 
   /* ================= RESPONSIVE ================= */
 
   useEffect(() => {
-    const onResize = () => setWindowWidth(window.innerWidth);
+    const onResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
 
     window.addEventListener("resize", onResize);
 
@@ -56,10 +60,10 @@ export default function AppLayout() {
         : isRTL
         ? "lg:mr-72"
         : "lg:ml-72"
-      : "ml-0 mr-0";
+      : "";
 
   return (
-    <div className={`flex min-h-screen ${isRTL ? "flex-row-reverse" : ""}`}>
+    <div className="flex min-h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
       {/* ================= SIDEBAR ================= */}
       <AppSidebar
         mobileOpen={mobileOpen}
@@ -69,7 +73,9 @@ export default function AppLayout() {
       />
 
       {/* ================= MAIN ================= */}
-      <div className={`flex flex-1 flex-col ${contentOffset}`}>
+      <div
+        className={`flex flex-1 min-w-0 flex-col transition-all duration-300 ${contentOffset}`}
+      >
         <AppHeader
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
@@ -77,7 +83,7 @@ export default function AppLayout() {
           setMini={setMini}
         />
 
-        <main className="flex-1 overflow-y-auto px-4">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto px-4">
           <Outlet />
         </main>
       </div>
