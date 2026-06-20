@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import {
   User,
   Phone,
-  // MapPin,
   Briefcase,
   Layers,
   Wrench,
@@ -84,6 +83,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
 
         {/* Customer Details */}
+        {/* Customer Details */}
         <div className="space-y-4 min-w-0">
           <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             {expandedLabels.customerDetails}
@@ -91,17 +91,17 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
           <div className="space-y-3">
             <div className="flex items-center gap-3 text-slate-700 min-w-0">
               <User className="h-4 w-4 text-slate-400 shrink-0" />
-              <span className="text-sm font-medium truncate">
+              <span className="text-sm font-medium break-words min-w-0">
                 {booking.customer.fullName}
               </span>
             </div>
             <div className="flex items-center gap-3 text-slate-600 min-w-0">
               <Phone className="h-4 w-4 text-slate-400 shrink-0" />
-              <span className="text-sm truncate">{booking.customer.phone}</span>
+              <span className="text-sm break-words min-w-0">{booking.customer.phone}</span>
             </div>
             <div className="flex items-center gap-3 text-slate-600 min-w-0">
               <Mail className="h-4 w-4 text-slate-400 shrink-0" />
-              <span className="text-sm truncate min-w-0 break-all">
+              <span className="text-sm break-all min-w-0">
                 {booking.customer.email}
               </span>
             </div>
@@ -117,7 +117,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
             <div className="flex items-start gap-3 text-slate-600 text-sm min-w-0">
               <Briefcase className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <span className="text-slate-400 mr-1">
+                <span className="text-slate-400 block sm:inline sm:mr-1">
                   {expandedLabels.serviceCategory}:
                 </span>
                 <span className="font-medium text-slate-800 break-words">
@@ -128,7 +128,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
             <div className="flex items-start gap-3 text-slate-600 text-sm min-w-0">
               <Wrench className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <span className="text-slate-400 mr-1">
+                <span className="text-slate-400 block sm:inline sm:mr-1">
                   {expandedLabels.serviceItem}:
                 </span>
                 <span className="font-medium text-slate-800 break-words">
@@ -159,7 +159,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
             <div className="flex items-start gap-3 min-w-0">
               <Fingerprint className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <span className="text-slate-400 mr-1">
+                <span className="text-slate-400 block sm:inline sm:mr-1">
                   {expandedLabels.bookingCode}:
                 </span>
                 <span className="font-mono font-medium text-slate-800 break-all">
@@ -171,7 +171,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
             <div className="flex items-start gap-3 min-w-0">
               <Activity className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <span className="text-slate-400 mr-1">
+                <span className="text-slate-400 block sm:inline sm:mr-1">
                   {expandedLabels.bookingType}:
                 </span>
                 <span className="font-medium text-slate-800 break-words">
@@ -183,7 +183,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
             <div className="flex items-start gap-3 min-w-0">
               <Calendar className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <span className="text-slate-400 mr-1">
+                <span className="text-slate-400 block sm:inline sm:mr-1">
                   {expandedLabels.workStartDate}:
                 </span>
                 <span className="font-medium text-slate-800 break-words">
@@ -195,7 +195,7 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
             <div className="flex items-start gap-3 min-w-0">
               <Calendar className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <span className="text-slate-400 mr-1">
+                <span className="text-slate-400 block sm:inline sm:mr-1">
                   {expandedLabels.startDate}:
                 </span>
                 <span className="font-medium text-slate-800 break-words">
@@ -211,7 +211,9 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
             <div className="flex items-start gap-3 min-w-0">
               <Hourglass className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <span className="text-slate-400 mr-1">Duration:</span>
+                <span className="text-slate-400 block sm:inline sm:mr-1">
+                  Duration:
+                </span>
                 <span className="font-medium text-slate-800 break-words">
                   {formatBookingDurationText(booking.booking)}
                 </span>
@@ -224,7 +226,9 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
                 <div className="flex items-start gap-2 min-w-0">
                   <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
                   <span className="break-words">
-                    {expandedLabels.workAssignedOn}{" "}
+                    <span className="block sm:inline">
+                      {expandedLabels.workAssignedOn}
+                    </span>{" "}
                     <span className="text-slate-700 font-medium">
                       {formatSmartDate(new Date(booking.assignedAt), {
                         showTime: true,
@@ -238,7 +242,9 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
                 <div className="flex items-start gap-2 min-w-0">
                   <Clock className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
                   <span className="break-words">
-                    {expandedLabels.workStartedOn}{" "}
+                    <span className="block sm:inline">
+                      {expandedLabels.workStartedOn}
+                    </span>{" "}
                     <span className="text-slate-700 font-medium">
                       {formatSmartDate(new Date(booking.startedAt), {
                         showTime: true,
@@ -252,7 +258,9 @@ export function BookingExpandedRow({ booking, bookingCategories }: Props) {
                 <div className="flex items-start gap-2 min-w-0">
                   <Clock className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
                   <span className="break-words">
-                    {expandedLabels.workCompletedOn}{" "}
+                    <span className="block sm:inline">
+                      {expandedLabels.workCompletedOn}
+                    </span>{" "}
                     <span className="text-slate-700 font-medium">
                       {formatSmartDate(new Date(booking.completedAt), {
                         showTime: true,
