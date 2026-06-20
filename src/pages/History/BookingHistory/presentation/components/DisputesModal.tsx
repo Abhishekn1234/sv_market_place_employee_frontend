@@ -109,27 +109,27 @@ export default function DisputeModal({
             </h2>
           </CommonModal.Header>
 
-        <CommonModal.Body className="max-h-[70vh] overflow-y-auto">
+      <CommonModal.Body className="overflow-y-auto max-h-[65vh] px-0 sm:px-4">
   {isLoading && <CommonSpinner />}
 
   {!isLoading && disputes.length === 0 && (
-    <p className="text-gray-500 text-sm">
+    <p className="text-gray-500 text-sm px-4">
       {t("disputepage.noData")}
     </p>
   )}
 
   {/* Desktop Table */}
-  <div className="hidden md:block">
-    {!isLoading && disputes.length > 0 && (
+  {!isLoading && disputes.length > 0 && (
+    <div className="hidden md:block">
       <CommonTable<Dispute>
         columns={columns}
         data={disputes}
         keyExtractor={(d) => d._id}
       />
-    )}
-  </div>
+    </div>
+  )}
 
-  {/* Mobile Cards */}
+  {/* Mobile Cards — no inner scroll, parent modal body scrolls */}
   {!isLoading && disputes.length > 0 && (
     <DisputesMobileCards
       disputes={disputes}

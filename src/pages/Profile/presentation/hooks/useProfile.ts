@@ -8,13 +8,16 @@ const usecase = new ListProfileUsecase(repo);
 export function useProfile() {
   return useQuery({
     queryKey: ["profile"],
-    queryFn: () => usecase.execute(),
+    queryFn: async () => {
+      console.log("PROFILE API CALLED");
+      return await usecase.execute();
+    },
 
-    staleTime: 1000 * 60 * 5, // 5 mins
+    staleTime: 0,
     gcTime: 1000 * 60 * 30,
 
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
     refetchOnReconnect: true,
 
     retry: 1,

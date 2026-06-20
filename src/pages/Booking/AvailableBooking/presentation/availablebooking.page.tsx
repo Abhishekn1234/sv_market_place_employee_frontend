@@ -11,6 +11,7 @@ import { formatScheduleDate } from "./helpers/formatScheduledatetime";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useAvailableBookings } from "@/core/Websocket/presentation/hooks/useGet";
+import CommonSpinner from "@/components/common/CommonSpinner";
 export default function AvailableBookingPage() {
   const { translations, language, t } = useLanguage();
   const isRTL = language === "AR";
@@ -261,9 +262,9 @@ export default function AvailableBookingPage() {
                       </div>
 
                       {/* NOTE */}
-                      <p className="text-[13px] text-muted-foreground">
-                        {t("availableBookings.hourlyNote")}
-                      </p>
+                    <p className="text-[13px] text-muted-foreground bg-gray-100 px-3 py-2 rounded-md">
+                          {t("availableBookings.hourlyNote")}
+                        </p>
 
                       {/* DATE */}
                       {isScheduled && (
@@ -324,7 +325,7 @@ export default function AvailableBookingPage() {
             {/* Spinner */}
             {loadingMore && (
               <div className="flex justify-center py-10">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
+                <CommonSpinner/>
               </div>
             )}
           </>
