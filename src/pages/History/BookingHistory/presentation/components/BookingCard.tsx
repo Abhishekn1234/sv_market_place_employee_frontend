@@ -63,13 +63,13 @@ export function BookingCard({
               <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             </div>
           <div className="flex flex-col min-w-0">
-  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-    {labels.client}
-  </span>
-  <span className="text-slate-700 dark:text-slate-200 font-medium break-words whitespace-normal">
-    {booking.customer?.fullName ?? "—"}
-  </span>
-</div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              {labels.client}
+            </span>
+            <span className="text-slate-700 dark:text-slate-200 font-medium break-words whitespace-normal">
+              {booking.customer?.fullName ?? "—"}
+            </span>
+          </div>
           </div>
 
           <div className="flex items-start gap-2.5">
