@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { User, Edit3 } from "lucide-react";
 
 type Props = {

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 
-import AppSidebar from "@/components/Layout/AppSidebar";
-import AppHeader from "@/components/Layout/AppHeader";
+import AppSidebar from "@/components/Layout/presentation/pages/AppSidebar";
+import AppHeader from "@/components/Layout/presentation/pages/AppHeader";
 
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useBookingSocket } from "@/core/Websocket/presentation/utils/useBookingsocket";
 import { useAssignedSocketInit } from "@/core/Websocket/presentation/hooks/socketinitliazation";
 import { useAssignedSocket } from "@/core/Websocket/presentation/utils/useAssignsocket";

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 // import { Label } from "@/components/ui/label";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import { Badge } from "@/components/ui/badge";
 import { PencilIcon } from "lucide-react";

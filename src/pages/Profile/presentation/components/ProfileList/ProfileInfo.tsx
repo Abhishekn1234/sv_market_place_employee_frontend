@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CommonCard } from "@/components/common/CommonCard";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 type Props = {
   profile: any;

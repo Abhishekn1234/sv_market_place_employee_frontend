@@ -601,6 +601,7 @@
     "reason": "Reason",
     "descriptionField": "Description",
     "status": "Status",
+    "Reason Type":"Reason Type",
     "response": "Response",
     "date": "Date",
     "actions": "Actions",

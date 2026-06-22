@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, Sparkles, X } from "lucide-react";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { Button } from "../ui/button";
 interface Props {
   open: boolean;

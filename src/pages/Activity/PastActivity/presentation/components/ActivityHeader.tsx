@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BarChart3, Download } from "lucide-react";
-import { useLanguage } from "@/context/LanguageContext";
-import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 
 interface ActivityHeaderProps {
   employeeName: string;

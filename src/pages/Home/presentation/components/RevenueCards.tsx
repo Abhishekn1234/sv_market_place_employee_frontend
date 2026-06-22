@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { TrendingUp, Wallet, ReceiptText, Coins } from "lucide-react";
 import { useGetMyWalletStatistics } from "../hooks/useStats";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { Button } from "@/components/ui/button";
 
 import CommonSpinner from "@/components/common/CommonSpinner";

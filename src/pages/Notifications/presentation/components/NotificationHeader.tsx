@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 import { Bell, Check } from "lucide-react";
 import { toast } from "react-toastify";

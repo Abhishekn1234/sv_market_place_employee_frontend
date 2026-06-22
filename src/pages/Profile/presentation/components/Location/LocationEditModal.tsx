@@ -4,7 +4,7 @@ import { CommonMap } from "@/components/common/CommonMap";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 import { Input } from "@/components/ui/input";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { toast } from "react-toastify";
 
 type Props = {

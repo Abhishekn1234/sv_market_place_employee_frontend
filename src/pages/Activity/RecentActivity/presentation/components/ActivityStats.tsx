@@ -1,8 +1,8 @@
 import { Calendar, DollarSign, Clock } from "lucide-react";
 import type { Activity } from "../../domain/entities/activity";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 
 function Stat({
   icon,

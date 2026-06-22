@@ -3,13 +3,13 @@ import { matchPath, Route, Routes, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 
-import { LocationProvider } from "./context/LocationContext";
+import { LocationProvider } from "./context/presentation/components/LocationContext";
 import { LocationTracker } from "./pages/Profile/presentation/components/Location/LocationTracker";
-import { LanguageProvider } from "./context/LanguageContext";
-import { ThemeProvider } from "./context/ThemeContext";
+import { LanguageProvider } from "./context/presentation/components/LanguageContext";
+import { ThemeProvider } from "./context/presentation/components/ThemeContext";
 
 import ProtectedRoute from "./ProtectedRoute";
-import AppLayout from "./components/Layout/AppLayout";
+import AppLayout from "./components/Layout/presentation/pages/AppLayout";
 
 /* PAGES */
 import HomePage from "./pages/Home/presentation/home.page";
@@ -45,6 +45,7 @@ import ChatWorkerPage from "./ChatCustomer/presentation/ChatWorkerPage";
 import { initOnMessage } from "./components/firebase/notifications";
 import { useNotificationManager } from "./pages/Notifications/presentation/hooks/useNotificationhandler";
 import { useDynamicLocation } from "@/utils/useNotification";
+
 
 /* =========================
    APP CONTENT
@@ -175,7 +176,7 @@ const handleNavigate = (url?: string, data?: any) => {
         {/* EMAIL */}
         <Route path="/email-verification" element={<SendOtpEmailPage />} />
         <Route path="/verify-otp-email" element={<VerifyOtpEmailPage />} />
-
+        
         {/* PROTECTED */}
         <Route
           path="/"
@@ -199,6 +200,10 @@ const handleNavigate = (url?: string, data?: any) => {
           <Route path="/currentWork" element={<CurrentWorkPage />} />
 
           <Route path="/chat/:bookingId" element={<ChatWorkerPage />} />
+          <Route
+              path="/disputes/:bookingId"
+              element={<Disputespage />}
+            />
 
           <Route path="settings/wallet" element={<Wallet />} />
           <Route path="notifications" element={<NotificationsPage />} />

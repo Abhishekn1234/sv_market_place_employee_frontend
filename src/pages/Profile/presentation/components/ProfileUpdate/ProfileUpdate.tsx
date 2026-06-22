@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { useUpdateProfile } from "../../hooks/useUpdateProfile";
 import { useProfile } from "../../hooks/useProfile";
 import type { TabType } from "@/pages/Profile/domain/entities/tabtype";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useAuthStore } from "@/core/store/auth";
 
 type ProfileUpdateProps = {

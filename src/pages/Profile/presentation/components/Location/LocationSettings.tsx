@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/presentation/components/LocationContext";
 import { useDynamicLocation } from "@/utils/useNotification";
 import { useServiceTier } from "@/pages/Servicesettings/presentation/hooks/useServiceTier";
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";

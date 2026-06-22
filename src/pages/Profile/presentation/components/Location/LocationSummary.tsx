@@ -4,7 +4,7 @@ import { PencilIcon } from "lucide-react";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 interface Props {
   status: WorkerStatus | null;

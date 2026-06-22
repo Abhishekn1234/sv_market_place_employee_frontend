@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import CommonSpinner from "@/components/common/CommonSpinner";
 import ChatWindow from "./components/ChatWindow";
 import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { Button } from "@/components/ui/button";
 
 export default function ChatWorkerPage() {

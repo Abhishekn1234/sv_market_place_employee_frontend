@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import MapPicker from "./LocationPicker";
 import ServiceSelector from "./ServiceSelector";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { toast } from "react-toastify";
 
 export default function LocationModal({

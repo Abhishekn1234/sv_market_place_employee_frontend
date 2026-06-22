@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 import { useAssign } from "../../hooks/useAssign";
 import { useCancel } from "../../hooks/useCancel";
 import { useState } from "react";
@@ -11,7 +11,7 @@ import { CommonModal } from "@/components/common/CommonModal";
 import { Button } from "@/components/ui/button";
 import { WorkCard } from "./assignedworkpagecard";
 import CommonSpinner from "@/components/common/CommonSpinner";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 type Props = {
   open: boolean;

@@ -1,7 +1,7 @@
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import type { Activity } from "../../domain/entities/activity";
 import type { TimePeriod } from "../../domain/entities/timeperiod";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 
 type Props = {
   getPeriodLabel: (period: TimePeriod) => string;

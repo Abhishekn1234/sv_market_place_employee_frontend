@@ -1,6 +1,6 @@
 import { CommonTable, type TableColumn } from "@/components/common/CommonTable";
 import type { Transaction } from "../../domain/entities/transaction";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import { cn } from "@/lib/utils";
 

@@ -6,7 +6,7 @@ import { CommonCard } from "@/components/common/CommonCard";
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { toast } from "react-toastify";
 
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useStatusConfig } from "./hooks/statusconfig";
 import { useBookingColumns } from "./hooks/useColumns";
 import { useGetBookingHistory, useGetBookingHistoryInfinite } from "./hooks/useGetBookingHistory";
@@ -19,7 +19,8 @@ import { BookingCard } from "./components/BookingCard"; // Import the new compon
 import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";
 import type { BookingHistory } from "../domain/entities/bookinghistory";
 import { useDebounce } from "@/utils/usedebouncer";
-import DisputeModal from "./components/DisputesModal";
+
+import { useNavigate } from "react-router-dom";
 
 export default function BookingHistory() {
   const { language, translations } = useLanguage();
@@ -89,14 +90,11 @@ const bookings = useMemo<BookingHistory[]>(() => {
 
   const normalize = (value?: string) => value?.toLowerCase().replace(/\s|-/g, "");
 
-  const [openDisputeModal, setOpenDisputeModal] = useState(false);
-  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
-
+ 
+   const navigate = useNavigate();
   const handleOpenDisputes = (bookingId: string) => {
-    setSelectedBookingId(bookingId);
-    setOpenDisputeModal(true);
-  };
-
+  navigate(`/disputes/${bookingId}`);
+};
  const filteredBookings = useMemo(() => {
   return bookings.filter((b) => {
     if (ignoredIds.includes(b._id)) {
@@ -317,11 +315,7 @@ const observer = new IntersectionObserver(
         </div>
       </div>
 
-      <DisputeModal
-        open={openDisputeModal}
-        bookingId={selectedBookingId}
-        onClose={() => setOpenDisputeModal(false)}
-      />
+      
     </div>
   );
 }

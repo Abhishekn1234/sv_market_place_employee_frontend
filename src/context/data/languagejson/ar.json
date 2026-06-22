@@ -612,6 +612,7 @@
     "description": "إدارة والرد على نزاعات المستخدمين",
     "bookingId": "معرّف الحجز",
     "user": "المستخدم",
+    "Reason Type":"نوع السبب",
     "reason": "السبب",
     "descriptionField": "الوصف",
     "status": "الحالة",

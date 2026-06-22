@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/presentation/components/LocationContext";
 import { useAuthStore } from "@/core/store/auth";
 import { reverseGeocode } from "@/components/common/CommonMap";
 

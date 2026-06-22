@@ -2,8 +2,8 @@
 
 import { DollarSign, Calendar, Filter } from "lucide-react";
 import { useWalletTransactions } from "@/pages/Wallet/presentation/hooks/useWalletTransactions";
-import { useLanguage } from "@/context/LanguageContext";
-import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 import { CommonCard } from "@/components/common/CommonCard";
 
 export default function TransactionSummary() {

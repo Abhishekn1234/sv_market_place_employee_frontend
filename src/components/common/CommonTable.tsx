@@ -18,7 +18,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import CommonSpinner from "@/components/common/CommonSpinner";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { cn } from "@/components/ui/utils";
 
 export type TableColumn<T> = {
@@ -76,11 +76,15 @@ export function CommonTable<T>({
   isLoading = false,
   isRTL = false,
 }: CommonTableProps<T>) {
-  const { translations } = useLanguage(); // ✅ FIXED LOCATION
+  const { translations } = useLanguage();
 
-  const renderedColumns = isRTL ? [...columns].reverse() : columns;
+  const renderedColumns = columns;
 
-  const visiblePages = getVisiblePages(currentPage??1, totalPages, 3);
+  const visiblePages = getVisiblePages(
+    currentPage ?? 1,
+    totalPages,
+    3
+  );
 
   const hasData = data.length > 0;
 
@@ -92,10 +96,11 @@ export function CommonTable<T>({
 
   return (
     <>
-      {/* TABLE WRAPPER */}
-      <div className="w-full overflow-x-auto">
-        <Table className={cn("min-w-full", isRTL && "direction-rtl")}>
-          {/* HEADER */}
+      <div
+        className="w-full overflow-x-auto"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
+        <Table className="min-w-full">
           <TableHeader className="hidden md:table-header-group">
             <TableRow>
               {renderedColumns.map((col) => (
@@ -112,7 +117,6 @@ export function CommonTable<T>({
             </TableRow>
           </TableHeader>
 
-          {/* BODY */}
           <TableBody>
             {isLoading ? (
               <TableRow>
@@ -138,8 +142,11 @@ export function CommonTable<T>({
 
                 return (
                   <React.Fragment key={rowKey}>
-                    {/* ROW */}
-                    <TableRow className="block md:table-row mb-4 md:mb-0 border-b md:border-0 last:border-b-0">
+                    <TableRow
+                      className={cn(
+                        "block md:table-row mb-4 md:mb-0 border-b md:border-0 last:border-b-0"
+                      )}
+                    >
                       {renderedColumns.map((col) => {
                         const value =
                           col.render !== undefined
@@ -152,7 +159,9 @@ export function CommonTable<T>({
                             className={cn(
                               col.className,
                               "block md:table-cell px-4 py-2 md:px-3 md:py-3",
-                              isRTL ? "text-right" : "text-left"
+                              isRTL
+                                ? "text-right"
+                                : "text-left"
                             )}
                           >
                             <span className="md:hidden font-medium text-gray-500">
@@ -164,17 +173,17 @@ export function CommonTable<T>({
                       })}
                     </TableRow>
 
-                    {/* EXPANDED ROW */}
-                    {renderExpandedRow && expandedRowKey === rowKey && (
-                      <TableRow className="block md:table-row">
-                        <TableCell
-                          colSpan={columns.length || 1}
-                          className="block md:table-cell bg-gray-50 p-4"
-                        >
-                          {renderExpandedRow(row)}
-                        </TableCell>
-                      </TableRow>
-                    )}
+                    {renderExpandedRow &&
+                      expandedRowKey === rowKey && (
+                        <TableRow className="block md:table-row">
+                          <TableCell
+                            colSpan={columns.length || 1}
+                            className="block md:table-cell bg-gray-50 p-4"
+                          >
+                            {renderExpandedRow(row)}
+                          </TableCell>
+                        </TableRow>
+                      )}
                   </React.Fragment>
                 );
               })
@@ -183,56 +192,52 @@ export function CommonTable<T>({
         </Table>
       </div>
 
-      {/* PAGINATION */}
-{showPagination && (
-  <Pagination
-    className={cn(
-      "mt-6 flex w-full",
-      isRTL ? "justify-start" : "justify-end"
-    )}
-    dir={isRTL ? "rtl" : "ltr"}
-  >
-    {/* Prev */}
-    <PaginationPrevious
-      onClick={() => {
-        if ((currentPage ?? 1) > 1) {
-          onPageChange?.((currentPage ?? 1) - 1);
-        }
-      }}
-      className={cn(
-        (currentPage ?? 1) <= 1 &&
-          "pointer-events-none opacity-50"
-      )}
-    />
+      {showPagination && (
+        <Pagination
+          className={cn(
+            "mt-6 flex w-full",
+            isRTL ? "justify-start" : "justify-end"
+          )}
+          dir={isRTL ? "rtl" : "ltr"}
+        >
+          <PaginationPrevious
+            onClick={() => {
+              if ((currentPage ?? 1) > 1) {
+                onPageChange?.((currentPage ?? 1) - 1);
+              }
+            }}
+            className={cn(
+              (currentPage ?? 1) <= 1 &&
+                "pointer-events-none opacity-50"
+            )}
+          />
 
-    {/* Pages */}
-    <PaginationContent className="flex gap-2">
-      {visiblePages.map((page) => (
-        <PaginationItem key={page}>
-          <PaginationLink
-            isActive={(currentPage ?? 1) === page}
-            onClick={() => onPageChange?.(page)}
-          >
-            {page}
-          </PaginationLink>
-        </PaginationItem>
-      ))}
-    </PaginationContent>
+          <PaginationContent className="flex gap-2">
+            {visiblePages.map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  isActive={(currentPage ?? 1) === page}
+                  onClick={() => onPageChange?.(page)}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+          </PaginationContent>
 
-    {/* Next */}
-    <PaginationNext
-      onClick={() => {
-        if ((currentPage ?? 1) < totalPages) {
-          onPageChange?.((currentPage ?? 1) + 1);
-        }
-      }}
-      className={cn(
-        (currentPage ?? 1) >= totalPages &&
-          "pointer-events-none opacity-50"
+          <PaginationNext
+            onClick={() => {
+              if ((currentPage ?? 1) < totalPages) {
+                onPageChange?.((currentPage ?? 1) + 1);
+              }
+            }}
+            className={cn(
+              (currentPage ?? 1) >= totalPages &&
+                "pointer-events-none opacity-50"
+            )}
+          />
+        </Pagination>
       )}
-    />
-  </Pagination>
-)}
     </>
   );
 }

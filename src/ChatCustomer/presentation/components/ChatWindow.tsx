@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { useChat } from "../hooks/useChat";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CommonCard } from "@/components/common/CommonCard";

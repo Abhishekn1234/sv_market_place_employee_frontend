@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import type { Work } from "../../domain/entities/work";
 import type { WorkStatsCard } from "../../../../History/WorkHistory/domain/entities/workstats";
 import { getNormalizedStatus } from "../../../../History/WorkHistory/presentation/utils/workhistory";

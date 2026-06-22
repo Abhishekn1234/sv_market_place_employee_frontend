@@ -1,12 +1,12 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import en from "./languagejson/en.json";
-import ar from "./languagejson/ar.json";
-import hi from "./languagejson/hi.json";
+import type { TranslationSchema } from "../../domain/entities/types/translationschema.types";
+import type { LanguageContextType } from "../../domain/entities/types/languagecontexttype.types";
+import type { Language } from "../../domain/entities/types/language.types";
 import { useAuthStore } from "@/core/store/auth";
-import type { Language } from "./types/language.types";
-import type { TranslationSchema } from "./types/translationschema.types";
-import type { LanguageContextType } from "./types/languagecontexttype.types";
+import en from "../../data/languagejson/en.json";
+import ar from "../../data/languagejson/ar.json";
+import hi from "../../data/languagejson/hi.json";
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 

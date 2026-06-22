@@ -4,8 +4,8 @@ import { CommonCard } from "@/components/common/CommonCard";
 import { useRef } from "react";
 import { FileUp, FileCheck, FileWarning } from "lucide-react";
 import { FilePreviewWithName } from "../../../presentation/components/FilePreview/FilePreviewwithName";
-import { useTheme } from "@/context/ThemeContext";
-import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 type Props = {
   isEditing: boolean;

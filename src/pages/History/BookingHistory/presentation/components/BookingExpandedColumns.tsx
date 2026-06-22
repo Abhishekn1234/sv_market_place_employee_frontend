@@ -13,7 +13,7 @@ import {
   Mail,
 } from "lucide-react";
 import { reverseGeocode } from "@/components/common/CommonMap";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
 import type { BookingHistory } from "../../domain/entities/bookinghistory";

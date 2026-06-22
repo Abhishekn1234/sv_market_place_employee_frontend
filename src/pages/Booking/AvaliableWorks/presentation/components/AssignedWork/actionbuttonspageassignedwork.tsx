@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import type { Work } from "../../../domain/entities/work";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 type ActionButtonsProps = {
   work: Work;

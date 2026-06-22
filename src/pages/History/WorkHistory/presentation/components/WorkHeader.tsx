@@ -1,7 +1,7 @@
 "use client";
 
-import { useLanguage } from "@/context/LanguageContext";
-import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 
 export default function WorkHeader() {
   const { translations, language } = useLanguage();

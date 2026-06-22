@@ -1,6 +1,6 @@
 import { CommonCard } from "@/components/common/CommonCard";
-import { useLanguage } from "@/context/LanguageContext";
-import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 import { BarChart3, CheckCircle2, Clock, DollarSign } from "lucide-react";
 
 interface ActivityStatsProps {

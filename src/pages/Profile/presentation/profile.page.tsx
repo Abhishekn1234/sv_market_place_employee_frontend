@@ -4,7 +4,7 @@ import { User, Lock, MapPin } from "lucide-react";
 import ProfileList from "./components/ProfileList/ProfileList";
 import PasswordChanging from "./components/Password/PasswordChanging";
 import LocationSettings from "./components/Location/LocationSettings";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import CommonTabs from "@/components/common/CommonTabs";
 import type { CommonTab } from "@/components/common/CommonTabs";
 import type { TabType } from "../domain/entities/tabtype";

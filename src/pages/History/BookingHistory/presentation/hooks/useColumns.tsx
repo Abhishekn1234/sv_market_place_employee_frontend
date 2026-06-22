@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 
 import type { TableColumn } from "@/components/common/CommonTable";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useStatusConfig } from "./statusconfig";
 import { useStringUtils } from "./useStringutils";
 

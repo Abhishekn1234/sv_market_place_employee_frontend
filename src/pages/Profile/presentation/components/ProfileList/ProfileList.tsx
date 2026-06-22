@@ -10,7 +10,7 @@ import { ProfileHeader } from "./ProfileHeader";
 import { ProfileInfo } from "./ProfileInfo";
 
 import CommonSpinner from "@/components/common/CommonSpinner";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 export default function ProfileList() {
   const { data: profile, isLoading } = useProfile();

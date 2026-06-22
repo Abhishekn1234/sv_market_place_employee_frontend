@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, DollarSign, Filter, TrendingUp } from "lucide-react";
 
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import CommonTabs from "@/components/common/CommonTabs";
 import type { CommonTab } from "@/components/common/CommonTabs";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 
 type ActivityType = "all" | "booking" | "payment" | "transaction";
 import type { TimePeriod } from "../../domain/entities/timeperiod";

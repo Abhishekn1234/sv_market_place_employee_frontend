@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import type { Activity } from "../../domain/entities/activity";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 import { formatDate } from "../helpers/formatdate";
 import type { StatusConfig } from "../../domain/entities/activitystatus.type";
 

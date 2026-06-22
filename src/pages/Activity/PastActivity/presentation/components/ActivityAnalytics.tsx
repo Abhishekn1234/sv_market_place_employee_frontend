@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 
 import type { Activity } from "../../domain/entities/activity";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 
 type Props = {

@@ -2,7 +2,7 @@ import { ChevronDown, ChevronUp, User, Calendar, Clock, Banknote } from "lucide-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CommonCard } from "@/components/common/CommonCard";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useStatusConfig } from "../hooks/statusconfig";
 import { useStringUtils } from "../hooks/useStringutils";
 import { formatBookingDurationText } from "../utils/formatduration";

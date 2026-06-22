@@ -11,7 +11,7 @@ import {
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 import CommonSpinner from "@/components/common/CommonSpinner";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 
 type Props<TWork extends DisplayWork | Work> = {

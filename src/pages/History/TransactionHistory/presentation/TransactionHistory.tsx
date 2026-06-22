@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useTheme } from "@/context/ThemeContext";
-import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useWalletTransactions } from "@/pages/Wallet/presentation/hooks/useWalletTransactions";
 import TransactionFilters from "./components/TransactionFilters";
 import TransactionSummary from "./components/TransactionSummary";

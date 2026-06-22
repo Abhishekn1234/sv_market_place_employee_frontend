@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 
-import { useLanguage } from "@/context/LanguageContext";
-import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 
 import NotificationsHeader from "./components/NotificationHeader";
 import NotificationItem from "./components/NotificationItem";

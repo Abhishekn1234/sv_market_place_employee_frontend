@@ -1,4 +1,4 @@
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { WalletHeader } from "./components/WalletHeader";
 import { WalletMain } from "./components/WalletMain";
 import { WalletSidebar } from "./components/WalletSidebar";

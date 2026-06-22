@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { CommonCard } from "@/components/common/CommonCard";
-import { CommonTable, type TableColumn } from "@/components/common/CommonTable";
+import {
+  CommonTable,
+  type TableColumn,
+} from "@/components/common/CommonTable";
 import { Button } from "@/components/ui/button";
-import { CommonModal } from "@/components/common/CommonModal";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 import type { Dispute } from "../../domain/entities/disputes";
 import { useGetDisputes } from "../hooks/useGetDispute";
@@ -15,35 +17,37 @@ import { useRespondDisputes } from "../hooks/useRespondDispute";
 import { getDisputeStatusStyle } from "../utils/disputescolors";
 import { toast } from "react-toastify";
 
+import DisputesMobileCards from "./DisputesMobileCards";
+import BookingDisputeRespondModal from "./BookingDisputeRespondModal";
+
 export default function Disputespage() {
   const { language, t } = useLanguage();
   const isRTL = language === "AR";
 
   const { data = [], isLoading } = useGetDisputes();
-  console.log(data);
   const respondMutation = useRespondDisputes();
 
-  // ✅ modal state
   const [selected, setSelected] = useState<Dispute | null>(null);
   const [response, setResponse] = useState("");
+  const [responseOpen, setResponseOpen] = useState(false);
 
-  // ✅ mobile detection
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
+
     check();
     window.addEventListener("resize", check);
+
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ✅ open modal
   const openModal = (row: Dispute) => {
     setSelected(row);
     setResponse("");
+    setResponseOpen(true);
   };
 
-  // ✅ submit
   const handleSubmit = () => {
     if (!selected) return;
 
@@ -55,11 +59,16 @@ export default function Disputespage() {
       {
         onSuccess: () => {
           toast.success("Response submitted successfully");
+
           setSelected(null);
           setResponse("");
+          setResponseOpen(false);
         },
         onError: (err: any) => {
-          toast.error(err?.response?.data?.message || "Failed to submit response");
+          toast.error(
+            err?.response?.data?.message ||
+              "Failed to submit response"
+          );
         },
       }
     );
@@ -69,7 +78,8 @@ export default function Disputespage() {
     {
       key: "bookingCode",
       header: t("disputepage.bookingId"),
-      render: (row: any) => row.booking?.bookingCode || row.bookingId,
+      render: (row: any) =>
+        row.booking?.bookingCode || row.bookingId,
     },
     {
       key: "raisedBy",
@@ -77,30 +87,32 @@ export default function Disputespage() {
     },
     {
       key: "reason",
-      header: t("disputepage.reasonType"),
+      header: t("disputepage.Reason Type"),
+      render:(row:any)=>row.reasonType
     },
     {
-      key: "status",
-      header: t("disputepage.status"),
-      render: (row) => (
-                <span
-          className={`px-2 py-1 rounded text-xs font-medium ${getDisputeStatusStyle(
-            row.status
-          )}`}
-        >
-          {row.status}
-        </span>
-      ),
-    },
+  key: "status",
+  header: t("disputepage.status"),
+  render: (row) => {
+    const statusInfo = getDisputeStatusStyle(row.status);
+
+    return (
+      <span
+        className={`px-2 py-1 rounded text-xs font-medium ${statusInfo.style}`}
+      >
+        {statusInfo.label}
+      </span>
+    );
+  },
+},
     {
       key: "action",
-      header: t("disputepage.action"),
+      header: t("disputepage.actions"),
       render: (row) => (
         <Button
           size="sm"
           onClick={() => openModal(row)}
-          // disabled={row.status == "OPEN"}
-          disabled={row.status=="IN_REVIEW"}
+          disabled={row.status === "IN_REVIEW"}
         >
           {t("disputepage.respond")}
         </Button>
@@ -109,69 +121,35 @@ export default function Disputespage() {
   ];
 
   return (
-    <div className="p-4">
-      <CommonCard
-        title={t("disputepage.title")}
-        description={t("disputepage.description")}
-        isRTL={isRTL}
-      >
-        {/* ✅ Responsive Rendering */}
-        {isMobile ? (
-          isLoading ? (
-            <div className="flex justify-center py-12">
-              <CommonSpinner />
-            </div>
-          ) : data.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-               {t("disputepage.noData")}
-            </div>
-          ) : (
-          <div className="space-y-3">
-            {data.map((row:any) => (
-              <CommonCard
-                key={row._id}
-                title={`#${row.booking?.bookingCode || row.bookingId}`}
-                description={
-                  <div className="text-sm space-y-1">
-                    <p>
-                      <strong>{t("disputepage.user")}:</strong>{" "}
-                      {row.raisedBy}
-                    </p>
-                    <p>
-                      <strong>{t("disputepage.reason")}:</strong>{" "}
-                      {row.reasonType}
-                    </p>
-
-                    {/* Status */}
-                    <span
-                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                        row.status === "OPEN"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : row.status === "RESOLVED"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {row.status}
-                    </span>
-                  </div>
-                }
-                footer={
-                  <Button
-                    size="sm"
-                    onClick={() => openModal(row)}
-                    disabled={row.status !== "OPEN"}
-                  >
-                    {t("disputepage.action")}
-                  </Button>
-                }
-                isRTL={isRTL}
+    <>
+      <div className="p-4">
+        <CommonCard
+          title={t("disputepage.title")}
+          description={t("disputepage.description")}
+          isRTL={isRTL}
+        >
+          {isMobile ? (
+            isLoading ? (
+              <div className="flex justify-center py-12">
+                <CommonSpinner />
+              </div>
+            ) : data.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                {t("disputepage.noData")}
+              </div>
+            ) : (
+              <DisputesMobileCards
+                disputes={data}
+                isLoading={isLoading}
+                t={t}
+                setSelected={(d) => {
+                  setSelected(d);
+                  setResponse("");
+                }}
+                setResponseOpen={setResponseOpen}
               />
-            ))}
-          </div>
-          )
-        ) : (
-          isLoading ? (
+            )
+          ) : isLoading ? (
             <div className="flex justify-center py-12">
               <CommonSpinner />
             </div>
@@ -182,63 +160,29 @@ export default function Disputespage() {
               data={data}
               keyExtractor={(row) => row._id}
               isRTL={isRTL}
+              
             />
-          )
-        )}
-      </CommonCard>
+          )}
+        </CommonCard>
+      </div>
 
-      {/* ✅ MODAL */}
-      <CommonModal
-        open={!!selected}
-        onOpenChange={(open) => {
+      <BookingDisputeRespondModal
+        open={responseOpen}
+        setOpen={(open) => {
+          setResponseOpen(open);
+
           if (!open) {
             setSelected(null);
             setResponse("");
           }
         }}
-      >
-        <CommonModal.Content>
-          {/* HEADER */}
-          <CommonModal.Header>
-            <h2 className="text-lg font-semibold">
-              {t("disputepage.respondTitle")}
-            </h2>
-          </CommonModal.Header>
-
-          {/* BODY */}
-          <CommonModal.Body>
-            <textarea
-              className="w-full border rounded p-2 text-sm"
-              rows={4}
-              placeholder={t("disputepage.responsePlaceholder")}
-              value={response}
-              onChange={(e) => setResponse(e.target.value)}
-            />
-          </CommonModal.Body>
-
-          {/* FOOTER */}
-          <CommonModal.Footer>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSelected(null);
-                setResponse("");
-              }}
-            >
-              {t("common.cancel")}
-            </Button>
-
-            <Button
-              onClick={handleSubmit}
-              disabled={respondMutation.isPending}
-            >
-              {respondMutation.isPending
-                ? t("common.submitting")
-                : t("common.submit")}
-            </Button>
-          </CommonModal.Footer>
-        </CommonModal.Content>
-      </CommonModal>
-    </div>
+        selected={selected}
+        response={response}
+        setResponse={setResponse}
+        handleSubmit={handleSubmit}
+        isPending={respondMutation.isPending}
+        t={t}
+      />
+    </>
   );
-}
+} 

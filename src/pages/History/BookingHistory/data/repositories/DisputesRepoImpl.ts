@@ -6,6 +6,7 @@ export class DisputesRepoImpl implements DisputesRepo {
 
   async getdisputes(): Promise<any> {
     const response = await api.get("/disputes/assigned");
+    console.log(response);
     return response.data;
   }
 

@@ -1,4 +1,4 @@
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import type { Transaction } from "../../domain/entities/transaction";
 import type { WalletSummary } from "../../domain/entities/wallet";

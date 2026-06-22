@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Search, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { cn } from "@/lib/utils";
 
 type TransactionStatus = "all" | "completed" | "pending" | "failed";

@@ -12,7 +12,7 @@ import {
 
 import type { Work } from "../../../domain/entities/work";
 import { ActionButtons } from "./actionbuttonspageassignedwork";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 type WorkCardProps = {
   work: Work;

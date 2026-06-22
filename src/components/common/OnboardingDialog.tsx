@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 export type OnboardingStep = {
   id: string;

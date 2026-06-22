@@ -14,7 +14,7 @@ import {
 
 import type { BookingStatus } from "../../../../Booking/AvailableBooking/domain/entities/bookingstatus";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { Label } from "@/components/ui/label";
 
 type Props = {

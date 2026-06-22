@@ -1,7 +1,7 @@
 import { CommonCard } from "@/components/common/CommonCard";
 import { useMemo } from "react";
 import type { Card } from "../../domain/entities/card";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
 
 export function WorkStatsCards({
   cards,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { WorkStatsCards } from "./components/WorkStatsCards";
 import { WorkFilters } from "./components/WorkFilters";
 import { WorkHistoryTable } from "./components/WorkHistoryTable";

@@ -603,6 +603,7 @@
     "description": "उपयोगकर्ता विवादों का प्रबंधन और जवाब दें",
     "bookingId": "बुकिंग आईडी",
     "user": "उपयोगकर्ता",
+    "Reason Type":"कारण का प्रकार",
     "reason": "कारण",
     "descriptionField": "विवरण",
     "status": "स्थिति",

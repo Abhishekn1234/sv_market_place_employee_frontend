@@ -14,7 +14,7 @@ import {
 } from "../helpers/workPresentation.helpers";
 import type { DisplayWork, WorkGridProps } from "../types/workPresentation.types";
 import { useNavigate } from "react-router-dom";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 // import { ChatBadge } from "./ChatBadge/ChatBadge";
 // import { Badge } from "@/components/ui/badge";
 import { isHidden } from "../helpers/hiddenstatus";

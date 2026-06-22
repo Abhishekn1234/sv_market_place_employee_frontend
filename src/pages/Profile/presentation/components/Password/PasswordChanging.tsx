@@ -10,8 +10,8 @@ import { usePassword } from "@/pages/Profile/presentation/hooks/usePassword";
 import { toast } from "react-toastify";
 import { validatePassword } from "@/pages/Profile/domain/validations/passwordinputvalidation";
 import { ValidatematchPassword } from "@/pages/Profile/domain/validations/passwordmatchvalidation";
-import { useTheme } from "@/context/ThemeContext";
-import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/presentation/components/ThemeContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 interface Props {
   onSuccess: () => void;

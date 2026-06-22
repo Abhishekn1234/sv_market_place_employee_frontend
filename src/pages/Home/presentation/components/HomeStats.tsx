@@ -22,7 +22,7 @@ import {
 
 import { useGetBookingHistory } from "@/pages/History/BookingHistory/presentation/hooks/useGetBookingHistory";
 import { useGetMyWalletStatistics } from "../hooks/useStats";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import WalletDashboard from "./RevenueCards";
 
