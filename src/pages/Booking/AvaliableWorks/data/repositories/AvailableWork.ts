@@ -1,7 +1,7 @@
 import api from "@/api/api";
 import type { Work } from "../../domain/entities/work";
 import type { AvailableWork } from "../../domain/repositories/AvailableWork";
-import { mapApiToWork } from "../../../../History/WorkHistory/presentation/mappers/workstatusmapping";
+import { mapApiToWork } from "../../presentation/helpers/workstatusmapping";
 
 export class AvailableWorkImpl implements AvailableWork {
   async getWorkList(): Promise<Work[]> {

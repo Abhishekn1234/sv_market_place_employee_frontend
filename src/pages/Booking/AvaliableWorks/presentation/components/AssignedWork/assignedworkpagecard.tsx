@@ -1,4 +1,4 @@
-import { getStatusColor, getStatusIcon } from "@/pages/History/WorkHistory/presentation/utils/workhistory";
+
 import { formatDateTime } from "../../helpers/formatdatetime";
 import {
   Calendar,
@@ -13,6 +13,7 @@ import {
 import type { Work } from "../../../domain/entities/work";
 import { ActionButtons } from "./actionbuttonspageassignedwork";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
+import { getStatusColor, getStatusIcon } from "../../helpers/getstatuscolorandicon";
 
 type WorkCardProps = {
   work: Work;

@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import type { Work } from "../../domain/entities/work";
-import type { WorkStatsCard } from "../../../../History/WorkHistory/domain/entities/workstats";
-import { getNormalizedStatus } from "../../../../History/WorkHistory/presentation/utils/workhistory";
+
+import { getNormalizedStatus } from "../helpers/getstatuscolorandicon";
+import type { WorkStatsCard } from "../../domain/entities/workstats";
 
 export function useWorkStatsCards(works: Work[]): WorkStatsCard[] {
   const { translations } = useLanguage();
