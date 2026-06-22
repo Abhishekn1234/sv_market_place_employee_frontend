@@ -40,7 +40,7 @@ export default function WorkCard({
         <BookingCustomerInfo
           customer={work.customer}
           t={t}
-          showCallButton={false}
+          showCallButton={true}
         />
 
         <BookingEstimateRow
