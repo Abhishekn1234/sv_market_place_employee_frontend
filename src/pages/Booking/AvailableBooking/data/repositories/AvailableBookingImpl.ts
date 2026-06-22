@@ -1,7 +1,7 @@
 import api from "@/api/api";
 import type { AvailableBookingRepo } from "../../domain/repositories/AvalableBookingRepo";
 import type { Booking, BookingResponse } from "../../domain/entities/booking";
-import { mapBookingStatus } from "../../presentation/helpers/mapstatus";
+import { mapBookingStatus } from "../../presentation/utils/mapstatus";
 
 export class AvailableBookingImpl implements AvailableBookingRepo {
   async getBookingAvailable(page: number): Promise<BookingResponse> {

@@ -26,20 +26,34 @@ export default function HeaderProfile({
 
   return (
     <div className="relative">
-      <Button
-        variant="ghost"
-        onClick={() => setDropdownOpen((p) => !p)}
-        className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
-      >
-        {profileImage ? (
-          <img src={profileImage} className="h-8 w-8 rounded-full" />
-        ) : (
-          <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-            {fullName?.slice(0, 2)}
-          </div>
-        )}
-        <span className="text-sm">{fullName}</span>
-      </Button>
+            <Button
+          variant="ghost"
+          onClick={() => setDropdownOpen((p) => !p)}
+          className={`
+            flex flex-col sm:flex-row
+            items-center
+            gap-1 sm:gap-2
+            min-w-fit
+            px-2
+            ${isRTL ? "sm:flex-row-reverse" : ""}
+          `}
+        >
+          {profileImage ? (
+            <img
+              src={profileImage}
+              alt={fullName}
+              className="h-8 w-8 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0">
+              {fullName?.slice(0, 2)?.toUpperCase()}
+            </div>
+          )}
+
+          <span className="text-xs sm:text-sm text-center sm:text-left">
+            {fullName}
+          </span>
+        </Button>
 
       {dropdownOpen && (
         <div

@@ -1,5 +1,5 @@
 
-import { formatDateTime } from "../../helpers/formatdatetime";
+import { formatDateTime } from "../../utils/formatdatetime";
 import {
   Calendar,
   User,
@@ -13,7 +13,7 @@ import {
 import type { Work } from "../../../domain/entities/work";
 import { ActionButtons } from "./actionbuttonspageassignedwork";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
-import { getStatusColor, getStatusIcon } from "../../helpers/getstatuscolorandicon";
+import { getStatusColor, getStatusIcon } from "../../utils/getstatuscolorandicon";
 
 type WorkCardProps = {
   work: Work;

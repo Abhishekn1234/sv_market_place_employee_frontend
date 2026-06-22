@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import type { Work } from "../../domain/entities/work";
 
-import { getNormalizedStatus } from "../helpers/getstatuscolorandicon";
+import { getNormalizedStatus } from "../utils/getstatuscolorandicon";
 import type { WorkStatsCard } from "../../domain/entities/workstats";
 
 export function useWorkStatsCards(works: Work[]): WorkStatsCard[] {

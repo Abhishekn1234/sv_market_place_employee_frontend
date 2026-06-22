@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 
 import { useAssignedEmitter } from "@/core/Websocket/presentation/utils/useAssignemitter";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
-import { getBookingId } from "../helpers/workPresentation.helpers";
+import { getBookingId } from "../utils/workPresentation.helpers";
 
 import type {
   DisplayWork,

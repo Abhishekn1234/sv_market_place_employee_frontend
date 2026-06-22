@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import {
   elapsedMinutes,
   getBookingId,
-} from "../../helpers/workPresentation.helpers";
+} from "../../utils/workPresentation.helpers";
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 import CommonSpinner from "@/components/common/CommonSpinner";

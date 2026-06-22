@@ -12,7 +12,7 @@ import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import {
   FINAL_WORK_STATUSES,
   normalizeAssignedWorks,
-} from "./helpers/workPresentation.helpers";
+} from "./utils/workPresentation.helpers";
 // import type { Booking } from "../../AvailableBooking/domain/entities/booking";
 import type {
   CancelableWork,

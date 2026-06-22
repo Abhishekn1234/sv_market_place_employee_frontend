@@ -10,7 +10,7 @@ import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 
 import { getSocket, initializeSocket } from "@/core/Websocket/presentation/components/socket";
-import { getBookingId } from "../../helpers/workPresentation.helpers";
+import { getBookingId } from "../../utils/workPresentation.helpers";
 
 type Props = {
   work: DisplayWork | Work;
