@@ -1,1 +1,0 @@
-export type ActivityType = "booking" | "transaction" | "payment";

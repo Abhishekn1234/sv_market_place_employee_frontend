@@ -1,8 +1,8 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
-import LocationPage from "@/pages/LocationSettings/presentation/location.settings.page";
-import { CurrentLocationFetcher } from "@/pages/LocationSettings/presentation/components/CurrentLocation";
+import LocationPage from "@/pages/Servicesettings/presentation/components/location.settings.page";
+import { CurrentLocationFetcher } from "@/pages/Servicesettings/presentation/components/CurrentLocation";
 import { reverseGeocode } from "@/components/common/CommonMap";
 
 type Props = {
@@ -44,7 +44,7 @@ export function LocationSelection({
 
       {/* RADIO OPTIONS */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-2">
-        <label className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
+        <Label className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
           <Input
             type="radio"
             checked={locationMode === "current"}
@@ -52,9 +52,9 @@ export function LocationSelection({
             className="h-4 w-4 sm:h-5 sm:w-5"
           />
           <span>Current Location</span>
-        </label>
+        </Label>
 
-        <label className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
+        <Label className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
           <Input
             type="radio"
             checked={locationMode === "manual"}
@@ -62,7 +62,7 @@ export function LocationSelection({
             className="h-4 w-4 sm:h-5 sm:w-5"
           />
           <span>Choose Location</span>
-        </label>
+        </Label>
       </div>
 
       {/* CURRENT LOCATION */}

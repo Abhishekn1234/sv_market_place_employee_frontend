@@ -22,7 +22,6 @@ import ResetPasswordPage from "./pages/Auth/ResetPassword/presentation/reset.pas
 
 import BookingHistory from "./pages/History/BookingHistory/presentation/BookingHistory";
 import TransactionHistory from "./pages/History/TransactionHistory/presentation/TransactionHistory";
-import WorkingHistory from "./pages/History/WorkHistory/presentation/WorkingHistory";
 
 import ServiceSettings from "./pages/Servicesettings/presentation/servicesettings.page";
 import DocumentOnboarding from "./pages/DocumentsOnboarding/presentation/document.onboarding.page";
@@ -38,7 +37,7 @@ import { VerifyOtpEmailPage } from "./pages/Auth/EmailVerification/presentation/
 import SendOtpMobilePage from "./pages/Auth/MobileVerification/presentation/components/SendOtpMobilePage";
 
 import Disputespage from "./pages/History/BookingHistory/presentation/components/Disputes.page";
-import CurrentWorkPage from "./pages/CurrentWork/presentation/CurrentWorkPage";
+// import CurrentWorkPage from "./pages/CurrentWork/presentation/CurrentWorkPage";
 import ChatWorkerPage from "./ChatCustomer/presentation/ChatWorkerPage";
 
 /* NOTIFICATIONS */
@@ -194,10 +193,10 @@ const handleNavigate = (url?: string, data?: any) => {
 
           <Route path="history/booking" element={<BookingHistory />} />
           <Route path="history/transaction" element={<TransactionHistory />} />
-          <Route path="history/work" element={<WorkingHistory />} />
+        
 
-          <Route path="/disputes" element={<Disputespage />} />
-          <Route path="/currentWork" element={<CurrentWorkPage />} />
+          {/* <Route path="/disputes" element={<Disputespage />} /> */}
+          {/* <Route path="/currentWork" element={<CurrentWorkPage />} /> */}
 
           <Route path="/chat/:bookingId" element={<ChatWorkerPage />} />
           <Route
