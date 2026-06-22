@@ -1,4 +1,4 @@
-import type { Message } from "@/ChatCustomer/domain/entities/chat";
+import type { Message } from "@/pages/ChatCustomer/domain/entities/chat";
 
 export const mergeUniqueMessages = (
   prev: Message[],

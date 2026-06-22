@@ -10,8 +10,8 @@ import { baseURL } from "@/api/apiConfig";
 
 import { useSendChatMessage } from "./useSendChatMessage";
 
-import type { Message } from "@/ChatCustomer/domain/entities/chat";
-import { mergeUniqueMessages } from "./mergeUniqueMessages";
+import type { Message } from "@/pages/ChatCustomer/domain/entities/chat";
+import { mergeUniqueMessages } from "../utils/mergeUniqueMessages";
 import { useGetChatMessages } from "./useChatMessages";
 
 const SOCKET_URL = `${baseURL}/chat`;

@@ -38,7 +38,7 @@ import SendOtpMobilePage from "./pages/Auth/MobileVerification/presentation/comp
 
 import Disputespage from "./pages/History/BookingHistory/presentation/components/Disputes.page";
 // import CurrentWorkPage from "./pages/CurrentWork/presentation/CurrentWorkPage";
-import ChatWorkerPage from "./ChatCustomer/presentation/ChatWorkerPage";
+import ChatWorkerPage from "./pages/ChatCustomer/presentation/ChatWorkerPage";
 
 /* NOTIFICATIONS */
 import { initOnMessage } from "./components/firebase/notifications";

@@ -1,4 +1,4 @@
-import { useGetChatMessages } from "@/ChatCustomer/presentation/hooks/useChatMessages";
+import { useGetChatMessages } from "@/pages/ChatCustomer/presentation/hooks/useChatMessages";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 
