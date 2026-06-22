@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/pages/Activity/RecentActivity/presentation/helpers/formatdate";
+
 import type { Dispute } from "../../domain/entities/disputes";
 import { CommonCard } from "@/components/common/CommonCard";
 import { getDisputeStatusStyle } from "../utils/disputescolors";
+import { formatDate } from "../utils/formatdate";
 
 export interface Props {
   isLoading: boolean;
