@@ -13,8 +13,8 @@ export function useVerifyOtpMobile() {
   return useMutation({
     mutationFn: (data: VerifyOtpMobile) => usecase.execute(data),
     mutationKey: ["verify-otp-mobile"],
-    onSuccess: (res) => {
-        console.log(res);
+    onSuccess: (_res) => {
+        // console.log(res);
       toast.success("Mobile OTP verified successfully");
       navigate("/login");
     },

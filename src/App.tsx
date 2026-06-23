@@ -100,9 +100,9 @@ const isSameChatRoute = (url: string) => {
   return matchPath("/chat/:bookingId", location.pathname) &&
          url.startsWith("/chat/");
 };
-const handleNavigate = (url?: string, data?: any) => {
+const handleNavigate = (url?: string, _data?: any) => {
   if (!url) return;
-  console.log(data);
+  // console.log(data);
   let finalUrl = url;
 
   if (url.includes("/availableBooking")) {

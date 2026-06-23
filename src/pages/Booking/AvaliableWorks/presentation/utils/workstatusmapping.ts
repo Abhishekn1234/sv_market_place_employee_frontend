@@ -17,7 +17,7 @@ const statusMap: Record<string, BookingStatus> = {
 
   return apiData.map((w) => {
     const bookingData = w.booking;
-     console.log(bookingData);
+    //  console.log(bookingData);
     const booking: Booking = {
       id: bookingData._id,
       clientName: w.customer?.fullName || "Unknown",
@@ -39,7 +39,7 @@ const statusMap: Record<string, BookingStatus> = {
         ? `${bookingData.location.coordinates[1]},${bookingData.location.coordinates[0]}`
         : "",
     };
-    console.log(booking);
+    // console.log(booking);
 
     return {
       _id: w._id,

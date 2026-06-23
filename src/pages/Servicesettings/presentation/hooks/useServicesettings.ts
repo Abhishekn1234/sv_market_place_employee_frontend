@@ -25,7 +25,7 @@ export function useServiceSettings() {
             "Request failed";
 
           toast.error(message);
-          console.log(err);
+          // console.log(err);
         },
   });
 }

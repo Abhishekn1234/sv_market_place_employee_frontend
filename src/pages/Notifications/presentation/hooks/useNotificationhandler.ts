@@ -1,4 +1,3 @@
-// useNotificationManager.ts
 import { useEffect } from "react";
 import { useNotificationStore } from "@/core/store/notificationStore";
 import { useRegisterDeviceToken } from "./useRegisterToken";
@@ -21,7 +20,10 @@ export const useNotificationManager = () => {
 
   const user = useAuthStore((s) => s.user);
 
-  // 1️⃣ Permission + token
+  const isLoggedIn = Boolean(user);
+  const roleId = user?.role?._id;
+
+  // 1️⃣ Request notification permission and FCM token
   useEffect(() => {
     const init = async () => {
       if (!("Notification" in window)) return;
@@ -38,60 +40,91 @@ export const useNotificationManager = () => {
     };
 
     init();
-  }, []);
+  }, [setPermission, setToken]);
 
-  // 2️⃣ Register token (avoid re-register loops)
+  // 2️⃣ Register token only when user is logged in
   useEffect(() => {
-    const roleId = user?.role?._id;
+    if (!isLoggedIn) return;
     if (!token || !roleId) return;
 
     const register = async () => {
-      await registerToken({
-        token,
-        platform: "WEB",
-        roleId,
-       deviceId: generateDeviceId(),
-        appId: "your-app-id",
-      });
-      setRegistered(true);
-    };
-
-    register();
-  }, [token, user?.role?._id]);
-
-  // 3️⃣ Logout cleanup
-  useEffect(() => {
-    if (user) return;
-    if (!token) return;
-
-    unregisterToken(token);
-    reset();
-  }, [user, token]);
-
-  // 4️⃣ Token refresh (register only when truly needed)
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const newToken = await requestAndGetToken();
-      if (!newToken || newToken === token) return;
-
-      // Only do network calls if we have a logged-in user role
-      const roleId = user?.role?._id;
-
-      if (token) await unregisterToken(token);
-      setToken(newToken);
-
-      if (roleId) {
+      try {
         await registerToken({
-          token: newToken,
+          token,
           platform: "WEB",
           roleId,
           deviceId: generateDeviceId(),
           appId: "your-app-id",
         });
+
         setRegistered(true);
+      } catch (error) {
+        console.error("Device token registration failed:", error);
       }
-    }, 1000 * 60 * 30);
+    };
+
+    register();
+  }, [
+    isLoggedIn,
+    token,
+    roleId,
+    registerToken,
+    setRegistered,
+  ]);
+
+  // 3️⃣ Cleanup local notification state on logout
+  // ❌ No API call here, so no 401 on login page
+  useEffect(() => {
+    if (isLoggedIn) return;
+
+    reset();
+  }, [isLoggedIn, reset]);
+
+  // 4️⃣ Periodic token refresh
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const newToken = await requestAndGetToken();
+
+        if (!newToken || newToken === token) return;
+
+        // Optional: unregister old token BEFORE registering new one
+        if (token) {
+          try {
+            await unregisterToken(token);
+          } catch (error) {
+            console.warn("Failed to unregister old token:", error);
+          }
+        }
+
+        setToken(newToken);
+
+        if (roleId) {
+          await registerToken({
+            token: newToken,
+            platform: "WEB",
+            roleId,
+            deviceId: generateDeviceId(),
+            appId: "your-app-id",
+          });
+
+          setRegistered(true);
+        }
+      } catch (error) {
+        console.error("Token refresh failed:", error);
+      }
+    }, 1000 * 60 * 10); // 30 minutes
 
     return () => clearInterval(interval);
-  }, [token, user?.role?._id]);
+  }, [
+    isLoggedIn,
+    token,
+    roleId,
+    registerToken,
+    unregisterToken,
+    setToken,
+    setRegistered,
+  ]);
 };

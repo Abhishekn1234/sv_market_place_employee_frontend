@@ -87,7 +87,7 @@ export function useBookingColumns({
       className: cellClass,
       render: (b) => {
         const status = b.status as BookingStatus;
-        console.log(status);
+        // console.log(status);
         const config = statusConfig[status];
         return (
           <Badge className={config?.color ?? ""}>{config?.label ?? status}</Badge>

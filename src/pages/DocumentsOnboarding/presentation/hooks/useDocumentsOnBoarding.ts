@@ -26,7 +26,7 @@ export function useDocumentsOnBoarding() {
     mutationFn: (payload) => usecase.execute(payload),
 
    onSuccess: (response) => {
-  console.log(response);
+  // console.log(response);
 
   const documents = response.user?.documents ?? [];
 

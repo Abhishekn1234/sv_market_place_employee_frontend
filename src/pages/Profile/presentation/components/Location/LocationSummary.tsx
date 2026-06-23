@@ -27,7 +27,7 @@ export default function LocationSummary({
 }: Props) {
   const {translations}=useLanguage();
   const edits=translations.profile
-  console.log(edits);
+  // console.log(edits);
   return (
     <>
       <div className="flex justify-between mb-4">

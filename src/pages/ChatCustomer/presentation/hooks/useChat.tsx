@@ -146,7 +146,7 @@ export function useChat(bookingId: string) {
     // EVENT: booking.chat-message
     // ==========================================
     socket.on("booking.chat-message", (payload: any) => {
-  console.log("booking.chat-message", payload);
+  // console.log("booking.chat-message", payload);
 
   const chatMessage =
     payload?.chatMessage ?? payload?.payload?.chatMessage;
@@ -178,7 +178,7 @@ export function useChat(bookingId: string) {
     incomingMessage.senderId !== myUserId &&
     !isInChatPageRoute
   ) {
-    console.log("📡 Sending message to SW (no UI notification)");
+    // console.log("📡 Sending message to SW (no UI notification)");
 
     navigator.serviceWorker?.controller?.postMessage({
       type: "SOCKET_CHAT_MESSAGE",

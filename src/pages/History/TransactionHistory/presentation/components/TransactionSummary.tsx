@@ -30,10 +30,10 @@ export default function TransactionSummary() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
+   new Intl.NumberFormat("en-SA", {
+    style: "currency",
+    currency: "SAR",
+  }).format(amount);
 
   return (
     <div

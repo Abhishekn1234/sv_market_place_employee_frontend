@@ -31,7 +31,7 @@ export default function PaymentModal({ work, open, onClose }: Props) {
         <Button
           className="w-full mb-2"
           onClick={() => {
-            console.log("Processing payment for work", work._id);
+            // console.log("Processing payment for work", work._id);
             onClose();
           }}
         >

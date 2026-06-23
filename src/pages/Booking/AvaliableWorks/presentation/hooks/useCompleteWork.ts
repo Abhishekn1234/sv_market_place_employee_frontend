@@ -52,7 +52,7 @@ export function useCompleteWork(
         }
       );
 
-      console.log("Work completed successfully:", completedBooking);
+      // console.log("Work completed successfully:", completedBooking);
       toast.success("Work completed successfully");
 
       if (onSuccess) onSuccess(completedBooking);

@@ -34,11 +34,11 @@ export function useDynamicLocation() {
   const lastNotifyRef = useRef(0);
 
   const notify = async (
-    loc: Location,
+    _loc: Location,
     place: string,
     distance: number
   ) => {
-    console.log("Notify location change:", loc, place, distance);
+    // console.log("Notify location change:", loc, place, distance);
     if (notifyCountRef.current >= 2) return;
     if (Date.now() - lastNotifyRef.current < 15000) return;
 

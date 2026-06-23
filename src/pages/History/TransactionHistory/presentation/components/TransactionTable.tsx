@@ -39,10 +39,10 @@ export default function TransactionTable({
       key: "amount",
       header: table.amount,
       render: (row) =>
-        new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(row.amount),
+            new Intl.NumberFormat("en-SA", {
+        style: "currency",
+        currency: "SAR",
+      }).format(row.amount),
     },
   ];
 
@@ -57,10 +57,10 @@ export default function TransactionTable({
       key: "amount",
       header: table.amount,
       render: (row) =>
-        new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(row.amount),
+              new Intl.NumberFormat("en-SA", {
+        style: "currency",
+        currency: "SAR",
+      }).format(row.amount),
     },
   ];
 
@@ -82,9 +82,9 @@ export default function TransactionTable({
                   "text-sm font-bold whitespace-nowrap",
                   row.type.toLowerCase().includes('credit') ? 'text-emerald-600' : 'text-rose-600'
                 )}>
-                  {new Intl.NumberFormat("en-US", {
+                {new Intl.NumberFormat("en-SA", {
                     style: "currency",
-                    currency: "USD",
+                    currency: "SAR",
                   }).format(row.amount)}
                 </span>
               </div>

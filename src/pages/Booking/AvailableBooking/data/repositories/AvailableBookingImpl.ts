@@ -11,7 +11,7 @@ export class AvailableBookingImpl implements AvailableBookingRepo {
         limit: 10, 
       },
     });
-   console.log(res.data);
+  //  console.log(res.data);
     return {
       data: res.data.data.map((item: any): Booking => {
         const createdAt = new Date(item.createdAt);
