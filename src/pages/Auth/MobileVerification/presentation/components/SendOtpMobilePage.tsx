@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSendOtpMobile } from "../hooks/useSendOtpMobile";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Phone, Send, Loader2 } from "lucide-react";
+import { Phone, Send } from "lucide-react";
 import CommonSpinner from "@/components/common/CommonSpinner";
 
 export default function SendOtpMobilePage() {
