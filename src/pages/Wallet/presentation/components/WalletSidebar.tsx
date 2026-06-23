@@ -75,7 +75,7 @@ export function WalletSidebar({
               </span>
             </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+            {/* <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
               <span className="shrink-0">{walletT.largestIncome}</span>
               <span className="text-emerald-600 font-semibold tabular-nums break-all sm:text-right">
                 {new Intl.NumberFormat(locale, {
@@ -103,7 +103,7 @@ export function WalletSidebar({
                     .map((t) => t.amount)
                 ))}
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
       </CommonCard>

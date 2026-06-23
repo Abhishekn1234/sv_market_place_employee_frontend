@@ -50,9 +50,9 @@ export default function HeaderProfile({
             </div>
           )}
 
-          <span className="text-xs sm:text-sm text-center sm:text-left">
-            {fullName}
-          </span>
+          <span className="hidden xs:block text-xs sm:text-sm text-center sm:text-left truncate max-w-[80px]">
+          {fullName}
+        </span>
         </Button>
 
       {dropdownOpen && (

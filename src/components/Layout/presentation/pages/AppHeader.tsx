@@ -86,7 +86,7 @@ export default function AppHeader({
 
   const isOnline =
     workerStatus === "ONLINE";
-  console.log(isOnline);
+  // console.log(isOnline);
   // FIRST LOGIN
   useEffect(() => {
     const done = localStorage.getItem(
