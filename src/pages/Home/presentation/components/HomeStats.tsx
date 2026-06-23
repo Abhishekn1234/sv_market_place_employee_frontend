@@ -12,16 +12,16 @@ import {
   Tooltip,
 } from "recharts";
 
-import {
-  ClipboardList,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  TrendingUp,
-} from "lucide-react";
+// import {
+//   ClipboardList,
+//   CheckCircle2,
+//   Clock,
+//   XCircle,
+//   TrendingUp,
+// } from "lucide-react";
 
 import { useGetBookingHistory } from "@/pages/History/BookingHistory/presentation/hooks/useGetBookingHistory";
-import { useGetMyWalletStatistics } from "../hooks/useStats";
+// import { useGetMyWalletStatistics } from "../hooks/useStats";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import WalletDashboard from "./RevenueCards";
@@ -31,10 +31,10 @@ import WalletDashboard from "./RevenueCards";
 
 export default function HomeStats() {
   const { translations, language } = useLanguage();
-  const isRTL = language === "AR";
+  // const isRTL = language === "AR";
 
   // ✅ Wallet stats FIXED
-  const { data: walletStats } = useGetMyWalletStatistics();
+  // const { data: walletStats } = useGetMyWalletStatistics();
 
   const { data: bookingHistory } = useGetBookingHistory({
     page: 1,
@@ -44,29 +44,29 @@ export default function HomeStats() {
   const bookings = bookingHistory?.data ?? [];
 
   // ================= BOOKINGS =================
-  const totalBookings =
-    bookingHistory?.pagination?.totalItems ?? bookings.length;
+  // const totalBookings =
+  //   bookingHistory?.pagination?.totalItems ?? bookings.length;
 
-  const completedStatuses = ["COMPLETED", "WORK_COMPLETED"];
-  const pendingStatuses = [
-    "IN_PROGRESS",
-    "REQUESTED",
-    "CONFIRMED",
-    "WORKER_ACCEPTED",
-    "WORK_STARTED",
-  ];
+  // const completedStatuses = ["COMPLETED", "WORK_COMPLETED"];
+  // const pendingStatuses = [
+  //   "IN_PROGRESS",
+  //   "REQUESTED",
+  //   "CONFIRMED",
+  //   "WORKER_ACCEPTED",
+  //   "WORK_STARTED",
+  // ];
   
-  const completedCount = bookings.filter((b) =>
-    completedStatuses.includes(b.status)
-  ).length;
+  // const completedCount = bookings.filter((b) =>
+  //   completedStatuses.includes(b.status)
+  // ).length;
 
-  const pendingCount = bookings.filter((b) =>
-    pendingStatuses.includes(b.status)
-  ).length;
+  // const pendingCount = bookings.filter((b) =>
+  //   pendingStatuses.includes(b.status)
+  // ).length;
 
-  const cancelledCount = bookings.filter((b) =>
-    b.status?.includes("CANCELLED")
-  ).length;
+  // const cancelledCount = bookings.filter((b) =>
+  //   b.status?.includes("CANCELLED")
+  // ).length;
 
   // ================= MONTHLY BOOKINGS =================
 const MONTHS = useMemo(() => {
@@ -111,49 +111,49 @@ const monthlyBookings = useMemo(() => {
 // console.log("Chart Data:", monthlyBookings);
 
   // ================= STATS =================
-  const statCards = [
-    {
-      title: translations.HomePage.totalBookings,
-      value: totalBookings,
-      icon: ClipboardList,
-      bg: "bg-indigo-100",
-      text: "text-indigo-600",
-    },
-    {
-      title: translations.HomePage.completed,
-      value: completedCount,
-      icon: CheckCircle2,
-      bg: "bg-green-100",
-      text: "text-green-600",
-    },
-    {
-      title: translations.HomePage.pending,
-      value: pendingCount,
-      icon: Clock,
-      bg: "bg-yellow-100",
-      text: "text-yellow-600",
-    },
-    {
-      title: translations.HomePage.cancelled,
-      value: cancelledCount,
-      icon: XCircle,
-      bg: "bg-red-100",
-      text: "text-red-600",
-    },
-    {
-      title: translations.HomePage.totalRevenue,
-      value: `${walletStats?.currency ?? "SAR"} ${walletStats?.totalEarned ?? 0}`,
-      icon: TrendingUp,
-      bg: "bg-emerald-100",
-      text: "text-emerald-600",
-    },
-  ];
+  // const statCards = [
+  //   {
+  //     title: translations.HomePage.totalBookings,
+  //     value: totalBookings,
+  //     icon: ClipboardList,
+  //     bg: "bg-indigo-100",
+  //     text: "text-indigo-600",
+  //   },
+  //   {
+  //     title: translations.HomePage.completed,
+  //     value: completedCount,
+  //     icon: CheckCircle2,
+  //     bg: "bg-green-100",
+  //     text: "text-green-600",
+  //   },
+  //   {
+  //     title: translations.HomePage.pending,
+  //     value: pendingCount,
+  //     icon: Clock,
+  //     bg: "bg-yellow-100",
+  //     text: "text-yellow-600",
+  //   },
+  //   {
+  //     title: translations.HomePage.cancelled,
+  //     value: cancelledCount,
+  //     icon: XCircle,
+  //     bg: "bg-red-100",
+  //     text: "text-red-600",
+  //   },
+  //   {
+  //     title: translations.HomePage.totalRevenue,
+  //     value: `${walletStats?.currency ?? "SAR"} ${walletStats?.totalEarned ?? 0}`,
+  //     icon: TrendingUp,
+  //     bg: "bg-emerald-100",
+  //     text: "text-emerald-600",
+  //   },
+  // ];
 
   return (
-   <div className="w-full max-w-7xl mx-auto mt-4 sm:mt-6 space-y-6 px-3 sm:px-4 overflow-x-hidden">
+   <div className="w-full max-w-7xl mx-auto mt-2 sm:mt-2 space-y-6 px-3 sm:px-4 overflow-x-hidden">
   <div className="w-full overflow-x-hidden">
       {/* ================= STATS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-5 gap-4 min-w-0">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-5 gap-4 min-w-0">
         {statCards.map((card) => (
           <CommonCard key={card.title}>
             <div
@@ -177,7 +177,7 @@ const monthlyBookings = useMemo(() => {
             </div>
           </CommonCard>
         ))}
-      </div>
+      </div> */}
 
       <WalletDashboard />
 

@@ -31,18 +31,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     <PhoneInput
       country="in"
       value={typeof value === "string" ? value : ""}
-      onChange={(phone, country: any) => {
-      const dialCode = country?.dialCode || "";
+              onChange={(phone, country: any) => {
+          const dialCode = country?.dialCode || "";
 
-      const formattedPhone = `+${dialCode}-${phone}`;
+          const nationalNumber = phone.startsWith(dialCode)
+            ? phone.slice(dialCode.length)
+            : phone;
 
-       onChange?.({
-        target: {
-        name: name || "",
-        value: formattedPhone,
-      },
-      } as React.ChangeEvent<HTMLInputElement>);
-      }}
+          const formattedPhone = `+${dialCode}-${nationalNumber}`;
+
+          onChange?.({
+            target: {
+              name: name || "",
+              value: formattedPhone,
+            },
+          } as React.ChangeEvent<HTMLInputElement>);
+        }}
       inputProps={{
         id,
         name,
