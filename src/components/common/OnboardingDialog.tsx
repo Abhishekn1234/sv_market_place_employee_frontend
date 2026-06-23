@@ -21,6 +21,8 @@ export type OnboardingStep = {
   done: boolean;
   optional?: boolean;
   route?: string;
+  onAction?: () => void;
+  actionLabel?: string;
 };
 
 interface Props {
@@ -44,12 +46,17 @@ export default function OnboardingDialog({
 
   // FIX: navigate first, then close dialog — avoids the dialog unmount
   // swallowing the navigation call.
-  const handleStepClick = (route: string | undefined) => {
-    if (!route) return;
-    navigate(route);
-    // Small defer so navigation registers before the dialog unmounts
+ const handleStepClick = (step: OnboardingStep) => {
+  if (step.onAction) {
+    step.onAction();
+    return;
+  }
+
+  if (step.route) {
+    navigate(step.route);
     setTimeout(() => onOpenChange(false), 0);
-  };
+  }
+};
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -208,7 +215,7 @@ export default function OnboardingDialog({
                               isCurrent &&
                                 "bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm shadow-violet-200 dark:shadow-violet-900/40"
                             )}
-                            onClick={() => handleStepClick(step.route)}
+                          onClick={() => handleStepClick(step)}
                           >
                             {t("onboarding.completenow")}
                             <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
