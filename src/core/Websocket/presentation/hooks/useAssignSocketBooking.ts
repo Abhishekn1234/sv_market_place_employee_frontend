@@ -17,7 +17,7 @@ export function useAssignedWorksSocket() {
       socket.connect();
     }
 
-    console.log("📡 Socket connected");
+    // console.log("📡 Socket connected");
 
     // =========================
     // 🔥 NORMALIZE FUNCTION

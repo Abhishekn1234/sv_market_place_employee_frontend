@@ -48,13 +48,13 @@ export function useBookingSocket() {
   } = useBookingSocketStore();
 
   useEffect(() => {
-    console.log("[Socket] initializing...");
+    // console.log("[Socket] initializing...");
 
     socket = initializeSocket("/workers/requests");
     socket.connect();
 
     socket.on("connect", () => {
-      console.log("[Socket] connected:", socket.id);
+      // console.log("[Socket] connected:", socket.id);
       setConnected(true);
     });
 
@@ -104,7 +104,7 @@ export function useBookingSocket() {
     socket.on(BookingEvents.EXPIRED, onRemove);
 
     return () => {
-      console.log("[Socket] cleanup");
+      // console.log("[Socket] cleanup");
 
       socket.off(BookingEvents.CREATED, onUpsert);
 

@@ -23,7 +23,7 @@ export const requestAndGetToken = async (): Promise<string | null> => {
       serviceWorkerRegistration: registration,
     });
 
-    console.log("✅ FCM Token:", token);
+    // console.log("✅ FCM Token:", token);
     return token;
   } catch (err) {
     console.error("🔥 Token error:", err);

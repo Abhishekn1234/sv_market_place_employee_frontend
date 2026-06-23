@@ -16,7 +16,7 @@ import type { WalletSummary } from "../../domain/entities/wallet";
 import { useEffect, useRef, useState } from "react";
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { Button } from "@/components/ui/button";
-
+import { formatDateTime } from "@/pages/Booking/AvaliableWorks/presentation/utils/formatdatetime";
 type Props = {
   transactions: Transaction[];
   totalBalance: number;
@@ -98,61 +98,114 @@ export function WalletMain({
     <div className="lg:col-span-2 space-y-4 sm:space-y-6">
 
       {/* BALANCE CARD */}
-      <CommonCard className="overflow-hidden text-white">
-        <div className="rounded-[28px] bg-linear-to-r from-slate-900 via-violet-900 to-blue-700 p-5 sm:p-7">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-sm uppercase tracking-[0.24em] text-slate-300">
-                {walletT.totalBalance}
-              </p>
-              <p className="mt-3 text-3xl sm:text-4xl font-bold leading-tight break-all">
-                {formattedBalance}
-              </p>
-              <p className="mt-3 text-sm text-slate-200">
-                {walletT.monthlyGrowth}
-              </p>
-            </div>
+     <CommonCard className="overflow-hidden border bg-card text-card-foreground">
+  <div
+    className="
+      rounded-[28px]
+      p-5 sm:p-7
+      bg-gradient-to-br
+      from-background
+      via-muted/40
+      to-muted/70
+      dark:from-slate-900
+      dark:via-slate-800
+      dark:to-slate-900
+    "
+  >
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="max-w-2xl">
+        <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">
+          {walletT.totalBalance}
+        </p>
 
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-white/10 text-slate-100 shadow-lg shadow-slate-900/20">
-              <Wallet className="h-7 w-7" />
-            </div>
-          </div>
+        <p className="mt-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl break-all">
+          {formattedBalance}
+        </p>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-slate-200">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
-                {walletT.income}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-white break-all">
-                {formattedCredit}
-              </p>
-            </div>
-            <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-slate-200">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
-                {walletT.expenses}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-white break-all">
-                {formattedDebit}
-              </p>
-            </div>
-            <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-slate-200">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
-                {t('wallet.net')}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-white break-all">
-                {formattedNet}
-              </p>
-            </div>
-          </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {walletT.monthlyGrowth}
+        </p>
+      </div>
 
-          {updatedAt && (
-            <p className="mt-5 text-sm text-slate-300">
-              {t('wallet.updated')} {updatedAt}
-            </p>
-          )}
-        </div>
-      </CommonCard>
+      <div
+        className="
+          inline-flex h-16 w-16 items-center justify-center
+          rounded-3xl
+          bg-primary/10
+          text-primary
+          border border-primary/20
+        "
+      >
+        <Wallet className="h-7 w-7" />
+      </div>
+    </div>
 
+    <div className="mt-6 grid gap-3 sm:grid-cols-3">
+      {/* Income */}
+      <div
+        className="
+          rounded-3xl
+          border
+          bg-background/80
+          backdrop-blur-sm
+          px-4 py-4
+        "
+      >
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          {walletT.income}
+        </p>
+
+        <p className="mt-2 text-lg font-semibold text-green-600 break-all">
+          {formattedCredit}
+        </p>
+      </div>
+
+      {/* Expenses */}
+      <div
+        className="
+          rounded-3xl
+          border
+          bg-background/80
+          backdrop-blur-sm
+          px-4 py-4
+        "
+      >
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          {walletT.expenses}
+        </p>
+
+        <p className="mt-2 text-lg font-semibold text-red-600 break-all">
+          {formattedDebit}
+        </p>
+      </div>
+
+      {/* Net */}
+      <div
+        className="
+          rounded-3xl
+          border
+          bg-background/80
+          backdrop-blur-sm
+          px-4 py-4
+        "
+      >
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          {t("wallet.net")}
+        </p>
+
+        <p className="mt-2 text-lg font-semibold text-foreground break-all">
+          {formattedNet}
+        </p>
+      </div>
+    </div>
+
+    {updatedAt && (
+      <p className="mt-5 text-sm text-muted-foreground">
+        {t("wallet.updated")} {formatDateTime(updatedAt)}
+      </p>
+    )}
+  </div>
+</CommonCard>
       {/* QUICK ACTIONS */}
       <CommonCard>
         <div className="p-4 sm:p-6">

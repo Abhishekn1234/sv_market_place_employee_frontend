@@ -9,7 +9,7 @@ export function useProfile() {
   return useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
-      console.log("PROFILE API CALLED");
+      // console.log("PROFILE API CALLED");
       return await usecase.execute();
     },
 

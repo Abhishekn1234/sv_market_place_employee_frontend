@@ -9,10 +9,10 @@ export function useStatusConfig(): Record<
   const { translations } = useLanguage();
   const completed = translations.bookingHistory.statusOptions.completed;
   const C = completed.toLocaleUpperCase();
-  console.log(C);
+  // console.log(C);
 
   const statusOptions = translations.bookingHistory.statusOptions as unknown as StatusOptions;
-  console.log(statusOptions);
+  // console.log(statusOptions);
 
   return {
     [C]: {  // <- dynamic key

@@ -106,9 +106,9 @@ const monthlyBookings = useMemo(() => {
   }));
 }, [bookings, MONTHS]);
 
-console.log("Language:", language);
-console.log("Months:", MONTHS);
-console.log("Chart Data:", monthlyBookings);
+// console.log("Language:", language);
+// console.log("Months:", MONTHS);
+// console.log("Chart Data:", monthlyBookings);
 
   // ================= STATS =================
   const statCards = [

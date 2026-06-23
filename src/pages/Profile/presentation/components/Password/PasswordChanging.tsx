@@ -30,7 +30,10 @@ export default function PasswordChanging({ onSuccess }: Props) {
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
+  const hasChanges =
+  oldPassword.trim() !== "" ||
+  newPassword.trim() !== "" ||
+  confirmPassword.trim() !== "";
   const { theme } = useTheme();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -135,18 +138,19 @@ export default function PasswordChanging({ onSuccess }: Props) {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full sm:w-auto"
-          onClick={() => {
-            setOldPassword("");
-            setNewPassword("");
-            setConfirmPassword("");
-          }}
-        >
-          {password.clear}
-        </Button>
+            <Button
+        type="button"
+        variant="outline"
+        className="w-full sm:w-auto"
+        disabled={!hasChanges}
+        onClick={() => {
+          setOldPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        }}
+      >
+        {password.clear}
+      </Button>
 
         <Button
           type="submit"
