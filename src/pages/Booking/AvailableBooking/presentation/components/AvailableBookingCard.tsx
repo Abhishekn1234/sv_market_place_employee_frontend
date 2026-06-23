@@ -30,20 +30,24 @@ export default function AvailableBookingCard({
   return (
     <CommonCard className="flex flex-col rounded-lg border bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow w-full max-w-sm">
 
-      {/* HEADER — service name + category in one tight row */}
-      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold truncate leading-tight">
-            {booking.service?.name || "—"}
-          </p>
-          <p className="text-[11px] text-muted-foreground truncate leading-tight">
-            {booking.service?.category ? categoryMap[booking.service.category] : "—"}
-          </p>
-        </div>
-        <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-          {booking.bookingType || "—"}
-        </span>
-      </div>
+      
+   <div className="flex flex-col gap-2 border-b px-3 py-1.5 sm:flex-row sm:items-center sm:justify-between">
+  {/* Left Side: Service Details */}
+  <div className="min-w-0">
+    <p className="truncate text-xs font-semibold leading-tight">
+      {booking.service?.name || "—"}
+    </p>
+    <p className="truncate text-[11px] leading-tight text-muted-foreground">
+      {booking.service?.category ? categoryMap[booking.service.category] : "—"}
+    </p>
+  </div>
+
+  {/* Right/Bottom Side: Booking Type Badge */}
+  {/* Removed `shrink-0` since it's wrapping, added `self-start` so it doesn't stretch full width when stacked */}
+  {/* <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:self-auto self-start">
+    {booking.bookingType || "—"}
+  </span> */}
+   </div>
 
       {/* BODY */}
       <div className="px-3 py-1.5 space-y-1.5 text-[12px]">
@@ -53,7 +57,7 @@ export default function AvailableBookingCard({
           customer={booking.customer}
           t={t}
           showCallButton
-          className="[&_*]:text-[12px]"
+         className="[&_*]:text-[12px] overflow-hidden text-ellipsis whitespace-nowrap"
         />
 
         {/* Estimate row */}
