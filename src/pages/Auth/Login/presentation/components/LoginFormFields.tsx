@@ -165,7 +165,7 @@ export default function LoginFormFields({
         className="h-14 w-full bg-gradient-to-r from-blue-500 to-indigo-600"
       >
         {isLoading ? (
-          <CommonSpinner />
+          <CommonSpinner color="white" />
         ) : (
           <>
             Sign In

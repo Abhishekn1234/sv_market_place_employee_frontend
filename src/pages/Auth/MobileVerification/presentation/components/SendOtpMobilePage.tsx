@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useSendOtpMobile } from "../hooks/useSendOtpMobile";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Phone, Send, MessageSquare } from "lucide-react";
+import { Phone, Send, Loader2 } from "lucide-react";
+import CommonSpinner from "@/components/common/CommonSpinner";
 
 export default function SendOtpMobilePage() {
   const [mobile, setMobile] = useState("");
@@ -35,9 +36,20 @@ export default function SendOtpMobilePage() {
           </div>
 
           <div className="px-6 py-6">
-            {/* Illustration area */}
-            <div className="bg-blue-50 rounded-xl h-20 flex items-center justify-center mb-5">
-              <MessageSquare className="h-9 w-9 text-blue-400" />
+
+            {/* Illustration */}
+            <div className="relative bg-gradient-to-br from-blue-50 to-slate-100 rounded-2xl h-28 flex items-center justify-center mb-5 overflow-hidden">
+              <div className="absolute h-24 w-24 rounded-full border-2 border-blue-100 opacity-60" />
+              <div className="absolute h-16 w-16 rounded-full border-2 border-blue-200 opacity-60" />
+              <div className="h-12 w-12 rounded-2xl bg-white shadow-sm border border-blue-100 flex items-center justify-center z-10">
+                <Phone className="h-6 w-6 text-blue-500" />
+              </div>
+              <div className="absolute top-4 right-10 flex gap-0.5 items-end">
+                <div className="w-1 h-2 bg-blue-300 rounded-sm" />
+                <div className="w-1 h-3 bg-blue-400 rounded-sm" />
+                <div className="w-1 h-4 bg-blue-500 rounded-sm" />
+                <div className="w-1 h-5 bg-blue-600 rounded-sm" />
+              </div>
             </div>
 
             {/* Info badge */}
@@ -51,12 +63,16 @@ export default function SendOtpMobilePage() {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+
               <div>
                 <label className="text-sm font-medium text-slate-600 block mb-1.5">
                   Mobile number
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400 pointer-events-none" />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
+                    <Phone className="h-4 w-4 text-blue-400" />
+                    <span className="text-xs text-slate-300">|</span>
+                  </div>
                   <Input
                     type="tel"
                     name="mobile"
@@ -64,23 +80,45 @@ export default function SendOtpMobilePage() {
                     required
                     placeholder="+1 (555) 000-0000"
                     onChange={(e) => setMobile(e.target.value)}
-                    className="pl-10 h-11 border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="pl-11 h-12 border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-slate-800 placeholder:text-slate-300 rounded-xl transition-all"
                   />
                 </div>
-                <p className="text-xs text-slate-400 mt-1.5">Include your country code</p>
+                <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
+                  <span className="h-1 w-1 rounded-full bg-slate-300 inline-block" />
+                  Include your country code (e.g. +1, +44, +91)
+                </p>
               </div>
 
               <Button
                 type="submit"
-                disabled={sendOtpMutation.isPending}
-                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-60"
+                disabled={sendOtpMutation.isPending || !mobile}
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-sm shadow-blue-200"
               >
-                <Send className="h-4 w-4" />
-                {sendOtpMutation.isPending ? "Sending OTP..." : "Send OTP"}
+                {sendOtpMutation.isPending ? (
+                  <>
+                    <CommonSpinner color="white"/>
+                    Sending OTP...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    Send OTP
+                  </>
+                )}
               </Button>
             </form>
 
-            <div className="border-t border-slate-100 mt-6 pt-4 text-center text-xs text-slate-400">
+            {/* Security note */}
+            <div className="mt-4 flex items-start gap-2 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
+              <div className="h-4 w-4 mt-0.5 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">
+                <span className="text-blue-600 text-[9px] font-bold">i</span>
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Your number is only used for verification and will never be shared with third parties.
+              </p>
+            </div>
+
+            <div className="border-t border-slate-100 mt-5 pt-4 text-center text-xs text-slate-400">
               Already verified?{" "}
               <a href="/login" className="text-blue-600 hover:underline font-medium">
                 Sign in
@@ -88,6 +126,13 @@ export default function SendOtpMobilePage() {
             </div>
           </div>
         </div>
+
+        {/* Step indicator */}
+        <div className="flex items-center justify-center gap-2 mt-5">
+          <div className="h-2 w-8 rounded-full bg-blue-600" />
+          <div className="h-2 w-2 rounded-full bg-slate-200" />
+        </div>
+
       </div>
     </div>
   );

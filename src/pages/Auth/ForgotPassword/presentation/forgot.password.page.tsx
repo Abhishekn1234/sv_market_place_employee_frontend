@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Loader2 } from "lucide-react";
+import { Mail, Send, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
@@ -20,7 +20,6 @@ export default function ForgotPassword() {
       toast.error("Email is required");
       return;
     }
-
     if (!/\S+@\S+\.\S+/.test(email)) {
       toast.error("Please enter a valid email address");
       return;
@@ -29,9 +28,7 @@ export default function ForgotPassword() {
     mutate(email, {
       onSuccess: (data: any) => {
         toast.success("OTP sent to your email");
-        navigate("/verify-otp", {
-          state: { hash: data.hash },
-        });
+        navigate("/verify-otp", { state: { hash: data.hash } });
       },
       onError: (err: any) => {
         toast.error(err?.response?.data?.message || "Failed to send reset link");
@@ -40,67 +37,68 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="
-      min-h-[100dvh] 
-      flex flex-col 
-      items-center justify-start 
-      lg:justify-center 
-      overflow-y-auto 
-      bg-gradient-to-br from-blue-50 via-white to-blue-100 
-      px-4 py-6 lg:py-10
-    ">
-      <div className="
-        w-full max-w-[360px] sm:max-w-sm md:max-w-md lg:max-w-lg 
-        bg-white rounded-2xl shadow-lg sm:shadow-xl md:shadow-2xl 
-        p-6 sm:p-8 md:p-10
-      ">
-        <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center mb-2">
-          Forgot Password
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
-        <p className="text-sm sm:text-base md:text-lg text-gray-600 text-center mb-6">
-          Enter your email to receive a verification code
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm sm:text-base md:text-lg font-medium mb-1">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-gray-400" />
-              <Input
-                type="email"
-                placeholder="john.doe@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 py-2.5 sm:py-3 md:py-4 text-sm sm:text-base md:text-lg border-gray-300 focus:ring-blue-200 focus:border-blue-500 rounded-lg w-full"
-              />
+          {/* Top bar */}
+          <div className="bg-blue-600 px-6 py-5 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+              <KeyRound className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-white font-medium text-base leading-tight">Forgot password</h1>
+              <p className="text-blue-200 text-xs mt-0.5">We'll email you a reset code</p>
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full mt-2 sm:mt-3 md:mt-4 h-11 sm:h-12 md:h-14 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg sm:rounded-xl flex items-center justify-center gap-2"
-            disabled={isPending}
-          >
-            {isPending && <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
-            Send OTP
-          </Button>
-        </form>
+          <div className="px-6 py-6">
+            {/* Illustration */}
+            <div className="bg-blue-50 rounded-xl h-20 flex items-center justify-center mb-5">
+              <Mail className="h-9 w-9 text-blue-400" />
+            </div>
 
-        <p className="text-center text-sm sm:text-base md:text-lg mt-4">
-          Remember your password?{" "}
-          <a 
-            href="/login" 
-            className="text-blue-600 hover:text-blue-800 hover:underline"
-          >
-            Login
-          </a>
-        </p>
+            <p className="text-sm text-slate-500 mb-5">
+              Enter the email address associated with your account and we'll send you a 6-digit verification code.
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-slate-600 block mb-1.5">
+                  Email address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400 pointer-events-none" />
+                  <Input
+                    type="email"
+                    placeholder="john.doe@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 h-11 border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-60"
+              >
+                <Send className="h-4 w-4" />
+                {isPending ? "Sending OTP..." : "Send OTP"}
+              </Button>
+            </form>
+
+            <div className="border-t border-slate-100 mt-6 pt-4 text-center text-xs text-slate-400">
+              Remember your password?{" "}
+              <a href="/login" className="text-blue-600 hover:underline font-medium">
+                Sign in
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
 

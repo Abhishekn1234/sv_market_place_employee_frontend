@@ -2,10 +2,10 @@
 
 import { useResetPassword } from '../presentation/hooks/useReset';
 import { useState } from 'react';
-import { Input } from '@/components/ui/input';   
-import { Button } from '@/components/ui/button'; 
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router';
-import { Eye, EyeOff } from 'lucide-react'; 
+import { Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
 import CommonSpinner from '@/components/common/CommonSpinner';
 
 export default function ResetPasswordForm() {
@@ -16,6 +16,9 @@ export default function ResetPasswordForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
+  const passwordsMatch = confirmPassword.length > 0 && newPassword === confirmPassword;
+  const passwordMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await resetPassword({ newPassword, confirmPassword });
@@ -23,87 +26,114 @@ export default function ResetPasswordForm() {
   };
 
   return (
-    <div className="
-      min-h-[100dvh] 
-      flex flex-col items-center justify-start 
-      lg:justify-center 
-      overflow-y-auto 
-      bg-gradient-to-br from-blue-50 via-white to-blue-100 
-      px-4 py-6 lg:py-10
-    ">
-      <form
-        onSubmit={handleSubmit}
-        className="
-          bg-white shadow-lg rounded-2xl 
-          w-full max-w-[360px] sm:max-w-sm md:max-w-md lg:max-w-lg 
-          p-6 sm:p-8 md:p-10
-        "
-      >
-        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-6 text-center text-gray-800">
-          Reset Your Password
-        </h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
-        <div className="space-y-4">
-          {/* New Password */}
-          <div className="relative">
-            <Input
-              type={showNewPassword ? 'text' : 'password'}
-              placeholder="New Password"
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              className="w-full pr-10 py-2.5 sm:py-3 md:py-4 text-sm sm:text-base md:text-lg rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-              required
-            />
-            <button
-              type="button"
-              className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              onClick={() => setShowNewPassword(prev => !prev)}
-            >
-              {showNewPassword ? <EyeOff className="h-5 w-5 sm:h-6 sm:w-6" /> : <Eye className="h-5 w-5 sm:h-6 sm:w-6" />}
-            </button>
+          {/* Top bar */}
+          <div className="bg-blue-600 px-6 py-5 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+              <KeyRound className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-white font-medium text-base leading-tight">Reset password</h1>
+              <p className="text-blue-200 text-xs mt-0.5">Create a new secure password</p>
+            </div>
           </div>
 
-          {/* Confirm Password */}
-          <div className="relative">
-            <Input
-              type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full pr-10 py-2.5 sm:py-3 md:py-4 text-sm sm:text-base md:text-lg rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-              required
-            />
-            <button
-              type="button"
-              className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              onClick={() => setShowConfirmPassword(prev => !prev)}
-            >
-              {showConfirmPassword ? <EyeOff className="h-5 w-5 sm:h-6 sm:w-6" /> : <Eye className="h-5 w-5 sm:h-6 sm:w-6" />}
-            </button>
+          <div className="px-6 py-6">
+            {/* Illustration */}
+            <div className="bg-blue-50 rounded-xl h-20 flex items-center justify-center mb-5">
+              <ShieldCheck className="h-9 w-9 text-blue-400" />
+            </div>
+
+            <p className="text-sm text-slate-500 mb-5">
+              Choose a strong password. It must be at least 6 characters long.
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* New password */}
+              <div>
+                <label className="text-sm font-medium text-slate-600 block mb-1.5">
+                  New password
+                </label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400 pointer-events-none" />
+                  <Input
+                    type={showNewPassword ? 'text' : 'password'}
+                    placeholder="At least 6 characters"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="pl-10 pr-11 h-11 border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                    aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm password */}
+              <div>
+                <label className="text-sm font-medium text-slate-600 block mb-1.5">
+                  Confirm password
+                </label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400 pointer-events-none" />
+                  <Input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Re-enter your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className={`pl-10 pr-11 h-11 bg-slate-50 focus:bg-white focus:ring-2 transition-all ${
+                      passwordMismatch
+                        ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                        : passwordsMatch
+                        ? 'border-green-400 focus:border-green-400 focus:ring-green-100'
+                        : 'border-slate-200 focus:border-blue-400 focus:ring-blue-100'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {passwordMismatch && (
+                  <p className="text-xs text-red-500 mt-1.5">Passwords don't match</p>
+                )}
+                {passwordsMatch && (
+                  <p className="text-xs text-green-600 mt-1.5">Passwords match</p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading || passwordMismatch}
+                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-60 mt-2"
+              >
+                {loading ? <CommonSpinner /> : "Reset password"}
+              </Button>
+            </form>
+
+            <div className="border-t border-slate-100 mt-6 pt-4 text-center text-xs text-slate-400">
+              Remember your password?{" "}
+              <a href="/login" className="text-blue-600 hover:underline font-medium">
+                Sign in
+              </a>
+            </div>
           </div>
         </div>
-
-        <Button
-          type="submit"
-          className="
-            w-full mt-6 sm:mt-7 md:mt-8 py-3 sm:py-3.5 md:py-4 
-            bg-blue-600 hover:bg-blue-700 text-white font-semibold 
-            rounded-lg sm:rounded-xl flex items-center justify-center 
-            transition
-          "
-          disabled={loading}
-        >
-          {loading ? <CommonSpinner/> : "Reset Password"}
-        </Button>
-
-        <p className="text-center text-sm sm:text-base md:text-lg mt-4">
-          Remember your password?{" "}
-          <a href="/login" className="text-blue-600 hover:text-blue-800 hover:underline">
-            Login
-          </a>
-        </p>
-      </form>
+      </div>
     </div>
   );
 }
-
