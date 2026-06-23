@@ -487,6 +487,7 @@
   "notifications": {
   "title": "सूचनाएँ",
   "selectAll":"सबका चयन करें",
+  "end":"अंत",
   "unselectAll":"सभी को अचयनित करें",
   "markSelected":"चिन्हित करें",
   "subtitle": "अपनी नवीनतम गतिविधियों से अपडेट रहें",

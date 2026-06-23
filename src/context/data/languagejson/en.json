@@ -472,6 +472,7 @@
   },
   "notifications": {
     "title": "Notifications",
+    "end":"End",
     "subtitle": "Stay updated with your latest activities",
     "markSelectedSuccess": "Selected notifications marked as read",
     "markSelectedFailed": "Failed to mark selected notifications as read",
