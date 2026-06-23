@@ -1,13 +1,14 @@
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { Switch } from "@/components/ui/switch";
-import type { TranslationSchema } from "@/context/domain/entities/types/translationschema.types";
+import type { HomePageTranslations } from "@/context/domain/entities/types/homepagetranslation.types";
+
 
 interface Props {
   isRTL: boolean;
   isOnline: boolean;
   workerStatus: boolean;
   loading: boolean;
-  homeTranslations: TranslationSchema;
+  homeTranslations: HomePageTranslations;
   handleToggle: (val: boolean) => void;
 }
 
@@ -28,8 +29,8 @@ export default function HeaderStatus({
       >
         {workerStatus ? (
           isOnline
-            ? homeTranslations?.HomePage?.online ?? "Online"
-            : homeTranslations?.HomePage?.offline ?? "Offline"
+            ? homeTranslations?.online ?? "Online"
+            : homeTranslations?.offline ?? "Offline"
         ) : (
           <CommonSpinner />
         )}
