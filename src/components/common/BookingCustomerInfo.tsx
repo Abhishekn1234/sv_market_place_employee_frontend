@@ -19,77 +19,87 @@ export default function BookingCustomerInfo({
 }: Props) {
   return (
     <CommonCard
-      className={`bg-muted/20 dark:bg-slate-800/40 px-3 py-3 space-y-2.5 max-w-[220px] aspect-square w-full h-auto flex flex-col justify-between ${
-        className ?? ""
-      }`}
-    >
-      <div className="space-y-2">
-        {/* Header */}
-        <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-          {t("availableBooking.customer")}
+  className={`
+    bg-muted/20 dark:bg-slate-800/40
+    aspect-square w-full max-w-[220px]
+    p-3
+    flex flex-col
+    justify-between
+    overflow-hidden
+    ${className ?? ""}
+  `}
+>
+  <div className="flex-1 min-h-0">
+    {/* Header */}
+    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+      {t("availableBooking.customer")}
+    </p>
+
+    <div className="space-y-2">
+      {/* Name */}
+      <div>
+        <p className="text-[8px] text-muted-foreground mb-0.5">
+          {t("availableBookings.name")}
         </p>
-
-        {/* Content Grid: Keeps everything tight and square-friendly */}
-        <div className="grid grid-cols-1 gap-1.5">
-          {/* Name */}
-          <div className="leading-tight">
-            <span className="text-[9px] block text-muted-foreground">
-              {t("availableBookings.name")}
-            </span>
-            <span
-              className="text-[11px] font-semibold break-words text-card-foreground block"
-              title={customer?.fullName}
-            >
-              {customer?.fullName || t("common.na")}
-            </span>
-          </div>
-
-          {/* Email */}
-          <div className="leading-tight">
-            <span className="text-[9px] block text-muted-foreground">
-              {t("availableBookings.email")}
-            </span>
-            <span
-              className="text-[10px] break-all text-card-foreground block"
-              {...(isRTL ? { dir: "ltr" } : {})}
-              title={customer?.email}
-            >
-              {customer?.email || t("common.na")}
-            </span>
-          </div>
-
-          {/* Phone */}
-          <div className="leading-tight">
-            <span className="text-[9px] block text-muted-foreground">
-              {t("availableBookings.phone")}
-            </span>
-            <span
-              className="text-[11px] font-medium text-card-foreground block"
-              {...(isRTL ? { dir: "ltr" } : {})}
-            >
-              {customer?.phone || t("common.na")}
-            </span>
-          </div>
-        </div>
+        <p
+          className="text-xs font-semibold text-card-foreground leading-tight line-clamp-2 break-words"
+          title={customer?.fullName}
+        >
+          {customer?.fullName || t("common.na")}
+        </p>
       </div>
 
-      {/* Call Button */}
-      {showCallButton && customer?.phone && (
-        <a
-          href={`tel:${customer.phone}`}
-          className="
-            flex items-center justify-center gap-1.5
-            w-full h-7 mt-1
-            rounded-md
-            bg-emerald-600 hover:bg-emerald-700
-            text-white text-[11px] font-medium
-            transition-colors shrink-0
-          "
+      {/* Email */}
+      <div>
+        <p className="text-[8px] text-muted-foreground mb-0.5">
+          {t("availableBookings.email")}
+        </p>
+        <p
+          className="text-[10px] leading-tight text-card-foreground line-clamp-2 break-all"
+          {...(isRTL ? { dir: "ltr" } : {})}
+          title={customer?.email}
         >
-          <Phone size={11} />
-          {t("availableBookings.callCustomer")}
-        </a>
-      )}
-    </CommonCard>
+          {customer?.email || t("common.na")}
+        </p>
+      </div>
+
+      {/* Phone */}
+      <div>
+        <p className="text-[8px] text-muted-foreground mb-0.5">
+          {t("availableBookings.phone")}
+        </p>
+        <p
+          className="text-xs font-medium text-card-foreground"
+          {...(isRTL ? { dir: "ltr" } : {})}
+        >
+          {customer?.phone || t("common.na")}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {/* Call Button */}
+  {showCallButton && customer?.phone && (
+    <a
+      href={`tel:${customer.phone}`}
+      className="
+        mt-2
+        h-8
+        w-full
+        flex items-center justify-center gap-1.5
+        rounded-md
+        bg-emerald-600 hover:bg-emerald-700
+        text-white
+        text-[10px] font-medium
+        shrink-0
+      "
+    >
+      <Phone size={12} />
+      <span className="truncate">
+        {t("availableBookings.callCustomer")}
+      </span>
+    </a>
+  )}
+</CommonCard>
   );
 }
