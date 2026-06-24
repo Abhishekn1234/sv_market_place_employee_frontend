@@ -90,27 +90,33 @@ export function CommonCard({
       )}
 
       {/* 🔹 Unified Content Area (Label, Value & Children) */}
-      {(label || value || children) && (
-        <CardContent className={cn(noPadding ? "p-0" : "p-5 sm:p-6", alignClass, contentClassName)}>
-          <div className="space-y-4">
-            {(label || value) && (
-              <div className="space-y-1">
-                {label && (
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                    {label}
-                  </p>
-                )}
-                {value && (
-                  <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                    {value}
-                  </div>
-                )}
-              </div>
-            )}
-            {children}
+    {(label || value || children) && (
+  <CardContent
+    className={cn(
+      noPadding ? "p-0" : "p-5 sm:p-6",
+      // Only add space-y-4 when there's actual label/value to stack
+      (label || value) ? "space-y-4" : "",
+      alignClass,
+      contentClassName
+    )}
+  >
+    {(label || value) && (
+      <div className="space-y-1">
+        {label && (
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            {label}
+          </p>
+        )}
+        {value && (
+          <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+            {value}
           </div>
-        </CardContent>
-      )}
+        )}
+      </div>
+    )}
+    {children}
+  </CardContent>
+)}
 
       {/* 🔹 Footer */}
       {footer && (
