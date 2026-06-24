@@ -6,6 +6,7 @@ interface Props {
   t: (key: string) => string;
   showCallButton?: boolean;
   className?: string;
+  isRTL?: boolean; // ✅ add this
 }
 
 export default function BookingCustomerInfo({
@@ -13,10 +14,14 @@ export default function BookingCustomerInfo({
   t,
   showCallButton = false,
   className,
+  isRTL = false,
 }: Props) {
   return (
-    <div className={`rounded-md border bg-muted/20 dark:bg-slate-800/40 px-2.5 py-1.5 space-y-0.5 ${className ?? ""}`}>
-
+    <div
+      className={`rounded-md border bg-muted/20 dark:bg-slate-800/40 px-2.5 py-1.5 space-y-0.5 ${
+        className ?? ""
+      }`}
+    >
       {/* Section label */}
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">
         {t("availableBooking.customer")}
@@ -33,20 +38,27 @@ export default function BookingCustomerInfo({
       </div>
 
       {/* Email */}
-            <div className="flex items-center justify-between gap-2 min-w-0">
-            <span className="text-[10px] text-muted-foreground shrink-0">
-                {t("availableBookings.email")}
-            </span>
-            <span className="text-[10px] text-right truncate min-w-0 flex-1">
-                {customer?.email || t("common.na")}
-            </span>
-            </div>
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <span className="text-[10px] text-muted-foreground shrink-0">
+          {t("availableBookings.email")}
+        </span>
+        <span
+          className="text-[10px] text-right truncate min-w-0 flex-1 whitespace-nowrap"
+          {...(isRTL ? { dir: "ltr" } : {})}
+        >
+          {customer?.email || t("common.na")}
+        </span>
+      </div>
+
       {/* Phone */}
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] text-muted-foreground shrink-0">
           {t("availableBookings.phone")}
         </span>
-        <span className="text-[11px] text-right">
+        <span
+          className="text-[11px] text-right whitespace-nowrap"
+          {...(isRTL ? { dir: "ltr" } : {})}
+        >
           {customer?.phone || t("common.na")}
         </span>
       </div>

@@ -9,6 +9,7 @@ interface Props {
   booking: any;
   categoryMap: Record<string, string>;
   isPending: boolean;
+  isRTL:boolean;
   t: (key: string) => string;
   getLatLng: (location?: { type: "Point"; coordinates: number[] }) => { lat: number; lng: number } | null;
   handleAccept: (booking: any) => void;
@@ -20,6 +21,7 @@ export default function AvailableBookingCard({
   categoryMap,
   isPending,
   t,
+  isRTL,
   getLatLng,
   handleAccept,
   handleIgnore,
@@ -58,6 +60,7 @@ export default function AvailableBookingCard({
           t={t}
           showCallButton
          className="[&_*]:text-[12px] overflow-hidden text-ellipsis whitespace-nowrap"
+         isRTL={isRTL}
         />
 
         {/* Estimate row */}
@@ -67,6 +70,7 @@ export default function AvailableBookingCard({
           amount={booking.workerPoolAmount}
           t={t}
           className="[&_*]:text-[12px]"
+          isRTL={isRTL}
         />
 
         {/* Scheduled date — only if scheduled */}

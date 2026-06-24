@@ -25,6 +25,7 @@ export default function AvailableBookingGrid({
   isRTL,
   translations,
   t,
+
   getLatLng,
   handleAccept,
   handleIgnore,
@@ -51,6 +52,7 @@ export default function AvailableBookingGrid({
                   categoryMap={categoryMap}
                   isPending={isPending}
                   t={t}
+                  isRTL={isRTL}
                   getLatLng={getLatLng}
                   handleAccept={handleAccept}
                   handleIgnore={handleIgnore}
