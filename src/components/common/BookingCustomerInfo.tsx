@@ -19,76 +19,72 @@ export default function BookingCustomerInfo({
 }: Props) {
   return (
     <CommonCard
-      className={`bg-muted/20 dark:bg-slate-800/40 px-2.5 py-1.5 space-y-2 ${
+      className={`bg-muted/20 dark:bg-slate-800/40 px-3 py-2 space-y-2 ${
         className ?? ""
       }`}
     >
-      {/* Section label */}
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+      {/* Header */}
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
         {t("availableBooking.customer")}
       </p>
 
       {/* Name */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
         <span className="text-[11px] text-muted-foreground shrink-0">
           {t("availableBookings.name")}
         </span>
 
-        <span className="text-[12px] font-medium text-right truncate max-w-[160px]">
+        <span
+          className="flex-1 min-w-0 text-[12px] font-semibold truncate"
+          title={customer?.fullName}
+        >
           {customer?.fullName || t("common.na")}
         </span>
       </div>
 
       {/* Email */}
       <div className="space-y-0.5">
-        <span className="text-[10px] text-muted-foreground block">
+        <p className="text-[11px] text-muted-foreground">
           {t("availableBookings.email")}
-        </span>
+        </p>
 
-        <span
-          className="block text-[10px] break-all leading-relaxed"
+        <p
+          className="text-[11px] leading-4 break-all line-clamp-2"
           {...(isRTL ? { dir: "ltr" } : {})}
+          title={customer?.email}
         >
           {customer?.email || t("common.na")}
-        </span>
+        </p>
       </div>
 
       {/* Phone */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
         <span className="text-[11px] text-muted-foreground shrink-0">
           {t("availableBookings.phone")}
         </span>
 
         <span
-          className="text-[11px] font-medium"
+          className="text-[12px] font-medium whitespace-nowrap"
           {...(isRTL ? { dir: "ltr" } : {})}
         >
           {customer?.phone || t("common.na")}
         </span>
       </div>
 
-      {/* Call button */}
+      {/* Call Button */}
       {showCallButton && customer?.phone && (
         <a
           href={`tel:${customer.phone}`}
           className="
-            mt-1
-            flex
-            items-center
-            justify-center
-            gap-1.5
-            w-full
-            bg-emerald-600
-            hover:bg-emerald-700
-            text-white
+            flex items-center justify-center gap-2
+            w-full h-8
             rounded-md
-            py-1
-            text-[11px]
-            font-medium
+            bg-emerald-600 hover:bg-emerald-700
+            text-white text-[12px] font-medium
             transition-colors
           "
         >
-          <Phone size={11} />
+          <Phone size={13} />
           {t("availableBookings.callCustomer")}
         </a>
       )}
