@@ -1,12 +1,13 @@
 import type { Customer } from "@/pages/History/BookingHistory/domain/entities/customer.types";
 import { Phone } from "lucide-react";
+import { CommonCard } from "./CommonCard";
 
 interface Props {
   customer?: Customer;
   t: (key: string) => string;
   showCallButton?: boolean;
   className?: string;
-  isRTL?: boolean; // ✅ add this
+  isRTL?: boolean;
 }
 
 export default function BookingCustomerInfo({
@@ -17,13 +18,13 @@ export default function BookingCustomerInfo({
   isRTL = false,
 }: Props) {
   return (
-    <div
-      className={`rounded-md border bg-muted/20 dark:bg-slate-800/40 px-2.5 py-1.5 space-y-0.5 ${
+    <CommonCard
+      className={`bg-muted/20 dark:bg-slate-800/40 px-2.5 py-1.5 space-y-2 ${
         className ?? ""
       }`}
     >
       {/* Section label */}
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">
+      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
         {t("availableBooking.customer")}
       </p>
 
@@ -32,31 +33,34 @@ export default function BookingCustomerInfo({
         <span className="text-[11px] text-muted-foreground shrink-0">
           {t("availableBookings.name")}
         </span>
+
         <span className="text-[12px] font-medium text-right truncate max-w-[160px]">
           {customer?.fullName || t("common.na")}
         </span>
       </div>
 
       {/* Email */}
-   <div className="flex items-start gap-2 min-w-0">
-  <span className="text-[10px] text-muted-foreground shrink-0">
-    {t("availableBookings.email")}
-  </span>
+      <div className="space-y-0.5">
+        <span className="text-[10px] text-muted-foreground block">
+          {t("availableBookings.email")}
+        </span>
 
-  <span
-    className="text-[10px] min-w-0 flex-1 break-all text-right"
-    {...(isRTL ? { dir: "ltr" } : {})}
-  >
-    {customer?.email || t("common.na")}
-  </span>
-</div>
+        <span
+          className="block text-[10px] break-all leading-relaxed"
+          {...(isRTL ? { dir: "ltr" } : {})}
+        >
+          {customer?.email || t("common.na")}
+        </span>
+      </div>
+
       {/* Phone */}
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] text-muted-foreground shrink-0">
           {t("availableBookings.phone")}
         </span>
+
         <span
-          className="text-[11px] text-right whitespace-nowrap"
+          className="text-[11px] font-medium"
           {...(isRTL ? { dir: "ltr" } : {})}
         >
           {customer?.phone || t("common.na")}
@@ -67,14 +71,27 @@ export default function BookingCustomerInfo({
       {showCallButton && customer?.phone && (
         <a
           href={`tel:${customer.phone}`}
-          className="mt-1.5 flex items-center justify-center gap-1.5 w-full 
-            bg-emerald-600 hover:bg-emerald-700 text-white rounded-md 
-            py-0.5 text-[11px] font-medium transition-colors"
+          className="
+            mt-1
+            flex
+            items-center
+            justify-center
+            gap-1.5
+            w-full
+            bg-emerald-600
+            hover:bg-emerald-700
+            text-white
+            rounded-md
+            py-1
+            text-[11px]
+            font-medium
+            transition-colors
+          "
         >
           <Phone size={11} />
           {t("availableBookings.callCustomer")}
         </a>
       )}
-    </div>
+    </CommonCard>
   );
 }
