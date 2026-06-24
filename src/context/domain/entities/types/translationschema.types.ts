@@ -14,6 +14,8 @@ export type TranslationSchema = {
   common: Record<string, string>;
   chat: Record<string, string>;
   HomePage: HomePageTranslations;
+  startWork:Record<string,string>;
+  completeWork:Record<string,string>;
   bookingHistory: BookingHistoryTranslations;
   workHistory: WorkHistoryTranslations;
   profile: ProfileTranslations;

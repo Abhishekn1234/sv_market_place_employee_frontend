@@ -9,8 +9,12 @@ import { toast } from "react-toastify";
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 
-import { getSocket, initializeSocket } from "@/core/Websocket/presentation/components/socket";
+import {
+  getSocket,
+  initializeSocket,
+} from "@/core/Websocket/presentation/components/socket";
 import { getBookingId } from "../../utils/workPresentation.helpers";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 type Props = {
   work: DisplayWork | Work;
@@ -26,6 +30,7 @@ export default function StartWork({
   onWorkStarted,
 }: Props) {
   const [otp, setOtp] = useState("");
+  const { translations } = useLanguage();
 
   const startWorkMutation = useStartWork();
 
@@ -33,14 +38,14 @@ export default function StartWork({
     const otpStr = otp.toString();
 
     if (otpStr.length !== 6) {
-      alert("Please enter a valid 6-digit OTP");
+      toast.error(translations.startWork.invalidOtp);
       return;
     }
 
-     const bookingId = getBookingId(work);
+    const bookingId = getBookingId(work);
 
     if (!bookingId) {
-      alert("Booking ID not found");
+      toast.error(translations.startWork.bookingIdMissing);
       return;
     }
 
@@ -48,13 +53,12 @@ export default function StartWork({
       { bookingId, otp: otpStr },
       {
         onSuccess: (data: any) => {
-          // toast.success("Work Started");
+          toast.success(translations.startWork.success);
 
           const socket =
             getSocket("/workers/assigned-updates") ||
             initializeSocket("/workers/assigned-updates");
 
-          // 🔥 EMIT SOCKET EVENT (THIS IS KEY)
           socket.emit("booking.worker.started", {
             bookingId,
             status: "IN_PROGRESS",
@@ -64,7 +68,8 @@ export default function StartWork({
           const updatedWork = {
             ...work,
             status: "IN_PROGRESS" as const,
-            workStartedAt: data?.startedAt || new Date().toISOString(),
+            workStartedAt:
+              data?.startedAt || new Date().toISOString(),
           };
 
           onWorkStarted?.(updatedWork);
@@ -72,7 +77,9 @@ export default function StartWork({
         },
 
         onError: (err: any) => {
-          toast.error(err?.message || "Failed to start work");
+          toast.error(
+            err?.message || translations.startWork.failed
+          );
         },
       }
     );
@@ -82,22 +89,30 @@ export default function StartWork({
     <CommonModal open={open} onOpenChange={onClose}>
       <CommonModal.Content>
         <CommonModal.Header>
-          <h3 className="text-lg font-semibold">Confirm Start Work</h3>
+          <h3 className="text-lg font-semibold">
+            {translations.startWork.title}
+          </h3>
         </CommonModal.Header>
 
         <CommonModal.Body className="space-y-4">
           <p>
-            Enter the 6-digit OTP to start work for{" "}
-            <strong>{work.customer?.fullName || "Customer"}</strong>
+            {translations.startWork.description}{" "}
+            <strong>
+              {work.customer?.fullName || "Customer"}
+            </strong>
           </p>
 
           <div className="flex justify-center">
             <Input
               value={otp}
               onChange={(e) =>
-                setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                setOtp(
+                  e.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, 6)
+                )
               }
-              placeholder="Enter OTP"
+              placeholder={translations.startWork.placeholder}
               maxLength={6}
               className="text-center w-32 tracking-widest text-lg"
             />
@@ -106,14 +121,19 @@ export default function StartWork({
 
         <CommonModal.Footer>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {translations.startWork.cancel}
           </Button>
 
           <Button
             onClick={handleConfirm}
-            disabled={otp.length !== 6 || startWorkMutation.isPending}
+            disabled={
+              otp.length !== 6 ||
+              startWorkMutation.isPending
+            }
           >
-            {startWorkMutation.isPending ? "Starting..." : "Confirm"}
+            {startWorkMutation.isPending
+              ? translations.startWork.starting
+              : translations.startWork.confirm}
           </Button>
         </CommonModal.Footer>
       </CommonModal.Content>
