@@ -22,7 +22,7 @@ export default function BookingCustomerInfo({
   {t("availableBooking.customer")}
 </p>
 
-<div className="space-y-2.5">
+<div className="space-y-1">
   {/* Name */}
   <div>
     <p className="text-xs text-muted-foreground mb-0.5">
