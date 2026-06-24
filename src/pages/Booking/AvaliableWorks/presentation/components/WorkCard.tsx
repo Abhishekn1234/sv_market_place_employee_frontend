@@ -43,6 +43,7 @@ export default function WorkCard({
           t={t}
           isRTL={isRTL}
           showCallButton={true}
+            className="[&_*]:text-[12px]"
         />
 
         <BookingEstimateRow

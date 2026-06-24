@@ -56,12 +56,12 @@ export default function AvailableBookingCard({
 
         {/* Customer info */}
         <BookingCustomerInfo
-          customer={booking.customer}
-          t={t}
-          showCallButton
-         className="[&_*]:text-[12px] overflow-hidden text-ellipsis whitespace-nowrap"
-         isRTL={isRTL}
-        />
+            customer={booking.customer}
+            t={t}
+            showCallButton
+            isRTL={isRTL}
+            className="[&_*]:text-[12px]"
+          />
 
         {/* Estimate row */}
         <BookingEstimateRow
