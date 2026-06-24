@@ -5,16 +5,15 @@ import type {
   WorkStatus,
 } from "../types/workPresentation.types";
 
-// ✅ FINAL STATUSES
 export const FINAL_WORK_STATUSES: WorkStatus[] = [
   "COMPLETED",
+  "INVOICE_GENERATED",
   "WORK_COMPLETED_PENDING",
   "WORKER_CANCELLED",
   "WORKER_REJECTED",
   "CUSTOMER_CANCELLED",
 ];
 
-// ✅ ALWAYS USE BOOKING ID
 export function getBookingId(work: {
   bookingId?: string;
   booking?: { _id?: string };
@@ -30,7 +29,6 @@ export function getBookingId(work: {
   );
 }
 
-// ✅ STATUS NORMALIZER
 export function normalizeWorkStatus(status?: unknown): WorkStatus {
   const normalized = String(status ?? "UNKNOWN").trim().toUpperCase();
 
@@ -42,9 +40,11 @@ export function normalizeWorkStatus(status?: unknown): WorkStatus {
       "STARTED",
       "IN_PROGRESS",
       "WORK_COMPLETED_PENDING",
+      "INVOICE_GENERATED",
       "COMPLETED",
-       "INVOICE_GENERATED"
-      
+      "WORKER_CANCELLED",
+      "WORKER_REJECTED",
+      "CUSTOMER_CANCELLED",
     ].includes(normalized)
   ) {
     return normalized as WorkStatus;
@@ -52,59 +52,59 @@ export function normalizeWorkStatus(status?: unknown): WorkStatus {
 
   return "UNKNOWN";
 }
-const isCancelled = (status?: string) => {
+
+const shouldExclude = (status?: string): boolean => {
   const s = status?.toUpperCase();
   return (
     s === "CUSTOMER_CANCELLED" ||
-    s === "WORKER_CANCELLED"
+    s === "WORKER_CANCELLED"   ||
+    s === "WORKER_REJECTED"    ||
+    s === "INVOICE_GENERATED"  ||
+    s === "COMPLETED"
   );
 };
 
-
-// ✅ MAIN NORMALIZER (MOST IMPORTANT FIX)
 export function normalizeAssignedWorks(
   assignedBookings: Array<Partial<DisplayWork> | Partial<Booking>>
 ): DisplayWork[] {
   const map = new Map<string, DisplayWork>();
 
- assignedBookings.forEach((item: any) => {
-  const booking = item.booking;
-  const id = getBookingId(item);
+  assignedBookings.forEach((item: any) => {
+    const booking = item.booking;
+    const id = getBookingId(item);
 
-  if (!id) return;
+    if (!id) return;
 
-  // ✅ Source of Truth: If the booking itself is completed or pending, use its status
-  // This resolves cases where the assignment status (item.status) lags behind the global booking state.
-  const bStatus = booking?.status?.toUpperCase();
-  const statusSource =
-    bStatus && FINAL_WORK_STATUSES.includes(bStatus as any)
-      ? booking.status
-      : item.status ?? booking?.status;
+    const bStatus = booking?.status?.toUpperCase();
+    const statusSource =
+      bStatus && FINAL_WORK_STATUSES.includes(bStatus as any)
+        ? booking.status
+        : item.status ?? booking?.status;
 
-  // 🔥 HARD BLOCK CANCELLED
-  if (isCancelled(statusSource)) return;
+    const normalizedStatus = normalizeWorkStatus(statusSource);
 
-  const existing = map.get(id);
+    if (shouldExclude(normalizedStatus)) return;
 
-  map.set(id, {
-    ...(existing ?? {}),
-    ...item,
-    _id: id,
-    id,
-    booking,
-    status: normalizeWorkStatus(statusSource),
-    workStartedAt:
-      item.workStartedAt ||
-      item.startedAt ||
-      booking?.startedAt ||
-      existing?.workStartedAt,
+    const existing = map.get(id);
+
+    map.set(id, {
+      ...(existing ?? {}),
+      ...item,
+      _id: id,
+      id,
+      booking,
+      status: normalizedStatus,
+      workStartedAt:
+        item.workStartedAt ||
+        item.startedAt ||
+        booking?.startedAt ||
+        existing?.workStartedAt,
+    });
   });
-});
 
   return Array.from(map.values());
 }
 
-// ✅ LOCATION HELPERS
 export function getWorkCoordinates(
   location?: WorkLocation | null
 ): { lat: number; lng: number } | null {
@@ -137,14 +137,14 @@ export function elapsedMinutes(elapsedTime?: string): string {
     .map(Number)
     .reduce((total, value, index) => {
       if (Number.isNaN(value)) return total;
-
-      if (index === 0) return total + value * 60; // hours → minutes
-      if (index === 1) return total + value;      // minutes
-      return total + value / 60;                  // seconds → minutes
+      if (index === 0) return total + value * 60;
+      if (index === 1) return total + value;
+      return total + value / 60;
     }, 0);
 
   return minutes.toFixed(0);
 }
+
 export function getWorkLocation(work: DisplayWork) {
   return work.location ?? work.booking?.location;
 }
@@ -152,6 +152,5 @@ export function getWorkLocation(work: DisplayWork) {
 export function getWorkerAmount(work: DisplayWork): string {
   const pool = work.workerPoolAmount ?? work.booking?.workerPoolAmount;
   const workers = work.booking?.numberOfWorkers ?? work.numberOfWorkers;
-
   return workers && pool ? (pool / workers).toFixed(2) : "0.00";
 }
