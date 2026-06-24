@@ -19,7 +19,7 @@ export default function BookingCustomerInfo({
 }: Props) {
   return (
     <CommonCard
-      className={`bg-muted/20 dark:bg-slate-800/40 px-3 py-2 space-y-2 ${
+      className={`bg-muted/20 dark:bg-slate-800/40 px-4 py-4 space-y-3 max-w-[260px] w-full h-auto ${
         className ?? ""
       }`}
     >
@@ -28,18 +28,17 @@ export default function BookingCustomerInfo({
         {t("availableBooking.customer")}
       </p>
 
-      {/* Name */}
-      <div className="flex items-center gap-2">
-        <span className="text-[11px] text-muted-foreground shrink-0">
+      {/* Name - Changed from flex to block/stacking to prevent '...' truncation */}
+      <div className="space-y-0.5">
+        <p className="text-[11px] text-muted-foreground">
           {t("availableBookings.name")}
-        </span>
-
-        <span
-          className="flex-1 min-w-0 text-[12px] font-semibold truncate"
+        </p>
+        <p
+          className="text-[12px] font-semibold break-words leading-tight"
           title={customer?.fullName}
         >
           {customer?.fullName || t("common.na")}
-        </span>
+        </p>
       </div>
 
       {/* Email */}
@@ -47,9 +46,8 @@ export default function BookingCustomerInfo({
         <p className="text-[11px] text-muted-foreground">
           {t("availableBookings.email")}
         </p>
-
         <p
-          className="text-[11px] leading-4 break-all line-clamp-2"
+          className="text-[11px] leading-4 break-all"
           {...(isRTL ? { dir: "ltr" } : {})}
           title={customer?.email}
         >
@@ -58,17 +56,16 @@ export default function BookingCustomerInfo({
       </div>
 
       {/* Phone */}
-      <div className="flex items-center gap-2">
-        <span className="text-[11px] text-muted-foreground shrink-0">
+      <div className="space-y-0.5">
+        <p className="text-[11px] text-muted-foreground">
           {t("availableBookings.phone")}
-        </span>
-
-        <span
+        </p>
+        <p
           className="text-[12px] font-medium whitespace-nowrap"
           {...(isRTL ? { dir: "ltr" } : {})}
         >
           {customer?.phone || t("common.na")}
-        </span>
+        </p>
       </div>
 
       {/* Call Button */}
@@ -77,7 +74,7 @@ export default function BookingCustomerInfo({
           href={`tel:${customer.phone}`}
           className="
             flex items-center justify-center gap-2
-            w-full h-8
+            w-full h-9 mt-2
             rounded-md
             bg-emerald-600 hover:bg-emerald-700
             text-white text-[12px] font-medium
