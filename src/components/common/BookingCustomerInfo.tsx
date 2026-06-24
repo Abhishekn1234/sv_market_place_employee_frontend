@@ -38,13 +38,13 @@ export default function BookingCustomerInfo({
       </div>
 
       {/* Email */}
-   <div className="flex items-start justify-between gap-2 min-w-0">
+   <div className="flex items-start gap-2 min-w-0">
   <span className="text-[10px] text-muted-foreground shrink-0">
     {t("availableBookings.email")}
   </span>
 
   <span
-    className="text-[10px]  min-w-0 max-w-[60px] break-words"
+    className="text-[10px] min-w-0 flex-1 break-all text-right"
     {...(isRTL ? { dir: "ltr" } : {})}
   >
     {customer?.email || t("common.na")}
