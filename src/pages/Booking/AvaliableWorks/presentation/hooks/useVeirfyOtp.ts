@@ -20,43 +20,67 @@ export function useVerifyOtp() {
   return useMutation({
     mutationFn: (data: verifyotp) => usecase.execute(data),
 
-   onSuccess: (response: any, variables) => {
-  const bookingId = variables.bookingId || variables.id || variables.workId;
+    onSuccess: (response: any, variables) => {
+      // ✅ booking id from mutation payload
+      const bookingId =
+        variables.bookingId ||
+        variables.id ||
+        variables.workId;
 
-  if (!bookingId) {
-    console.error("No bookingId found in variables", variables);
-    return;
-  }
+      if (!bookingId) {
+        console.error("No bookingId found in variables", variables);
+        return;
+      }
 
-  const nextStatusRaw =
-    response?.booking?.status ??
-    response?.status ??
-    response?.bookingStatus;
+      // ✅ UPDATE CACHE
+      // NOTE: do not hardcode status. Backend may respond with CUSTOMER_CANCELLED.
+      const nextStatusRaw =
+        response?.booking?.status ??
+        response?.status ??
+        response?.bookingStatus;
 
-  // ✅ Update cache in place — no refetch needed
-  queryClient.setQueryData(
-    ASSIGNED_WORKS_KEY,
-    (old: any[] = []) =>
-      old.map((work) => {
-        const id = work._id || work.bookingId || work.id;
-        if (id !== bookingId) return work;
-        return {
-          ...work,
-          status: nextStatusRaw ?? "INVOICE_GENERATED",
-          invoice: response?.invoice ?? response?.booking?.invoice,
-          completedAt: new Date().toISOString(),
-        };
-      })
-  );
+      queryClient.setQueryData(
+        ASSIGNED_WORKS_KEY,
+        (old: any[] = []) =>
+          old.map((work) => {
+            const id =
+              work._id ||
+              work.bookingId ||
+              work.id;
 
-  // ✅ Zustand sync
-  useBookingSocketStore.getState().removeAssigned(bookingId);
+            if (id !== bookingId) return work;
 
-  // ❌ Remove this — it refetches and causes the flicker
-  // queryClient.invalidateQueries({ queryKey: ASSIGNED_WORKS_KEY });
+            return {
+              ...work,
 
-  toast.success(response?.message || "OTP verified successfully");
-},
+              // ✅ update status from backend (fallback to INVOICE_GENERATED)
+              status:
+                nextStatusRaw ?? "INVOICE_GENERATED",
+
+              // ✅ attach invoice details
+              invoice: response?.invoice ?? response?.booking?.invoice,
+
+              // optional
+              completedAt: new Date().toISOString(),
+            };
+          })
+      );
+
+      // ✅ Zustand sync
+      useBookingSocketStore
+        .getState()
+        .removeAssigned(bookingId);
+
+      // ✅ optional refetch
+      queryClient.invalidateQueries({
+        queryKey: ASSIGNED_WORKS_KEY,
+      });
+
+      toast.success(
+        response?.message ||
+          "OTP verified successfully"
+      );
+    },
 
     onError: (error: any) => {
       toast.error(

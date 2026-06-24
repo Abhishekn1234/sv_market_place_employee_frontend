@@ -23,7 +23,7 @@ export type WorkStatus =
   | "COMPLETED"
   | "WORKER_CANCELLED"
   | "WORKER_REJECTED"
-  | "CUSTOMER_CANCELLED"|"INVOICE_GENERATED";
+  | "CUSTOMER_CANCELLED";
 
 /**
  * Modal types
