@@ -38,18 +38,18 @@ export default function BookingCustomerInfo({
       </div>
 
       {/* Email */}
-      <div className="flex items-center justify-between gap-2 min-w-0">
-        <span className="text-[10px] text-muted-foreground shrink-0">
-          {t("availableBookings.email")}
-        </span>
-        <span
-          className="text-[10px] text-right truncate min-w-0 flex-1 whitespace-nowrap"
-          {...(isRTL ? { dir: "ltr" } : {})}
-        >
-          {customer?.email || t("common.na")}
-        </span>
-      </div>
+    <div className="flex items-center justify-between gap-2 min-w-0">
+  <span className="text-[10px] text-muted-foreground shrink-0">
+    {t("availableBookings.email")}
+  </span>
 
+  <span
+    className="text-[10px] text-right min-w-0 flex-1 break-all"
+    {...(isRTL ? { dir: "ltr" } : {})}
+  >
+    {customer?.email || t("common.na")}
+  </span>
+</div>
       {/* Phone */}
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] text-muted-foreground shrink-0">
