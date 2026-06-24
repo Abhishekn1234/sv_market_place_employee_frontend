@@ -86,6 +86,7 @@ export type WorkGridProps = {
   onComplete: (work: DisplayWork) => void;
   onVerify: (work: DisplayWork) => void;
   onCancel: (work: CancelableWork) => void;
+  isRTL:boolean;
 };
 
 /**

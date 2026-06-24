@@ -165,6 +165,7 @@ return (
     >
       <WorkGrid
         workList={workList}
+        isRTL={isRTL}
         categories={categories}
         timers={timers}
         onStart={(work) => openModal(work, "start")}

@@ -27,6 +27,7 @@ export default function WorkGrid({
   onComplete,
   onVerify,
   onCancel,
+  isRTL
 }: WorkGridProps) {
   const [locations, setLocations] = useState<Record<string, string>>({});
   const { t } = useLanguage();
@@ -89,6 +90,7 @@ const normalizedWorkList = useMemo(() => {
               key={id}
               work={work}
               id={id}
+              isRTL={isRTL}
               categoryName={categoryName}
               coordinates={coordinates}
               timers={timers}

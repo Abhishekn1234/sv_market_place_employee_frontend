@@ -10,6 +10,7 @@ import BookingMapButton from "@/components/common/BookingMapButton";
 interface Props {
   work: DisplayWork;
   id: string;
+  isRTL:boolean;
   categoryName: string;
   coordinates: { lat: number; lng: number } | null;
   timers: Record<string, string>;
@@ -21,7 +22,7 @@ interface Props {
 }
 
 export default function WorkCard({
-  work, id, categoryName, coordinates, timers, t,
+  work, id, categoryName, coordinates, timers, t,isRTL,
   onStart, onComplete, onCancel, onVerify,
 }: Props) {
   return (
@@ -40,6 +41,7 @@ export default function WorkCard({
         <BookingCustomerInfo
           customer={work.customer}
           t={t}
+          isRTL={isRTL}
           showCallButton={true}
         />
 
@@ -48,6 +50,7 @@ export default function WorkCard({
           currency={work.booking?.currency}
           amount={getWorkerAmount(work)}
           t={t}
+          isRTL={isRTL}
           showBorder
         />
 
