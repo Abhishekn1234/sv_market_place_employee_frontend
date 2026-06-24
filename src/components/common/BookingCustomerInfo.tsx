@@ -44,7 +44,7 @@ export default function BookingCustomerInfo({
   </span>
 
   <span
-    className="text-[10px] text-right min-w-0 max-w-[60px] break-words"
+    className="text-[10px]  min-w-0 max-w-[60px] break-words"
     {...(isRTL ? { dir: "ltr" } : {})}
   >
     {customer?.email || t("common.na")}
