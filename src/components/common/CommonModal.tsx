@@ -11,13 +11,22 @@ import { Button } from "../ui/button";
    ROOT
 ========================= */
 
+type CommonModalProps = React.ComponentProps<typeof DialogPrimitive.Root> & {
+  onOpenChange?: (open: boolean) => void;
+};
+
 function CommonModal({
   open,
   onOpenChange,
   children,
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  ...props
+}: CommonModalProps) {
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+    <DialogPrimitive.Root
+      open={open}
+      onOpenChange={(value) => onOpenChange?.(value)}
+      {...props}
+    >
       {children}
     </DialogPrimitive.Root>
   );
@@ -135,11 +144,8 @@ CommonModalDescription.displayName =
 function CommonModalHeader({
   className,
   children,
-  onClose,
   ...props
-}: React.ComponentProps<"div"> & {
-  onClose?: () => void;
-}) {
+}: React.ComponentProps<"div">) {
   return (
     <div
       className={cn(
@@ -151,11 +157,11 @@ function CommonModalHeader({
     >
       {children}
 
+      {/* Proper Radix close (NO manual onClose) */}
       <DialogPrimitive.Close asChild>
         <Button
           type="button"
           variant="ghost"
-          onClick={onClose}
           className={cn(
             "absolute right-3 top-3",
             "sm:right-4 sm:top-4",
@@ -203,7 +209,7 @@ function CommonModalFooter({
       className={cn(
         "shrink-0 border-t",
         "px-4 sm:px-6 py-3 sm:py-4",
-        "flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end",
+        "flex flex-col-reverse sm:flex-row sm:justify-end sm:items-center gap-2 sm:gap-3 w-full",
         className
       )}
       {...props}

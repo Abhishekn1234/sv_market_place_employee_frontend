@@ -12,7 +12,7 @@ import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
-
+import { CommonModal } from "@/components/common/CommonModal";
 
 type Props<TWork extends DisplayWork | Work> = {
   work: TWork;
@@ -30,8 +30,6 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
   const { mutate: completeWorkMutation, isPending: isLoading } =
     useCompleteWork();
   const { t } = useLanguage();
-
-  if (!open) return null;
 
   const handleConfirmClick = () => {
     const bookingId = getBookingId(work);
@@ -59,7 +57,6 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
         } as TWork;
 
         onSuccess(updatedWork);
-        // toast.success(t("completeWork.success"));
         onClose();
       },
 
@@ -71,35 +68,56 @@ export default function CompleteWork<TWork extends DisplayWork | Work>({
     });
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
-        <h2 className="text-lg font-semibold mb-4">{t("completeWork.title")}</h2>
+return (
+  <CommonModal open={open} onOpenChange={onClose}>
+    <CommonModal.Content className="max-w-md">
+      
+      {/* 1. Header Sub-component: Handles Title & Radix Close Button automatically */}
+      <CommonModal.Header>
+        <CommonModal.Title>
+          {t("completeWork.title")}
+        </CommonModal.Title>
+      </CommonModal.Header>
 
-        <div className="space-y-2 text-sm mb-4">
-          <p>
-            <strong>{t("completeWork.service")}:</strong> {work.service?.name || t("common.na")}
-          </p>
-          <p>
-            <strong>{t("completeWork.customer")}:</strong> {work.customer?.fullName || t("common.na")}
-          </p>
-          <p>
-            <strong>{t("completeWork.workedTime")}:</strong> {elapsedMinutes(work.elapsedTime)}{" "}
-            {t("common.minutes")}
-          </p>
-        </div>
+      {/* 2. Body Sub-component: Handles padding and text formatting */}
+      <CommonModal.Body className="space-y-2 text-sm">
+        <p className="break-words">
+          <strong>{t("completeWork.service")}:</strong>{" "}
+          {work.service?.name || t("common.na")}
+        </p>
 
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            {t("common.close")}
-          </Button>
-          <Button onClick={handleConfirmClick} disabled={isLoading}>
-          
-           {isLoading ? <CommonSpinner size="sm" /> : t("completeWork.confirm")}
+        <p className="break-words">
+          <strong>{t("completeWork.customer")}:</strong>{" "}
+          {work.customer?.fullName || t("common.na")}
+        </p>
 
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+        <p className="break-words">
+          <strong>{t("completeWork.workedTime")}:</strong>{" "}
+          {elapsedMinutes(work.elapsedTime)} {t("common.minutes")}
+        </p>
+      </CommonModal.Body>
+
+      {/* 3. Footer Sub-component: Aligns buttons cleanly on the right via its built-in classes */}
+      <CommonModal.Footer>
+        <Button
+          variant="outline"
+          onClick={onClose}
+          disabled={isLoading}
+          className="w-full sm:w-auto" // Keeps full-width on mobile stack, auto on desktop
+        >
+          {t("common.close")}
+        </Button>
+
+        <Button
+          onClick={handleConfirmClick}
+          disabled={isLoading}
+          className="w-full sm:w-auto"
+        >
+          {isLoading ? <CommonSpinner size="sm" /> : t("completeWork.confirm")}
+        </Button>
+      </CommonModal.Footer>
+
+    </CommonModal.Content>
+  </CommonModal>
+);
 }

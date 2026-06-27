@@ -4,14 +4,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
-// import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import { normalizeAssignedWorks } from "../../utils/workPresentation.helpers";
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
-// import { ASSIGNED_WORKS_KEY } from "../../hooks/useAssign";
-// import { useQueryClient } from "@tanstack/react-query";
-// import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import { Input } from "@/components/ui/input";
+import { CommonModal } from "@/components/common/CommonModal";
 
 type Props<TWork extends DisplayWork | Work> = {
   work: TWork;
@@ -29,10 +26,6 @@ export default function VerifyOtpModal<TWork extends DisplayWork | Work>({
   const { t } = useLanguage();
   const [otp, setOtp] = useState("");
   const { mutate, isPending } = useVerifyOtp();
-  // const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
-//  const removeAssigned = useBookingSocketStore((s) => s.removeAssigned);
-// const queryClient = useQueryClient();
-  if (!open) return null;
 
   const handleVerify = () => {
     if (!otp) return;
@@ -44,44 +37,63 @@ export default function VerifyOtpModal<TWork extends DisplayWork | Work>({
         purpose: "WORK_COMPLETE",
       },
       {
-     onSuccess: (res) => {
-  const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
+        onSuccess: (res) => {
+          const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
 
-  if (updatedWork) {
-    onSuccess(updatedWork as TWork);
-  }
+          if (updatedWork) {
+            onSuccess(updatedWork as TWork);
+          }
 
-  onClose();
-},
+          setOtp(""); // Reset OTP state on clean success
+          onClose();
+        },
       }
     );
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl w-96 space-y-4">
-        <h2 className="text-lg font-semibold">
-          {t("workHistory.actions.verifyOtp")}
-        </h2>
+    <CommonModal open={open} onOpenChange={onClose}>
+      <CommonModal.Content className="max-w-sm">
+        
+        {/* Header - Renders Title & Close 'X' button */}
+        <CommonModal.Header>
+          <CommonModal.Title>
+            {t("workHistory.actions.verifyOtp")}
+          </CommonModal.Title>
+        </CommonModal.Header>
 
-        <Input
-          type="text"
-          value={otp}
-          onChange={(event) => setOtp(event.target.value)}
-          placeholder="Enter OTP"
-          className="w-full border rounded-md p-2"
-        />
+        {/* Body - Contains inputs and fields */}
+        <CommonModal.Body className="space-y-4">
+          <Input
+            type="text"
+            value={otp}
+            onChange={(event) => setOtp(event.target.value)}
+            placeholder="Enter OTP"
+            className="w-full"
+            
+          />
+        </CommonModal.Body>
 
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
+        {/* Footer - Automatically structures buttons on mobile vs desktop */}
+        <CommonModal.Footer>
+          <Button 
+            variant="outline" 
+            onClick={onClose}
+            className="w-full sm:w-auto"
+          >
             {t("common.cancel")}
           </Button>
 
-          <Button onClick={handleVerify} disabled={isPending}>
+          <Button 
+            onClick={handleVerify} 
+            disabled={isPending || !otp}
+            className="w-full sm:w-auto"
+          >
             {isPending ? t("workHistory.actions.verifying") : t("workHistory.actions.verify")}
           </Button>
-        </div>
-      </div>
-    </div>
+        </CommonModal.Footer>
+
+      </CommonModal.Content>
+    </CommonModal>
   );
 }
