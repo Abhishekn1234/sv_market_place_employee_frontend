@@ -11,13 +11,9 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { cn } from "@/lib/utils";
 
-type TransactionStatus = "all" | "completed" | "pending" | "failed";
-
 interface Props {
   searchTerm: string;
-  statusFilter: TransactionStatus;
   onSearchChange: (v: string) => void;
-  onStatusChange: (v: TransactionStatus) => void;
   limit: number;
   onLimitChange: (v: number) => void;
   isMobile: boolean;
@@ -29,9 +25,7 @@ interface Props {
 
 export default function TransactionFilters({
   searchTerm,
-  statusFilter,
   onSearchChange,
-  onStatusChange,
   limit,
   onLimitChange,
   isMobile,
@@ -42,8 +36,6 @@ export default function TransactionFilters({
 }: Props) {
   const { translations, language, t } = useLanguage();
   const isRTL = language === "AR";
-
-  const filters = translations.transactionHistory.filters;
 
   return (
     <div
@@ -64,42 +56,37 @@ export default function TransactionFilters({
         <Input
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={filters.searchPlaceholder}
-          className={cn("bg-white border-slate-200 text-xs sm:text-sm py-2 sm:py-2.5 h-auto", isRTL ? "pr-10" : "pl-10")}
+          placeholder={
+            translations.transactionHistory.filters.searchPlaceholder
+          }
+          className={cn(
+            "bg-white border-slate-200 text-xs sm:text-sm py-2 sm:py-2.5 h-auto",
+            isRTL ? "pr-10" : "pl-10"
+          )}
         />
       </div>
-
-      {/* STATUS */}
-      <Select value={statusFilter} onValueChange={(value) => onStatusChange(value as TransactionStatus)}>
-        <SelectTrigger className="w-full md:w-[200px] bg-white border-slate-200 text-xs sm:text-sm py-2 sm:py-2.5 h-auto">
-          <SelectValue placeholder={filters.filterStatus} />
-        </SelectTrigger>
-
-        <SelectContent align={isRTL ? "end" : "start"}>
-          {Object.entries(filters.statusOptions).map(([key, label]) => (
-            <SelectItem key={key} value={key}>
-              {String(label)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
 
       {/* SORT */}
       <Select value={sort} onValueChange={onSortChange}>
         <SelectTrigger className="w-full md:w-[180px] bg-white border-slate-200 text-xs sm:text-sm py-2 sm:py-2.5 h-auto">
-          <SelectValue placeholder={t('common.sort') ?? "Sort by"} />
+          <SelectValue placeholder={t("common.sort") ?? "Sort by"} />
         </SelectTrigger>
         <SelectContent align={isRTL ? "end" : "start"}>
-          <SelectItem value="createdAt:desc">{t('common.newest') ?? "Newest"}</SelectItem>
-          <SelectItem value="createdAt:asc">{t('common.oldest') ?? "Oldest"}</SelectItem>
-          {/* <SelectItem value="amount:desc">{t('common.amountHigh') ?? "Amount: High to Low"}</SelectItem>
-          <SelectItem value="amount:asc">{t('common.amountLow') ?? "Amount: Low to High"}</SelectItem> */}
+          <SelectItem value="createdAt:desc">
+            {t("common.newest") ?? "Newest"}
+          </SelectItem>
+          <SelectItem value="createdAt:asc">
+            {t("common.oldest") ?? "Oldest"}
+          </SelectItem>
         </SelectContent>
       </Select>
 
       {/* LIMIT - Desktop only */}
       {!isMobile && (
-        <Select value={limit.toString()} onValueChange={(v) => onLimitChange(Number(v))}>
+        <Select
+          value={limit.toString()}
+          onValueChange={(v) => onLimitChange(Number(v))}
+        >
           <SelectTrigger className="w-full md:w-[150px] bg-white border-slate-200 text-xs sm:text-sm py-2 sm:py-2.5 h-auto">
             <SelectValue placeholder="Rows per page" />
           </SelectTrigger>
@@ -121,7 +108,7 @@ export default function TransactionFilters({
         className="w-full md:w-auto bg-white border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors gap-2 text-xs sm:text-sm py-2 sm:py-2.5 h-auto"
       >
         <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        {translations.common?.clear ?? t('common.clear') ?? "Clear"}
+        {translations.common?.clear ?? t("common.clear") ?? "Clear"}
       </Button>
     </div>
   );

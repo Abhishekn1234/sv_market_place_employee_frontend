@@ -13,14 +13,14 @@ import CommonSpinner from "@/components/common/CommonSpinner";
 import { useDebounce } from "@/utils/usedebouncer";
 import { useTransactionHistory } from "./hooks/useTransaction";
 
-type TransactionStatus = "all" | "completed" | "pending" | "failed";
+// type TransactionStatus = "all" | "completed" | "pending" | "failed";
 
 const DEFAULT_SORT = "createdAt:desc";
 const DEFAULT_LIMIT = 10;
 
 export default function TransactionHistory() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<TransactionStatus>("all");
+  // const [statusFilter, setStatusFilter] = useState<TransactionStatus>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState(DEFAULT_SORT);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
@@ -44,12 +44,12 @@ export default function TransactionHistory() {
   }, []);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const debouncedStatusFilter = useDebounce(statusFilter, 300);
+  // const debouncedStatusFilter = useDebounce(statusFilter, 300);
 useEffect(() => {
   // Reset to first page whenever criteria changes. 
   // We no longer clear allTransactions here to allow instant local filtering.
   setCurrentPage(1);
-}, [debouncedSearchTerm, debouncedStatusFilter, sort, limit, isMobile]);
+}, [debouncedSearchTerm, sort, limit, isMobile]);
 
   // Use real API with pagination
   const { data: transactionsResponse, isLoading, isError } = useTransactionHistory({
@@ -115,7 +115,7 @@ useEffect(() => {
 
   const handleClearFilters = () => {
     setSearchTerm("");
-    setStatusFilter("all");
+    // setStatusFilter("all");
     setSort(DEFAULT_SORT);
     setLimit(DEFAULT_LIMIT);
     setCurrentPage(1);
@@ -194,9 +194,9 @@ useEffect(() => {
         {/* FILTERS */}
         <TransactionFilters
           searchTerm={searchTerm}
-          statusFilter={statusFilter}
+          // statusFilter={statusFilter}
           onSearchChange={setSearchTerm}
-          onStatusChange={setStatusFilter}
+          // onStatusChange={setStatusFilter}
             isFilterActive={isFilterActive}
             sort={sort}
             onSortChange={setSort}

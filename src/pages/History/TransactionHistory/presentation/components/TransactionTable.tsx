@@ -3,7 +3,7 @@ import type { Transaction } from "../../domain/entities/transaction";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import { cn } from "@/lib/utils";
-
+import { formatDateTime } from "@/pages/Booking/AvaliableWorks/presentation/utils/formatdatetime";
 interface Props {
   transactions: Transaction[];
   currentPage: number;
@@ -46,23 +46,53 @@ export default function TransactionTable({
     },
   ];
 
-  const desktopColumns: TableColumn<Transaction>[] = [
-    { key: "id", header: table.transactionId },
-    { key: "date", header: table.date },
-    { key: "type", header: table.type },
-    { key: "description", header: table.description },
-    { key: "paymentMethod", header: table.paymentMethod },
-    { key: "status", header: table.status },
-    {
-      key: "amount",
-      header: table.amount,
-      render: (row) =>
-              new Intl.NumberFormat("en-SA", {
+ const desktopColumns: TableColumn<Transaction>[] = [
+  {
+    key: "id",
+    header: table.transactionId,
+    render: (row) => (
+      <div className="max-w-[140px] whitespace-normal break-all">
+        {row.id}
+      </div>
+    ),
+  },
+  {
+    key: "date",
+    header: table.date,
+    render: (row) => {
+      const formatted = formatDateTime(row.date);
+      const [date, time] = formatted.split(", ");
+
+      return (
+        <div className="leading-5 whitespace-normal">
+          <div>{date}</div>
+          {time && <div>{time}</div>}
+        </div>
+      );
+    },
+  },
+  { key: "type", header: table.type },
+  {
+    key: "description",
+    header: table.description,
+    render: (row) => (
+      <div className="max-w-[250px] whitespace-normal break-words">
+        {row.description}
+      </div>
+    ),
+  },
+  { key: "paymentMethod", header: table.paymentMethod },
+  { key: "status", header: table.status },
+  {
+    key: "amount",
+    header: table.amount,
+    render: (row) =>
+      new Intl.NumberFormat("en-SA", {
         style: "currency",
         currency: "SAR",
       }).format(row.amount),
-    },
-  ];
+  },
+];
 
   const finalColumns = isSmallScreen ? mobileColumns : desktopColumns;
 
@@ -75,43 +105,79 @@ export default function TransactionTable({
             className="mb-0 overflow-hidden shadow-sm border-slate-200 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
             isRTL={isRTL}
           >
-            <div className={cn("p-4 space-y-3", isRTL ? "text-right" : "text-left")}>
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">#{row.id}</span>
-                <span className={cn(
-                  "text-sm font-bold whitespace-nowrap",
-                  row.type.toLowerCase().includes('credit') ? 'text-emerald-600' : 'text-rose-600'
-                )}>
-                {new Intl.NumberFormat("en-SA", {
-                    style: "currency",
-                    currency: "SAR",
-                  }).format(row.amount)}
-                </span>
-              </div>
-              
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug">{row.description}</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">{row.type}</p>
+           <div className={cn("p-4 space-y-3", isRTL ? "text-right" : "text-left")}>
+            <div className="space-y-2">
+              <div>
+                <p className="text-[10px] text-slate-500">{table.transactionId}</p>
+                <p className="text-xs font-mono break-all">{row.id}</p>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-[11px] text-slate-500 dark:text-slate-400">
-                <div className="flex items-center gap-2">
-                  <span>{row.date}</span>
-                  {row.paymentMethod && (
-                    <>
-                      <span className="w-1 h-1 rounded-full bg-slate-300" />
-                      <span className="truncate max-w-[100px]">{row.paymentMethod}</span>
-                    </>
-                  )}
+              <div>
+                <p className="text-[10px] text-slate-500">{table.description}</p>
+                <p className="text-sm font-semibold break-words">
+                  {row.description}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[10px] text-slate-500">{table.type}</p>
+                <p className="text-xs uppercase break-words">
+                  {row.type}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[10px] text-slate-500">{table.date}</p>
+                <p className="text-xs break-words">
+                  {formatDateTime(row.date)}
+                </p>
+              </div>
+
+              {row.paymentMethod && (
+                <div>
+                  <p className="text-[10px] text-slate-500">
+                    {table.paymentMethod}
+                  </p>
+                  <p className="text-xs break-words">
+                    {row.paymentMethod}
+                  </p>
                 </div>
-                <span className={cn(
-                  "px-2 py-0.5 rounded-full text-[10px] font-medium capitalize",
-                  row.status === 'completed' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : row.status === 'pending' ? 'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400' // Added styling for pending/failed
-                )}>
+              )}
+
+              <div>
+                <p className="text-[10px] text-slate-500">{table.status}</p>
+                <span
+                  className={cn(
+                    "inline-flex mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium capitalize",
+                    row.status === "completed"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : row.status === "pending"
+                      ? "bg-yellow-50 text-yellow-700"
+                      : "bg-rose-50 text-rose-700"
+                  )}
+                >
                   {row.status}
                 </span>
               </div>
+
+              <div>
+                <p className="text-[10px] text-slate-500">{table.amount}</p>
+                <p
+                  className={cn(
+                    "text-base font-bold break-all",
+                    row.type.toLowerCase().includes("credit")
+                      ? "text-emerald-600"
+                      : "text-rose-600"
+                  )}
+                >
+                  {new Intl.NumberFormat("en-SA", {
+                    style: "currency",
+                    currency: "SAR",
+                  }).format(row.amount)}
+                </p>
+              </div>
             </div>
+          </div>
           </CommonCard>
         ))}
         {displayTransactions.length === 0 && (
