@@ -53,7 +53,7 @@ export default function StartWork({
       { bookingId, otp: otpStr },
       {
         onSuccess: (data: any) => {
-          toast.success(translations.startWork.success);
+          // toast.success(translations.startWork.success);
 
           const socket =
             getSocket("/workers/assigned-updates") ||
