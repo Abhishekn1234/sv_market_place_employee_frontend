@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useTheme } from "@/context/presentation/components/ThemeContext";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
-import { useWalletTransactions } from "@/pages/Wallet/presentation/hooks/useWalletTransactions";
+
 import TransactionFilters from "./components/TransactionFilters";
 import TransactionSummary from "./components/TransactionSummary";
 import TransactionTable from "./components/TransactionTable";
@@ -11,6 +11,7 @@ import TransactionTable from "./components/TransactionTable";
 import type { Transaction } from "../domain/entities/transaction";
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { useDebounce } from "@/utils/usedebouncer";
+import { useTransactionHistory } from "./hooks/useTransaction";
 
 type TransactionStatus = "all" | "completed" | "pending" | "failed";
 
@@ -51,12 +52,12 @@ useEffect(() => {
 }, [debouncedSearchTerm, debouncedStatusFilter, sort, limit, isMobile]);
 
   // Use real API with pagination
-  const { data: transactionsResponse, isLoading, isError } = useWalletTransactions({
+  const { data: transactionsResponse, isLoading, isError } = useTransactionHistory({
     page: currentPage,
     limit: isMobile ? 20 : limit,
     sort: sort,
     search: debouncedSearchTerm || undefined,
-    status: debouncedStatusFilter === "all" ? undefined : debouncedStatusFilter,
+   
   });
 
   // Transform API transactions to component format
@@ -121,8 +122,8 @@ useEffect(() => {
   };
 
   const isFilterActive = useMemo(() => {
-    return searchTerm !== "" || statusFilter !== "all" || sort !== DEFAULT_SORT || limit !== DEFAULT_LIMIT;
-  }, [searchTerm, statusFilter, sort, limit]);
+    return searchTerm !== ""  || sort !== DEFAULT_SORT || limit !== DEFAULT_LIMIT;
+  }, [searchTerm,  sort, limit]);
 
   // Infinite scroll observer for mobile
   useEffect(() => {

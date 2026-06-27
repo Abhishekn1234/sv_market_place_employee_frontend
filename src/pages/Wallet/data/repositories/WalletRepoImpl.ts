@@ -8,8 +8,5 @@ export class WalletRepoImpl implements WalletRepo {
     return response.data;
   }
 
-  async getWalletTransactions(params?: WalletTransactionsParams): Promise<WalletTransactionsResponse> {
-    const response = await api.get("/wallet/me/transactions", { params });
-    return response.data;
-  }
+ 
 }

@@ -4,15 +4,16 @@ import { WalletMain } from "./components/WalletMain";
 import { WalletSidebar } from "./components/WalletSidebar";
 
 import { useWallet } from "./hooks/useWallet";
-import { useWalletTransactions } from "./hooks/useWalletTransactions";
+
 import type { Transaction } from "../domain/entities/transaction";
 import { useAuthStore } from "@/core/store/auth";
+import { useTransactionHistory } from "@/pages/History/TransactionHistory/presentation/hooks/useTransaction";
 export default function Wallet() {
   const { language, t } = useLanguage();
   const isRTL = language === "AR";
 
   const { data: wallet } = useWallet();
-  const { data: transactionsResponse } = useWalletTransactions({
+  const { data: transactionsResponse } = useTransactionHistory({
     sort: "createdAt:desc",
   });
 
