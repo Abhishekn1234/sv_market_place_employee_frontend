@@ -1,15 +1,16 @@
 "use client";
 
 import { DollarSign, Calendar, Filter } from "lucide-react";
-import { useWalletTransactions } from "@/pages/Wallet/presentation/hooks/useWalletTransactions";
+
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useTheme } from "@/context/presentation/components/ThemeContext";
 import { CommonCard } from "@/components/common/CommonCard";
+import { useTransactionHistory } from "../hooks/useTransaction";
 
 export default function TransactionSummary() {
   const { translations, language } = useLanguage();
   const { theme } = useTheme();
-  const { data, isLoading } = useWalletTransactions();
+  const { data, isLoading } = useTransactionHistory();
 
   const transactions = data?.data ?? [];
   const isRTL = language === "AR";
