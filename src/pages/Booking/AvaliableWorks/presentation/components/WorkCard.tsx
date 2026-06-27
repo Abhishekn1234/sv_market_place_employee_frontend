@@ -30,12 +30,14 @@ export default function WorkCard({
 
       {/* HEADER */}
       <div className="p-2 border-b">
-        <h3 className="font-semibold text-sm line-clamp-1">
-          {work.service?.name || t("common.na")}
-        </h3>
-        <p className="text-[13px] text-muted-foreground">{categoryName}</p>
-      </div>
+  <h3 className="font-semibold text-sm whitespace-normal break-words">
+    {work.service?.name || t("common.na")}
+  </h3>
 
+  <p className="text-[13px] text-muted-foreground whitespace-normal break-words">
+    {categoryName}
+  </p>
+</div>
       {/* BODY */}
       <div className="p-2 space-y-2 text-[13px]">
         <BookingCustomerInfo
