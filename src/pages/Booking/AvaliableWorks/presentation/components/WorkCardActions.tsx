@@ -31,28 +31,28 @@ export default function WorkCardActions({
     <>
       {/* TIMER */}
       {isActiveWork(work) && timers[id] && (
-        <div className="flex items-center gap-1 text-green-700 text-[13px] font-medium">
-          <Timer size={12} />
+        <div className="mx-4 mb-3 flex items-center justify-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-300">
+          <Timer size={14} />
           {timers[id]}
         </div>
       )}
 
       {/* ACTIONS */}
-      <div className="p-2 border-t grid grid-cols-3 gap-1">
+      <div className="mt-auto grid grid-cols-1 gap-2 border-t bg-slate-50/60 px-4 py-3 dark:bg-slate-950/20 sm:grid-cols-3">
         {canStartOrCancel(work) && (
           <>
-            <Button size="sm" onClick={() => onStart(work)} className="h-7 w-full text-[13px]">
+            <Button size="sm" onClick={() => onStart(work)} className="h-9 w-full text-xs font-semibold">
               {t("common.start")}
             </Button>
 
-            <Button size="sm" variant="destructive" onClick={() => onCancel(work)} className="h-7 w-full text-[13px]">
+            <Button size="sm" variant="destructive" onClick={() => onCancel(work)} className="h-9 w-full text-xs font-semibold">
               {t("common.cancel")}
             </Button>
 
             <Button
               size="sm"
               onClick={() => navigate(`/chat/${work.bookingId}`)}
-              className="h-7 w-full text-[13px] flex items-center justify-center gap-1"
+              className="flex h-9 w-full items-center justify-center gap-2 text-xs font-semibold"
             >
               <MessageCircle size={14} />
               {t("common.chat")}
@@ -61,10 +61,10 @@ export default function WorkCardActions({
         )}
 
         {isActiveWork(work) && (
-          <div className="flex gap-3 col-span-3">
+          <div className="flex flex-col gap-2 sm:col-span-3 sm:flex-row">
             <Button
               size="sm"
-              className="h-7 text-[13px]"
+              className="h-9 flex-1 text-xs font-semibold"
               onClick={() => onComplete({ ...work, elapsedTime: timers[id] || "00:00:00" })}
             >
               {t("common.complete")}
@@ -73,7 +73,7 @@ export default function WorkCardActions({
             <Button
               size="sm"
               onClick={() => navigate(`/chat/${work.bookingId}`)}
-              className="h-7 text-[13px] flex items-center gap-1"
+              className="flex h-9 flex-1 items-center gap-2 text-xs font-semibold"
             >
               <MessageCircle size={14} />
               {t("common.chat")}
@@ -84,7 +84,7 @@ export default function WorkCardActions({
         {work.status === "WORK_COMPLETED_PENDING" && (
           <Button
             size="sm"
-            className="h-7 w-full text-[13px] col-span-3"
+            className="h-9 w-full text-xs font-semibold sm:col-span-3"
             onClick={() => onVerify(work)}
           >
             {t("availableWork.verifyOtp")}

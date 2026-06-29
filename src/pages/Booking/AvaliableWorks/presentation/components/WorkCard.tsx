@@ -26,26 +26,30 @@ export default function WorkCard({
   onStart, onComplete, onCancel, onVerify,
 }: Props) {
   return (
-    <CommonCard className="relative flex flex-col rounded-xl border bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all">
+    <CommonCard
+      noPadding
+      hoverable
+      className="relative h-full rounded-xl border bg-white shadow-sm dark:bg-slate-900"
+    >
+      <div className="flex h-full min-w-0 flex-col">
 
       {/* HEADER */}
-      <div className="p-2 border-b">
-  <h3 className="font-semibold text-sm whitespace-normal break-words">
+      <div className="border-b bg-slate-50/70 px-4 py-3 dark:bg-slate-900/70">
+  <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-slate-900 break-words dark:text-slate-100">
     {work.service?.name || t("common.na")}
   </h3>
 
-  <p className="text-[13px] text-muted-foreground whitespace-normal break-words">
+  <p className="mt-1 truncate text-xs text-muted-foreground">
     {categoryName}
   </p>
 </div>
       {/* BODY */}
-      <div className="p-2 space-y-2 text-[13px]">
+      <div className="flex flex-1 flex-col gap-3 px-4 py-4">
         <BookingCustomerInfo
           customer={work.customer}
           t={t}
           isRTL={isRTL}
           showCallButton={true}
-            className="[&_*]:text-[12px]"
         />
 
         <BookingEstimateRow
@@ -54,7 +58,6 @@ export default function WorkCard({
           amount={getWorkerAmount(work)}
           t={t}
           isRTL={isRTL}
-          showBorder
         />
 
         <BookingMapButton
@@ -73,6 +76,7 @@ export default function WorkCard({
         onCancel={onCancel}
         onVerify={onVerify}
       />
+      </div>
     </CommonCard>
   );
 }
