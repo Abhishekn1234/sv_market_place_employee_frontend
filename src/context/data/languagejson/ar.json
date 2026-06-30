@@ -2,6 +2,7 @@
   "common": {
     "showing": "عرض",
     "of": "من",
+    "Location and Service Settings":"إعدادات الموقع والخدمة",
     "all": "الكل",
     "location": "الموقع",
     "edit": "تعديل",
@@ -627,6 +628,7 @@
   
  "sidebar": {
 "home": "الرئيسية",
+ "Location and Service Settings":"إعدادات الموقع والخدمة",
   "history": "السجل",
   "disputes":"النزاعات",
   "bookingHistory": "سجل الحجوزات",

@@ -1,6 +1,7 @@
 {
   "common": {
     "showing": "Showing",
+    "Location and Service Settings":"Location and Service Settings",
     "of": "of",
     "clear": "Clear",
     "sort": "Sort by",
@@ -612,6 +613,7 @@
   },
   "sidebar": {
     "home": "Home",
+     "Location and Service Settings":"Location and Service Settings",
     "history": "History",
     "bookingHistory": "Booking History",
     "transactionHistory": "Transaction History",

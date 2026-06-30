@@ -44,6 +44,7 @@ import ChatWorkerPage from "./pages/ChatCustomer/presentation/ChatWorkerPage";
 import { initOnMessage } from "./components/firebase/notifications";
 import { useNotificationManager } from "./pages/Notifications/presentation/hooks/useNotificationhandler";
 import { useDynamicLocation } from "@/utils/useNotification";
+import LocationSettings from "./pages/Profile/presentation/components/Location/LocationSettings";
 
 
 /* =========================
@@ -205,6 +206,7 @@ const handleNavigate = (url?: string, _data?: any) => {
             />
 
           <Route path="settings/wallet" element={<Wallet />} />
+          <Route path="location/service/settings"element={<LocationSettings/>}/>
           <Route path="notifications" element={<NotificationsPage />} />
 
           <Route path="availableWork" element={<AvailableWorkPage />} />

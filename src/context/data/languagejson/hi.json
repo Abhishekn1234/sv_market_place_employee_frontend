@@ -12,6 +12,7 @@
   "common": {
     "showing": "दिखा रहा है",
     "of": "में से",
+    "Location and Service Settings":"लोकेशन और सर्विस सेटिंग्ज़",
     "all": "सभी",
     "date":"तारीख",
         "search": "खोज",
@@ -617,6 +618,7 @@
   },
 "sidebar": {
     "home": "होम",
+    "Location and Service Settings":"लोकेशन और सर्विस सेटिंग्ज़",
   "history": "इतिहास",
   "bookingHistory": "बुकिंग इतिहास",
   "transactionHistory": "लेन-देन इतिहास",

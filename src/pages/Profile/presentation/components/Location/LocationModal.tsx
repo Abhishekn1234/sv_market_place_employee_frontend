@@ -6,11 +6,10 @@ import MapPicker from "./LocationPicker";
 import ServiceSelector from "./ServiceSelector";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { toast } from "react-toastify";
+import { useState } from "react";
 
 export default function LocationModal({
   tempLocation,
-  locationMode,
-  setLocationMode,
   setTempLocation,
   setLocationName,
   radius,
@@ -23,13 +22,16 @@ export default function LocationModal({
   setSelectedCategories,
   saveChanges,
   onClose,
-
-  // ✅ NEW PROPS
   onUseCurrentLocation,
   onManualLocation,
 }: any) {
   const { translations } = useLanguage();
   const edits = translations.profile;
+
+  // ✅ LOCAL STATE (FIXES YOUR ERROR)
+  const [locationMode, setLocationMode] = useState<"CURRENT" | "MANUAL">(
+    "MANUAL"
+  );
 
   /* ---------------- RADIUS ---------------- */
   const handleRadiusChange = (valueKm: number) => {
@@ -48,19 +50,25 @@ export default function LocationModal({
     setLocationMode(mode);
 
     if (mode === "CURRENT") {
-      onUseCurrentLocation();
+      onUseCurrentLocation?.();
     }
+  };
 
-    // ❗ MANUAL handled via map click, no immediate action needed
+  /* ---------------- MAP UPDATE ---------------- */
+  const handleManualLocation = (coords: [number, number]) => {
+    setTempLocation(coords);
+    onManualLocation?.(coords[0], coords[1]);
   };
 
   return (
     <div className="border rounded p-4 space-y-5">
+
       {/* Location Mode */}
       <div>
         <Label>{edits.locationMode ?? "Location Mode"}</Label>
+
         <div className="flex gap-4 mt-2">
-          {['CURRENT', 'MANUAL'].map((mode) => (
+          {["CURRENT", "MANUAL"].map((mode) => (
             <label key={mode} className="flex items-center gap-2">
               <input
                 type="radio"
@@ -78,16 +86,15 @@ export default function LocationModal({
       </div>
 
       {/* Map Picker */}
-    <MapPicker
-  tempLocation={tempLocation}
-  locationMode={locationMode}
-  setTempLocation={(coords) => {
-    setTempLocation(coords);
-    onManualLocation(coords[0], coords[1]);
-  }}
-  setLocationName={setLocationName}
-  radius={radius}
-/>
+      <MapPicker
+        tempLocation={tempLocation}
+        locationMode={locationMode}
+        setTempLocation={(coords: [number, number]) =>
+          handleManualLocation(coords)
+        }
+        setLocationName={setLocationName}
+        radius={radius}
+      />
 
       {/* Radius */}
       <div>
@@ -124,7 +131,9 @@ export default function LocationModal({
         <Button variant="outline" onClick={onClose}>
           {edits.cancel}
         </Button>
-        <Button onClick={saveChanges}>{edits.update}</Button>
+        <Button onClick={saveChanges}>
+          {edits.update}
+        </Button>
       </div>
     </div>
   );

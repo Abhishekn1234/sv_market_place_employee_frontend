@@ -1,10 +1,13 @@
+import { useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
-// import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import { Badge } from "@/components/ui/badge";
-import { PencilIcon } from "lucide-react";
+import { PencilIcon, MapPin, ShieldCheck, Layers, Tag } from "lucide-react";
 import { toast } from "react-toastify";
+import { cn } from "@/lib/utils";
+import { statusStyles } from "../../utils/statusstyles";
+import { hasAnyRequiredDocument } from "../../utils/caneditdocuments";
 
 export default function EmployeeDetails({
   status,
@@ -19,149 +22,143 @@ export default function EmployeeDetails({
   const { translations } = useLanguage();
   const edits = translations.profile;
 
-  /* ---------------- DOCUMENT CHECK ---------------- */
+  const toastShownRef = useRef(false);
 
-  const hasAnyRequiredDocument = () => {
-    const documents = user?.documents;
+  /* ---------------- CAN EDIT LOGIC ---------------- */
+ const canEdit = useMemo(
+  () => hasAnyRequiredDocument(user?.documents),
+  [user?.documents]
+);
 
-    if (!Array.isArray(documents)) return false;
+  /* ---------------- TOAST ON HOVER ---------------- */
+ const handleHover = () => {
+  if (!canEdit && !toastShownRef.current) {
+    toastShownRef.current = true;
 
-    const requiredDocs = new Set([
-      "idproof",
-      "addressproof",
-      "photoproof",
-    ]);
+    toast.info(
+     
+        "You cannot edit service details until required documents are uploaded"
+    );
 
-    return documents.some((doc: any) => {
-      const type = (doc.documentType || "").toLowerCase();
-      return requiredDocs.has(type) && !!doc.filePath;
-    });
-  };
+    setTimeout(() => {
+      toastShownRef.current = false;
+    }, 3000);
+  }
+};
 
-  /* ---------------- EDIT PERMISSION ---------------- */
-      const allowedStatuses = ["pending", "approved", "IN_PROGRESS"];
+  const filteredTiers =
+    serviceTiers?.filter((t: any) =>
+      selectedTiers.includes(String(t._id || t.id))
+    ) ?? [];
 
-      const canEdit =
-        allowedStatuses.includes(user?.kycStatus ?? "") &&
-        hasAnyRequiredDocument();
-
-  /* ---------------- TOAST CONTROL (avoid spam) ---------------- */
-
-  let toastShown = false;
-
-  const handleHover = () => {
-    if (!canEdit && !toastShown) {
-      toastShown = true;
-
-      toast.info(
-        edits.kycEditWarning ?? "You cannot edit service details until KYC documents are submitted and approved"
-      );
-
-      setTimeout(() => {
-        toastShown = false;
-      }, 3000);
-    }
-  };
-
-  /* ---------------- UI ---------------- */
+  const filteredCategories =
+    serviceCategories?.filter((c: any) =>
+      selectedCategories.includes(String(c._id || c.id))
+    ) ?? [];
 
   return (
-    <>
-      <div className="flex justify-between mb-4">
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+    <div className="space-y-5">
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           {edits.EmployeeDetails ?? "Service Details"}
         </h2>
 
         <div onMouseEnter={handleHover}>
-          <Button onClick={onEdit} disabled={!canEdit}>
-            <PencilIcon className="w-4 h-4 mr-2" />
-            {edits.edit}
+          <Button
+            onClick={onEdit}
+            disabled={!canEdit}
+            size="sm"
+            className="h-9 gap-2 text-xs font-semibold"
+          >
+            <PencilIcon className="h-3.5 w-3.5" />
+            {edits.edit ?? "Edit"}
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      {/* GRID */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* STATUS */}
-        <CommonCard
-          title={edits.status ?? "Status"}
-          contentClassName="py-2"
-        >
+        <CommonCard className="border border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2 px-1 pb-2 pt-1">
+            <ShieldCheck size={14} className="text-slate-400" />
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+              {edits.status ?? "Status"}
+            </p>
+          </div>
+
           <Badge
-            className={`
-              text-xs font-medium uppercase tracking-wider
-              ${status === "ONLINE" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : ""}
-              ${status === "OFFLINE" ? "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400" : ""}
-              ${status === "IN_PROGRESS" ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" : ""}
-            `}
+            variant="outline"
+            className={cn(
+              "rounded-md px-2.5 py-1 text-xs font-semibold",
+              statusStyles[status] ?? statusStyles.OFFLINE
+            )}
           >
             {status}
           </Badge>
         </CommonCard>
 
         {/* LOCATION */}
-        <CommonCard
-          title={edits.location ?? "Location"}
-          contentClassName="py-2"
-        >
-          <span className="font-medium text-slate-800 dark:text-slate-200">
-            {locationName}
-          </span>
+        <CommonCard className="border border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2 px-1 pb-2 pt-1">
+            <MapPin size={14} className="text-slate-400" />
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+              {edits.location ?? "Location"}
+            </p>
+          </div>
+
+          <p className="truncate px-1 pb-1 text-sm font-medium">
+            {locationName || "—"}
+          </p>
         </CommonCard>
 
-        {/* SERVICE TIERS */}
-        <CommonCard
-          title={edits.serviceTiers ?? "Service Tiers"}
-          contentClassName="py-2"
-        >
-          <div className="flex flex-wrap gap-2">
-            {serviceTiers?.length ? (
-              serviceTiers
-                .filter((t: any) =>
-                  selectedTiers.includes(String(t._id || t.id))
-                )
-                .map((tier: any) => (
-                  <Badge
-                    key={tier._id || tier.id}
-                    className="bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400"
-                  >
-                    {tier.displayName}
-                  </Badge>
-                ))
+        {/* TIERS */}
+        <CommonCard className="border border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2 px-1 pb-2 pt-1">
+            <Layers size={14} className="text-slate-400" />
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+              {edits.serviceTiers ?? "Service Tiers"}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5 px-1">
+            {filteredTiers.length > 0 ? (
+              filteredTiers.map((tier: any) => (
+                <Badge key={tier._id} variant="secondary">
+                  {tier.displayName}
+                </Badge>
+              ))
             ) : (
-              <p className="text-xs text-slate-400 dark:text-slate-500">
-                {edits.noTiers ?? "No tiers available"}
-              </p>
+              <span className="text-xs text-muted-foreground">None</span>
             )}
           </div>
         </CommonCard>
 
-        {/* SERVICE CATEGORIES */}
-        <CommonCard
-          title={edits.serviceCategories ?? "Service Categories"}
-          contentClassName="py-2"
-        >
-          <div className="flex flex-wrap gap-2">
-            {serviceCategories?.length ? (
-              serviceCategories
-                .filter((c: any) =>
-                  selectedCategories.includes(String(c._id || c.id))
-                )
-                .map((cat: any) => (
-                  <span
-                    key={cat._id || cat.id}
-                    className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs dark:bg-green-500/20 dark:text-green-400"
-                  >
-                    {cat.name}
-                  </span>
-                ))
+        {/* CATEGORIES */}
+        <CommonCard className="border border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2 px-1 pb-2 pt-1">
+            <Tag size={14} className="text-slate-400" />
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+              {edits.serviceCategories ?? "Categories"}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5 px-1">
+            {filteredCategories.length > 0 ? (
+              filteredCategories.map((cat: any) => (
+                <Badge key={cat._id} variant="secondary">
+                  {cat.name}
+                </Badge>
+              ))
             ) : (
-              <p className="text-xs text-slate-400 dark:text-slate-500">
-                {edits.noCategories ?? "No categories available"}
-              </p>
+              <span className="text-xs text-muted-foreground">
+                None selected
+              </span>
             )}
           </div>
         </CommonCard>
       </div>
-    </>
+    </div>
   );
 }

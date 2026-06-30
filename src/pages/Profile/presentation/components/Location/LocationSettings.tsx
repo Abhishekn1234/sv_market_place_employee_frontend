@@ -7,7 +7,6 @@ import { useDynamicLocation } from "@/utils/useNotification";
 import { useServiceTier } from "@/pages/Servicesettings/presentation/hooks/useServiceTier";
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
 import { useServiceSettings } from "@/pages/Servicesettings/presentation/hooks/useServicesettings";
-
 import { useProfile } from "@/pages/Profile/presentation/hooks/useProfile";
 
 import {
@@ -22,20 +21,27 @@ import type { WorkerPayload } from "@/pages/Servicesettings/domain/entities/work
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/core/store/auth";
 import CommonSpinner from "@/components/common/CommonSpinner";
+import { useLocation as useRouterLocation } from "react-router-dom";
 
 initLeafletIcons();
 
-export default function LocationSettings({ setActiveTab }: any) {
+export default function LocationSettings() {
   useDynamicLocation();
- const queryClient = useQueryClient();
+
+  const queryClient = useQueryClient();
   const { currentLocation } = useLocationContext();
+
   const { data: serviceTiers } = useServiceTier();
   const { data: serviceCategories } = useServiceCategory();
   const serviceSettingsMutation = useServiceSettings();
 
-  // ✅ replaced auth store with react-query profile
   const { data: profile, isLoading } = useProfile();
   const updateWorker = useAuthStore((s) => s.updateWorker);
+
+  const routeLocation = useRouterLocation();
+
+  const incomingLat = routeLocation.state?.lat;
+  const incomingLng = routeLocation.state?.lng;
 
   const [status, setStatus] = useState("OFFLINE");
   const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
@@ -45,163 +51,125 @@ export default function LocationSettings({ setActiveTab }: any) {
   const [radius, setRadius] = useState(1000);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [locationMode, setLocationMode] =
-    useState<"CURRENT" | "MANUAL">("MANUAL");
+  const worker = profile?.worker;
 
-  /* ---------------- INIT FROM PROFILE ---------------- */
-useEffect(() => {
-  if (!profile) return;
+  /* ---------------- INIT ---------------- */
+  useEffect(() => {
+    if (!worker) return;
 
-  const worker = profile.worker;
+    setStatus(worker?.status ?? "OFFLINE");
+    setRadius(worker?.serviceRadius ?? 5);
 
-  setStatus(worker?.status ?? "OFFLINE");
+    setSelectedCategories((worker?.categories ?? []).map((c: any) => String(c._id)));
+    setSelectedTiers((worker?.serviceTiers ?? []).map((t: any) => String(t._id)));
 
-  // ✅ FIX: convert km → meters
-  const radiusKm = worker?.serviceRadius ?? 5;
-  setRadius(radiusKm);
+    if (incomingLat && incomingLng) {
+      const nLat = normalize(incomingLat);
+      const nLng = normalize(incomingLng);
 
-  // ✅ FIX: ensure correct mapping
-    setSelectedCategories(
-    (worker?.categories ?? []).map((c: any) => String(c._id))
-  );
+      setTempLocation([nLat, nLng]);
+      reverseGeocode(nLat, nLng).then(setLocationName);
+      return;
+    }
 
-  setSelectedTiers(
-    (worker?.serviceTiers ?? []).map((t: any) => String(t._id)));
+    const coords = worker?.location?.coordinates;
 
-  const coords = worker?.location?.coordinates;
+    if (coords?.length === 2) {
+      const [lng, lat] = coords;
 
-  if (coords?.length === 2) {
-    const [lng, lat] = coords;
+      const nLat = normalize(lat);
+      const nLng = normalize(lng);
 
-    const nLat = normalize(lat);
-    const nLng = normalize(lng);
-
-    setTempLocation([nLat, nLng]);
-
-    // ❗ FIX: detect correct mode
-    setLocationMode("MANUAL");
-
-    reverseGeocode(nLat, nLng).then(setLocationName);
-  }
-}, [profile?.worker]);
+      setTempLocation([nLat, nLng]);
+      reverseGeocode(nLat, nLng).then(setLocationName);
+    }
+  }, [worker]);
 
   /* ---------------- CURRENT LOCATION ---------------- */
- const handleUseCurrentLocation = () => {
-  if (!currentLocation) {
-    toast.error("Unable to fetch current location");
-    return;
-  }
+  const handleUseCurrentLocation = () => {
+    if (!currentLocation) {
+      toast.error("Unable to fetch current location");
+      return;
+    }
 
-  const lat = normalize(currentLocation.lat);
-  const lng = normalize(currentLocation.lng);
+    const lat = normalize(currentLocation.lat);
+    const lng = normalize(currentLocation.lng);
 
-  setLocationMode("CURRENT"); // ✅ correct
-  setTempLocation([lat, lng]);
-
-  reverseGeocode(lat, lng).then(setLocationName);
-};
-
-const handleManualLocation = (lat: number, lng: number) => {
-  const nLat = normalize(lat);
-  const nLng = normalize(lng);
-
-  setLocationMode("MANUAL");
-
-  setTempLocation([nLat, nLng]);
-
-  reverseGeocode(nLat, nLng).then(setLocationName);
-};
-
-  /* ---------------- MANUAL LOCATION ---------------- */
- 
-
-  /* ---------------- SAVE ---------------- */
- const saveChanges = () => {
-  if (!tempLocation) return;
-
-  const [lat, lng] = tempLocation;
-
-  if (lat === 0 && lng === 0) {
-    toast.error("Please select a valid location");
-    return;
-  }
-
-  const MAX_RADIUS_KM = 45;
-  if (radius / 1000 > MAX_RADIUS_KM) {
-    toast.error(`Service radius cannot exceed ${MAX_RADIUS_KM} km`);
-    return;
-  }
-
-  const payload: WorkerPayload = {
-    status,
-    serviceTierIds: selectedTiers,
-    categoryIds: selectedCategories,
-    serviceRadius: radius,
-    location: {
-      type: "Point",
-      coordinates: [lng, lat],
-    },
+    setTempLocation([lat, lng]);
+    reverseGeocode(lat, lng).then(setLocationName);
   };
 
-  serviceSettingsMutation.mutate(payload, {
-  onSuccess: (res) => {
-  toast.success("Updated successfully");
+  /* ---------------- SAVE ---------------- */
+  const saveChanges = () => {
+    if (!tempLocation) return;
 
-  // ✅ 1. Update React Query cache
-  queryClient.setQueryData(["profile"], (old: any) => {
-    if (!old) return old;
+    const [lat, lng] = tempLocation;
 
-    return {
-      ...old,
-      worker: {
-        ...old.worker,
-        categories: res.categories,
-        serviceTiers: res.serviceTiers,
-        status: res.status,
-        serviceRadius: res.serviceRadius,
-        location: res.location,
+    if (lat === 0 && lng === 0) {
+      toast.error("Please select a valid location");
+      return;
+    }
+
+    const MAX_RADIUS_KM = 45;
+    if (radius / 1000 > MAX_RADIUS_KM) {
+      toast.error(`Service radius cannot exceed ${MAX_RADIUS_KM} km`);
+      return;
+    }
+
+    const payload: WorkerPayload = {
+      status,
+      serviceTierIds: selectedTiers,
+      categoryIds: selectedCategories,
+      serviceRadius: radius,
+      location: {
+        type: "Point",
+        coordinates: [lng, lat],
       },
     };
-  });
 
-  // ✅ 2. Update Zustand (VERY IMPORTANT)
-  updateWorker({
-    categories: res.categories,
-    serviceTiers: res.serviceTiers,
-    status: res.status,
-    serviceRadius: res.serviceRadius,
-    location: res.location,
-  });
+    serviceSettingsMutation.mutate(payload, {
+      onSuccess: (res: any) => {
+        toast.success("Updated successfully");
 
-  // ✅ 3. UI updates
-  setModalOpen(false);
-  setActiveTab("location");
-},
+        // ✅ FULL SAFE CACHE UPDATE (NO STALE DATA)
+        queryClient.setQueryData(["profile"], (old: any) => {
+          if (!old) return old;
 
-    onError: (err: any) => {
-  const message =
-    err?.response?.data?.message ||
-    err?.response?.data?.error ||
-    err?.message ||
-    "Update failed";
+          return {
+            ...old,
+            worker: {
+              ...old.worker,
+              ...res, // backend should ideally return full worker
+            },
+          };
+        });
 
-  toast.error(message);
-  console.error(err);
-},
-  });
-};
+        // zustand sync
+        updateWorker(res);
 
-  /* ---------------- UI STATES ---------------- */
-  if (isLoading) return <CommonSpinner/>;
+        setModalOpen(false);
+      },
+
+      onError: (err: any) => {
+        const message =
+          err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err?.message ||
+          "Update failed";
+
+        toast.error(message);
+      },
+    });
+  };
+
+  if (isLoading) return <CommonSpinner />;
   if (!profile) return <div className="p-6">No profile found</div>;
   if (!tempLocation) return <div className="p-6">Select location...</div>;
-
- 
 
   return (
     <div className="max-w-3xl mx-auto p-6">
       <EmployeeDetails
-        user={profile}
+        user={worker}
         status={status}
         locationName={locationName}
         serviceTiers={serviceTiers}
@@ -214,13 +182,10 @@ const handleManualLocation = (lat: number, lng: number) => {
       {modalOpen && (
         <LocationModal
           tempLocation={tempLocation}
-          locationMode={locationMode}
-          setLocationMode={setLocationMode}
           setTempLocation={setTempLocation}
           locationName={locationName}
           setLocationName={setLocationName}
           radius={radius}
-        
           setRadius={setRadius}
           serviceTiers={serviceTiers}
           serviceCategories={serviceCategories}
@@ -231,7 +196,6 @@ const handleManualLocation = (lat: number, lng: number) => {
           saveChanges={saveChanges}
           onClose={() => setModalOpen(false)}
           onUseCurrentLocation={handleUseCurrentLocation}
-          onManualLocation={handleManualLocation}
         />
       )}
     </div>

@@ -1,9 +1,8 @@
 "use client";
 
-import { User, Lock, MapPin } from "lucide-react";
+import { User, Lock } from "lucide-react";
 import ProfileList from "./components/ProfileList/ProfileList";
 import PasswordChanging from "./components/Password/PasswordChanging";
-import LocationSettings from "./components/Location/LocationSettings";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import CommonTabs from "@/components/common/CommonTabs";
 import type { CommonTab } from "@/components/common/CommonTabs";
@@ -30,12 +29,6 @@ export default function ProfileSettings({ activeTab, setActiveTab }: Props) {
       label: translations.profile.password,
       icon: <Lock className="w-4 h-4 md:w-5 md:h-5" />,
       content: <PasswordChanging onSuccess={() => setActiveTab("profile")} />
-    },
-    {
-      value: "location",
-      label: translations.profile.location,
-      icon: <MapPin className="w-4 h-4 md:w-5 md:h-5" />,
-      content: <LocationSettings setActiveTab={setActiveTab} />
     }
   ];
 

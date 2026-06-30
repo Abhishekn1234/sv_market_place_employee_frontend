@@ -125,6 +125,7 @@ const profileImage = profile?.profilePictureUrl || user?.profileImage;
       icon: Settings,
       subLinks: [
         { id: "profile", title: t("sidebar.profileSettings"), href: "/settings/profile" },
+        {id:"servicesettings",title:t("sidebar.Location and Service Settings"),href:"/location/service/settings"},
         { id: "wallet", title: t("sidebar.wallet"), href: "/settings/wallet" },
         { id: "logout", title: t("sidebar.logout"), action: "logout" },
       ],

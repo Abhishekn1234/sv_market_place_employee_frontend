@@ -54,10 +54,9 @@ export function useDynamicLocation() {
       body: `${place}\nMoved ${(distance / 1000).toFixed(2)} km`,
       tag: "location-change",
       renotify: false, 
-      data: {
-        url: "/settings/profile",
-        tab: "location",
-      },
+     data: {
+  url: "/location/service/settings",
+},
       actions: [
         { action: "update", title: "Update" },
         { action: "close", title: "Dismiss" },
