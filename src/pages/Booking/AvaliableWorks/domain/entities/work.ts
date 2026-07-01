@@ -8,24 +8,48 @@ import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/se
 
 export interface Work {
   _id: string;
+
   id?: string;
+
+  workerId?: string;
+
   bookingId?: string;
+
   status: BookingStatus;
+
   assignedAt: string;
+
+  startedAt?: string;
+
+  completedAt?: string;
+
   workStartedAt?: Date | string | null;
+
   elapsedTime?: string;
+
   workElapsedTime?: string;
+
   location?: GeoPoint | string;
+
   workerPoolAmount?: number;
+
   numberOfWorkers?: number;
+
   pricingMode?: PricingTier;
+
   service?: ServiceCategory;
+
   serviceTier?: ServiceTier;
+
   invoice?: Invoice;
+
+  booking?: Booking;
+
   customer?: {
     _id: string;
     fullName: string;
+    email?: string;
     phone?: string;
+    profilePictureUrl?: string;
   };
-  booking: Booking;
 }

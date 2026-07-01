@@ -7,43 +7,123 @@ import type { PricingTier } from "./pricingtier.types";
 import type { Bookingschedule } from "./bookingschedule";
 
 export interface Booking {
-  id: string;
-   _id?:string;
-   bookingCode?:string;
-  clientName: string;
-  startDate?:Date;
-  clientEmail: string;
-  workerPoolAmount?:number;
-  numberofWorkers?:number;
-  clientPhone?:string;
-  clientPhoto?:string;
-  serviceType: string;
-  amount?:number;
-  bookingType?:string;
-  date: string;
-  time: string;
-  duration: number;
-  pricingTier?:PricingTier[];
-  pricingMode?:"HOURLY" |"PER_DAY";
-  currency?:string;
-  service?:ServiceCategory | string;
-  serviceTier?:ServiceTier | string;
-  serviceTierId?:ServiceTier|string;
-  schedule?:Bookingschedule;
-  numberOfWorkers?:number;
-  actualWorkers?:number;
-  actualWorkHours?:number;
-  actualDays?:number;
+  _id: string;
+  id?: string;
+
+  bookingCode?: string;
+
+  userId?: string;
+
+  serviceId?: string;
+
+  serviceTierId?: string | ServiceTier;
+
+  bookingType?: "INSTANT" | "SCHEDULED";
+
+  pricingMode?: "HOURLY" | "PER_DAY";
+
+  schedule?: Bookingschedule;
+
   status: BookingStatus;
-  payment: number;
-  location?: GeoPoint | string;
+
+  currency?: string;
+
+  amount?: number;
+
+  serviceFee?: number;
+
+  discountAmount?: number;
+
+  taxableAmount?: number;
+
+  totalCost?: number;
+
+  vatRate?: number;
+
+  vatAmount?: number;
+
+  commissionValue?: number;
+
+  commissionType?: "PERCENTAGE" | "FIXED";
+
+  commissionAmount?: number;
+
+  workerPoolAmount?: number;
+
+  memberDiscount?: number;
+
+  numberOfWorkers?: number;
+
+  workDescription?: string;
+
+  isFinalized?: boolean;
+
+  estimatedValues?: any;
+
+  actualValues?: any;
+
+  taxLines?: any[];
+
+  appliedDiscounts?: any[];
+
+  finalAmount?: number;
+
+  finalWorkerPoolAmount?: number;
+
+  actualWorkHours?: number;
+
+  actualWorkDays?: number;
+
+  actualWorkMinutes?: number;
+
+  startedAt?: string;
+
+  completedAt?: string;
+
+  paymentId?: string;
+
+  invoiceId?: string;
+
+  assignedAt?: string | Date;
+
+  service?: ServiceCategory | string;
+
+  serviceTier?: ServiceTier | string;
+
+  customer?: {
+    _id: string;
+    fullName: string;
+    email?: string;
+    phone?: string;
+    profilePictureUrl?: string;
+  };
+
+  clientName?: string;
+
+  clientEmail?: string;
+
+  clientPhone?: string;
+
+  clientPhoto?: string;
+
+  serviceType?: string;
+
+  date?: string;
+
+  time?: string;
+
+  duration?: number;
+
+  pricingTier?: PricingTier[];
+
+  payment?: number;
+
   notes?: string;
-  assignedAt?:string |Date;
-  startedAt?:string;
-  workStartedAt?:string;
+
+  location?: GeoPoint | string;
 }
 
-export interface BookingResponse{
-  data:Booking[];
-  pagination:Pagination;
+export interface BookingResponse {
+  data: Booking[];
+  pagination: Pagination;
 }
