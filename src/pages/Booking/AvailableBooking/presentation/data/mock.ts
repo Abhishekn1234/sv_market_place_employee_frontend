@@ -2,6 +2,7 @@ import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/b
 
 export const mockData: Booking[] = [
   {
+    _id: "BK-001",
     id: "BK-001",
     clientName: "Rahul Sharma",
     clientEmail: "rahul.sharma@gmail.com",
@@ -21,6 +22,7 @@ export const mockData: Booking[] = [
     notes: "Outdoor photoshoot at Marine Drive",
   },
   {
+    _id: "BK-002",
     id: "BK-002",
     clientName: "Anita Verma",
     clientEmail: "anita.verma@gmail.com",
@@ -38,6 +40,7 @@ export const mockData: Booking[] = [
     location: "Delhi",
   },
   {
+    _id: "BK-003",
     id: "BK-003",
     clientName: "Arjun Mehta",
     clientEmail: "arjun.mehta@gmail.com",
@@ -55,6 +58,7 @@ export const mockData: Booking[] = [
     notes: "Annual company meetup",
   },
   {
+    _id: "BK-004",
     id: "BK-004",
     clientName: "Sneha Kapoor",
     clientEmail: "sneha.k@gmail.com",
@@ -72,6 +76,7 @@ export const mockData: Booking[] = [
     location: "Online (Zoom)",
   },
   {
+    _id: "BK-005",
     id: "BK-005",
     clientName: "Vikram Singh",
     clientEmail: "vikram.singh@gmail.com",
