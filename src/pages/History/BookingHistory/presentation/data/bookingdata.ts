@@ -3,6 +3,7 @@ import type { Booking } from "../../../../Booking/AvailableBooking/domain/entiti
 
 export const mockBookings:Booking[] = [
   {
+    _id: 'BK-2024-001',
     id: 'BK-2024-001',
     clientName: 'Sarah Johnson',
     clientEmail: 'sarah.j@email.com',
@@ -16,6 +17,7 @@ export const mockBookings:Booking[] = [
     notes: 'Deep cleaning requested, bring extra supplies'
   },
   {
+    _id: 'BK-2024-002',
     id: 'BK-2024-002',
     clientName: 'Michael Chen',
     clientEmail: 'mchen@email.com',
@@ -29,6 +31,7 @@ export const mockBookings:Booking[] = [
     notes: 'Leaking kitchen faucet'
   },
   {
+    _id: 'BK-2024-003',
     id: 'BK-2024-003',
     clientName: 'Emma Williams',
     clientEmail: 'emma.w@email.com',
@@ -42,6 +45,7 @@ export const mockBookings:Booking[] = [
     notes: 'Client rescheduled'
   },
   {
+    _id: 'BK-2024-004',
     id: 'BK-2024-004',
     clientName: 'David Martinez',
     clientEmail: 'david.m@email.com',
@@ -54,6 +58,7 @@ export const mockBookings:Booking[] = [
     location: '321 Elm Street',
   },
   {
+    _id: 'BK-2024-005',
     id: 'BK-2024-005',
     clientName: 'Lisa Anderson',
     clientEmail: 'lisa.a@email.com',
@@ -67,6 +72,7 @@ export const mockBookings:Booking[] = [
     notes: 'Regular weekly cleaning'
   },
   {
+    _id: 'BK-2024-006',
     id: 'BK-2024-006',
     clientName: 'James Wilson',
     clientEmail: 'james.w@email.com',
@@ -80,6 +86,7 @@ export const mockBookings:Booking[] = [
     notes: 'Annual maintenance check'
   },
   {
+    _id: 'BK-2024-007',
     id: 'BK-2024-007',
     clientName: 'Sophia Brown',
     clientEmail: 'sophia.b@email.com',
@@ -92,6 +99,7 @@ export const mockBookings:Booking[] = [
     location: '999 Cedar Court',
   },
   {
+    _id: 'BK-2024-008',
     id: 'BK-2024-008',
     clientName: 'Robert Taylor',
     clientEmail: 'robert.t@email.com',

@@ -19,19 +19,20 @@ const statusMap: Record<string, BookingStatus> = {
     const bookingData = w.booking;
     //  console.log(bookingData);
     const booking: Booking = {
+      _id: bookingData._id,
       id: bookingData._id,
       clientName: w.customer?.fullName || "Unknown",
       clientEmail: w.customer?.phone || "",
       serviceType: w.service?.name || "Unknown",
       date: bookingData.date || "",
-      startedAt:bookingData.startedAt,
+      startedAt: bookingData.startedAt,
       time: bookingData.time || "",
-    duration:
-  bookingData.pricingMode === "HOURLY"
-    ? bookingData.schedule?.estimatedHours ?? 1
-    : bookingData.schedule?.estimatedDays ?? 1,
-    workerPoolAmount:bookingData.workerPoolAmount,
-    numberofWorkers:bookingData.numberOfWorkers,
+      duration:
+        bookingData.pricingMode === "HOURLY"
+          ? bookingData.schedule?.estimatedHours ?? 1
+          : bookingData.schedule?.estimatedDays ?? 1,
+      workerPoolAmount: bookingData.workerPoolAmount,
+      numberOfWorkers: bookingData.numberOfWorkers,
       status: bookingData.status,
       pricingMode: bookingData.pricingMode,
       payment: bookingData.amount || 0,

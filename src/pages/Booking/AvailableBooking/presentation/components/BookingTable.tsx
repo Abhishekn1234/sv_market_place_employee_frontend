@@ -52,7 +52,7 @@ export function BookingTable({
     <CommonTable
       columns={columns}
       data={data}
-      keyExtractor={(row) => row.id}
+      keyExtractor={(row) => String(row.id ?? row._id)}
       currentPage={page}
       totalPages={totalPages}
       onPageChange={onPageChange}

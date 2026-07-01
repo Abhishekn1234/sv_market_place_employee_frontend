@@ -24,6 +24,8 @@ export interface Booking {
 
   schedule?: Bookingschedule;
 
+  startDate?: string;
+
   status: BookingStatus;
 
   currency?: string;
