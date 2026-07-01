@@ -52,6 +52,7 @@ export default function LocationSettings() {
   const [modalOpen, setModalOpen] = useState(false);
 
   const worker = profile?.worker;
+  
 
   /* ---------------- INIT ---------------- */
   useEffect(() => {
@@ -168,8 +169,9 @@ export default function LocationSettings() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <EmployeeDetails
-        user={worker}
+            <EmployeeDetails
+        documents={profile.documents}
+        worker={worker}
         status={status}
         locationName={locationName}
         serviceTiers={serviceTiers}

@@ -3,7 +3,13 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import { Badge } from "@/components/ui/badge";
-import { PencilIcon, MapPin, ShieldCheck, Layers, Tag } from "lucide-react";
+import {
+  PencilIcon,
+  MapPin,
+  ShieldCheck,
+  Layers,
+  Tag,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
 import { statusStyles } from "../../utils/statusstyles";
@@ -16,7 +22,8 @@ export default function EmployeeDetails({
   serviceCategories,
   selectedTiers = [],
   selectedCategories = [],
-  user,
+  documents = [],
+  // worker,
   onEdit,
 }: any) {
   const { translations } = useLanguage();
@@ -25,26 +32,24 @@ export default function EmployeeDetails({
   const toastShownRef = useRef(false);
 
   /* ---------------- CAN EDIT LOGIC ---------------- */
- const canEdit = useMemo(
-  () => hasAnyRequiredDocument(user?.documents),
-  [user?.documents]
-);
+  const canEdit = useMemo(() => {
+    return hasAnyRequiredDocument(documents);
+  }, [documents]);
 
   /* ---------------- TOAST ON HOVER ---------------- */
- const handleHover = () => {
-  if (!canEdit && !toastShownRef.current) {
-    toastShownRef.current = true;
+  const handleHover = () => {
+    if (!canEdit && !toastShownRef.current) {
+      toastShownRef.current = true;
 
-    toast.info(
-     
+      toast.info(
         "You cannot edit service details until required documents are uploaded"
-    );
+      );
 
-    setTimeout(() => {
-      toastShownRef.current = false;
-    }, 3000);
-  }
-};
+      setTimeout(() => {
+        toastShownRef.current = false;
+      }, 3000);
+    }
+  };
 
   const filteredTiers =
     serviceTiers?.filter((t: any) =>
@@ -125,7 +130,7 @@ export default function EmployeeDetails({
           <div className="flex flex-wrap gap-1.5 px-1">
             {filteredTiers.length > 0 ? (
               filteredTiers.map((tier: any) => (
-                <Badge key={tier._id} variant="secondary">
+                <Badge key={tier._id || tier.id} variant="secondary">
                   {tier.displayName}
                 </Badge>
               ))
@@ -147,7 +152,7 @@ export default function EmployeeDetails({
           <div className="flex flex-wrap gap-1.5 px-1">
             {filteredCategories.length > 0 ? (
               filteredCategories.map((cat: any) => (
-                <Badge key={cat._id} variant="secondary">
+                <Badge key={cat._id || cat.id} variant="secondary">
                   {cat.name}
                 </Badge>
               ))

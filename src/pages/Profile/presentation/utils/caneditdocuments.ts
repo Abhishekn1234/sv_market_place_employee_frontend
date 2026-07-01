@@ -2,6 +2,8 @@ export const normalizeType = (type: string) =>
   (type || "").toLowerCase();
 
 export const hasAnyRequiredDocument = (documents: any[] = []) => {
+  console.log("documents received", documents);
+
   if (!Array.isArray(documents)) return false;
 
   const requiredDocs = new Set([
@@ -10,8 +12,12 @@ export const hasAnyRequiredDocument = (documents: any[] = []) => {
     "photoproof",
   ]);
 
-  return documents.some((doc: any) => {
-    const type = normalizeType(doc.documentType);
-    return requiredDocs.has(type) && !!doc.filePath;
+  return documents.some((doc) => {
+    console.log(doc.documentType, normalizeType(doc.documentType), doc.filePath);
+
+    return (
+      requiredDocs.has(normalizeType(doc.documentType)) &&
+      Boolean(doc.filePath)
+    );
   });
 };

@@ -76,11 +76,11 @@ export default function StartWork({
           onClose();
         },
 
-        onError: (err: any) => {
-          toast.error(
-            err?.message || translations.startWork.failed
-          );
-        },
+        // onError: (err: any) => {
+        //   toast.error(
+        //     err?.message || translations.startWork.failed
+        //   );
+        // },
       }
     );
   };

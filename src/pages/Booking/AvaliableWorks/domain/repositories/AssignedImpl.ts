@@ -4,7 +4,7 @@ import api from "@/api/api";
 
 export  class AssignedWorkImpl implements AssignedWork{
     async getAssignedWorks():Promise<GetBooking>{
-      const response =await api.get('/booking/get-assigned-booking')
+      const response =await api.get('/booking/get-assigned-bookings')
       return response.data;
     }
 }
