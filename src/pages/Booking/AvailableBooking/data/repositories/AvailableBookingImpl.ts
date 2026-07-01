@@ -17,7 +17,8 @@ export class AvailableBookingImpl implements AvailableBookingRepo {
         const createdAt = new Date(item.createdAt);
 
        return {
-  id: item._id,
+        id: item._id,
+  _id: item._id,
   clientName: item.customer?.fullName ?? "-",
   clientEmail: item.customer?.phone ?? "-",
   clientPhone: item.customer?.phone,
