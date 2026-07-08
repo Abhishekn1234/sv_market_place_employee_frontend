@@ -24,6 +24,7 @@ import type { Dispute } from "@/pages/History/BookingHistory/domain/entities/dis
 import type { CancelReasonType, CancelWork } from "../../domain/entities/cancelwork";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useQueryClient } from "@tanstack/react-query";
+import BookingConfirmCashPayment from "./BookingConfirmCashPayment/BookingConfirmCashPayment";
 // import { CancelWork } from "../../domain/entities/cancelwork";
 
 
@@ -212,6 +213,15 @@ const CANCEL_REASONS = [
           setDisputeWork(null);
         }}
       />
+            {modalType === "confirmCashPayment" && selectedWork && (
+        <BookingConfirmCashPayment
+          open
+          work={selectedWork}
+          onOpenChange={(open) => {
+            if (!open) closeModal();
+          }}
+        />
+      )}
 
      {cancelConfirmWork && (
   <CommonModal open onOpenChange={() => setCancelConfirmWork(null)}>

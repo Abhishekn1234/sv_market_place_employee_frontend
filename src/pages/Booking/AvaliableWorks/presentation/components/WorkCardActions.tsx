@@ -11,6 +11,9 @@ interface Props {
   onStart: (work: DisplayWork) => void;
   onComplete: (work: DisplayWork & { elapsedTime: string }) => void;
   onCancel: (work: DisplayWork) => void;
+   bookingStatus?: string;
+  onConfirmCashPayment: (work: DisplayWork) => void;
+    canConfirmCashPayment?: boolean;
   onVerify: (work: DisplayWork) => void;
 }
 
@@ -21,12 +24,14 @@ function canStartOrCancel(work: DisplayWork) {
 function isActiveWork(work: DisplayWork) {
   return ["STARTED", "IN_PROGRESS"].includes(work.status);
 }
-
+// canConfirmCashPayment,
 export default function WorkCardActions({
   work, id, timers, t, onStart, onComplete, onCancel, onVerify,
+    onConfirmCashPayment,
+  bookingStatus,
 }: Props) {
   const navigate = useNavigate();
-
+ console.log(bookingStatus);
   return (
     <>
       {/* TIMER */}
@@ -98,6 +103,15 @@ export default function WorkCardActions({
           >
             {t("availableWork.verifyOtp")}
           </Button>
+        )}
+                {bookingStatus ==="PAYMENT_PENDING" && (
+            <Button
+              size="sm"
+              className="w-full mt-2"
+              onClick={() => onConfirmCashPayment(work)}
+            >
+              {t("availableWork.confirmCashPayment")}
+            </Button>
         )}
       </div>
     </>

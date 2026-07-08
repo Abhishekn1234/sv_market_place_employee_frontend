@@ -352,6 +352,7 @@
 },
 "availableWork": {
     "noWorks": "कोई कार्य उपलब्ध नहीं है",
+    "confirmCashPayment":"कैश पेमेंट कन्फ़र्म करें",
     "bookingConfirmCashPayment": {
   "title": "नकद भुगतान की पुष्टि करें",
   "description": "भुगतान की पुष्टि करने से पहले चाहें तो एक टिप्पणी जोड़ें।",

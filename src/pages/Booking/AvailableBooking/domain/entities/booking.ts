@@ -13,13 +13,14 @@ export interface Booking {
   bookingCode?: string;
 
   userId?: string;
+  customerId?: string;
+  workerId?: string;
+  workerIds?: string[];
 
   serviceId?: string;
-
   serviceTierId?: string | ServiceTier;
 
   bookingType?: "INSTANT" | "SCHEDULED";
-
   pricingMode?: "HOURLY" | "PER_DAY";
 
   schedule?: Bookingschedule;
@@ -31,23 +32,16 @@ export interface Booking {
   currency?: string;
 
   amount?: number;
-
   serviceFee?: number;
-
   discountAmount?: number;
-
   taxableAmount?: number;
-
   totalCost?: number;
 
   vatRate?: number;
-
   vatAmount?: number;
 
   commissionValue?: number;
-
   commissionType?: "PERCENTAGE" | "FIXED";
-
   commissionAmount?: number;
 
   workerPoolAmount?: number;
@@ -55,41 +49,42 @@ export interface Booking {
   memberDiscount?: number;
 
   numberOfWorkers?: number;
+  remainingWorkers?: number;
+
+  distance?: number;
 
   workDescription?: string;
 
   isFinalized?: boolean;
 
   estimatedValues?: any;
-
   actualValues?: any;
 
   taxLines?: any[];
-
   appliedDiscounts?: any[];
 
   finalAmount?: number;
-
   finalWorkerPoolAmount?: number;
 
   actualWorkHours?: number;
-
   actualWorkDays?: number;
-
   actualWorkMinutes?: number;
 
   startedAt?: string;
-
   completedAt?: string;
 
-  paymentId?: string;
+  assignedAt?: string | Date;
+  workStartedAt?: string;
 
+  createdAt?: string;
+  updatedAt?: string;
+
+  paymentId?: string;
   invoiceId?: string;
 
-  assignedAt?: string | Date;
+  invoiceGeneratedAt?: string;
 
   service?: ServiceCategory | string;
-
   serviceTier?: ServiceTier | string;
 
   customer?: {
@@ -100,20 +95,17 @@ export interface Booking {
     profilePictureUrl?: string;
   };
 
+  assignedWorkers?: any[];
+
   clientName?: string;
-
   clientEmail?: string;
-
   clientPhone?: string;
-
   clientPhoto?: string;
 
   serviceType?: string;
 
   date?: string;
-
   time?: string;
-
   duration?: number;
 
   pricingTier?: PricingTier[];
@@ -123,6 +115,19 @@ export interface Booking {
   notes?: string;
 
   location?: GeoPoint | string;
+
+  payload?: {
+    eventName?: string;
+    bookingId?: string;
+    actorId?: string;
+  };
+
+  eventName?: string;
+  occurredAt?: string;
+
+  workerActions?: {
+    canConfirmCashPayment: boolean;
+  };
 }
 
 export interface BookingResponse {

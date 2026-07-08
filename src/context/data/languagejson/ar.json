@@ -44,6 +44,7 @@
   },
    "availableWork": {
     "noWorks": "لا توجد أعمال متاحة",
+    "confirmCashPayment":"تأكيد الدفع النقدي",
      "bookingConfirmCashPayment": {
         "title": "تأكيد الدفع النقدي",
         "description": "أضف ملاحظة اختيارية قبل تأكيد عملية الدفع.",

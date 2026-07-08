@@ -15,20 +15,61 @@ import type { Work } from "../../domain/entities/work";
  */
 export type WorkStatus =
   | "UNKNOWN"
+
+  // Booking lifecycle
+  | "CREATED"
+  | "ACCEPTED"
   | "ASSIGNED"
+  | "FINALIZED"
+  | "REVIEWED"
+  | "EXPIRED"
+
+  // Worker lifecycle
   | "WORKER_ACCEPTED"
+  | "WORKER_REJECTED"
+  | "WORKER_STARTED"
+  | "WORKER_COMPLETED"
+
+  // Work lifecycle
+  | "WORK_START_OTP_GENERATED"
+  | "WORK_STARTED"
   | "STARTED"
   | "IN_PROGRESS"
+  | "WORK_COMPLETED_BY_WORKER"
   | "WORK_COMPLETED_PENDING"
+  | "COMPLETION_OTP_GENERATED"
+  | "COMPLETION_CONFIRMED"
+
+  // Multi-worker
+  | "ALL_WORKERS_STARTED"
+  | "ALL_WORKERS_COMPLETED"
+
+  // Invoice & Payment
+  | "INVOICE_GENERATED"
+  | "PARTIALLY_PAID"
+  | "PAYMENT_INITIATED"
+  | "PAYMENT_COMPLETED"
+  | "PAYMENT_FAILED"
+  | "PAID"
+  | "REFUNDED"
+
+  // Final
   | "COMPLETED"
+
+  // Cancellation
   | "WORKER_CANCELLED"
   | "WORKER_REJECTED"
-  | "CUSTOMER_CANCELLED";
+  | "CUSTOMER_CANCELLED"
+  | "ADMIN_CANCELLED"
+  | "CANCELLED"
+  | "CANCELLED_BY_CUSTOMER"
+  | "CANCELLED_BY_WORKER"
+  | "CANCELLED_BY_PLATFORM";
 
 /**
  * Modal types
  */
-export type WorkModalType = "start" | "complete" | "verify" | "dispute";
+export type WorkModalType = "start" | "complete" | "verify" | "dispute" |"confirmCashPayment";
 
 /**
  * Timer map keyed by canonical work id
@@ -50,19 +91,22 @@ export type WorkLocation =
  * - ONLY ONE timestamp (startedAt)
  */
 export type DisplayWork = Omit<Work, "status" | "location" | "booking"> & {
-  id: string; // ✅ SINGLE ID (NO _id anymore)
+  id: string;
 
   status: WorkStatus;
 
-  startedAt?: string; // ✅ SINGLE SOURCE (NO workStartedAt)
+  workStartedAt?: string;
 
   location?: WorkLocation;
+
+  workerActions?: {
+    canConfirmCashPayment: boolean;
+  };
 
   booking?: Booking & {
     location?: WorkLocation;
   };
 };
-
 /**
  * Cancel work payload extension
  */
@@ -77,7 +121,7 @@ export type CancelableWork = DisplayWork & {
  */
 export type WorkGridProps = {
   workList: DisplayWork[]; // ✅ FIXED (was Partial<DisplayWork>[])
-
+  onConfirmCashPayment:(work:DisplayWork)=>void;
   categories?: ServiceCategory[];
 
   timers: WorkTimerMap;
