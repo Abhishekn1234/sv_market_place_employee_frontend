@@ -33,7 +33,7 @@ interface NotificationsHeaderProps {
   markAllRead: () => void | Promise<void>;
 
   isPending: boolean;
-
+   isAllSelected:boolean;
   selectedCategory: string;
   setSelectedCategory: (category: string) => void;
 
@@ -44,6 +44,7 @@ interface NotificationsHeaderProps {
 
 export default function NotificationsHeader({
   unreadCount,
+  isAllSelected,
   readCount,
   totalCount,
   filter,
@@ -76,7 +77,8 @@ export default function NotificationsHeader({
   // =========================
   const selectedCount = selectedNotificationIds.length;
 
-  const hasSelection = selectedCount > 0;
+  // const hasSelection =
+  // !isAllSelected && selectedCount > 0;
 
   // =========================
   // RESET BULK STATE
@@ -90,11 +92,10 @@ export default function NotificationsHeader({
   // =========================
   // DISABLED STATE
   // =========================
-  const isDisabled =
+ const isDisabled =
     isPending ||
-    selectedCount === 0 ||
+    (!isAllSelected && selectedCount === 0) ||
     bulkHandled;
-
   // =========================
   // MARK SELECTED
   // =========================
@@ -118,15 +119,12 @@ export default function NotificationsHeader({
     } finally {
       setBulkHandled(false);
     }
-  };
+  }
 
   // =========================
   // SELECT ALL STATE
   // =========================
-  const isAllSelected =
-    currentPageUnreadCount > 0 &&
-    selectedCount === currentPageUnreadCount;
-
+ 
   // =========================
   // MARK ALL
   // =========================
@@ -182,33 +180,31 @@ export default function NotificationsHeader({
         </div>
 
         {/* BULK ACTIONS */}
-        {hasSelection && (
-          <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
 
-            {/* MARK SELECTED */}
-            <Button
-              onClick={handleMarkSelected}
-              disabled={isDisabled}
-              variant="secondary"
-              className="bg-blue-600 text-white"
-            >
-              <Check className="w-4 h-4 mr-1" />
-              {notificationsTranslations.markSelected} ({selectedCount})
-            </Button>
+  {!isAllSelected && selectedCount > 0 && (
+    <Button
+      onClick={handleMarkSelected}
+      disabled={isDisabled}
+      variant="secondary"
+      className="bg-blue-600 text-white"
+    >
+      <Check className="w-4 h-4 mr-1" />
+      {notificationsTranslations.markSelected} ({selectedCount})
+    </Button>
+  )}
 
-            {/* MARK ALL */}
-            {isAllSelected && (
-              <Button
-                onClick={handleMarkAll}
-                disabled={isDisabled}
-                variant="outline"
-              >
-                {notificationsTranslations.markAllRead}
-              </Button>
-            )}
+  {isAllSelected && (
+    <Button
+      onClick={handleMarkAll}
+      disabled={isPending}
+      variant="outline"
+    >
+      {notificationsTranslations.markAllRead}
+    </Button>
+  )}
 
-          </div>
-        )}
+</div>
 
       </div>
 

@@ -8,6 +8,7 @@ import { useCancel } from "./hooks/useCancel";
 import { useAssign } from "./hooks/useAssign";
 import WorkGrid from "./components/WorkGrid";
 import WorkModals from "./components/WorkModals";
+
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import {
   FINAL_WORK_STATUSES,
@@ -20,6 +21,7 @@ import type {
   WorkModalType,
   WorkTimerMap,
 } from "./types/workPresentation.types";
+
 // import CommonSpinner from "@/components/common/CommonSpinner";
 
 export default function AvailableWorkPage() {
@@ -72,8 +74,8 @@ export default function AvailableWorkPage() {
     assignedBookings
   ).filter((work) => {
     const status = work.status?.toUpperCase();
-    const bookingStatus = work.booking?.status?.toUpperCase();
-
+    console.log(status);
+    
     // Broaden exclusion to handle all cancellation types instantly
     const excludedStatuses = [
       "CUSTOMER_CANCELLED",
@@ -81,16 +83,18 @@ export default function AvailableWorkPage() {
       "CANCELLED",
       "ADMIN_CANCELLED",
       "CANCELLED_BY_CUSTOMER",
-      "COMPLETED",
-      "WORK_COMPLETED",
+     
     ];
 
     return (
-      !excludedStatuses.includes(status || "") &&
-      !excludedStatuses.includes(bookingStatus || "")
+      !excludedStatuses.includes(status || "")
+     
     );
   });
 }, [assignedBookings]);
+// useEffect(() => {
+//   console.log("Work List:", workList);
+// }, [workList]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -163,16 +167,19 @@ return (
       title={t("sidebar.assignedWork")}
       headerAlign={isRTL ? "right" : "left"}
     >
-      <WorkGrid
-        workList={workList}
-        isRTL={isRTL}
-        categories={categories}
-        timers={timers}
-        onStart={(work) => openModal(work, "start")}
-        onComplete={(work) => openModal(work, "complete")}
-        onVerify={(work) => openModal(work, "verify")}
-        onCancel={setCancelConfirmWork}
-      />
+        <WorkGrid
+      workList={workList}
+      isRTL={isRTL}
+      categories={categories}
+      timers={timers}
+      onStart={(work) => openModal(work, "start")}
+      onComplete={(work) => openModal(work, "complete")}
+      onVerify={(work) => openModal(work, "verify")}
+      onCancel={setCancelConfirmWork}
+      onConfirmCashPayment={(work) =>
+        openModal(work, "confirmCashPayment")
+      }
+    />
 
       <WorkModals
         selectedWork={selectedWork}

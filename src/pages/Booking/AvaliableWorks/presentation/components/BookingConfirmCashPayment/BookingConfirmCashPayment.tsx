@@ -3,67 +3,104 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { DisplayWork } from "../../types/workPresentation.types";
+import { useBookingConfirmCashPayment } from "../../hooks/useBookingConfirmCashPayment";
 
-export default function BookingConfirmCashPayment() {
-  const [open, setOpen] = useState(false);
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  work: DisplayWork | null;
+}
+
+export default function BookingConfirmCashPayment({
+  open,
+  onOpenChange,
+  work,
+}: Props) {
   const [notes, setNotes] = useState("");
 
   const { t } = useLanguage();
 
+  const confirmCashPaymentMutation = useBookingConfirmCashPayment();
+
+  useEffect(() => {
+    if (!open) {
+      setNotes("");
+    }
+  }, [open]);
+
+  const handleConfirm = () => {
+    if (!work) return;
+
+    confirmCashPaymentMutation.mutate(
+      {
+        bookingId: work.booking?._id ?? work.bookingId ?? work._id,
+        note:notes,
+      },
+      {
+        onSuccess: () => {
+          setNotes("");
+          onOpenChange(false);
+        },
+      }
+    );
+  };
+
   return (
-    <CommonModal open={open} onOpenChange={setOpen}>
-      <div className="w-full max-w-lg space-y-6 p-6">
-        {/* Header */}
-        <div className="space-y-1">
-          <h2 className="text-xl font-semibold text-foreground">
+    <CommonModal open={open} onOpenChange={onOpenChange}>
+      <CommonModal.Content className="max-w-lg">
+        <CommonModal.Header>
+          <CommonModal.Title>
             {t("availableWork.bookingConfirmCashPayment.title")}
-          </h2>
+          </CommonModal.Title>
 
-          <p className="text-sm leading-6 text-muted-foreground">
+          <CommonModal.Description>
             {t("availableWork.bookingConfirmCashPayment.description")}
-          </p>
-        </div>
+          </CommonModal.Description>
+        </CommonModal.Header>
 
-        {/* Notes */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="cash-payment-notes"
-            className="text-sm font-medium"
-          >
-            {t("availableWork.bookingConfirmCashPayment.notes")}
-          </Label>
+        <CommonModal.Body>
+          <div className="space-y-2">
+            <Label htmlFor="cash-payment-notes">
+              {t("availableWork.bookingConfirmCashPayment.notes")}
+            </Label>
 
-          <Textarea
-            id="cash-payment-notes"
-            rows={5}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder={t(
-              "availableWork.bookingConfirmCashPayment.placeholder"
-            )}
-            className="min-h-[130px] resize-none rounded-xl border-border bg-background text-sm shadow-sm focus-visible:ring-2"
-          />
-        </div>
+            <Textarea
+              id="cash-payment-notes"
+              value={notes}
+              rows={5}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder={t(
+                "availableWork.bookingConfirmCashPayment.placeholder"
+              )}
+            />
+          </div>
+        </CommonModal.Body>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3 border-t pt-5">
+        <CommonModal.Footer>
           <Button
             variant="outline"
-            onClick={() => setOpen(false)}
-            className="min-w-[110px]"
+            onClick={() => onOpenChange(false)}
+            disabled={confirmCashPaymentMutation.isPending}
           >
-            {t("availableWork.bookingConfirmPayment.cancel")}
+            {t("availableWork.bookingConfirmCashPayment.cancel")}
           </Button>
 
           <Button
-            className="min-w-[180px]"
-            disabled={!notes.trim()}
+            onClick={handleConfirm}
+            disabled={
+              !notes.trim() || confirmCashPaymentMutation.isPending
+            }
           >
-            {t("availableWork.bookingConfirmPayment.confirmCashPayment")}
+            {confirmCashPaymentMutation.isPending
+              ? t("common.loading")
+              : t(
+                  "availableWork.bookingConfirmCashPayment.confirmCashPayment"
+                )}
           </Button>
-        </div>
-      </div>
+        </CommonModal.Footer>
+      </CommonModal.Content>
     </CommonModal>
   );
 }

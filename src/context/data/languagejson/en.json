@@ -56,6 +56,7 @@
     "noWorks": "No works available",
     "customer": "Customer",
     "location": "Location",
+    "confirmCashPayment":"Confirm cash payment",
     "bookingConfirmCashPayment": {
       "title": "Confirm Cash Payment",
       "description": "Add an optional note before confirming the payment.",
@@ -452,6 +453,7 @@
     "actions": {
       "cancel": "Cancel",
       "start": "Start",
+      "confirmCashPayment":"Confirm cash payment",
       "viewDetails": "View Details",
       "stopwork": "Stop Work",
       "resumeWork": "Resume Work",

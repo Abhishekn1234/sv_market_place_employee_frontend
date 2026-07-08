@@ -24,6 +24,7 @@ export default function WorkGrid({
   categories = [],
   timers,
   onStart,
+  onConfirmCashPayment,
   onComplete,
   onVerify,
   onCancel,
@@ -86,20 +87,21 @@ const normalizedWorkList = useMemo(() => {
           const coordinates = getWorkCoordinates(getWorkLocation(work));
 
           return (
-            <WorkCard
-              key={id}
-              work={work}
-              id={id}
-              isRTL={isRTL}
-              categoryName={categoryName}
-              coordinates={coordinates}
-              timers={timers}
-              t={t}
-              onStart={onStart}
-              onComplete={onComplete}
-              onCancel={onCancel}
-              onVerify={onVerify}
-            />
+                  <WorkCard
+        key={id}
+        work={work}
+        id={id}
+        isRTL={isRTL}
+        categoryName={categoryName}
+        coordinates={coordinates}
+        timers={timers}
+        t={t}
+        onStart={onStart}
+        onComplete={onComplete}
+        onCancel={onCancel}
+        onVerify={onVerify}
+        onConfirmCashPayment={onConfirmCashPayment}
+      />
           );
         })}
         </div>

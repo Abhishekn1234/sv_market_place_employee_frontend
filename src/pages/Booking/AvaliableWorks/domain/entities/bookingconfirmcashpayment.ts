@@ -1,5 +1,5 @@
 export interface BookingConfirmCashPayment{
     bookingId:string;
-    transactionId:string;
+    transactionId?:string;
     note:string;
 }
