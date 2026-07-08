@@ -1,14 +1,12 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { VerifyOtpCompleteImpl } from "../../data/repositories/VerifyWorkRepoImpl";
-import { VerifyWorkUsecase } from "../../domain/usecase/VerifyWorkUsecase";
-
-import type { verifyotp } from "../../domain/entities/verifyotp";
-
 import { toast } from "react-toastify";
 
-import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
+import { VerifyOtpCompleteImpl } from "../../data/repositories/VerifyWorkRepoImpl";
+import { VerifyWorkUsecase } from "../../domain/usecase/VerifyWorkUsecase";
+import type { verifyotp } from "../../domain/entities/verifyotp";
+
 import { ASSIGNED_WORKS_KEY } from "./useAssign";
 
 export function useVerifyOtp() {
@@ -21,7 +19,6 @@ export function useVerifyOtp() {
     mutationFn: (data: verifyotp) => usecase.execute(data),
 
     onSuccess: (response: any, variables) => {
-      // ✅ booking id from mutation payload
       const bookingId =
         variables.bookingId ||
         variables.id ||
@@ -32,12 +29,13 @@ export function useVerifyOtp() {
         return;
       }
 
-      // ✅ UPDATE CACHE
-      // NOTE: do not hardcode status. Backend may respond with CUSTOMER_CANCELLED.
-      const nextStatusRaw =
-        response?.booking?.status ??
+      const updatedBooking = response?.booking ?? {};
+
+      const nextStatus =
+        updatedBooking.status ??
         response?.status ??
-        response?.bookingStatus;
+        response?.bookingStatus ??
+        "INVOICE_GENERATED";
 
       queryClient.setQueryData(
         ASSIGNED_WORKS_KEY,
@@ -48,43 +46,45 @@ export function useVerifyOtp() {
               work.bookingId ||
               work.id;
 
-            if (id !== bookingId) return work;
+            if (id !== bookingId) {
+              return work;
+            }
 
             return {
               ...work,
+              ...updatedBooking,
 
-              // ✅ update status from backend (fallback to INVOICE_GENERATED)
-              status:
-                nextStatusRaw ?? "INVOICE_GENERATED",
+              _id: work._id,
+              bookingId: work.bookingId,
 
-              // ✅ attach invoice details
-              invoice: response?.invoice ?? response?.booking?.invoice,
+              status: nextStatus,
+              invoice:
+                response?.invoice ??
+                updatedBooking.invoice ??
+                work.invoice,
 
-              // optional
               completedAt: new Date().toISOString(),
             };
           })
       );
 
-      // ✅ Zustand sync
-      useBookingSocketStore
-        .getState()
-        .removeAssigned(bookingId);
+      // ❌ Do NOT remove from Zustand
+      // useBookingSocketStore.getState().removeAssigned(bookingId);
 
-      // ✅ optional refetch
-      queryClient.invalidateQueries({
-        queryKey: ASSIGNED_WORKS_KEY,
-      });
+      // ❌ Do NOT refetch
+      // queryClient.invalidateQueries({
+      //   queryKey: ASSIGNED_WORKS_KEY,
+      // });
 
       toast.success(
-        response?.message ||
+        response?.message ??
           "OTP verified successfully"
       );
     },
 
     onError: (error: any) => {
       toast.error(
-        error?.response?.data?.message ||
+        error?.response?.data?.message ??
           "OTP verification failed"
       );
     },
