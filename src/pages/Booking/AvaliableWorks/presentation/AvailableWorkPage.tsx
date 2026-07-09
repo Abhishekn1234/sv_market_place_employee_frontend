@@ -74,7 +74,7 @@ export default function AvailableWorkPage() {
     assignedBookings
   ).filter((work) => {
     const status = work.status?.toUpperCase();
-    console.log(status);
+    // console.log(status);
     
     // Broaden exclusion to handle all cancellation types instantly
     const excludedStatuses = [

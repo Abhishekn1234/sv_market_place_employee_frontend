@@ -37,36 +37,36 @@ export function useVerifyOtp() {
         response?.bookingStatus ??
         "INVOICE_GENERATED";
 
-      queryClient.setQueryData(
-        ASSIGNED_WORKS_KEY,
-        (old: any[] = []) =>
-          old.map((work) => {
-            const id =
-              work._id ||
-              work.bookingId ||
-              work.id;
+              queryClient.setQueryData(
+          ASSIGNED_WORKS_KEY,
+          (old: any[] = []) =>
+            old.flatMap((work) => {
+              const id = work._id || work.bookingId || work.id;
 
-            if (id !== bookingId) {
-              return work;
-            }
+              if (id !== bookingId) {
+                return [work];
+              }
 
-            return {
-              ...work,
-              ...updatedBooking,
+              if (nextStatus === "INVOICE_GENERATED") {
+                return [];
+              }
 
-              _id: work._id,
-              bookingId: work.bookingId,
-
-              status: nextStatus,
-              invoice:
-                response?.invoice ??
-                updatedBooking.invoice ??
-                work.invoice,
-
-              completedAt: new Date().toISOString(),
-            };
-          })
-      );
+              return [
+                {
+                  ...work,
+                  ...updatedBooking,
+                  _id: work._id,
+                  bookingId: work.bookingId,
+                  status: nextStatus,
+                  invoice:
+                    response?.invoice ??
+                    updatedBooking.invoice ??
+                    work.invoice,
+                  completedAt: new Date().toISOString(),
+                },
+              ];
+            })
+        );
 
       // ❌ Do NOT remove from Zustand
       // useBookingSocketStore.getState().removeAssigned(bookingId);

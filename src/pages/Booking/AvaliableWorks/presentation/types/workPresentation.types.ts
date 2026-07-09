@@ -1,5 +1,3 @@
-"use client";
-
 import type { Dispatch, SetStateAction } from "react";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
@@ -11,12 +9,15 @@ import type {
 import type { Work } from "../../domain/entities/work";
 
 /**
- * ✅ SINGLE SOURCE OF TRUTH STATUS
+ * ============================================
+ * STATUS
+ * ============================================
  */
+
 export type WorkStatus =
   | "UNKNOWN"
 
-  // Booking lifecycle
+  // Booking
   | "CREATED"
   | "ACCEPTED"
   | "ASSIGNED"
@@ -24,13 +25,13 @@ export type WorkStatus =
   | "REVIEWED"
   | "EXPIRED"
 
-  // Worker lifecycle
+  // Worker
   | "WORKER_ACCEPTED"
   | "WORKER_REJECTED"
   | "WORKER_STARTED"
   | "WORKER_COMPLETED"
 
-  // Work lifecycle
+  // Work
   | "WORK_START_OTP_GENERATED"
   | "WORK_STARTED"
   | "STARTED"
@@ -44,8 +45,10 @@ export type WorkStatus =
   | "ALL_WORKERS_STARTED"
   | "ALL_WORKERS_COMPLETED"
 
-  // Invoice & Payment
+  // Invoice / Payment
   | "INVOICE_GENERATED"
+  | "PAYMENT_PENDING"
+  | "PENDING"
   | "PARTIALLY_PAID"
   | "PAYMENT_INITIATED"
   | "PAYMENT_COMPLETED"
@@ -56,9 +59,8 @@ export type WorkStatus =
   // Final
   | "COMPLETED"
 
-  // Cancellation
+  // Cancel
   | "WORKER_CANCELLED"
-  | "WORKER_REJECTED"
   | "CUSTOMER_CANCELLED"
   | "ADMIN_CANCELLED"
   | "CANCELLED"
@@ -67,30 +69,164 @@ export type WorkStatus =
   | "CANCELLED_BY_PLATFORM";
 
 /**
- * Modal types
+ * ============================================
+ * MODALS
+ * ============================================
  */
-export type WorkModalType = "start" | "complete" | "verify" | "dispute" |"confirmCashPayment";
 
-/**
- * Timer map keyed by canonical work id
- */
+export type WorkModalType =
+  | "start"
+  | "complete"
+  | "verify"
+  | "dispute"
+  | "confirmCashPayment";
+
 export type WorkTimerMap = Record<string, string>;
 
-/**
- * Location type
- */
 export type WorkLocation =
   | string
   | {
+      type?: "Point";
       coordinates?: [number, number];
     };
 
 /**
- * ✅ CORE ENTITY (FIXED)
- * - ONLY ONE ID (id)
- * - ONLY ONE timestamp (startedAt)
+ * ============================================
+ * BOOKING VALUE TYPES
+ * ============================================
  */
-export type DisplayWork = Omit<Work, "status" | "location" | "booking"> & {
+
+export interface TaxLine {
+  name: string;
+  taxType: string;
+  rate: number;
+  taxableAmount: number;
+  amount: number;
+}
+
+export interface AppliedDiscount {
+  id?: string;
+  name?: string;
+  type?: string;
+  value?: number;
+  amount?: number;
+}
+
+export interface BookingValues {
+  workHours: number;
+  workDays: number;
+  noOfWorkers: number;
+  amount: number;
+  serviceFee: number;
+  discountAmount: number;
+  taxableAmount: number;
+  vatRate: number;
+  vatAmount: number;
+  taxLines: TaxLine[];
+  commissionAmount: number;
+  workerPoolAmount: number;
+  finalAmount: number;
+  appliedDiscounts: AppliedDiscount[];
+}
+
+/**
+ * ============================================
+ * PAYMENT
+ * ============================================
+ */
+
+export interface PendingCashPayment {
+  _id: string;
+  bookingId: string;
+  invoiceId: string;
+  userId: string;
+  amount: number;
+  remainingAmount: number;
+  currency: string;
+  paymentMethod: string;
+  paymentFlowMode: string;
+  status: string;
+  initiatedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * ============================================
+ * SERVICE
+ * ============================================
+ */
+
+export interface DisplayService {
+  _id: string;
+  name: string;
+  slug: string;
+  category: string;
+  description: string;
+  currency: string;
+  pricingTiers: {
+    tierId: string;
+    HOURLY: {
+      ratePerHour: number;
+    };
+    PER_DAY: {
+      ratePerDay: number;
+    };
+    commissionType: string;
+    commissionValue: number;
+    _id: string;
+  }[];
+  isActive: boolean;
+  avgRating: number;
+  totalRatings: number;
+  createdAt: string;
+  updatedAt: string;
+  iconPublicId: string;
+  iconUrl: string;
+  thumbnailPublicId: string;
+  thumbnailUrl: string;
+  vatRate: number;
+}
+
+export interface DisplayServiceTier {
+  _id: string;
+  code: string;
+  displayName: string;
+  description: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  features: string;
+}
+
+/**
+ * ============================================
+ * CUSTOMER
+ * ============================================
+ */
+
+export interface DisplayCustomer {
+  _id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+}
+
+/**
+ * ============================================
+ * DISPLAY WORK
+ * ============================================
+ */
+
+export type DisplayWork = Omit<
+  Work,
+  | "status"
+  | "location"
+  | "booking"
+  | "service"
+  | "serviceTier"
+  | "customer"
+> & {
   id: string;
 
   status: WorkStatus;
@@ -103,51 +239,87 @@ export type DisplayWork = Omit<Work, "status" | "location" | "booking"> & {
     canConfirmCashPayment: boolean;
   };
 
+  pendingCashPayment?: PendingCashPayment;
+
+  service?: DisplayService;
+
+  serviceTier?: DisplayServiceTier;
+
+  customer?: DisplayCustomer;
+
   booking?: Booking & {
     location?: WorkLocation;
+    estimatedValues?: BookingValues;
+    actualValues?: BookingValues;
   };
 };
+
 /**
- * Cancel work payload extension
+ * ============================================
+ * CANCELABLE WORK
+ * ============================================
  */
+
 export type CancelableWork = DisplayWork & {
   cancelType?: CancelReasonType;
   cancelledReason?: string;
 };
 
 /**
- * ✅ FIXED: NEVER USE Partial HERE
- * Partial causes ghost reappearance + merge bugs
+ * ============================================
+ * GRID PROPS
+ * ============================================
  */
-export type WorkGridProps = {
-  workList: DisplayWork[]; // ✅ FIXED (was Partial<DisplayWork>[])
-  onConfirmCashPayment:(work:DisplayWork)=>void;
+
+export interface WorkGridProps {
+  workList: DisplayWork[];
+
   categories?: ServiceCategory[];
 
   timers: WorkTimerMap;
 
   onStart: (work: DisplayWork) => void;
+
   onComplete: (work: DisplayWork) => void;
+
   onVerify: (work: DisplayWork) => void;
+
   onCancel: (work: CancelableWork) => void;
-  isRTL:boolean;
-};
+
+  onConfirmCashPayment: (work: DisplayWork) => void;
+
+  isRTL: boolean;
+}
 
 /**
- * Modal props
+ * ============================================
+ * MODAL PROPS
+ * ============================================
  */
-export type WorkModalsProps = {
+
+export interface WorkModalsProps {
   selectedWork: DisplayWork | null;
+
   modalType: WorkModalType | null;
+
   closeModal: () => void;
 
   cancelConfirmWork: CancelableWork | null;
-  setCancelConfirmWork: Dispatch<SetStateAction<CancelableWork | null>>;
 
-  cancelMutation: UseMutationResult<unknown, Error, CancelWork, unknown>;
+  setCancelConfirmWork: Dispatch<
+    SetStateAction<CancelableWork | null>
+  >;
+
+  cancelMutation: UseMutationResult<
+    unknown,
+    Error,
+    CancelWork,
+    unknown
+  >;
 
   timers?: WorkTimerMap;
 
   onCancelSuccess?: (updatedBooking: Booking) => void;
+
   onCompleteSuccess?: (updatedWork: Work | DisplayWork) => void;
-};
+}

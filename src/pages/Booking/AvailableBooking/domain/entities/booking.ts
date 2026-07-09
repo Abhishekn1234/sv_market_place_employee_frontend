@@ -5,6 +5,7 @@ import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servic
 import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import type { PricingTier } from "./pricingtier.types";
 import type { Bookingschedule } from "./bookingschedule";
+import type { AppliedDiscount, BookingValues, TaxLine } from "@/pages/Booking/AvaliableWorks/presentation/types/workPresentation.types";
 
 export interface Booking {
   _id: string;
@@ -57,12 +58,11 @@ export interface Booking {
 
   isFinalized?: boolean;
 
-  estimatedValues?: any;
-  actualValues?: any;
+    estimatedValues?: BookingValues;
+    actualValues?: BookingValues;
 
-  taxLines?: any[];
-  appliedDiscounts?: any[];
-
+    taxLines?: TaxLine[];
+    appliedDiscounts?: AppliedDiscount[];
   finalAmount?: number;
   finalWorkerPoolAmount?: number;
 

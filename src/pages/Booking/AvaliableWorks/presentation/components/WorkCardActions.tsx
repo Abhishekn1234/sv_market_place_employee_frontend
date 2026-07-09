@@ -28,10 +28,10 @@ function isActiveWork(work: DisplayWork) {
 export default function WorkCardActions({
   work, id, timers, t, onStart, onComplete, onCancel, onVerify,
     onConfirmCashPayment,
-  bookingStatus,
+ 
 }: Props) {
   const navigate = useNavigate();
- console.log(bookingStatus);
+//  console.log(bookingStatus);
   return (
     <>
       {/* TIMER */}
@@ -104,14 +104,14 @@ export default function WorkCardActions({
             {t("availableWork.verifyOtp")}
           </Button>
         )}
-                {bookingStatus ==="PAYMENT_PENDING" && (
-            <Button
-              size="sm"
-              className="w-full mt-2"
-              onClick={() => onConfirmCashPayment(work)}
-            >
-              {t("availableWork.confirmCashPayment")}
-            </Button>
+         {work.pendingCashPayment?.paymentMethod==="CASH" && (
+          <Button
+            size="sm"
+            className="mt-2 w-full"
+            onClick={() => onConfirmCashPayment(work)}
+          >
+            {t("availableWork.confirmCashPayment")}
+          </Button>
         )}
       </div>
     </>

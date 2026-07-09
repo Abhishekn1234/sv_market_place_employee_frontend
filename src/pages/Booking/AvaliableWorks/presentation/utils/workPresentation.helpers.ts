@@ -217,7 +217,7 @@ export function getWorkLocation(work: DisplayWork) {
 
 export function getWorkerAmount(work: DisplayWork): string {
   const pool =
-    work.workerPoolAmount ?? work.booking?.workerPoolAmount;
+    work.booking?.finalWorkerPoolAmount ?? work.booking?.workerPoolAmount;
 
   const workers =
     work.booking?.numberOfWorkers ?? work.numberOfWorkers;
