@@ -5,10 +5,10 @@ import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/enti
 
 export function mapApiToWork(apiData: any[]): Work[] {
 const statusMap: Record<string, BookingStatus> = {
-  ASSIGNED: "requested",                  // or "pending"? choose logically
+  ASSIGNED: "ACCEPTED",                  // or "pending"? choose logically
   WORKER_ACCEPTED: "WORKER_ACCEPTED",
-  WORK_CANCELLED: "cancelled",
-  COMPLETED: "completed",
+  WORK_CANCELLED: "WORKER_CANCELLED",
+  COMPLETED: "COMPLETED",
   IN_PROGRESS: "IN_PROGRESS",
   STARTED: "IN_PROGRESS",
   WORK_COMPLETED_PENDING: "WORK_COMPLETED_PENDING",

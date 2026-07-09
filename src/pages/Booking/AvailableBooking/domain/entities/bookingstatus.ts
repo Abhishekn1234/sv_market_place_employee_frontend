@@ -20,4 +20,4 @@ export type BookingStatus =
   | "WORKER_CANCELLED"
   | "CUSTOMER_CANCELLED"
   | "ADMIN_CANCELLED"
-  | "CANCELLED";
+  | "CANCELLED" |"INVOICE_GENERATED";

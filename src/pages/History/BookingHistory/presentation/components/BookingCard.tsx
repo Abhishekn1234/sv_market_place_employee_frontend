@@ -124,7 +124,7 @@ export function BookingCard({
             {t('sidebar.disputes')}
           </Button>
 
-          {booking.status === "requested" && (
+          {booking.status === "CREATED" && (
             <div className="flex gap-3 flex-1 sm:flex-none">
               <Button
                 size="default"

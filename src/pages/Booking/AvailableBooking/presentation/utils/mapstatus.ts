@@ -3,19 +3,19 @@ import type { BookingStatus } from "../../domain/entities/bookingstatus";
 export function mapBookingStatus(apiStatus: string): BookingStatus {
   switch (apiStatus?.toUpperCase()) {
     case "REQUESTED":
-      return "requested";
+      return "CREATED";
 
     case "CONFIRMED":
-      return "confirmed";
+      return "COMPLETION_CONFIRMED";
 
     case "COMPLETED":
-      return "completed";
+      return "COMPLETED";
 
     case "CANCELLED":
     case "CANCELED":
     case "WORK_CANCELLED":
     case "WORKER_CANCELLED": // ✅ THIS WAS MISSING
-      return "cancelled";
+      return "CANCELLED";
 
     case "IN_PROGRESS":
     case "IN-PROGRESS":
@@ -23,6 +23,6 @@ export function mapBookingStatus(apiStatus: string): BookingStatus {
 
     default:
       console.warn("Unknown booking status:", apiStatus);
-      return "pending";
+      return "PENDING";
   }
 }

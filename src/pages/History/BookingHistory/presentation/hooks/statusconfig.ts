@@ -7,74 +7,124 @@ export function useStatusConfig(): Record<
   { label: string; color: string }
 > {
   const { translations } = useLanguage();
-  const completed = translations.bookingHistory.statusOptions.completed;
-  const C = completed.toLocaleUpperCase();
-  // console.log(C);
 
-  const statusOptions = translations.bookingHistory.statusOptions as unknown as StatusOptions;
-  // console.log(statusOptions);
+  const statusOptions =
+    translations.bookingHistory.statusOptions as unknown as StatusOptions;
 
   return {
-    [C]: {  // <- dynamic key
+    UNKNOWN: {
+      label: statusOptions.pending,
+      color: "bg-gray-100 text-gray-700",
+    },
+
+    CREATED: {
+      label: statusOptions.requested,
+      color: "bg-blue-100 text-blue-700",
+    },
+
+    ACCEPTED: {
+      label: statusOptions.ongoing,
+      color: "bg-blue-100 text-blue-700",
+    },
+
+    ASSIGNED: {
+      label: statusOptions.ongoing,
+      color: "bg-blue-100 text-blue-700",
+    },
+
+    WORKER_ACCEPTED: {
+      label: statusOptions.ongoing,
+      color: "bg-blue-100 text-blue-700",
+    },
+
+    WORKER_REJECTED: {
+      label: statusOptions.cancelled,
+      color: "bg-red-100 text-red-700",
+    },
+
+    WORKER_STARTED: {
+      label: statusOptions.inProgress,
+      color: "bg-purple-100 text-purple-700",
+    },
+
+    WORKER_COMPLETED: {
       label: statusOptions.completed,
       color: "bg-green-100 text-green-700",
     },
-    INVOICE_GENERATED:{
-      label:statusOptions.completed,
-      color:"bg-gray-100"
+
+    WORK_STARTED: {
+      label: statusOptions.inProgress,
+      color: "bg-purple-100 text-purple-700",
     },
-    completed:{
-      label:statusOptions.completed,
-      color:"bg-gray-100"
+
+    STARTED: {
+      label: statusOptions.inProgress,
+      color: "bg-purple-100 text-purple-700",
     },
-    confirmed: {
-      label: statusOptions.confirmed,
-      color: "bg-blue-100 text-blue-700",
-    },
-    pending: {
-      label: statusOptions.pending,
-      color: "bg-yellow-100 text-yellow-700",
-    },
+
     IN_PROGRESS: {
       label: statusOptions.inProgress,
       color: "bg-purple-100 text-purple-700",
     },
-    cancelled: {
+
+    WORK_COMPLETED_PENDING: {
+      label: statusOptions.completed,
+      color: "bg-green-100 text-green-700",
+    },
+
+    COMPLETION_CONFIRMED: {
+      label: statusOptions.confirmed,
+      color: "bg-green-100 text-green-700",
+    },
+
+    PAYMENT_PENDING: {
+      label: statusOptions.pending,
+      color: "bg-yellow-100 text-yellow-700",
+    },
+
+    PENDING: {
+      label: statusOptions.pending,
+      color: "bg-yellow-100 text-yellow-700",
+    },
+
+    PAYMENT_COMPLETED: {
+      label: statusOptions.completed,
+      color: "bg-green-100 text-green-700",
+    },
+
+    PAID: {
+      label: statusOptions.completed,
+      color: "bg-green-100 text-green-700",
+    },
+
+    INVOICE_GENERATED: {
+      label: statusOptions.completed,
+      color: "bg-green-100 text-green-700",
+    },
+
+    COMPLETED: {
+      label: statusOptions.completed,
+      color: "bg-green-100 text-green-700",
+    },
+
+    WORKER_CANCELLED: {
       label: statusOptions.cancelled,
       color: "bg-red-100 text-red-700",
     },
-    requested: {
-      label: statusOptions.requested,
+
+    CUSTOMER_CANCELLED: {
+      label: statusOptions.cancelled,
       color: "bg-red-100 text-red-700",
     },
-    ongoing: {
-      label: statusOptions.ongoing,
+
+    ADMIN_CANCELLED: {
+      label: statusOptions.cancelled,
       color: "bg-red-100 text-red-700",
     },
-    workCompletedPending:{
-      label:statusOptions.completed,
-      color:"bg-blue-100"
+
+    CANCELLED: {
+      label: statusOptions.cancelled,
+      color: "bg-red-100 text-red-700",
     },
-    WORK_COMPLETED_PENDING:{
-      label:statusOptions.completed,
-      color:"bg-green-100"
-    },
-   
-    WORK_COMPLETED:{
-      label:statusOptions.completed,
-      color:"bg-gray-100"
-    },
-    WORKER_ACCEPTED:{
-      label:statusOptions.completed,
-      color:"bg-blue-100"
-    },
-    WORKER_CANCELLED:{
-      label:statusOptions.cancelled,
-      color:"bg-red-100 text-red-700"
-    },
-    CUSTOMER_CANCELLED:{
-      label:statusOptions.cancelled,
-      color:"bg-red-100 text-red-700"
-    }
   };
 }
