@@ -62,7 +62,9 @@ export default function BookingCustomerInfo({
         </div>
 
         {/* BUTTON */}
-        {showCallButton && customer?.phone && (
+
+      </div>
+      {showCallButton && customer?.phone && (
           <a
             href={`tel:${customer.phone}`}
             className="inline-flex w-fit sm:w-auto h-6 shrink-0 items-center gap-1 rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white transition-colors hover:bg-emerald-700"
@@ -71,7 +73,6 @@ export default function BookingCustomerInfo({
             {t("availableBookings.callCustomer")}
           </a>
         )}
-      </div>
       </div>
     </section>
   );

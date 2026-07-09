@@ -70,43 +70,47 @@ export const useBookingSocketStore = create<State>((set) => ({
   // ASSIGNED BOOKINGS (FIXED)
   // =========================
 
-  upsertAssigned: (b) =>
-    set((state) => {
-      const id = normalizeId(getId(b));
-      if (!id) return state;
+ upsertAssigned: (b) =>
+  set((state) => {
+    const id = normalizeId(getId(b));
+    if (!id) return state;
 
-      const normalized = {
-        ...b,
-        _id: id,
-        booking: {
-          ...b.booking,
-        },
-      };
+    const exists = state.assignedBookings.find(
+      (x) => normalizeId(getId(x)) === id
+    );
 
-      const exists = state.assignedBookings.some(
-        (x) => normalizeId(getId(x)) === id
-      );
+    const normalized = {
+      ...exists,
+      ...b,
+      _id: id,
+      booking: {
+        ...(exists?.booking ?? {}),
+        ...(b.booking ?? {}),
+        // ✅ keep booking status synchronized
+        status:
+          b.status ??
+          b.booking?.status ??
+          exists?.booking?.status,
+        // ✅ keep workStartedAt synchronized
+        workStartedAt:
+          b.workStartedAt ??
+          b.booking?.workStartedAt ??
+          exists?.booking?.workStartedAt,
+      },
+    };
 
+    if (exists) {
       return {
-        assignedBookings: exists
-          ? state.assignedBookings.map((x) => {
-              const xId = normalizeId(getId(x));
-
-              if (xId !== id) return x;
-
-              return {
-                ...x,
-                ...normalized,
-                booking: {
-                  ...x.booking,
-                  ...normalized.booking,
-                },
-              };
-            })
-          : [normalized, ...state.assignedBookings],
+        assignedBookings: state.assignedBookings.map((x) =>
+          normalizeId(getId(x)) === id ? normalized : x
+        ),
       };
-    }),
+    }
 
+    return {
+      assignedBookings: [normalized, ...state.assignedBookings],
+    };
+  }),
   // =========================
   // REMOVE (INSTANT UI UPDATE)
   // =========================

@@ -79,7 +79,7 @@ function getSmartRoute(data = {}) {
     status === "REQUESTED"
   ) {
     return bookingId
-      ? `/availableBooking?status=requested&bookingId=${bookingId}`
+      ? `/availableBooking`
       : "/availableBooking?status=requested";
   }
 

@@ -352,6 +352,15 @@
 },
 "availableWork": {
     "noWorks": "कोई कार्य उपलब्ध नहीं है",
+    "confirmCashPayment":"कैश पेमेंट कन्फ़र्म करें",
+    "bookingConfirmCashPayment": {
+  "title": "नकद भुगतान की पुष्टि करें",
+  "description": "भुगतान की पुष्टि करने से पहले चाहें तो एक टिप्पणी जोड़ें।",
+  "notes": "टिप्पणी",
+  "cancel":"रद्द करना",
+  "confirmCashPayment":"कैश पेमेंट कन्फ़र्म करें",
+  "placeholder": "उदाहरण: ग्राहक ने ₹500 नकद भुगतान किया। शेष राशि का भुगतान हो गया।"
+   },
     "customer": "ग्राहक",
     "location": "स्थान",
     "fetchingLocation": "स्थान प्राप्त किया जा रहा है...",

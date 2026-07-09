@@ -31,6 +31,7 @@ export default function NotificationsPage() {
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const [selectAll, setSelectAll] = useState(false);
 
   // =========================
   // INFINITE QUERY
@@ -46,6 +47,7 @@ export default function NotificationsPage() {
     unreadOnly: filter === "unread" ? true : undefined,
     type: CATEGORY_MAP[selectedCategory],
   });
+  
 
   // =========================
   // FLATTEN DATA
@@ -73,6 +75,9 @@ export default function NotificationsPage() {
   // SELECT LOGIC
   // =========================
   const handleSelectNotification = (id: string) => {
+     if (selectAll) {
+        setSelectAll(false);
+    }
     const target = notifications.find((n) => n._id === id);
     if (!target || target.isRead) return;
 
@@ -83,21 +88,15 @@ export default function NotificationsPage() {
     );
   };
 
-  const toggleSelectAll = () => {
-    const unreadIds = unreadNotifications.map((n) => n._id);
+ const toggleSelectAll = () => {
+    const next = !selectAll;
 
-    const allSelected =
-      unreadIds.length > 0 &&
-      unreadIds.every((id) => selectedIds.includes(id));
+    setSelectAll(next);
 
-    if (allSelected) {
-      setSelectedIds((prev) =>
-        prev.filter((id) => !unreadIds.includes(id))
-      );
-    } else {
-      setSelectedIds(unreadIds);
+    if (next) {
+        setSelectedIds([]);
     }
-  };
+};
 
   // =========================
   // MARK SELECTED AS READ
@@ -115,11 +114,11 @@ export default function NotificationsPage() {
   // =========================
   // MARK ALL AS READ
   // =========================
-  const handleMarkAllAsRead = async () => {
+ const handleMarkAllAsRead = async () => {
     await markAllRead();
     setSelectedIds([]);
-  };
-
+    setSelectAll(false);
+};
   // =========================
   // LOAD MORE
   // =========================
@@ -210,6 +209,7 @@ export default function NotificationsPage() {
           setSelectedCategory={setSelectedCategory}
           markSelectedAsRead={markSelectedAsRead}
           markAllRead={handleMarkAllAsRead}
+          isAllSelected={selectAll}
           selectedNotificationIds={selectedIds}
           isPending={isMarkingSelected || isMarkingAll}
           toggleSelectAll={toggleSelectAll}

@@ -44,6 +44,16 @@
   },
    "availableWork": {
     "noWorks": "لا توجد أعمال متاحة",
+    "confirmCashPayment":"تأكيد الدفع النقدي",
+     "bookingConfirmCashPayment": {
+        "title": "تأكيد الدفع النقدي",
+        "description": "أضف ملاحظة اختيارية قبل تأكيد عملية الدفع.",
+        "notes": "ملاحظات",
+        "cancel":"إلغاء",
+        "confirmCashPayment":"تأكيد الدفع النقدي",
+        
+        "placeholder": "مثال: دفع العميل 500 روبية نقدًا. تم تسوية المبلغ بالكامل."
+      },
     "customer": "العميل",
     "location": "الموقع",
     "fetchingLocation": "جارٍ تحميل الموقع...",

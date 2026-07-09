@@ -56,6 +56,15 @@
     "noWorks": "No works available",
     "customer": "Customer",
     "location": "Location",
+    "confirmCashPayment":"Confirm cash payment",
+    "bookingConfirmCashPayment": {
+      "title": "Confirm Cash Payment",
+      "description": "Add an optional note before confirming the payment.",
+      "notes": "Notes",
+      "cancel":"Cancel",
+      "confirmCashPayment":"Confirm cash payment",
+      "placeholder": "Example: Customer paid ₹500 in cash. Balance settled."
+   },
     "fetchingLocation": "Fetching location...",
     "category": "Category",
     "workerPoolAmount": "Worker Pool Amount",
@@ -444,6 +453,7 @@
     "actions": {
       "cancel": "Cancel",
       "start": "Start",
+      "confirmCashPayment":"Confirm cash payment",
       "viewDetails": "View Details",
       "stopwork": "Stop Work",
       "resumeWork": "Resume Work",
