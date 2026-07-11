@@ -14,7 +14,7 @@ export const FINAL_WORK_STATUSES: WorkStatus[] = [
   "PARTIALLY_PAID",
   "PAYMENT_INITIATED",
   "PAYMENT_COMPLETED",
- 
+
   "WORKER_CANCELLED",
   "WORKER_REJECTED",
   "CUSTOMER_CANCELLED",
@@ -79,7 +79,7 @@ export function normalizeWorkStatus(status?: unknown): WorkStatus {
     "PAYMENT_INITIATED",
     "PAYMENT_COMPLETED",
     "PAYMENT_FAILED",
-   "PAYMENT_PENDING",
+    "PAYMENT_PENDING",
 
     // Final
     "COMPLETED",
@@ -113,6 +113,13 @@ const isCancelled = (status?: string) => {
   ].includes(s ?? "");
 };
 
+// ✅ Statuses that should not render as a work card
+const isExcludedFromCards = (status?: string) => {
+  const s = status?.toUpperCase();
+
+  return ["INVOICE_GENERATED"].includes(s ?? "");
+};
+
 // ✅ Main normalizer
 export function normalizeAssignedWorks(
   assignedBookings: Array<Partial<DisplayWork> | Partial<Booking>>
@@ -130,6 +137,9 @@ export function normalizeAssignedWorks(
 
     // Skip cancelled bookings
     if (isCancelled(statusSource)) return;
+
+    // Skip bookings whose invoice has already been generated
+    if (isExcludedFromCards(statusSource)) return;
 
     const existing = map.get(id);
 

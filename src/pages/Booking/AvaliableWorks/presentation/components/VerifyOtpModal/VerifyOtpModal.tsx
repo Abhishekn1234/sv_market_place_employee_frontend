@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
-import { useVerifyOtp } from "../../hooks/useVeirfyOtp";
+import { useVerifyOtp } from "../../hooks/useVerifyOtp";
 import { normalizeAssignedWorks } from "../../utils/workPresentation.helpers";
 import type { DisplayWork } from "../../types/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";

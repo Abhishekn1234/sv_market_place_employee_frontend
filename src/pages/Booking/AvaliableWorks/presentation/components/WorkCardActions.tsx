@@ -11,9 +11,9 @@ interface Props {
   onStart: (work: DisplayWork) => void;
   onComplete: (work: DisplayWork & { elapsedTime: string }) => void;
   onCancel: (work: DisplayWork) => void;
-   bookingStatus?: string;
+  bookingStatus?: string;
   onConfirmCashPayment: (work: DisplayWork) => void;
-    canConfirmCashPayment?: boolean;
+  canConfirmCashPayment?: boolean;
   onVerify: (work: DisplayWork) => void;
 }
 
@@ -24,14 +24,18 @@ function canStartOrCancel(work: DisplayWork) {
 function isActiveWork(work: DisplayWork) {
   return ["STARTED", "IN_PROGRESS"].includes(work.status);
 }
-// canConfirmCashPayment,
+
 export default function WorkCardActions({
   work, id, timers, t, onStart, onComplete, onCancel, onVerify,
-    onConfirmCashPayment,
- 
+  onConfirmCashPayment,
 }: Props) {
   const navigate = useNavigate();
-//  console.log(bookingStatus);
+
+  // ✅ Gate the cash payment button on the backend flag, not just payment method
+  const canConfirmCashPayment = Boolean(
+    (work as DisplayWork).workerActions?.canConfirmCashPayment
+  );
+
   return (
     <>
       {/* TIMER */}
@@ -104,7 +108,8 @@ export default function WorkCardActions({
             {t("availableWork.verifyOtp")}
           </Button>
         )}
-         {work.pendingCashPayment?.paymentMethod==="CASH" && (
+
+        {canConfirmCashPayment && (
           <Button
             size="sm"
             className="mt-2 w-full"
