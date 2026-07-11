@@ -118,7 +118,7 @@ export function useBookingColumns({
                     {t('sidebar.disputes')}
                   </Button>
 
-          {b.status === "CREATED" && (
+           {b.status === "CREATED" && (
             <>
               <Button
                 size="sm"
