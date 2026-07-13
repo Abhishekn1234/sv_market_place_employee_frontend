@@ -31,10 +31,11 @@ export default function WorkCardActions({
 }: Props) {
   const navigate = useNavigate();
 
-  // ✅ Gate the cash payment button on the backend flag, not just payment method
-  const canConfirmCashPayment = Boolean(
-    (work as DisplayWork).workerActions?.canConfirmCashPayment
-  );
+        // ✅ Gate the cash payment button on the backend flag, not just payment method
+      const canConfirmCashPayment = Boolean(
+        work.workerActions?.canConfirmCashPayment ??
+        work.booking?.workerActions?.canConfirmCashPayment
+      );
 
   return (
     <>

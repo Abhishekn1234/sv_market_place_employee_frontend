@@ -143,14 +143,13 @@ export function normalizeAssignedWorks(
 
     const existing = map.get(id);
 
-    map.set(id, {
+      map.set(id, {
       ...(existing ?? {}),
       ...item,
 
       _id: id,
       id,
 
-      // ✅ Keep booking object in sync with latest socket status
       booking: booking
         ? {
             ...booking,
@@ -158,10 +157,13 @@ export function normalizeAssignedWorks(
           }
         : existing?.booking,
 
-      // ✅ Latest status
+      workerActions:
+        item.workerActions ??
+        booking?.workerActions ??
+        existing?.workerActions,
+
       status: normalizeWorkStatus(statusSource),
 
-      // ✅ Preserve work start time
       workStartedAt:
         item.workStartedAt ??
         item.startedAt ??

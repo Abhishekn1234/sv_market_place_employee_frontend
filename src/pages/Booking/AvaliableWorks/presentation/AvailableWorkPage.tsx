@@ -41,34 +41,37 @@ export default function AvailableWorkPage() {
     useState<CancelableWork | null>(null);
   const [timers, setTimers] = useState<WorkTimerMap>({});
 
- const assignedBookings = useMemo(() => {
-  const map = new Map<string, any>();
+    const assignedBookings = useMemo(() => {
+      const map = new Map<string, any>();
 
-  // ✅ API FIRST
-  (assignedFromApi ?? []).forEach((b) => {
-    const id = b.booking?._id || b._id;
-    map.set(id, b);
-  });
-  // console.log("API Assigned:", assignedFromApi);
+      (assignedFromApi ?? []).forEach((b) => {
+        const id = b.booking?._id || b._id;
+        map.set(id, b);
+      });
 
-  // ✅ SOCKET OVERRIDE (MERGED, NOT REPLACED)
-  socketBookings.forEach((b) => {
-    const id = b.booking?._id || b._id;
+      socketBookings.forEach((b) => {
+        const id = b.booking?._id || b._id;
 
-    const existing = map.get(id);
+        const existing = map.get(id);
 
-    map.set(id, {
-      ...existing,
-      ...b,
-      booking: {
-        ...existing?.booking,
-        ...b.booking,
-      },
-    });
-  });
+        map.set(id, {
+          ...existing,
+          ...b,
 
-  return Array.from(map.values());
-}, [assignedFromApi, socketBookings]);
+          booking: {
+            ...existing?.booking,
+            ...b.booking,
+          },
+
+          workerActions: {
+            ...existing?.workerActions,
+            ...b.workerActions,
+          },
+        });
+      });
+
+      return Array.from(map.values());
+    }, [assignedFromApi, socketBookings]);
   const workList = useMemo(() => {
   return normalizeAssignedWorks(
     assignedBookings
