@@ -42,10 +42,10 @@ export default function WorkCard({
     work.workerActions?.canConfirmCashPayment;
 // console.log("bookingStatus:", work.booking?.status);
 // console.log("workerActions:", work.workerActions);
-// console.log(
-//   "canConfirmCashPayment:",
-//   work.workerActions?.canConfirmCashPayment
-// );
+console.log(
+   "canConfirmCashPayment:",
+  work.workerActions?.canConfirmCashPayment
+);
   return (
     <CommonCard
       noPadding

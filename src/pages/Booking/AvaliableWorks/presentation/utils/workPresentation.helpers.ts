@@ -4,6 +4,7 @@ import type {
   WorkLocation,
   WorkStatus,
 } from "../types/workPresentation.types";
+import { BookingEvents } from "@/components/common/BookingEvents";
 
 // ✅ Final statuses
 export const FINAL_WORK_STATUSES: WorkStatus[] = [
@@ -12,7 +13,7 @@ export const FINAL_WORK_STATUSES: WorkStatus[] = [
   "COMPLETION_CONFIRMED",
   "INVOICE_GENERATED",
   "PARTIALLY_PAID",
-  "PAYMENT_INITIATED",
+   "PAID",
   "PAYMENT_COMPLETED",
 
   "WORKER_CANCELLED",
@@ -120,7 +121,7 @@ const isExcludedFromCards = (status?: string) => {
   return ["INVOICE_GENERATED"].includes(s ?? "");
 };
 
-// ✅ Main normalizer
+
 export function normalizeAssignedWorks(
   assignedBookings: Array<Partial<DisplayWork> | Partial<Booking>>
 ): DisplayWork[] {
@@ -131,38 +132,92 @@ export function normalizeAssignedWorks(
     const id = getBookingId(item);
 
     if (!id) return;
+   
+    // Default status
+   let statusSource = booking?.status ?? item.status;
+    const normalizedStatus = normalizeWorkStatus(statusSource);
+    // Socket event takes precedence
+    switch (item.eventName) {
+      case BookingEvents.WORK_START_OTP_GENERATED:
+        statusSource = "WORK_START_OTP_GENERATED";
+        break;
 
-    // ✅ Socket status takes priority over booking status
-    const statusSource = item.status ?? booking?.status;
+      case BookingEvents.WORK_STARTED:
+      case BookingEvents.WORKER_STARTED:
+        statusSource = "STARTED";
+        break;
 
-    // Skip cancelled bookings
+      case BookingEvents.WORK_COMPLETED_BY_WORKER:
+        statusSource = "WORK_COMPLETED_PENDING";
+        break;
+
+      case BookingEvents.COMPLETION_OTP_GENERATED:
+        statusSource = "WORK_COMPLETED_PENDING";
+        break;
+
+      case BookingEvents.COMPLETION_CONFIRMED:
+        statusSource = "COMPLETION_CONFIRMED";
+        break;
+
+      case BookingEvents.INVOICE_GENERATED:
+        statusSource = "INVOICE_GENERATED";
+        break;
+
+      case BookingEvents.PAYMENT_INITIATED:
+        statusSource = "PAYMENT_INITIATED";
+        break;
+
+      case BookingEvents.PAYMENT_COMPLETED:
+      case BookingEvents.PAID:
+        statusSource = "PAYMENT_COMPLETED";
+        break;
+
+      case BookingEvents.PARTIALLY_PAID:
+        statusSource = "PARTIALLY_PAID";
+        break;
+
+      case BookingEvents.CANCELLED_BY_CUSTOMER:
+        statusSource = "CUSTOMER_CANCELLED";
+        break;
+
+      case BookingEvents.CANCELLED_BY_WORKER:
+        statusSource = "WORKER_CANCELLED";
+        break;
+
+      default:
+        break;
+    }
+
     if (isCancelled(statusSource)) return;
 
-    // Skip bookings whose invoice has already been generated
     if (isExcludedFromCards(statusSource)) return;
 
     const existing = map.get(id);
 
-      map.set(id, {
+    map.set(id, {
       ...(existing ?? {}),
       ...item,
 
       _id: id,
       id,
 
-      booking: booking
-        ? {
-            ...booking,
-            status: item.status ?? booking.status,
-          }
-        : existing?.booking,
+    
 
-      workerActions:
-        item.workerActions ??
-        booking?.workerActions ??
-        existing?.workerActions,
+      booking: {
+        ...(existing?.booking ?? {}),
+        ...(booking ?? {}),
+        status: normalizedStatus,
+      },
 
-      status: normalizeWorkStatus(statusSource),
+      status: normalizedStatus,
+
+      workerActions: {
+        ...(existing?.workerActions ?? {}),
+        ...(booking?.workerActions ?? {}),
+        ...(item.workerActions ?? {}),
+      },
+
+     
 
       workStartedAt:
         item.workStartedAt ??

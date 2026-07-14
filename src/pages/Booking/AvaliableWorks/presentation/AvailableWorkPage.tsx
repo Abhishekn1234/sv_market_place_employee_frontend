@@ -33,6 +33,7 @@ export default function AvailableWorkPage() {
   const isRTL = language === "AR";
   const removeAssigned = useBookingSocketStore((state) => state.removeAssigned);
   const socketBookings = useBookingSocketStore((state) => state.assignedBookings);
+  // console.log(socketBookings);
   // const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
 
   const [selectedWork, setSelectedWork] = useState<DisplayWork | null>(null);
@@ -51,7 +52,7 @@ export default function AvailableWorkPage() {
 
       socketBookings.forEach((b) => {
         const id = b.booking?._id || b._id;
-
+        // console.log(b);
         const existing = map.get(id);
 
         map.set(id, {
@@ -72,27 +73,26 @@ export default function AvailableWorkPage() {
 
       return Array.from(map.values());
     }, [assignedFromApi, socketBookings]);
+    // console.log("assignedBookings", assignedBookings);
   const workList = useMemo(() => {
   return normalizeAssignedWorks(
     assignedBookings
   ).filter((work) => {
-    const status = work.status?.toUpperCase();
-    // console.log(status);
-    
-    // Broaden exclusion to handle all cancellation types instantly
-    const excludedStatuses = [
-      "CUSTOMER_CANCELLED",
-      "WORKER_CANCELLED",
-      "CANCELLED",
-      "ADMIN_CANCELLED",
-      "CANCELLED_BY_CUSTOMER",
-     
-    ];
+    const status = (work.booking?.status ?? work.status)?.toUpperCase();
 
-    return (
-      !excludedStatuses.includes(status || "")
-     
-    );
+const excludedStatuses = [
+  "CUSTOMER_CANCELLED",
+  "WORKER_CANCELLED",
+  "CANCELLED",
+  "ADMIN_CANCELLED",
+  "CANCELLED_BY_CUSTOMER",
+  "INVOICE_GENERATED",
+  "PAYMENT_COMPLETED",
+];
+
+return !excludedStatuses.includes(status || "");
+
+    
   });
 }, [assignedBookings]);
 // useEffect(() => {
@@ -104,7 +104,7 @@ export default function AvailableWorkPage() {
       const updatedTimers: WorkTimerMap = {};
 
       workList.forEach((work) => {
-        if (FINAL_WORK_STATUSES.includes(work.status)) return;
+        if (FINAL_WORK_STATUSES.includes(work?.booking?.status??"FINALIZED")) return;
 
      const startedAt = work.workStartedAt;
 

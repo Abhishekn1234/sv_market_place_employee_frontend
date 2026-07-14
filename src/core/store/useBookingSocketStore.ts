@@ -79,25 +79,30 @@ export const useBookingSocketStore = create<State>((set) => ({
       (x) => normalizeId(getId(x)) === id
     );
 
-    const normalized = {
-      ...exists,
-      ...b,
-      _id: id,
-      booking: {
-        ...(exists?.booking ?? {}),
-        ...(b.booking ?? {}),
-        // ✅ keep booking status synchronized
-        status:
-          b.status ??
-          b.booking?.status ??
-          exists?.booking?.status,
-        // ✅ keep workStartedAt synchronized
-        workStartedAt:
-          b.workStartedAt ??
-          b.booking?.workStartedAt ??
-          exists?.booking?.workStartedAt,
-      },
-    };
+   const normalized = {
+  ...exists,
+  ...b,
+  _id: id,
+
+  booking: {
+    ...(exists?.booking ?? {}),
+    ...(b.booking ?? {}),
+    status:
+      b.status ??
+      b.booking?.status ??
+      exists?.booking?.status,
+    workStartedAt:
+      b.workStartedAt ??
+      b.booking?.workStartedAt ??
+      exists?.booking?.workStartedAt,
+  },
+
+  workerActions: {
+    ...(exists?.workerActions ?? {}),
+    ...(b.workerActions ?? {}),
+    ...(b.booking?.workerActions ?? {}),
+  },
+};
 
     if (exists) {
       return {
