@@ -1,4 +1,4 @@
-import type { DisplayWork } from "../types/workPresentation.types";
+import type { DisplayWork } from "../../domain/entities/workPresentation.types";
 
 export const HIDDEN_STATUSES = [
   "UNKNOWN",

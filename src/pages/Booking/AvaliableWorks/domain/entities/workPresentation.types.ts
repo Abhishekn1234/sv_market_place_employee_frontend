@@ -5,8 +5,8 @@ import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/b
 import type {
   CancelReasonType,
   CancelWork,
-} from "../../domain/entities/cancelwork";
-import type { Work } from "../../domain/entities/work";
+} from "./cancelwork";
+import type { Work } from "./work";
 
 /**
  * ============================================

@@ -8,7 +8,7 @@ import {
   elapsedMinutes,
   getBookingId,
 } from "../../utils/workPresentation.helpers";
-import type { DisplayWork } from "../../types/workPresentation.types";
+import type { DisplayWork } from "../../../domain/entities/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useVerifyOtp } from "../../hooks/useVerifyOtp";
 import { normalizeAssignedWorks } from "../../utils/workPresentation.helpers";
-import type { DisplayWork } from "../../types/workPresentation.types";
+import type { DisplayWork } from "../../../domain/entities/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 import { Input } from "@/components/ui/input";
 import { CommonModal } from "@/components/common/CommonModal";

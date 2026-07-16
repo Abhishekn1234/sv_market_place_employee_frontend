@@ -19,7 +19,7 @@ import type {
   WorkModalsProps,
   
   
-} from "../types/workPresentation.types";
+} from "../../domain/entities/workPresentation.types";
 import type { Dispute } from "@/pages/History/BookingHistory/domain/entities/disputes";
 import type { CancelReasonType, CancelWork } from "../../domain/entities/cancelwork";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";

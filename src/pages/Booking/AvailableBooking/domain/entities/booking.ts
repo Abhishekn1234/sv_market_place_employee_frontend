@@ -5,7 +5,7 @@ import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servic
 import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import type { PricingTier } from "./pricingtier.types";
 import type { Bookingschedule } from "./bookingschedule";
-import type { AppliedDiscount, BookingValues, TaxLine } from "@/pages/Booking/AvaliableWorks/presentation/types/workPresentation.types";
+import type { AppliedDiscount, BookingValues, TaxLine } from "@/pages/Booking/AvaliableWorks/domain/entities/workPresentation.types";
 
 export interface Booking {
   _id: string;

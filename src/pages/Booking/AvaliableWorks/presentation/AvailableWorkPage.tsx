@@ -20,7 +20,7 @@ import type {
   DisplayWork,
   WorkModalType,
   WorkTimerMap,
-} from "./types/workPresentation.types";
+} from "../domain/entities/workPresentation.types";
 
 // import CommonSpinner from "@/components/common/CommonSpinner";
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useStartWork } from "../../hooks/useStartWork";
 import { toast } from "react-toastify";
-import type { DisplayWork } from "../../types/workPresentation.types";
+import type { DisplayWork } from "../../../domain/entities/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 
 import {

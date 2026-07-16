@@ -3,7 +3,7 @@ import type {
   DisplayWork,
   WorkLocation,
   WorkStatus,
-} from "../types/workPresentation.types";
+} from "../../domain/entities/workPresentation.types";
 import { BookingEvents } from "@/components/common/BookingEvents";
 
 // ✅ Final statuses

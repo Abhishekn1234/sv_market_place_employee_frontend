@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useState, useEffect } from "react";
-import type { DisplayWork } from "../../types/workPresentation.types";
+import type { DisplayWork } from "../../../domain/entities/workPresentation.types";
 import { useBookingConfirmCashPayment } from "../../hooks/useBookingConfirmCashPayment";
 
 interface Props {
