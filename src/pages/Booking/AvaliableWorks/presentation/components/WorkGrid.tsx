@@ -41,6 +41,7 @@ export default function WorkGrid({
   const [locations, setLocations] = useState<Record<string, string>>({});
   const { t } = useLanguage();
   const navigate = useNavigate();
+  // console.log(workList)
 
   // ✅ workList is already normalized once by the page — do NOT re-normalize here.
   const normalizedWorkList = useMemo(() => {
@@ -90,7 +91,8 @@ export default function WorkGrid({
             categories.find((c) => c._id === work.service?.category)?.name ??
             t("common.na");
           const coordinates = getWorkCoordinates(getWorkLocation(work));
-          const canConfirmCashPayment = work.workerActions?.canConfirmCashPayment;
+          const canConfirmCashPayment =
+  work.workerActions?.canConfirmCashPayment === true;
 
           return (
             <CommonCard

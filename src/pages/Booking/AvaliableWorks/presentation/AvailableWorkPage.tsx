@@ -12,6 +12,7 @@ import WorkModals from "./components/WorkModals";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import {
   FINAL_WORK_STATUSES,
+  getBookingId,
   normalizeAssignedWorks,
 } from "./utils/workPresentation.helpers";
 // import type { Booking } from "../../AvailableBooking/domain/entities/booking";
@@ -43,36 +44,36 @@ export default function AvailableWorkPage() {
   const [timers, setTimers] = useState<WorkTimerMap>({});
 
     const assignedBookings = useMemo(() => {
-      const map = new Map<string, any>();
+  const map = new Map<string, any>();
 
-      (assignedFromApi ?? []).forEach((b) => {
-        const id = b.booking?._id || b._id;
-        map.set(id, b);
-      });
+  (assignedFromApi ?? []).forEach((b) => {
+    const id = getBookingId(b);
+    if (!id) return;
+    map.set(id, b);
+  });
 
-      socketBookings.forEach((b) => {
-        const id = b.booking?._id || b._id;
-        // console.log(b);
-        const existing = map.get(id);
+  socketBookings.forEach((b) => {
+    const id = getBookingId(b);
+    if (!id) return;
 
-        map.set(id, {
-          ...existing,
-          ...b,
+    const existing = map.get(id);
 
-          booking: {
-            ...existing?.booking,
-            ...b.booking,
-          },
+    map.set(id, {
+      ...existing,
+      ...b,
+      booking: {
+        ...existing?.booking,
+        ...b.booking,
+      },
+      workerActions: {
+        ...existing?.workerActions,
+        ...b.workerActions,
+      },
+    });
+  });
 
-          workerActions: {
-            ...existing?.workerActions,
-            ...b.workerActions,
-          },
-        });
-      });
-
-      return Array.from(map.values());
-    }, [assignedFromApi, socketBookings]);
+  return Array.from(map.values());
+}, [assignedFromApi, socketBookings]);
     // console.log("assignedBookings", assignedBookings);
   const workList = useMemo(() => {
   return normalizeAssignedWorks(

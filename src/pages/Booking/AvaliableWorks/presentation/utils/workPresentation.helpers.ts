@@ -13,7 +13,7 @@ export const FINAL_WORK_STATUSES: WorkStatus[] = [
   "COMPLETION_CONFIRMED",
   "INVOICE_GENERATED",
   "PARTIALLY_PAID",
-   "PAID",
+  "PAID",
   "PAYMENT_COMPLETED",
 
   "WORKER_CANCELLED",
@@ -114,13 +114,34 @@ const isCancelled = (status?: string) => {
   ].includes(s ?? "");
 };
 
-// ✅ Statuses that should not render as a work card
-const isExcludedFromCards = (status?: string) => {
-  const s = status?.toUpperCase();
+// ✅ Status-specific exclusion rules (dynamic & extensible)
+// Each rule receives the raw item (plus its nested booking) and returns
+// true when that status should NOT render as a card.
+// Add new statuses/conditions here without touching the core loop.
+type ExclusionRule = (item: any) => boolean;
 
-  return ["INVOICE_GENERATED"].includes(s ?? "");
+const STATUS_EXCLUSION_RULES: Partial<Record<string, ExclusionRule>> = {
+  // Always excluded, no conditions
+  INVOICE_GENERATED: () => true,
+
+  // Only excluded when payment can't actually be processed yet
+  PAYMENT_PENDING: (item) => {
+    const canProcessPayment =
+      item?.canProcessPayment ?? item?.booking?.canProcessPayment;
+
+    // Treat only strict boolean true as "can process"
+    return canProcessPayment !== true;
+  },
 };
 
+// ✅ Statuses that should not render as a work card
+const isExcludedFromCards = (status?: string, item?: any) => {
+  const s = status?.toUpperCase();
+  if (!s) return false;
+
+  const rule = STATUS_EXCLUSION_RULES[s];
+  return rule ? rule(item) : false;
+};
 
 export function normalizeAssignedWorks(
   assignedBookings: Array<Partial<DisplayWork> | Partial<Booking>>
@@ -132,9 +153,9 @@ export function normalizeAssignedWorks(
     const id = getBookingId(item);
 
     if (!id) return;
-   
+
     // Default status
-   let statusSource = booking?.status ?? item.status;
+    let statusSource = booking?.status ?? item.status;
     const normalizedStatus = normalizeWorkStatus(statusSource);
     // Socket event takes precedence
     switch (item.eventName) {
@@ -190,7 +211,7 @@ export function normalizeAssignedWorks(
 
     if (isCancelled(statusSource)) return;
 
-    if (isExcludedFromCards(statusSource)) return;
+    if (isExcludedFromCards(statusSource, item)) return;
 
     const existing = map.get(id);
 
@@ -200,8 +221,6 @@ export function normalizeAssignedWorks(
 
       _id: id,
       id,
-
-    
 
       booking: {
         ...(existing?.booking ?? {}),
@@ -216,8 +235,6 @@ export function normalizeAssignedWorks(
         ...(booking?.workerActions ?? {}),
         ...(item.workerActions ?? {}),
       },
-
-     
 
       workStartedAt:
         item.workStartedAt ??
