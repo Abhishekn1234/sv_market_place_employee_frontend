@@ -18,7 +18,7 @@ export default function BookingCustomerInfo({
   isRTL = false,
 }: Props) {
   const ltr = isRTL ? { dir: "ltr" as const } : {};
-
+console.log(customer);
   return (
     <section className={cn("space-y-1.5", className)}>
       <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
