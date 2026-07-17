@@ -7,6 +7,7 @@ import type {
   CancelWork,
 } from "./cancelwork";
 import type { Work } from "./work";
+import type { Bookingschedule } from "@/pages/Booking/AvailableBooking/domain/entities/bookingschedule";
 
 /**
  * ============================================
@@ -238,6 +239,7 @@ export type DisplayWork = Omit<
   workerActions?: {
     canConfirmCashPayment: boolean;
   };
+  schedule?:Bookingschedule;
 
   pendingCashPayment?: PendingCashPayment;
 
@@ -322,4 +324,10 @@ export interface WorkModalsProps {
   onCancelSuccess?: (updatedBooking: Booking) => void;
 
   onCompleteSuccess?: (updatedWork: Work | DisplayWork) => void;
+
+  // ✅ replace useBookingSocketStore's upsertAssigned/removeAssigned —
+  // WorkModals writes straight into the page's own liveBookings state.
+  onUpsertWork?: (work: any, eventName?: string) => void;
+
+  onRemoveWork?: (id: string | undefined) => void;
 }

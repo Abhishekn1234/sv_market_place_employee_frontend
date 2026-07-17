@@ -124,7 +124,7 @@ export interface Booking {
 
   eventName?: string;
   occurredAt?: string;
-
+  canConfirmCashPayment?:boolean;
   workerActions?: {
     canConfirmCashPayment: boolean;
   };

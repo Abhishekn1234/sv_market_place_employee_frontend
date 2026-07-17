@@ -9,120 +9,211 @@ import { useAssign } from "./hooks/useAssign";
 import WorkGrid from "./components/WorkGrid";
 import WorkModals from "./components/WorkModals";
 
-import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import {
   FINAL_WORK_STATUSES,
   getBookingId,
-  normalizeAssignedWorks,
 } from "./utils/workPresentation.helpers";
-// import type { Booking } from "../../AvailableBooking/domain/entities/booking";
 import type {
   CancelableWork,
   DisplayWork,
   WorkModalType,
   WorkTimerMap,
 } from "../domain/entities/workPresentation.types";
+import { BookingEvents } from "@/components/common/BookingEvents";
+import { getSocket, initializeSocket } from "@/core/Websocket/presentation/components/socket";
 
-// import CommonSpinner from "@/components/common/CommonSpinner";
+const BOOKING_NAMESPACE = "/workers/assigned-updates";
+
+const EXCLUDED_STATUSES = [
+  "CANCELLED",
+  "CANCELLED_BY_CUSTOMER",
+  "CANCELLED_BY_WORKER",
+  "INVOICE_GENERATED",
+  "PAYMENT_COMPLETED",
+];
+
+const UPSERT_EVENTS = [
+  BookingEvents.ASSIGNED,
+  BookingEvents.WORKER_ACCEPTED,
+  BookingEvents.WORKER_STARTED,
+  BookingEvents.WORKER_COMPLETED,
+  BookingEvents.WORK_START_OTP_GENERATED,
+  BookingEvents.WORK_STARTED,
+  BookingEvents.WORK_COMPLETED_BY_WORKER,
+  BookingEvents.COMPLETION_OTP_GENERATED,
+  BookingEvents.COMPLETION_CONFIRMED,
+  BookingEvents.COMPLETED,
+
+  BookingEvents.PAYMENT_INITIATED, // <-- Add this
+
+  BookingEvents.PARTIALLY_PAID,
+  BookingEvents.PAID,
+
+  BookingEvents.COORDINATOR_ASSIGNED_WORKER,
+  BookingEvents.COORDINATOR_REASSIGNED_WORKER,
+];
+
+const REMOVE_EVENTS = [
+  BookingEvents.CANCELLED_BY_CUSTOMER,
+  BookingEvents.CANCELLED_BY_WORKER,
+  BookingEvents.CANCELLEDLED_BY_PLATFORM,
+  BookingEvents.INVOICE_GENERATED,
+  BookingEvents.PAYMENT_COMPLETED,
+];
+
+
+function resolveStartedAt(work: any): string | null {
+  return (
+    work?.workStartedAt ??
+    work?.startedAt ??
+    work?.booking?.startedAt ??
+    work?.booking?.workStartedAt ??
+    null
+  );
+}
 
 export default function AvailableWorkPage() {
   const { language, t } = useLanguage();
   const { data: categories } = useServiceCategory();
   const cancelMutation = useCancel();
   const { assignedWorks: assignedFromApi, isLoading } = useAssign();
-//  console.log("API Assigned from useAssign:", assignedFromApi);
   const isRTL = language === "AR";
-  const removeAssigned = useBookingSocketStore((state) => state.removeAssigned);
-  const socketBookings = useBookingSocketStore((state) => state.assignedBookings);
-  // console.log(socketBookings);
-  // const upsertAssigned = useBookingSocketStore((state) => state.upsertAssigned);
 
   const [selectedWork, setSelectedWork] = useState<DisplayWork | null>(null);
   const [modalType, setModalType] = useState<WorkModalType | null>(null);
   const [cancelConfirmWork, setCancelConfirmWork] =
     useState<CancelableWork | null>(null);
   const [timers, setTimers] = useState<WorkTimerMap>({});
+  const [liveBookings, setLiveBookings] = useState<any[]>([]);
 
-    const assignedBookings = useMemo(() => {
-  const map = new Map<string, any>();
+  // Hydrate from API once on load / reload
+  useEffect(() => {
+    if (assignedFromApi?.length) setLiveBookings(assignedFromApi);
+  }, [assignedFromApi]);
 
-  (assignedFromApi ?? []).forEach((b) => {
-    const id = getBookingId(b);
+  // ✅ Single upsert/remove path — used by both the raw socket listeners below
+  // AND by WorkModals (via props), so every update lands in the exact same
+  // state the grid renders from. No separate store, no separate normalizer,
+  // no zustand.
+  const upsertLiveBooking = (payload: any, eventName?: string) => {
+    const id = getBookingId(payload);
     if (!id) return;
-    map.set(id, b);
-  });
 
-  socketBookings.forEach((b) => {
-    const id = getBookingId(b);
-    if (!id) return;
+    const tagged = eventName ? { ...payload, eventName } : payload;
 
-    const existing = map.get(id);
+    setLiveBookings((prev) => {
+      const idx = prev.findIndex((b) => getBookingId(b) === id);
+      if (idx === -1) return [...prev, tagged];
 
-    map.set(id, {
-      ...existing,
-      ...b,
-      booking: {
-        ...existing?.booking,
-        ...b.booking,
-      },
-      workerActions: {
-        ...existing?.workerActions,
-        ...b.workerActions,
-      },
+      const next = [...prev];
+      // Deep-merge the nested `booking` object instead of clobbering it, so a
+      // partial socket payload (e.g. one that only sends
+      // `{ bookingId, status, startedAt }`) doesn't wipe out fields like
+      // `booking.schedule` or `booking.currency` that the grid still needs.
+      next[idx] = {
+  ...next[idx],
+  ...tagged,
+
+  customer:
+    tagged.customer ??
+    tagged.booking?.customer ??
+    next[idx].customer,
+
+  service:
+    tagged.service ??
+    tagged.booking?.service ??
+    next[idx].service,
+
+  workerActions: {
+    ...next[idx].workerActions,
+    ...tagged.workerActions,
+    ...tagged.booking?.workerActions,
+  },
+
+  booking: {
+    ...next[idx].booking,
+    ...tagged.booking,
+
+    workerActions: {
+      ...next[idx].booking?.workerActions,
+      ...tagged.booking?.workerActions,
+    },
+  },
+};
+      return next;
     });
-  });
+  };
 
-  return Array.from(map.values());
-}, [assignedFromApi, socketBookings]);
-    // console.log("assignedBookings", assignedBookings);
+  const removeLiveBooking = (id: string | undefined) => {
+    if (!id) return;
+    setLiveBookings((prev) => prev.filter((b) => getBookingId(b) !== id));
+  };
+
+  // Live socket updates drive everything after initial hydration
+  useEffect(() => {
+    const socket = getSocket(BOOKING_NAMESPACE) ?? initializeSocket(BOOKING_NAMESPACE);
+
+    const upsertHandlers = UPSERT_EVENTS.map((event) => {
+      const handler = (payload: any) => upsertLiveBooking(payload, event);
+      socket.on(event, handler);
+      return { event, handler };
+    });
+
+    const removeHandlers = REMOVE_EVENTS.map((event) => {
+      const handler = (payload: any) => removeLiveBooking(getBookingId(payload));
+      socket.on(event, handler);
+      return { event, handler };
+    });
+
+    return () => {
+      upsertHandlers.forEach(({ event, handler }) => socket.off(event, handler));
+      removeHandlers.forEach(({ event, handler }) => socket.off(event, handler));
+    };
+  }, []);
+
+  // ✅ No normalizeAssignedWorks — liveBookings already carries the shape
+  // WorkGrid needs (work.service / work.customer / work.booking). We just
+  // dedupe by id and drop terminal statuses.
   const workList = useMemo(() => {
-  return normalizeAssignedWorks(
-    assignedBookings
-  ).filter((work) => {
-    const status = (work.booking?.status ?? work.status)?.toUpperCase();
+    const seen = new Set<string>();
+    const result: DisplayWork[] = [];
 
-const excludedStatuses = [
-  "CUSTOMER_CANCELLED",
-  "WORKER_CANCELLED",
-  "CANCELLED",
-  "ADMIN_CANCELLED",
-  "CANCELLED_BY_CUSTOMER",
-  "INVOICE_GENERATED",
-  "PAYMENT_COMPLETED",
-];
+    for (const item of liveBookings) {
+      const id = getBookingId(item);
+      if (!id || seen.has(id)) continue;
 
-return !excludedStatuses.includes(status || "");
+      const status = (item.booking?.status ?? item.status ?? "").toUpperCase();
+      if (EXCLUDED_STATUSES.includes(status)) continue;
 
-    
-  });
-}, [assignedBookings]);
-// useEffect(() => {
-//   console.log("Work List:", workList);
-// }, [workList]);
+      seen.add(id);
+      result.push(item as DisplayWork);
+    }
 
+    return result;
+  }, [liveBookings]);
+
+  // ✅ Timer tick — now reads the real timestamp via resolveStartedAt(), so it
+  // works for hydrated jobs, socket-pushed jobs, and locally-started jobs.
   useEffect(() => {
     const interval = window.setInterval(() => {
       const updatedTimers: WorkTimerMap = {};
 
       workList.forEach((work) => {
-        if (FINAL_WORK_STATUSES.includes(work?.booking?.status??"FINALIZED")) return;
+        const status = work.booking?.status ?? (work as any).status;
+        if (status && FINAL_WORK_STATUSES.includes(status)) return;
 
-     const startedAt = work.workStartedAt;
-
+        const startedAt = resolveStartedAt(work);
         if (!startedAt) return;
 
-        const elapsed = Date.now() - new Date(startedAt).getTime();
-        if (Number.isNaN(elapsed)) return;
+        const elapsedMs = Date.now() - new Date(startedAt).getTime();
+        if (Number.isNaN(elapsedMs) || elapsedMs < 0) return;
 
-        const hours = Math.floor(elapsed / 3_600_000);
-        const minutes = Math.floor((elapsed % 3_600_000) / 60_000);
-        const seconds = Math.floor((elapsed % 60_000) / 1_000);
+        const hours = Math.floor(elapsedMs / 3_600_000);
+        const minutes = Math.floor((elapsedMs % 3_600_000) / 60_000);
+        const seconds = Math.floor((elapsedMs % 60_000) / 1_000);
 
-        updatedTimers[work.id] = [
-          hours,
-          minutes,
-          seconds,
-        ]
+        const id = getBookingId(work) ?? work.id;
+        updatedTimers[id] = [hours, minutes, seconds]
           .map((unit) => String(unit).padStart(2, "0"))
           .join(":");
       });
@@ -133,9 +224,8 @@ return !excludedStatuses.includes(status || "");
     return () => window.clearInterval(interval);
   }, [workList]);
 
-  // ✅ Automatically close modals if the selected work is cancelled or removed from the list
   useEffect(() => {
-    if (selectedWork && !workList.some((w) => w.id === selectedWork.id)) {
+    if (selectedWork && !workList.some((w) => getBookingId(w) === getBookingId(selectedWork))) {
       closeModal();
     }
   }, [workList, selectedWork]);
@@ -150,54 +240,50 @@ return !excludedStatuses.includes(status || "");
     setModalType(null);
   };
 
- if (socketBookings.length === 0 && isLoading) {
+  if (isLoading && liveBookings.length === 0) {
+    return (
+      <div className="mt-8 px-4 lg:px-6">
+        <CommonCard title={t("sidebar.assignedWork")} headerAlign={isRTL ? "right" : "left"}>
+          <div className="text-center py-16 text-gray-500">{t("common.noData")}</div>
+        </CommonCard>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-8 px-4 lg:px-6">
-      <CommonCard
-        title={t("sidebar.assignedWork")}
-        headerAlign={isRTL ? "right" : "left"}
-      >
-        <div className="text-center py-16 text-gray-500">
-          {t("common.noData")}
-        </div>
+      <CommonCard title={t("sidebar.assignedWork")} headerAlign={isRTL ? "right" : "left"}>
+        <WorkGrid
+          workList={workList}
+          isRTL={isRTL}
+          categories={categories}
+          timers={timers}
+          onStart={(work) => openModal(work, "start")}
+          onComplete={(work) => openModal(work, "complete")}
+          onVerify={(work) => openModal(work, "verify")}
+          onCancel={setCancelConfirmWork}
+          onConfirmCashPayment={(work) => openModal(work, "confirmCashPayment")}
+        />
+
+        <WorkModals
+          selectedWork={selectedWork}
+          modalType={modalType}
+          closeModal={closeModal}
+          cancelConfirmWork={cancelConfirmWork}
+          setCancelConfirmWork={setCancelConfirmWork}
+          cancelMutation={cancelMutation}
+          // ✅ These two replace any global store's upsertAssigned/removeAssigned.
+          // WorkModals writes straight into this page's liveBookings state,
+          // the same state workList/WorkGrid render from — so updates are
+          // instant and there's no store to keep in sync.
+          onUpsertWork={upsertLiveBooking}
+          onRemoveWork={removeLiveBooking}
+          onCancelSuccess={(updatedBooking) => {
+            const bookingId = updatedBooking?._id;
+            if (bookingId) removeLiveBooking(bookingId);
+          }}
+        />
       </CommonCard>
     </div>
   );
-}
-
-return (
-  <div className="mt-8 px-4 lg:px-6">
-    <CommonCard
-      title={t("sidebar.assignedWork")}
-      headerAlign={isRTL ? "right" : "left"}
-    >
-        <WorkGrid
-      workList={workList}
-      isRTL={isRTL}
-      categories={categories}
-      timers={timers}
-      onStart={(work) => openModal(work, "start")}
-      onComplete={(work) => openModal(work, "complete")}
-      onVerify={(work) => openModal(work, "verify")}
-      onCancel={setCancelConfirmWork}
-      onConfirmCashPayment={(work) =>
-        openModal(work, "confirmCashPayment")
-      }
-    />
-
-      <WorkModals
-        selectedWork={selectedWork}
-        modalType={modalType}
-        closeModal={closeModal}
-        cancelConfirmWork={cancelConfirmWork}
-        setCancelConfirmWork={setCancelConfirmWork}
-        cancelMutation={cancelMutation}
-        onCancelSuccess={(updatedBooking) => {
-          const bookingId = updatedBooking?._id;
-          if (bookingId) removeAssigned(bookingId);
-        }}
-      />
-    </CommonCard>
-  </div>
-);
 }

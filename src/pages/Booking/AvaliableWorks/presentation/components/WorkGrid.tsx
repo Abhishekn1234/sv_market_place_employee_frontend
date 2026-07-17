@@ -23,8 +23,16 @@ function canStartOrCancel(work: DisplayWork) {
   return ["ASSIGNED", "WORKER_ACCEPTED"].includes(work?.booking?.status ?? "");
 }
 
+
 function isActiveWork(work: DisplayWork) {
-  return ["STARTED", "IN_PROGRESS"].includes(work?.booking?.status ?? "");
+  // ✅ Check booking.status first, then fall back to the top-level status.
+  // Socket assignment payloads carry status at BOTH levels (outer `status`
+  // and `booking.status`) and they can briefly disagree during a transition
+  // (e.g. outer STARTED while booking hasn't been patched yet), so checking
+  // either is what keeps the "active" card (and therefore the timer row)
+  // showing continuously through Start -> Complete.
+  const status = work.booking?.status ?? (work as any).status;
+  return ["STARTED", "IN_PROGRESS"].includes(status);
 }
 
 export default function WorkGrid({
@@ -41,12 +49,12 @@ export default function WorkGrid({
   const [locations, setLocations] = useState<Record<string, string>>({});
   const { t } = useLanguage();
   const navigate = useNavigate();
-  // console.log(workList)
 
   // ✅ workList is already normalized once by the page — do NOT re-normalize here.
   const normalizedWorkList = useMemo(() => {
     return workList.filter((work: DisplayWork) => !isHidden(work));
   }, [workList]);
+  // console.log(normalizedWorkList);
 
   useEffect(() => {
     if (!normalizedWorkList.length) return;
@@ -84,15 +92,30 @@ export default function WorkGrid({
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
         {normalizedWorkList.map((work: DisplayWork) => {
           const id = getBookingId(work);
-          if (renderedIds.has(id)) return null;
+          if (!id || renderedIds.has(id)) return null;
           renderedIds.add(id);
 
-          const categoryName =
-            categories.find((c) => c._id === work.service?.category)?.name ??
-            t("common.na");
+                const service =
+  typeof work.service === "object" && work.service
+    ? work.service
+    : typeof work.booking?.service === "object" && work.booking.service
+    ? work.booking.service
+    : undefined;
+
+const serviceName = service?.name ?? t("common.na");
+
+const categoryName =
+  categories.find((c) => c._id === service?.category)?.name ??
+  t("common.na");
           const coordinates = getWorkCoordinates(getWorkLocation(work));
-          const canConfirmCashPayment =
-  work.workerActions?.canConfirmCashPayment === true;
+          const canConfirmCashPayment = Boolean(
+              work.workerActions?.canConfirmCashPayment ??
+              work.booking?.workerActions?.canConfirmCashPayment ??
+              work.booking?.canConfirmCashPayment
+            );
+
+          const active = isActiveWork(work);
+          const timerValue = timers[id];
 
           return (
             <CommonCard
@@ -103,8 +126,9 @@ export default function WorkGrid({
             >
               <div className="border-b bg-slate-50/70 px-3.5 py-2.5 dark:border-slate-800 dark:bg-slate-900/70">
                 <h3 className="line-clamp-1 text-sm font-semibold">
-                  {work.service?.name || t("common.na")}
+                  {serviceName}
                 </h3>
+
                 <p className="mt-0.5 text-[11px] text-muted-foreground">
                   {categoryName}
                 </p>
@@ -112,7 +136,7 @@ export default function WorkGrid({
 
               <div className="flex flex-1 flex-col gap-2.5 px-3.5 py-3">
                 <BookingCustomerInfo
-                  customer={work.customer}
+                 customer={work.customer ?? work.booking?.customer}
                   t={t}
                   isRTL={isRTL}
                   showCallButton
@@ -132,11 +156,16 @@ export default function WorkGrid({
                 />
               </div>
 
-              {/* Timer */}
-              {isActiveWork(work) && timers[id] && (
+              {/* Timer — only rendered while the job is active AND a value
+                  exists in the timers map for this id. Because the page now
+                  resolves startedAt from booking.startedAt / startedAt /
+                  workStartedAt (in that priority order), this fires
+                  immediately for jobs hydrated from the API or pushed via
+                  socket, not just ones started in this browser tab. */}
+              {active && timerValue && (
                 <div className="mx-3.5 mb-2.5 flex items-center justify-center gap-1.5 rounded-md bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-300">
                   <Timer size={13} />
-                  {timers[id]}
+                  {timerValue}
                 </div>
               )}
 
@@ -172,13 +201,13 @@ export default function WorkGrid({
                   </div>
                 )}
 
-                {isActiveWork(work) && (
+                {active && (
                   <div className="flex flex-wrap gap-2">
                     <Button
                       size="sm"
                       className="h-8 min-w-[100px] flex-1 text-xs font-semibold"
                       onClick={() =>
-                        onComplete({ ...work, elapsedTime: timers[id] || "00:00:00" })
+                        onComplete({ ...work, elapsedTime: timerValue || "00:00:00" })
                       }
                     >
                       {t("common.complete")}

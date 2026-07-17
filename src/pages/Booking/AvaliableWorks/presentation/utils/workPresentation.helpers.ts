@@ -5,17 +5,18 @@ import type {
   WorkStatus,
 } from "../../domain/entities/workPresentation.types";
 import { BookingEvents } from "@/components/common/BookingEvents";
+import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";
 
 // ✅ Final statuses
-export const FINAL_WORK_STATUSES: WorkStatus[] = [
+export const FINAL_WORK_STATUSES:BookingStatus[] = [
   "COMPLETED",
   "WORK_COMPLETED_PENDING",
   "COMPLETION_CONFIRMED",
   "INVOICE_GENERATED",
-  "PARTIALLY_PAID",
+  
    "PAID",
   "PAYMENT_COMPLETED",
-
+   
   "WORKER_CANCELLED",
   "WORKER_REJECTED",
   "CUSTOMER_CANCELLED",
