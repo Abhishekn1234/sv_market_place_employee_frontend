@@ -272,10 +272,7 @@ export default function AvailableWorkPage() {
           cancelConfirmWork={cancelConfirmWork}
           setCancelConfirmWork={setCancelConfirmWork}
           cancelMutation={cancelMutation}
-          // ✅ These two replace any global store's upsertAssigned/removeAssigned.
-          // WorkModals writes straight into this page's liveBookings state,
-          // the same state workList/WorkGrid render from — so updates are
-          // instant and there's no store to keep in sync.
+         
           onUpsertWork={upsertLiveBooking}
           onRemoveWork={removeLiveBooking}
           onCancelSuccess={(updatedBooking) => {
