@@ -19,6 +19,7 @@ export function useAssign(open: boolean = true) {
     
     staleTime: 30_000,
     refetchOnWindowFocus: true, // Enable refetch on window focus for real-time updates
+      refetchOnReconnect: true,
   
   });
 

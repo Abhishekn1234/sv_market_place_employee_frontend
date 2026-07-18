@@ -63,8 +63,12 @@ export default function BookingEstimateRow({
               {...ltr}
             >
               {isDaily
-                ? `${estimated.estimatedDays} ${t("common.days")}`
-                : `${estimated.estimatedHours} ${t("common.hours")}`}
+            ? `${estimated.estimatedDays} ${
+                estimated.estimatedDays === 1 ? t("common.day") : t("common.days")
+              }`
+            : `${estimated.estimatedHours} ${
+                estimated.estimatedHours === 1 ? t("common.hour") : t("common.hours")
+              }`}
             </p>
           </div>
         </div>

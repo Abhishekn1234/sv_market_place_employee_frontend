@@ -11,7 +11,7 @@ import NotificationItem from "./components/NotificationItem";
 import { useMarkAsRead } from "./hooks/useMarkasRead";
 import { useMarkAllRead } from "./hooks/useMarkAllRead";
 import { useGetNotifications } from "./hooks/useGetNotifications";
-
+import { useUnreadCount } from "./hooks/useUnreadCount";
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { CATEGORY_MAP } from "./utils/typemap";
 
@@ -32,7 +32,12 @@ export default function NotificationsPage() {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [selectAll, setSelectAll] = useState(false);
-
+   const {
+    data: unreadCountData,
+    isLoading: isUnreadLoading,
+    refetch: refetchUnreadCount,
+  } = useUnreadCount();
+ const unreadCount = unreadCountData ?? 0;
   // =========================
   // INFINITE QUERY
   // =========================
@@ -52,8 +57,7 @@ export default function NotificationsPage() {
   // =========================
   // FLATTEN DATA
   // =========================
-  const notifications =
-    data?.pages.flatMap((page) => page.data) ?? [];
+  const notifications = data?.pages.flatMap((page) => page.data) ?? [];
 
   const lastPage = data?.pages?.[data.pages.length - 1];
   const pagination = lastPage?.pagination;
@@ -61,15 +65,17 @@ export default function NotificationsPage() {
   const totalCount = pagination?.totalItems ?? 0;
 
   // =========================
-  // FILTERED DERIVED DATA
+  // PAGE-LEVEL UNREAD (only for loaded items — used for selection UI,
+  // NOT for the header stat anymore)
   // =========================
-  const unreadNotifications = useMemo(
+  const loadedUnreadNotifications = useMemo(
     () => notifications.filter((n) => !n.isRead),
     [notifications]
   );
 
-  const readCount = notifications.length - unreadNotifications.length;
-  const unreadCount = unreadNotifications.length;
+  const readCount = totalCount - unreadCount; // now derived from real totals
+  const currentPageUnreadCount = loadedUnreadNotifications.length;
+  
 
   // =========================
   // SELECT LOGIC
@@ -89,36 +95,37 @@ export default function NotificationsPage() {
   };
 
  const toggleSelectAll = () => {
-    const next = !selectAll;
+  const next = !selectAll;
 
-    setSelectAll(next);
+  setSelectAll(next);
 
-    if (next) {
-        setSelectedIds([]);
-    }
+  if (next) {
+    // Select every unread notification on the current page
+    setSelectedIds(
+      loadedUnreadNotifications.map((notification) => notification._id)
+    );
+  } else {
+    // Unselect everything
+    setSelectedIds([]);
+  }
 };
 
   // =========================
   // MARK SELECTED AS READ
   // =========================
-  const markSelectedAsRead = async () => {
-    if (!selectedIds.length) return;
+  const handleMarkAllAsRead = async () => {
+  await markAllRead();
+  setSelectedIds([]);
+  setSelectAll(false);
+  refetchUnreadCount();
+   };
 
-    await Promise.all(
-      selectedIds.map((id) => markAsReadApi(id))
-    );
-
-    setSelectedIds([]);
-  };
-
-  // =========================
-  // MARK ALL AS READ
-  // =========================
- const handleMarkAllAsRead = async () => {
-    await markAllRead();
-    setSelectedIds([]);
-    setSelectAll(false);
-};
+    const markSelectedAsRead = async () => {
+      if (!selectedIds.length) return;
+      await Promise.all(selectedIds.map((id) => markAsReadApi(id)));
+      setSelectedIds([]);
+      refetchUnreadCount();
+    };
   // =========================
   // LOAD MORE
   // =========================
@@ -185,13 +192,16 @@ export default function NotificationsPage() {
             </div>
 
             <div className="flex gap-4">
-              <div>
-                <p className="text-xs">Unread</p>
-                <p className="text-xl font-bold">{unreadCount}</p>
-              </div>
+             {/* HEADER STATS */}
+                <div>
+                  <p className="text-xs">{t("notifications.unread")}</p>
+                  <p className="text-xl font-bold">
+                    {isUnreadLoading ? "…" : unreadCount}
+                  </p>
+                </div>
 
               <div>
-                <p className="text-xs">Total</p>
+                <p className="text-xs">{t("notifications.total")}</p>
                 <p className="text-xl font-bold">{totalCount}</p>
               </div>
             </div>
@@ -213,13 +223,13 @@ export default function NotificationsPage() {
           selectedNotificationIds={selectedIds}
           isPending={isMarkingSelected || isMarkingAll}
           toggleSelectAll={toggleSelectAll}
-          currentPageUnreadCount={unreadCount}
+          currentPageUnreadCount={currentPageUnreadCount} 
         />
 
         {/* LIST */}
         {notifications.length === 0 ? (
           <div className="text-center p-8 text-slate-500">
-            No notifications
+           {t("common.noData")}
           </div>
         ) : (
           <div className="flex flex-col gap-4 p-4 sm:p-6">

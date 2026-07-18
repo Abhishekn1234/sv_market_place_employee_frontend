@@ -12,6 +12,7 @@ import { getTypeColor } from "../utils/gettypecolor";
 
 import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
 import { formatNotificationDate } from "../utils/formaatnotificationtodaytime";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
 
 type Props = {
   notification: Notification;
@@ -31,7 +32,7 @@ export default function NotificationItem({
   onMarkedRead,
 }: Props) {
   const navigate = useNavigate();
-
+ const{t}=useLanguage();
   const isRead = notification.isRead;
 
   const [handled, setHandled] = useState(false);
@@ -207,7 +208,7 @@ export default function NotificationItem({
                     : "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
                 }`}
               >
-                {isRead ? "Read" : "Unread"}
+                {isRead ? t("notifications.read") : t("notifications.unread")}
               </span>
             </div>
           </div>

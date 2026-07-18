@@ -75,14 +75,13 @@ function getSmartRoute(data = {}) {
    * NEW BOOKING REQUEST
    */
   if (
-    type === "BOOKING_REQUEST" ||
-    status === "REQUESTED"
+  type === "BOOKING_REQUEST" ||
+  status === "REQUESTED"
   ) {
-    return bookingId
-      ? `/availableBooking`
-      : "/availableBooking?status=requested";
+  return bookingId
+    ? `/availableBooking?status=requested&bookingId=${bookingId}`
+    : "/availableBooking?status=requested";
   }
-
   /**
    * WORK UPDATES
    * NOTE:

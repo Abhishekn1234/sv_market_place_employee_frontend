@@ -76,7 +76,7 @@ export default function AvailableWorkPage() {
   const { language, t } = useLanguage();
   const { data: categories } = useServiceCategory();
   const cancelMutation = useCancel();
-  const { assignedWorks: assignedFromApi, isLoading } = useAssign();
+  const { assignedWorks: assignedFromApi, isLoading,refetch } = useAssign();
   const isRTL = language === "AR";
 
   const [selectedWork, setSelectedWork] = useState<DisplayWork | null>(null);
@@ -87,9 +87,24 @@ export default function AvailableWorkPage() {
   const [liveBookings, setLiveBookings] = useState<any[]>([]);
 
   // Hydrate from API once on load / reload
-  useEffect(() => {
-    if (assignedFromApi?.length) setLiveBookings(assignedFromApi);
-  }, [assignedFromApi]);
+ useEffect(() => {
+    setLiveBookings(assignedFromApi ?? []);
+}, [assignedFromApi]);
+useEffect(() => {
+  const onVisible = () => {
+    if (document.visibilityState === "visible") {
+      refetch();
+    }
+  };
+
+  window.addEventListener("focus", onVisible);
+  document.addEventListener("visibilitychange", onVisible);
+
+  return () => {
+    window.removeEventListener("focus", onVisible);
+    document.removeEventListener("visibilitychange", onVisible);
+  };
+}, [refetch]);
 
   // ✅ Single upsert/remove path — used by both the raw socket listeners below
   // AND by WorkModals (via props), so every update lands in the exact same
@@ -111,35 +126,35 @@ export default function AvailableWorkPage() {
       // `{ bookingId, status, startedAt }`) doesn't wipe out fields like
       // `booking.schedule` or `booking.currency` that the grid still needs.
       next[idx] = {
-  ...next[idx],
-  ...tagged,
+      ...next[idx],
+      ...tagged,
 
-  customer:
-    tagged.customer ??
-    tagged.booking?.customer ??
-    next[idx].customer,
+      customer:
+        tagged.customer ??
+        tagged.booking?.customer ??
+        next[idx].customer,
 
-  service:
-    tagged.service ??
-    tagged.booking?.service ??
-    next[idx].service,
+      service:
+        tagged.service ??
+        tagged.booking?.service ??
+        next[idx].service,
 
-  workerActions: {
-    ...next[idx].workerActions,
-    ...tagged.workerActions,
-    ...tagged.booking?.workerActions,
-  },
+      workerActions: {
+        ...next[idx].workerActions,
+        ...tagged.workerActions,
+        ...tagged.booking?.workerActions,
+      },
 
-  booking: {
-    ...next[idx].booking,
-    ...tagged.booking,
+      booking: {
+        ...next[idx].booking,
+        ...tagged.booking,
 
-    workerActions: {
-      ...next[idx].booking?.workerActions,
-      ...tagged.booking?.workerActions,
-    },
-  },
-};
+        workerActions: {
+          ...next[idx].booking?.workerActions,
+          ...tagged.booking?.workerActions,
+        },
+      },
+       };
       return next;
     });
   };
@@ -160,6 +175,7 @@ export default function AvailableWorkPage() {
     });
 
     const removeHandlers = REMOVE_EVENTS.map((event) => {
+  
       const handler = (payload: any) => removeLiveBooking(getBookingId(payload));
       socket.on(event, handler);
       return { event, handler };
@@ -175,22 +191,33 @@ export default function AvailableWorkPage() {
   // WorkGrid needs (work.service / work.customer / work.booking). We just
   // dedupe by id and drop terminal statuses.
   const workList = useMemo(() => {
-    const seen = new Set<string>();
-    const result: DisplayWork[] = [];
+  const seen = new Set<string>();
+  const result: DisplayWork[] = [];
 
-    for (const item of liveBookings) {
-      const id = getBookingId(item);
-      if (!id || seen.has(id)) continue;
+  for (const item of liveBookings) {
+    const id = getBookingId(item);
+    if (!id || seen.has(id)) continue;
 
-      const status = (item.booking?.status ?? item.status ?? "").toUpperCase();
-      if (EXCLUDED_STATUSES.includes(status)) continue;
+    const status = (item.booking?.status ?? item.status ?? "").toUpperCase();
 
-      seen.add(id);
-      result.push(item as DisplayWork);
+    if (EXCLUDED_STATUSES.includes(status)) continue;
+
+    const canConfirmCashPayment =
+      item.workerActions?.canConfirmCashPayment ??
+      item.booking?.workerActions?.canConfirmCashPayment ??
+      item.booking?.canConfirmCashPayment ??
+      false;
+
+    if (status === "PAYMENT_PENDING" && !canConfirmCashPayment) {
+      continue;
     }
 
-    return result;
-  }, [liveBookings]);
+    seen.add(id);
+    result.push(item as DisplayWork);
+  }
+
+  return result;
+    }, [liveBookings]);
 
   // ✅ Timer tick — now reads the real timestamp via resolveStartedAt(), so it
   // works for hydrated jobs, socket-pushed jobs, and locally-started jobs.
