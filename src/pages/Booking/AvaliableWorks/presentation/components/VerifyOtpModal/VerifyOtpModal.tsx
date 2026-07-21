@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useVerifyOtp } from "../../hooks/useVerifyOtp";
-import { getBookingId, normalizeAssignedWorks } from "../../utils/workPresentation.helpers";
+import { getBookingId } from "../../utils/workPresentation.helpers";
 import type { DisplayWork } from "../../../domain/entities/workPresentation.types";
 import type { Work } from "../../../domain/entities/work";
 import { Input } from "@/components/ui/input";
@@ -39,16 +39,14 @@ export default function VerifyOtpModal<TWork extends DisplayWork | Work>({
       purpose: "WORK_COMPLETE",
     },
     {
-      onSuccess: (res) => {
-        const updatedWork = normalizeAssignedWorks([res?.booking ?? res])[0];
+     onSuccess: (res) => {
+  const updatedWork = (res?.booking ?? res) as TWork;
 
-        if (updatedWork) {
-          onSuccess(updatedWork as TWork);
-        }
+  onSuccess(updatedWork);
 
-        setOtp("");
-        onClose();
-      },
+  setOtp("");
+  onClose();
+},
     }
   );
 };

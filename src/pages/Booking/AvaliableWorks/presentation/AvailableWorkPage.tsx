@@ -105,6 +105,22 @@ useEffect(() => {
     document.removeEventListener("visibilitychange", onVisible);
   };
 }, [refetch]);
+useEffect(() => {
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "visible") {
+      // 1. Make sure socket is actually alive, reconnect if not
+      const socket = getSocket(BOOKING_NAMESPACE);
+      if (socket && !socket.connected) {
+        socket.connect();
+      }
+      // 2. Always refetch truth from server regardless of socket state
+      refetch();
+    }
+  };
+
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+}, [refetch]);
 
   // ✅ Single upsert/remove path — used by both the raw socket listeners below
   // AND by WorkModals (via props), so every update lands in the exact same
