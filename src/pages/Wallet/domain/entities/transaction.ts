@@ -1,8 +1,12 @@
 export type Transaction = {
-  id: number;
-  _id?:number;
-  type: string;
+  id: string;
+  type: "CREDIT" | "DEBIT";
+  source?: string;
   amount: number;
-  description: string;
-  date: string;
+  balanceAfter?: number;
+  dueToAppBalanceAfter?: number;
+  bookingId?: string;
+  paymentId?: string;
+  note?: string;
+  createdAt?: string;
 };

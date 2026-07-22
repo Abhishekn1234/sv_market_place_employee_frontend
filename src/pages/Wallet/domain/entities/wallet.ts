@@ -1,29 +1,35 @@
 export interface WalletSummary {
-  workerId: string;
+  workerId?: string;
   balance: number;
   currency: string;
   updatedAt: string;
+  dueToAppBalance?:number;
 }
 
-export type  WalletTransactionType=
-   "CREDIT"|
-  "DEBIT"
-
+export type WalletTransactionType =
+  | "CREDIT"
+  | "DEBIT";
 
 export type WalletTransactionSource =
-  "BOOKING_PAYMENT"|
-  "ADMIN_ADJUSTMENT"
+  | "BOOKING_PAYMENT"
+  | "CASH_COLLECTION_DUE"
+  | "ADMIN_ADJUSTMENT";
 
 export interface WalletTransaction {
   id: string;
-  _id?: number;
-  type: WalletTransactionType;   
-  source: WalletTransactionSource; 
+  type: WalletTransactionType;
+  source: WalletTransactionSource;
+
   amount: number;
+
+  balanceAfter?: number;
+  dueToAppBalanceAfter?: number;
+
   bookingId?: string;
   paymentId?: string;
+
   note?: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface WalletTransactionsResponse {
@@ -42,5 +48,4 @@ export interface WalletTransactionsParams {
   limit?: number;
   sort?: string;
   search?: string;
-  // status?: "completed" | "pending" | "failed" | "all";
 }

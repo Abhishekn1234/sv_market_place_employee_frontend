@@ -34,7 +34,7 @@ export function WalletMain({
 }: Props) {
   const { translations, t, language } = useLanguage();
   const walletT = translations.wallet;
-
+   
   const currencyLabel = wallet?.currency ?? "USD";
   const locale = language === 'AR' ? 'ar-EG' : language === 'HI' ? 'hi-IN' : 'en-US';
 
