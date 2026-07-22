@@ -12,6 +12,7 @@ import type { Transaction } from "../domain/entities/transaction";
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { useDebounce } from "@/utils/usedebouncer";
 import { useTransactionHistory } from "./hooks/useTransaction";
+import { formatDateTime } from "@/pages/Booking/AvaliableWorks/presentation/utils/formatdatetime";
 
 // type TransactionStatus = "all" | "completed" | "pending" | "failed";
 
@@ -66,7 +67,7 @@ useEffect(() => {
 
     return transactionsResponse.data.map((txn) => ({
       id: txn.id,
-      date: new Date(txn.createdAt).toLocaleDateString(),
+      date: formatDateTime(txn.createdAt),
       amount: txn.amount,
       type: txn.source.replace(/_/g, ' ').toLowerCase(), // Assuming txn.source can be used for type
       status: (txn as any).status || 'completed', // Cast to any to access status if type is missing
