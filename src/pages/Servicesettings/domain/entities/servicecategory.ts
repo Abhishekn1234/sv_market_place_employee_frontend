@@ -9,5 +9,6 @@ export interface ServiceCategory{
     createdAt?:Date;
     updatedAt?:Date;
     category?:string;
+    avgRating?:number;
     pricingTiers?:PricingTier[];
 }

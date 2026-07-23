@@ -78,7 +78,19 @@ export function useBookingColumns({
   header: tableHeaders.payment,
   className: cellClass,
   render: (b) => {
-   return<span>{b.booking.currency} {b.booking.amount}</span>;
+    const booking = b.booking;
+
+    const amount =
+      booking.finalAmount ??
+      booking.totalCost ??
+      booking.amount ??
+      0;
+
+    return (
+      <span dir="ltr" className="font-medium">
+        {booking.currency} {amount.toFixed(2)}
+      </span>
+    );
   },
 },
     {

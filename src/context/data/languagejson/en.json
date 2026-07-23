@@ -251,13 +251,44 @@
       "customerDetails": "Customer Details",
       "serviceDetails": "Service Details",
       "workDetails": "Work Details",
+      "paymentDetails": "Payment Details",
+      "serviceInformation": "Service Information",
+
       "serviceCategory": "Service Category",
       "serviceItem": "Service Item",
       "serviceTier": "Service Tier",
+      "serviceDescription": "Service Description",
+
       "bookingCode": "Booking Code",
       "bookingType": "Booking Type",
+      "bookingStatus": "Booking Status",
+      "pricingMode": "Pricing Mode",
+      "workDescription": "Work Description",
+
       "workStartDate": "Work Start Date",
       "startDate": "Start Date",
+      "duration": "Duration",
+      "estimatedDuration": "Estimated Duration",
+      "actualDuration": "Actual Duration",
+
+      "numberOfWorkers": "Number of Workers",
+
+      "amount": "Amount",
+      "serviceFee": "Service Fee",
+      "discount": "Discount",
+      "taxableAmount": "Taxable Amount",
+      "vatRate": "VAT Rate",
+      "vatAmount": "VAT Amount",
+      "estimatedTotal": "Estimated Total",
+      "finalAmount": "Final Amount",
+      "workerPoolAmount": "Worker Pool Amount",
+
+      "invoiceId": "Invoice ID",
+      "paymentId": "Payment ID",
+
+      "averageRating": "Average Rating",
+      "totalRatings": "Total Ratings",
+
       "workAssignedOn": "Work Assigned On",
       "workStartedOn": "Work Started On",
       "workCompletedOn": "Work Completed On"

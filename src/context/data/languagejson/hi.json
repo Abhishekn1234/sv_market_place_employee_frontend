@@ -187,13 +187,44 @@
       "customerDetails": "ग्राहक विवरण",
       "serviceDetails": "सेवा विवरण",
       "workDetails": "कार्य विवरण",
+      "paymentDetails": "भुगतान विवरण",
+      "serviceInformation": "सेवा जानकारी",
+
       "serviceCategory": "सेवा श्रेणी",
       "serviceItem": "सेवा आइटम",
       "serviceTier": "सेवा स्तर",
+      "serviceDescription": "सेवा विवरण",
+
       "bookingCode": "बुकिंग कोड",
       "bookingType": "बुकिंग प्रकार",
+      "bookingStatus": "बुकिंग स्थिति",
+      "pricingMode": "मूल्य निर्धारण प्रकार",
+      "workDescription": "कार्य विवरण",
+
       "workStartDate": "कार्य प्रारंभ तिथि",
       "startDate": "प्रारंभ तिथि",
+      "duration": "अवधि",
+      "estimatedDuration": "अनुमानित अवधि",
+      "actualDuration": "वास्तविक अवधि",
+
+      "numberOfWorkers": "कर्मचारियों की संख्या",
+
+      "amount": "राशि",
+      "serviceFee": "सेवा शुल्क",
+      "discount": "छूट",
+      "taxableAmount": "कर योग्य राशि",
+      "vatRate": "वैट दर",
+      "vatAmount": "वैट राशि",
+      "estimatedTotal": "अनुमानित कुल",
+      "finalAmount": "अंतिम राशि",
+      "workerPoolAmount": "वर्कर पूल राशि",
+
+      "invoiceId": "इनवॉइस आईडी",
+      "paymentId": "भुगतान आईडी",
+
+      "averageRating": "औसत रेटिंग",
+      "totalRatings": "कुल रेटिंग",
+
       "workAssignedOn": "कार्य सौंपा गया",
       "workStartedOn": "कार्य प्रारंभ हुआ",
       "workCompletedOn": "कार्य पूर्ण हुआ"

@@ -222,17 +222,48 @@
       "status": "الحالة",
       "actions": "الإجراءات"
     },
-    "expandedRow": {
+     "expandedRow": {
       "customerDetails": "تفاصيل العميل",
       "serviceDetails": "تفاصيل الخدمة",
       "workDetails": "تفاصيل العمل",
+      "paymentDetails": "تفاصيل الدفع",
+      "serviceInformation": "معلومات الخدمة",
+
       "serviceCategory": "فئة الخدمة",
       "serviceItem": "عنصر الخدمة",
       "serviceTier": "مستوى الخدمة",
+      "serviceDescription": "وصف الخدمة",
+
       "bookingCode": "رمز الحجز",
       "bookingType": "نوع الحجز",
+      "bookingStatus": "حالة الحجز",
+      "pricingMode": "طريقة التسعير",
+      "workDescription": "وصف العمل",
+
       "workStartDate": "تاريخ بدء العمل",
       "startDate": "تاريخ البدء",
+      "duration": "المدة",
+      "estimatedDuration": "المدة التقديرية",
+      "actualDuration": "المدة الفعلية",
+
+      "numberOfWorkers": "عدد العمال",
+
+      "amount": "المبلغ",
+      "serviceFee": "رسوم الخدمة",
+      "discount": "الخصم",
+      "taxableAmount": "المبلغ الخاضع للضريبة",
+      "vatRate": "نسبة ضريبة القيمة المضافة",
+      "vatAmount": "قيمة ضريبة القيمة المضافة",
+      "estimatedTotal": "الإجمالي التقديري",
+      "finalAmount": "المبلغ النهائي",
+      "workerPoolAmount": "حصة العمال",
+
+      "invoiceId": "رقم الفاتورة",
+      "paymentId": "رقم الدفع",
+
+      "averageRating": "متوسط التقييم",
+      "totalRatings": "إجمالي التقييمات",
+
       "workAssignedOn": "تم تعيين العمل في",
       "workStartedOn": "بدأ العمل في",
       "workCompletedOn": "اكتمل العمل في"
