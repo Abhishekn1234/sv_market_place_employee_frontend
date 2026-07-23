@@ -13,7 +13,7 @@ import { useGetBookingHistory, useGetBookingHistoryInfinite } from "./hooks/useG
 import { useServiceCategory } from "@/pages/Servicesettings/presentation/hooks/useServiceCategory";
 
 import { BookingFilters } from "./components/BookingFilters";
-import { BookingExpandedRow } from "./components/BookingExpandedColumns";
+import { BookingExpandedRow } from "./components/BookingExpandedColumns/BookingExpandedColumns";
 import { BookingCard } from "./components/BookingCard"; // Import the new component
 
 import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";

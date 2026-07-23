@@ -6,7 +6,7 @@ import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useStatusConfig } from "../hooks/statusconfig";
 import { useStringUtils } from "../hooks/useStringutils";
 import { formatBookingDurationText } from "../utils/formatduration";
-import { BookingExpandedRow } from "./BookingExpandedColumns";
+import { BookingExpandedRow } from "./BookingExpandedColumns/BookingExpandedColumns";
 import { toast } from "react-toastify";
 
 import type { BookingHistory } from "../../domain/entities/bookinghistory";
