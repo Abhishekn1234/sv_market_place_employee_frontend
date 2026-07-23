@@ -1,10 +1,11 @@
 
 import { Briefcase, Tag, Wrench, Layers } from "lucide-react";
 import type { ServiceCategory } from "@/pages/Servicesettings/domain/entities/servicecategory";
+import type { ServiceTier } from "@/pages/Servicesettings/domain/entities/servicetier";
 
 type ServiceDetailsProps = {
   service: any;
-  serviceTier: any;
+  serviceTier: ServiceTier;
   category?: ServiceCategory;
   title: string;
   labels: {

@@ -9,10 +9,13 @@ import {
   Percent 
 } from "lucide-react";
 import { DetailRow } from "./DetailRows";
+import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
+import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";
+import { getBookingStatusColor } from "../../utils/bookingstatuscolors";
 
 type PaymentDetailsProps = {
-  bookingData: any;
-  status: string;
+  bookingData: Booking;
+  status:BookingStatus;
   currency: string;
   amount: number;
   serviceFee: number;
@@ -60,16 +63,7 @@ export function BookingExpandedColumnsPaymentDetails({
   title,
   labels
 }: PaymentDetailsProps) {
-  const getStatusColor = (status: string) => {
-    const statusMap: Record<string, string> = {
-      'COMPLETED': 'bg-green-100 text-green-700',
-      'IN_PROGRESS': 'bg-yellow-100 text-yellow-700',
-      'WORKER_CANCELLED': 'bg-red-100 text-red-700',
-      'CUSTOMER_CANCELLED': 'bg-red-100 text-red-700',
-    };
-    return statusMap[status] || 'bg-blue-100 text-blue-700';
-  };
-
+ 
   return (
     <div className="lg:col-span-2 xl:col-span-3 space-y-4 min-w-0 bg-white/50 p-4 rounded-lg border border-slate-100">
       <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -82,7 +76,7 @@ export function BookingExpandedColumnsPaymentDetails({
           <DetailRow
             label={labels.bookingStatus}
             value={
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getBookingStatusColor(status)}`}>
                 {status}
               </span>
             }
