@@ -36,41 +36,24 @@ export const initOnMessage = async () => {
   const messaging = await getFirebaseMessaging();
   if (!messaging) return;
 
-  // const audio = new Audio("/notification.wav");
-  // const channel = new BroadcastChannel("fcm_channel");
+  const audio = new Audio("/notification.wav");
 
-  // // simple in-memory dedupe for foreground notifications
-  // const recentTags = new Set<string>();
-  // const addRecentTag = (tag: string) => {
-  //   recentTags.add(tag);
-  //   // forget after 60s to allow future notifications
-  //   setTimeout(() => recentTags.delete(tag), 60000);
-  // };
+  onMessage(messaging, (payload) => {
+    const data = payload?.data || {};
+    const notification = payload?.notification || {};
 
-  // const makeTag = (data: any) => {
-  //   return `${data?.type || "notification"}-${data?.messageId || data?.bookingId || "general"}`;
-  // };
+    console.log(data, notification);
 
- onMessage(messaging, (payload) => {
-  const data = payload?.data || {};
-  const notification = payload?.notification || {};
-console.log(data,notification);
-  // console.log("━━━━━━━━━━━━━━━━━━━━━━");
-  // console.log("⚡ FOREGROUND FCM RECEIVED (LOG ONLY)");
-  // console.log("━━━━━━━━━━━━━━━━━━━━━━");
+    // Play sound only for chat notifications
+    if (
+      data.type === "CHAT_MESSAGE" ||
+      data.type === "NEW_MESSAGE"
+    ) {
+      audio.currentTime = 0;
 
-  // console.log("📩 FULL PAYLOAD:", payload);
-  // console.log("📦 DATA:", data);
-  // console.log("🔔 NOTIFICATION:", notification);
-
-  // console.log("🧠 PARSED:");
-  // console.log("type:", data?.type);
-  // console.log("status:", data?.status);
-  // console.log("bookingId:", data?.bookingId);
-  // console.log("messageId:", data?.messageId);
-
-  // ❌ NO NOTIFICATION CREATION HERE
-  // ❌ NO AUDIO
-  // ❌ NO NAVIGATION
-});
-};
+      audio.play().catch((err) => {
+        console.log("Unable to play notification sound:", err);
+      });
+    }
+  });
+ };

@@ -7,7 +7,7 @@ import { LocationProvider } from "./context/presentation/components/LocationCont
 import { LocationTracker } from "./pages/Profile/presentation/components/Location/LocationTracker";
 import { LanguageProvider } from "./context/presentation/components/LanguageContext";
 import { ThemeProvider } from "./context/presentation/components/ThemeContext";
-
+import NotFound from "./pages/Notfound/presentation/Notfound";
 import ProtectedRoute from "./ProtectedRoute";
 import AppLayout from "./components/Layout/presentation/pages/AppLayout";
 
@@ -157,62 +157,70 @@ const handleNavigate = (url?: string, _data?: any) => {
     <LanguageProvider>
       <ToastContainer position="top-right" autoClose={5000} />
 
-      <Routes>
-        {/* AUTH */}
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/verify-otp" element={<VerifyOtpPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+     <Routes>
+  {/* AUTH */}
+  <Route path="/register" element={<RegisterPage />} />
+  <Route path="/login" element={<LoginPage />} />
+  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+  <Route path="/verify-otp" element={<VerifyOtpPage />} />
+  <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-        {/* SERVICES */}
-        <Route path="/services/employee" element={<ServiceSettings />} />
-        <Route path="/services/documents" element={<DocumentOnboarding />} />
+  {/* SERVICES */}
+  <Route path="/services/employee" element={<ServiceSettings />} />
+  <Route path="/services/documents" element={<DocumentOnboarding />} />
 
-        {/* MOBILE */}
-        <Route path="/verify-otp-mobile" element={<VerifyMobilePage />} />
-        <Route path="/send-otp-mobile" element={<SendOtpMobilePage />} />
+  {/* MOBILE */}
+  <Route path="/verify-otp-mobile" element={<VerifyMobilePage />} />
+  <Route path="/send-otp-mobile" element={<SendOtpMobilePage />} />
 
-        {/* EMAIL */}
-        <Route path="/email-verification" element={<SendOtpEmailPage />} />
-        <Route path="/verify-otp-email" element={<VerifyOtpEmailPage />} />
-        
-        {/* PROTECTED */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<HomePage />} />
+  {/* EMAIL */}
+  <Route path="/email-verification" element={<SendOtpEmailPage />} />
+  <Route path="/verify-otp-email" element={<VerifyOtpEmailPage />} />
 
-          <Route path="settings/profile" element={
-            <ProfileSettings activeTab={activeTab} setActiveTab={setActiveTab} />
-          } />
+  {/* PROTECTED */}
+  <Route
+    path="/"
+    element={
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    }
+  >
+    <Route index element={<HomePage />} />
 
-          <Route path="history/booking" element={<BookingHistory />} />
-          <Route path="history/transaction" element={<TransactionHistory />} />
-        
+    <Route
+      path="settings/profile"
+      element={
+        <ProfileSettings
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      }
+    />
 
-          {/* <Route path="/disputes" element={<Disputespage />} /> */}
-          {/* <Route path="/currentWork" element={<CurrentWorkPage />} /> */}
+    <Route path="history/booking" element={<BookingHistory />} />
+    <Route path="history/transaction" element={<TransactionHistory />} />
 
-          <Route path="/chat/:bookingId" element={<ChatWorkerPage />} />
-          <Route
-              path="/disputes/:bookingId"
-              element={<Disputespage />}
-            />
+    <Route path="chat/:bookingId" element={<ChatWorkerPage />} />
+    <Route path="disputes/:bookingId" element={<Disputespage />} />
 
-          <Route path="settings/wallet" element={<Wallet />} />
-          <Route path="location/service/settings"element={<LocationSettings/>}/>
-          <Route path="notifications" element={<NotificationsPage />} />
+    <Route path="settings/wallet" element={<Wallet />} />
+    <Route
+      path="location/service/settings"
+      element={<LocationSettings />}
+    />
+    <Route path="notifications" element={<NotificationsPage />} />
 
-          <Route path="availableWork" element={<AvailableWorkPage />} />
-          <Route path="availableBooking" element={<AvailableBookingPage />} />
-        </Route>
-      </Routes>
+    <Route path="availableWork" element={<AvailableWorkPage />} />
+    <Route path="availableBooking" element={<AvailableBookingPage />} />
+
+    {/* Protected 404 */}
+    <Route path="*" element={<NotFound />} />
+  </Route>
+
+  {/* Public 404 */}
+  <Route path="*" element={<NotFound />} />
+</Routes>
 
       <LocationTracker />
     </LanguageProvider>

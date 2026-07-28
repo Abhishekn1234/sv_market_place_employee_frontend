@@ -23,6 +23,7 @@ export function useChat(bookingId: string) {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const socketRef = useRef<Socket | null>(null);
   const isInChatPage = useRef(false);
@@ -88,7 +89,13 @@ export function useChat(bookingId: string) {
       return next;
     });
   }, [data, bookingId, myUserId]);
+useEffect(() => {
+  audioRef.current = new Audio("/notification.wav");
 
+  return () => {
+    audioRef.current = null;
+  };
+}, []);
   // ==========================================
   // SOCKET CONNECTION
   // ==========================================
@@ -145,9 +152,7 @@ export function useChat(bookingId: string) {
     // RECEIVE SAVED MESSAGE
     // EVENT: booking.chat-message
     // ==========================================
-    socket.on("booking.chat-message", (payload: any) => {
-  // console.log("booking.chat-message", payload);
-
+  socket.on("booking.chat-message", (payload: any) => {
   const chatMessage =
     payload?.chatMessage ?? payload?.payload?.chatMessage;
 
@@ -163,7 +168,6 @@ export function useChat(bookingId: string) {
     status: "delivered",
   };
 
-  // update UI
   setMessages((prev) => {
     const next = mergeUniqueMessages(prev, [incomingMessage]);
     messageCache.set(bookingId, next);
@@ -173,13 +177,20 @@ export function useChat(bookingId: string) {
   const isInChatPageRoute =
     location.pathname === `/chat/${bookingId}`;
 
-  // ✅ ONLY send event to SW (no notification UI here)
+  // 🔊 Play sound
+  if (incomingMessage.senderId !== myUserId) {
+    audioRef.current?.pause();
+    audioRef.current!.currentTime = 0;
+
+    audioRef.current
+      ?.play()
+      .catch((err) => console.log("Audio blocked:", err));
+  }
+
   if (
     incomingMessage.senderId !== myUserId &&
     !isInChatPageRoute
   ) {
-    // console.log("📡 Sending message to SW (no UI notification)");
-
     navigator.serviceWorker?.controller?.postMessage({
       type: "SOCKET_CHAT_MESSAGE",
       payload: {

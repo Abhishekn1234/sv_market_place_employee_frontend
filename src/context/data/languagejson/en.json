@@ -779,6 +779,12 @@
       "descriptionRequired": "Please enter a reason"
     }
   },
+   "notFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you are looking for doesn't exist or has been moved.",
+    "home": "Go to Home",
+    "back": "Go Back"
+  },
   "chat": {
     "back": "Back",
     "customer": "Customer",
