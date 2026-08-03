@@ -6,6 +6,7 @@ import type { GeoPoint } from "@/pages/Profile/domain/entities/location";
 import type { WorkerStatus } from "@/pages/Servicesettings/domain/entities/workerstatus";
 import type { Worker } from "@/pages/Profile/domain/entities/workertype";
 import { getOnboardingStatus, type OnboardingStatus } from "@/pages/Servicesettings/presentation/helpers/documentstatus";
+import type { Language } from "@/context/domain/entities/types/language.types";
 
 /* =========================
    NOTIFICATION TYPE
@@ -56,7 +57,7 @@ export interface EmployeeUser {
   location?: GeoPoint;
 
   preferredTheme?: "light" | "dark";
-  preferredLanguage?: "EN" | "AR" | "HI";
+  preferredLanguage?: Language;
 
   profileImage?: string;
   profilePictureUrl?: string;
@@ -86,6 +87,7 @@ interface AuthState {
   refreshToken: string | null;
   user: EmployeeUser | null;
   isAuthenticated: boolean;
+  preferredLanguage: Language;
 
   hydrated: boolean;
   setHydrated: () => void;
@@ -119,7 +121,7 @@ interface AuthState {
   /* =========================
      PREFERENCES
   ========================= */
-  setPreferredLanguage: (lang: "EN" | "AR" | "HI") => void;
+  setPreferredLanguage: (lang: Language) => void;
   setPreferredTheme: (theme: "light" | "dark") => void;
   setUserLocation: (location: GeoPoint) => void;
 }
@@ -135,6 +137,7 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       user: null,
       isAuthenticated: false,
+      preferredLanguage: "EN",
 
       hydrated: false,
       setHydrated: () => set({ hydrated: true }),
@@ -199,6 +202,11 @@ export const useAuthStore = create<AuthState>()(
 
       setAuth: (incomingUser) => {
         const existingUser = get().user;
+        const preferredLanguage = normalizeLanguage(
+          incomingUser.preferredLanguage ??
+            existingUser?.preferredLanguage ??
+            get().preferredLanguage
+        );
 
         const incomingLocation = incomingUser?.worker?.location;
 
@@ -220,9 +228,11 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: {
             ...finalUser,
+            preferredLanguage,
             onboardingStatus: status,
             isOnboarded: status === "COMPLETED",
           },
+          preferredLanguage,
           isAuthenticated: true,
         });
       },
@@ -307,14 +317,17 @@ export const useAuthStore = create<AuthState>()(
       ========================= */
 
       setPreferredLanguage: (lang) => {
+        const preferredLanguage = normalizeLanguage(lang);
         const { user } = get();
-        if (!user) return;
 
         set({
-          user: {
-            ...user,
-            preferredLanguage: lang,
-          },
+          preferredLanguage,
+          user: user
+            ? {
+                ...user,
+                preferredLanguage,
+              }
+            : user,
         });
       },
 
@@ -369,7 +382,18 @@ export const useIsAuthenticated = () =>
   useAuthStore((s) => s.isAuthenticated);
 
 export const usePreferredLanguage = () =>
-  useAuthStore((s) => s.user?.preferredLanguage);
+  useAuthStore((s) => s.preferredLanguage);
+
+const normalizeLanguage = (value?: string | null): Language => {
+  switch (value?.toUpperCase()) {
+    case "AR":
+      return "AR";
+    case "HI":
+      return "HI";
+    default:
+      return "EN";
+  }
+};
 
 export const usePreferredTheme = () =>
   useAuthStore((s) => s.user?.preferredTheme);

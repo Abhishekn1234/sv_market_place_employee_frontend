@@ -5,6 +5,7 @@ import {
 
 import { BookingHistoryImpl } from "../../data/repositories/BookingHistoryImpl";
 import { GetBookingHistoryUsecase } from "../../domain/usecase/GetBookingHistoryUsecase";
+import { usePreferredLanguage } from "@/core/store/auth";
 
 import type {
   BookingHistoryQueryParams,
@@ -19,8 +20,10 @@ const usecase = new GetBookingHistoryUsecase(repo);
 export const useGetBookingHistory = (
   params?: BookingHistoryQueryParams
 ) => {
+  const language = usePreferredLanguage();
+
   return useQuery<BookingHistoryResponse, Error>({
-    queryKey: ["bookinghistory", params],
+    queryKey: ["bookinghistory", params, language],
     queryFn: () => usecase.execute(params),
   });
 };
@@ -30,13 +33,14 @@ export const useGetBookingHistory = (
 export const useGetBookingHistoryInfinite = (
   params?: BookingHistoryQueryParams
 ) => {
+  const language = usePreferredLanguage();
   const pageSize = params?.limit ?? 10;
 
   return useInfiniteQuery<
     BookingHistoryResponse,
     Error
   >({
-    queryKey: ["bookinghistory-infinite", params],
+    queryKey: ["bookinghistory-infinite", params, language],
 
     initialPageParam: 1,
 

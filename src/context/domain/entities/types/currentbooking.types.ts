@@ -13,7 +13,7 @@ export interface CurrentBookings {
     confirmed: string;
     inProgress:string;
     requested:string;
-    WORK_COMPLETED_PENDING:string;
+    WORK_COMPLETED_PENDING?:string;
     workCompletedPending:string;
     IN_PROGRESS?:string;
     WORK_COMPLETED?:string;

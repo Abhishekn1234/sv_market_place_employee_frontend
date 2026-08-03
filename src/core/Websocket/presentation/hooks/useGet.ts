@@ -1,16 +1,18 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BookingRepositoryImpl } from "../../data/repositories/GetRepoImpl";
 import { GetAvailableBookingsUseCase } from "../../domain/usecase/GetWorkUsecase";
+import { usePreferredLanguage } from "@/core/store/auth";
 
 export function useAvailableBookings() {
   const queryClient = useQueryClient();
+  const language = usePreferredLanguage();
 
   const repo = new BookingRepositoryImpl();
   const usecase = new GetAvailableBookingsUseCase(repo);
 
   // ✅ FETCH BOOKINGS
   const { data = [], isLoading, refetch } = useQuery({
-    queryKey: ["availableBookings"],
+    queryKey: ["availableBookings", language],
     queryFn: async () => {
       const res = await usecase.execute();
       return res.data;
@@ -19,14 +21,14 @@ export function useAvailableBookings() {
 
   // ✅ REMOVE
   const removeBooking = (id: string) => {
-    queryClient.setQueryData(["availableBookings"], (old: any = []) =>
+    queryClient.setQueryData(["availableBookings", language], (old: any = []) =>
       old.filter((b: any) => b._id !== id)
     );
   };
 
   // ✅ ADD / UPDATE (used by socket)
   const addBooking = (booking: any) => {
-    queryClient.setQueryData(["availableBookings"], (old: any = []) => {
+    queryClient.setQueryData(["availableBookings", language], (old: any = []) => {
       if (!Array.isArray(old)) return [booking];
 
       const exists = old.find((b: any) => b._id === booking._id);

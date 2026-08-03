@@ -16,7 +16,7 @@ import type { WalletSummary } from "../../domain/entities/wallet";
 import { useEffect, useRef, useState } from "react";
 import CommonSpinner from "@/components/common/CommonSpinner";
 import { Button } from "@/components/ui/button";
-import { formatDateTime } from "@/pages/Booking/AvaliableWorks/presentation/utils/formatdatetime";
+import { formatDateTime } from "@/pages/Booking/AvailableWorks/presentation/utils/formatdatetime";
 type Props = {
   transactions: Transaction[];
   totalBalance: number;

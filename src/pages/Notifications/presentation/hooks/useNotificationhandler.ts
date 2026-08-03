@@ -4,7 +4,7 @@ import { useRegisterDeviceToken } from "./useRegisterToken";
 import { useUnregisterDeviceToken } from "./useUnRegisterToken";
 import { useAuthStore } from "@/core/store/auth";
 import { requestAndGetToken } from "@/components/firebase/notifications";
-import { generateDeviceId } from "../utils/generationdeviceId";
+import { generateDeviceId } from "../utils/generateDeviceId";
 
 export const useNotificationManager = () => {
   const {

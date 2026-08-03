@@ -1,5 +1,5 @@
 import type { Worker } from "@/pages/Profile/domain/entities/workertype";
-import type { WorkerRepo } from "../../domain/repositories/wokerrepo";
+import type { WorkerRepo } from "../../domain/repositories/workerrepo";
 import api from "@/api/api";
 
 export  class WorkRepoImpl implements WorkerRepo{

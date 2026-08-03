@@ -1,5 +1,5 @@
 import type { VerifyOtpEmail } from "../entities/verifyotp";
-import type { VerifyOtpEmailRepo } from "../repositroies/VerifyOtpEmailRepo";
+import type { VerifyOtpEmailRepo } from "../repositories/VerifyOtpEmailRepo";
 
 export class VerifyOtpEmailUsecase{
     private verifyotp:VerifyOtpEmailRepo;

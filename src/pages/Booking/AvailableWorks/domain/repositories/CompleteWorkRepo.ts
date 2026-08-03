@@ -1,5 +1,5 @@
 import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
-import type { CompleteWork } from "../../../../Booking/AvaliableWorks/domain/entities/completework";
+import type { CompleteWork } from "../../../../Booking/AvailableWorks/domain/entities/completework";
 
 
 export interface CompleteWorkRepo{

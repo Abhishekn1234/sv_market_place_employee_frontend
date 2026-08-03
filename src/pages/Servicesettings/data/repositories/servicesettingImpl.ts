@@ -1,5 +1,4 @@
 import api from "@/api/api";
-import { baseURL } from "@/api/apiConfig";
 import type { WorkerPayload } from "../../domain/entities/workerpayload";
 import type { ServiceSettingRepo } from "../../domain/repositories/servicesettingsrepo";
 import { useAuthStore} from "@/core/store/auth";
@@ -8,7 +7,7 @@ export class ServiceSettingsRepoimpl implements ServiceSettingRepo {
   async updatesettings(data: WorkerPayload): Promise<WorkerPayload> {
     try {
       const response = await api.post(
-        `${baseURL}/worker/update`,
+        "/worker/update",
         data,
         {
           headers: { "Content-Type": "application/json" },

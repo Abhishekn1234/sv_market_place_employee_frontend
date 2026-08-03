@@ -1,5 +1,5 @@
 
-import type { Work } from "@/pages/Booking/AvaliableWorks/domain/entities/work";
+import type { Work } from "@/pages/Booking/AvailableWorks/domain/entities/work";
 import { AlertCircle, CheckCircle2, PlayCircle, XCircle } from "lucide-react";
 
 export const getStatusColor = (status: string) => {

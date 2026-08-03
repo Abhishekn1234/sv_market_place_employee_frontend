@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { RegisterImpl } from '../../data/repositories/RegitserImpl';
+import { RegisterImpl } from '../../data/repositories/RegisterImpl';
 import { RegisterUsecase } from '../../domain/usecase/Registerusecase/registerusecase';
 import type { Register } from '../../domain/entities/register';
 

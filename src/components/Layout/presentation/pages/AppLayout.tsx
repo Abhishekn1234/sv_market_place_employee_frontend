@@ -8,7 +8,7 @@ import AppHeader from "@/components/Layout/presentation/pages/AppHeader";
 
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { useBookingSocket } from "@/core/Websocket/presentation/utils/useBookingsocket";
-import { useAssignedSocketInit } from "@/core/Websocket/presentation/hooks/socketinitliazation";
+import { useAssignedSocketInit } from "@/core/Websocket/presentation/hooks/socketInitialization";
 import { useAssignedSocket } from "@/core/Websocket/presentation/utils/useAssignsocket";
 
 export default function AppLayout() {

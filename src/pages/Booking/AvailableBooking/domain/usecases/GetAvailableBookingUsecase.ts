@@ -1,4 +1,4 @@
-import type { AvailableBookingRepo } from "../repositories/AvalableBookingRepo";
+import type { AvailableBookingRepo } from "../repositories/AvailableBookingRepo";
 
 export class GetBookingAvailableUsecase {
   private getBooking: AvailableBookingRepo;

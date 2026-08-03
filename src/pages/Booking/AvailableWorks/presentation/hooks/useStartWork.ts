@@ -5,9 +5,11 @@ import type { Startworkrequest } from "../../domain/entities/startwork";
 import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
 import { toast } from "react-toastify";
 import { ASSIGNED_WORKS_KEY } from "./useAssign";
+import { usePreferredLanguage } from "@/core/store/auth";
 
 export const useStartWork = () => {
   const queryClient = useQueryClient();
+  const language = usePreferredLanguage();
   const repo = new StartWorkRepoImpl();
   const usecase = new StartWorkUsecase(repo);
 
@@ -19,7 +21,7 @@ export const useStartWork = () => {
     onSuccess: (startedBooking) => {
       // Update the assigned works cache to reflect the status change
       queryClient.setQueryData<Booking[]>(
-        ASSIGNED_WORKS_KEY,
+        [...ASSIGNED_WORKS_KEY, language],
         (old) => {
           const safeOld = Array.isArray(old) ? old : [];
           return safeOld.map((booking) =>

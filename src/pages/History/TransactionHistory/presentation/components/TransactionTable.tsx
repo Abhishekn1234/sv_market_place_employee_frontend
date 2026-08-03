@@ -3,7 +3,7 @@ import type { Transaction } from "../../domain/entities/transaction";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
 import { CommonCard } from "@/components/common/CommonCard";
 import { cn } from "@/lib/utils";
-import { formatDateTime } from "@/pages/Booking/AvaliableWorks/presentation/utils/formatdatetime";
+import { formatDateTime } from "@/pages/Booking/AvailableWorks/presentation/utils/formatdatetime";
 interface Props {
   transactions: Transaction[];
   currentPage: number;

@@ -22,8 +22,8 @@ export type TranslationSchema = {
   wallet: WalletTranslations;
   notifications: NotificationsTranslations;
   sidebar: SidebarTranslations;
-  home: Record<string, string>;
-  languages: LanguagesTranslations;
+  home?: Record<string, string>;
+  languages?: LanguagesTranslations;
   recentActivities?: any;
   pastActivities?: any;
   transactionHistory?: any;

@@ -1,11 +1,8 @@
 import type { IResetPasswordRepo } from '../../domain/repositories/resetrepo';
 import type { ResetPassword } from '../../domain/entities/resetpassword';
-import { baseURL } from '@/api/apiConfig';
-import axios from 'axios';
+import api from '@/api/api';
 
 export class ResetPasswordRepoImpl implements IResetPasswordRepo {
-  private baseUrl = baseURL;
-
   async resetPassword(data: ResetPassword): Promise<void> {
    
     if (data.newPassword !== data.confirmPassword) {
@@ -19,8 +16,8 @@ export class ResetPasswordRepoImpl implements IResetPasswordRepo {
     }
 
     
-    await axios.post(
-      `${this.baseUrl}/auth/reset-password`,
+    await api.post(
+      "/auth/reset-password",
       {
         password: data.newPassword
       },

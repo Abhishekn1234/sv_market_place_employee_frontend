@@ -1,4 +1,4 @@
-import type { VerifyOtpPayload } from "../entites/verify";
+import type { VerifyOtpPayload } from "../entities/verify";
 
 export function validateVerifyOTP(request: VerifyOtpPayload): VerifyOtpPayload {
   if (!request.otp) {

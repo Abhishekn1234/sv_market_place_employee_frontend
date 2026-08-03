@@ -2,6 +2,28 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { baseURL } from "./apiConfig";
 import { useAuthStore } from "@/core/store/auth";
 
+const getPreferredLanguage = () => {
+  const state = useAuthStore.getState();
+  const preferredLanguage = (
+    state.preferredLanguage ||
+    state.user?.preferredLanguage ||
+    "EN"
+  ).toUpperCase();
+
+  switch (preferredLanguage) {
+    case "AR":
+      return "ar";
+    case "HI":
+      return "hi";
+    default:
+      return "en";
+  }
+};
+
+export const getAcceptLanguageHeader = () => ({
+  "accept-language": getPreferredLanguage(),
+});
+
 const api = axios.create({
   baseURL,
   headers: {
@@ -31,6 +53,9 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    const languageHeader = getAcceptLanguageHeader();
+    config.headers["accept-language"] = languageHeader["accept-language"];
 
     return config;
   },
@@ -75,7 +100,12 @@ api.interceptors.response.use(
       const refreshResponse = await axios.post(
         `${baseURL}/auth/refresh-token`,
         { refreshToken: currentRefreshToken },
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...getAcceptLanguageHeader(),
+          },
+        }
       );
 
       const { accessToken, refreshToken } = refreshResponse.data;

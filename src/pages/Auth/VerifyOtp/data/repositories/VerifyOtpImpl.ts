@@ -1,6 +1,6 @@
 // data/repositories/VerifyOtpImpl.ts
 
-import type { VerifyOtp, VerifyOtpPayload } from "../../domain/entites/verify";
+import type { VerifyOtp, VerifyOtpPayload } from "../../domain/entities/verify";
 import type { VerifyOtpRepo } from "../../domain/repositories/verifyrepo";
 import api from "@/api/api";
 

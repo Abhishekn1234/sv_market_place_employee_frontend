@@ -29,7 +29,7 @@ import Wallet from "./pages/Wallet/presentation/wallet.page";
 import NotificationsPage from "./pages/Notifications/presentation/notification.page";
 
 import AvailableBookingPage from "./pages/Booking/AvailableBooking/presentation/availablebooking.page";
-import AvailableWorkPage from "./pages/Booking/AvaliableWorks/presentation/AvailableWorkPage";
+import AvailableWorkPage from "./pages/Booking/AvailableWorks/presentation/AvailableWorkPage";
 
 import VerifyMobilePage from "./pages/Auth/MobileVerification/presentation/VerifyMobilePage";
 import { SendOtpEmailPage } from "./pages/Auth/EmailVerification/presentation/SendOtpEmailPage";

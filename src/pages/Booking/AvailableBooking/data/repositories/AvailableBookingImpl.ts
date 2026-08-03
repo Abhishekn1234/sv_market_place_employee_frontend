@@ -1,5 +1,5 @@
 import api from "@/api/api";
-import type { AvailableBookingRepo } from "../../domain/repositories/AvalableBookingRepo";
+import type { AvailableBookingRepo } from "../../domain/repositories/AvailableBookingRepo";
 import type { Booking, BookingResponse } from "../../domain/entities/booking";
 import { mapBookingStatus } from "../../presentation/utils/mapstatus";
 

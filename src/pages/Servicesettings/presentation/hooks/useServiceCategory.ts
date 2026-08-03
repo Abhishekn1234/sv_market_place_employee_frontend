@@ -2,13 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import { ServiceCategoryImpl } from "../../data/repositories/servicecategoryImpl";
 import { ServiceCategoryUsecase } from "../../domain/usecase/servicecategoryusecase";
 import type { ServiceCategory } from "../../domain/entities/servicecategory";
+import { usePreferredLanguage } from "@/core/store/auth";
 
 const repo = new ServiceCategoryImpl();
 const usecase = new ServiceCategoryUsecase(repo);
 
 export function useServiceCategory() {
+  const language = usePreferredLanguage();
+
   return useQuery<ServiceCategory[], Error>({
-    queryKey: ["service-categories"],
+    queryKey: ["service-categories", language],
     queryFn: () => usecase.getServiceCategories(),
 
     staleTime: 1000 * 60 * 10,    

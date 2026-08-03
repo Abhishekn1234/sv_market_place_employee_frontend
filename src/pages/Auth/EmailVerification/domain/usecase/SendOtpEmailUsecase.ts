@@ -1,5 +1,5 @@
 import type { SendOtpEmail } from "../entities/sendotp";
-import type { SendOtpEmailRepo } from "../repositroies/SendOtpEmailRepo";
+import type { SendOtpEmailRepo } from "../repositories/SendOtpEmailRepo";
 
 export class SendOtpEmailUsecase{
     private sendotpemail:SendOtpEmailRepo;

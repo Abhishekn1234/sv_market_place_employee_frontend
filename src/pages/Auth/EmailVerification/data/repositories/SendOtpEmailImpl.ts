@@ -1,6 +1,6 @@
 import api from "@/api/api";
 import type { SendOtpEmail } from "../../domain/entities/sendotp";
-import type { SendOtpEmailRepo } from "../../domain/repositroies/SendOtpEmailRepo";
+import type { SendOtpEmailRepo } from "../../domain/repositories/SendOtpEmailRepo";
 
 export class SendOtpEmailImpl implements SendOtpEmailRepo {
   async sendOtp(data: SendOtpEmail): Promise<any> {

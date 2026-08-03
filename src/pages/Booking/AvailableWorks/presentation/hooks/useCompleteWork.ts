@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import type { CompleteWork } from "../../domain/entities/completework";
 import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
 import { ASSIGNED_WORKS_KEY } from "./useAssign";
+import { usePreferredLanguage } from "@/core/store/auth";
 
 type UseCompleteWorkOptions = {
   onSuccess?: (data: Booking) => void;
@@ -16,6 +17,7 @@ export function useCompleteWork(
   { onSuccess, onError }: UseCompleteWorkOptions = {}
 ) {
   const queryClient = useQueryClient();
+  const language = usePreferredLanguage();
   const repo = new CompleteWorkRepoImpl();
   const usecase = new CompleteWorkUsecase(repo);
 
@@ -31,7 +33,7 @@ export function useCompleteWork(
 
       // Update the assigned works cache to reflect the status change
       queryClient.setQueryData<Booking[]>(
-        ASSIGNED_WORKS_KEY,
+        [...ASSIGNED_WORKS_KEY, language],
         (old) => {
           const safeOld = Array.isArray(old) ? old : [];
           return safeOld.map((booking) => {

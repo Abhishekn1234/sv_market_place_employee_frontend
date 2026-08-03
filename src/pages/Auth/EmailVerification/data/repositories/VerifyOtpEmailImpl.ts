@@ -1,6 +1,6 @@
 import api from "@/api/api";
 import type { VerifyOtpEmail } from "../../domain/entities/verifyotp";
-import type { VerifyOtpEmailRepo } from "../../domain/repositroies/VerifyOtpEmailRepo";
+import type { VerifyOtpEmailRepo } from "../../domain/repositories/VerifyOtpEmailRepo";
 
 export class VerifyOtpEmailImpl implements VerifyOtpEmailRepo{
     async verifyotpemail(data: VerifyOtpEmail): Promise<any> {

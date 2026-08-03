@@ -106,6 +106,22 @@
 
     "footer": "डेटा दिखाया जा रहा है"
   },
+  "home": {
+    "dashboard": "डैशबोर्ड",
+    "totalEmployees": "कुल कर्मचारी",
+    "activeProjects": "सक्रिय प्रोजेक्ट्स",
+    "totalBookings": "कुल बुकिंग",
+    "assignedWorks": "निर्दिष्ट कार्य",
+    "monthlyRevenue": "मासिक आय",
+    "notifications": "सूचनाएं",
+    "online": "ऑनलाइन",
+    "offline": "ऑफलाइन"
+  },
+  "languages": {
+    "english": "अंग्रेज़ी",
+    "arabic": "अरबी",
+    "hindi": "हिन्दी"
+  },
    "totalBookings": "कुल बुकिंग",
   "assignedWorks": "निर्दिष्ट कार्य",
   "activeEmployees": "सक्रिय कर्मचारी",

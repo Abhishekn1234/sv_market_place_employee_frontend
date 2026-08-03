@@ -8,9 +8,11 @@ import { VerifyWorkUsecase } from "../../domain/usecase/VerifyWorkUsecase";
 import type { verifyotp } from "../../domain/entities/verifyotp";
 
 import { ASSIGNED_WORKS_KEY } from "./useAssign";
+import { usePreferredLanguage } from "@/core/store/auth";
 
 export function useVerifyOtp() {
   const queryClient = useQueryClient();
+  const language = usePreferredLanguage();
 
   const repo = new VerifyOtpCompleteImpl();
   const usecase = new VerifyWorkUsecase(repo);
@@ -29,7 +31,7 @@ export function useVerifyOtp() {
   }
 
       queryClient.setQueryData(
-        ASSIGNED_WORKS_KEY,
+        [...ASSIGNED_WORKS_KEY, language],
         (old: any[] = []) =>
           old.filter((work) => {
             const workInvoiceId =

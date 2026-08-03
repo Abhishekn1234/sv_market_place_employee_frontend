@@ -1,4 +1,4 @@
-import type { Work } from "@/pages/Booking/AvaliableWorks/domain/entities/work";
+import type { Work } from "@/pages/Booking/AvailableWorks/domain/entities/work";
 
 import type { Booking } from "@/pages/Booking/AvailableBooking/domain/entities/booking";
 import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";

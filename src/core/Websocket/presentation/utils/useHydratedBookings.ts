@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useAssign } from "@/pages/Booking/AvaliableWorks/presentation/hooks/useAssign";
+import { useAssign } from "@/pages/Booking/AvailableWorks/presentation/hooks/useAssign";
 import { useBookingSocketStore } from "@/core/store/useBookingSocketStore";
 import { normalizeBooking } from "./normalizeBooking";
 

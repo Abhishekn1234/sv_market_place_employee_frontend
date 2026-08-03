@@ -1,5 +1,5 @@
 import type { Worker } from "@/pages/Profile/domain/entities/workertype";
-import type { WorkerRepo } from "../repositories/wokerrepo";
+import type { WorkerRepo } from "../repositories/workerrepo";
 
 export class WorkUsecase {
     private workerrepo: WorkerRepo;

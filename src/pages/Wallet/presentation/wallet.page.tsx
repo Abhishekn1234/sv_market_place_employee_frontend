@@ -7,7 +7,7 @@ import { useWallet } from "./hooks/useWallet";
 import type { Transaction } from "../domain/entities/transaction";
 import { useAuthStore } from "@/core/store/auth";
 import { useTransactionHistory } from "@/pages/History/TransactionHistory/presentation/hooks/useTransaction";
-import { formatDateTime } from "@/pages/Booking/AvaliableWorks/presentation/utils/formatdatetime";
+import { formatDateTime } from "@/pages/Booking/AvailableWorks/presentation/utils/formatdatetime";
 import type { WalletSummary } from "../domain/entities/wallet";
 
 export default function Wallet() {

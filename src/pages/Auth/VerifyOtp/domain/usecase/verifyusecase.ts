@@ -1,5 +1,5 @@
 
-import type { VerifyOtp, VerifyOtpPayload } from "../entites/verify";
+import type { VerifyOtp, VerifyOtpPayload } from "../entities/verify";
 import type { VerifyOtpRepo } from "../repositories/verifyrepo";
 import { validateVerifyOTP } from "../validations/otp.validation";
 

@@ -2,7 +2,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { VerifyOtpImpl } from "../../data/repositories/VerifyOtpImpl";
 import { VerifyOtpUsecase } from "../../domain/usecase/verifyusecase";
-import type { VerifyOtp, VerifyOtpPayload } from "../../domain/entites/verify";
+import type { VerifyOtp, VerifyOtpPayload } from "../../domain/entities/verify";
 
 export function useOtp() {
   const repo = new VerifyOtpImpl();
