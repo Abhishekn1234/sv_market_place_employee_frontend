@@ -18,7 +18,7 @@ import { BookingCard } from "./components/BookingCard"; // Import the new compon
 
 import type { BookingStatus } from "@/pages/Booking/AvailableBooking/domain/entities/bookingstatus";
 import type { BookingHistory } from "../domain/entities/bookinghistory";
-import { useDebounce } from "@/utils/useDebouncer";
+import { useDebounce } from "@/utils/usedebouncer";
 
 import { useNavigate } from "react-router-dom";
 
