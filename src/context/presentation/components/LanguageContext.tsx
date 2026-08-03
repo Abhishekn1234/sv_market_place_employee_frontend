@@ -104,26 +104,23 @@ export const LanguageProvider: React.FC<{
   }, [userLang, language]);
 
   useEffect(() => {
-    const loadServerLanguage = async () => {
-      if (!isAuthenticated) {
-        return;
-      }
+  if (!isAuthenticated) return;
 
-      try {
-        const response = await api.get("/language");
-        const serverLanguage = response.data?.language;
-        const mappedLanguage = mapLanguageFromBackend(serverLanguage);
+  const loadServerLanguage = async () => {
+    try {
+      const response = await api.get("/language");
+      const mappedLanguage = mapLanguageFromBackend(
+        response.data?.language
+      );
 
-        if (mappedLanguage !== language) {
-          applyLanguage(mappedLanguage, false);
-        }
-      } catch (error) {
-        console.warn("Unable to load language preference from server", error);
-      }
-    };
+      applyLanguage(mappedLanguage, false);
+    } catch (error) {
+      console.warn(error);
+    }
+  };
 
-    void loadServerLanguage();
-  }, [applyLanguage, isAuthenticated, language]);
+  void loadServerLanguage();
+}, [isAuthenticated]);
 
   useEffect(() => {
     document.documentElement.lang =

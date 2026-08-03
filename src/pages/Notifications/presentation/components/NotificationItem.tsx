@@ -13,6 +13,7 @@ import { getTypeColor } from "../utils/gettypecolor";
 import { useAssign } from "@/pages/Booking/AvailableWorks/presentation/hooks/useAssign";
 import { formatNotificationDate } from "../utils/formatNotificationDate";
 import { useLanguage } from "@/context/presentation/components/LanguageContext";
+import { formatNotificationText } from "../utils/notificationText";
 
 type Props = {
   notification: Notification;
@@ -32,7 +33,7 @@ export default function NotificationItem({
   onMarkedRead,
 }: Props) {
   const navigate = useNavigate();
- const{t}=useLanguage();
+ const{t, language}=useLanguage();
   const isRead = notification.isRead;
 
   const [handled, setHandled] = useState(false);
@@ -137,11 +138,19 @@ export default function NotificationItem({
     }
   };
 
-  const title =
-    notification.title || notificationsTranslations.defaultTitle;
+  const title = formatNotificationText(
+    notification.title,
+    notificationsTranslations.defaultTitle,
+    notification as unknown as Record<string, unknown>,
+    language
+  );
 
-  const message =
-    notification.message || notificationsTranslations.defaultMessage;
+  const message = formatNotificationText(
+    notification.message,
+    notificationsTranslations.defaultMessage,
+    notification as unknown as Record<string, unknown>,
+    language
+  );
 
   const formattedDate = formatNotificationDate(
     notification.createdAt

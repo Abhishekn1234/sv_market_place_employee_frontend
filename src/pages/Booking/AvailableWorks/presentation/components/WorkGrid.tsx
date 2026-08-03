@@ -47,7 +47,7 @@ export default function WorkGrid({
   isRTL,
 }: WorkGridProps) {
   const [locations, setLocations] = useState<Record<string, string>>({});
-  const { t } = useLanguage();
+  const { t ,localize} = useLanguage();
   const navigate = useNavigate();
 
   // ✅ workList is already normalized once by the page — do NOT re-normalize here.
@@ -102,11 +102,12 @@ export default function WorkGrid({
     ? work.booking.service
     : undefined;
 
-const serviceName = service?.name ?? t("common.na");
+const serviceName = localize(service?.name) ?? t("common.na");
 
 const categoryName =
-  categories.find((c) => c._id === service?.category)?.name ??
-  t("common.na");
+  localize(
+    categories.find((c) => c._id === service?.category)?.name
+  ) || t("common.na");
           const coordinates = getWorkCoordinates(getWorkLocation(work));
           const canConfirmCashPayment = Boolean(
               work.workerActions?.canConfirmCashPayment ??

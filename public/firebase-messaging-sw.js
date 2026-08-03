@@ -108,6 +108,145 @@ function getSmartRoute(data = {}) {
    SHOW NOTIFICATION
 ========================= */
 
+const OBJECT_TEXT_PATTERN = /\[?object[\s,]+Object\]?/gi;
+
+const TEXT_KEYS = [
+  "en",
+  "EN",
+  "ar",
+  "AR",
+  "hi",
+  "HI",
+  "name",
+  "displayName",
+  "serviceName",
+  "serviceTitle",
+  "label",
+  "title",
+  "titles",
+  "message",
+  "messages",
+  "body",
+  "text",
+  "description",
+];
+
+function isObject(value) {
+  return (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  );
+}
+
+function resolveText(value) {
+  if (value == null) return "";
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        return resolveText(JSON.parse(trimmed));
+      } catch {
+        return value;
+      }
+    }
+
+    return value;
+  }
+
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map(resolveText)
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  if (!isObject(value)) return "";
+
+  for (const key of TEXT_KEYS) {
+    const text = resolveText(value[key]);
+    if (text) return text;
+  }
+
+  for (const nestedValue of Object.values(value)) {
+    const text = resolveText(nestedValue);
+    if (text) return text;
+  }
+
+  return "";
+}
+
+function getServiceName(data = {}) {
+  const booking = isObject(data.booking)
+    ? data.booking
+    : {};
+  const bookingDetails = isObject(data.bookingDetails)
+    ? data.bookingDetails
+    : {};
+
+  const sources = [
+    data.serviceName,
+    data.serviceTitle,
+    data.service_title,
+    data.service_name,
+    data.service,
+    data.serviceCategory,
+    data.service_category,
+    data.category,
+    booking.serviceName,
+    booking.serviceTitle,
+    booking.service_title,
+    booking.service_name,
+    booking.service,
+    booking.serviceCategory,
+    booking.service_category,
+    booking.category,
+    bookingDetails.serviceName,
+    bookingDetails.serviceTitle,
+    bookingDetails.service_title,
+    bookingDetails.service_name,
+    bookingDetails.service,
+    bookingDetails.serviceCategory,
+    bookingDetails.service_category,
+    bookingDetails.category,
+  ];
+
+  for (const source of sources) {
+    const text = resolveText(source);
+    if (text) return text;
+  }
+
+  return "";
+}
+
+function formatText(value, fallback, data = {}) {
+  const text = resolveText(value) || fallback;
+
+  if (!OBJECT_TEXT_PATTERN.test(text)) {
+    return text;
+  }
+
+  OBJECT_TEXT_PATTERN.lastIndex = 0;
+  return text
+    .replace(
+      OBJECT_TEXT_PATTERN,
+      getServiceName(data) || fallback
+    )
+    .trim();
+}
+
 function showNotification(
   data,
   notification,
@@ -115,15 +254,19 @@ function showNotification(
 ) {
   const url = getSmartRoute(data);
 
-  const title =
-    notification?.title ||
-    data?.title ||
-    "Notification";
+  const title = formatText(
+    notification?.title || data?.title,
+    "Notification",
+    data
+  );
 
-  const body =
+  const body = formatText(
     notification?.body ||
-    data?.body ||
-    "You have a new update";
+      data?.body ||
+      data?.message,
+    "You have a new update",
+    data
+  );
 
   const tag =
     messageId ||

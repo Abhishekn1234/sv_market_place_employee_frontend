@@ -2,12 +2,29 @@ import { Bell, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useInAppNotification } from "../hooks/useinAppNotification";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/context/presentation/components/LanguageContext";
+import { formatNotificationText } from "../utils/notificationText";
 
 export const FloatingNotification = () => {
   const data = useInAppNotification();
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
   if (!data) return null;
+
+  const title = formatNotificationText(
+    data.title,
+    "Notification",
+    data,
+    language
+  );
+
+  const body = formatNotificationText(
+    data.body ?? data.message,
+    "You have a new notification",
+    data,
+    language
+  );
 
   const handleOpen = () => {
     if (!data?.url) return;
@@ -30,11 +47,11 @@ export const FloatingNotification = () => {
 
         <div className="flex-1">
           <h4 className="text-sm font-semibold text-gray-900">
-            {data.title}
+            {title}
           </h4>
 
           <p className="text-xs text-gray-500 mt-1">
-            {data.body}
+            {body}
           </p>
 
           <div className="mt-3 flex items-center justify-between gap-2">
