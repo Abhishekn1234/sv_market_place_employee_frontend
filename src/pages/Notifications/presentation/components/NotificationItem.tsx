@@ -33,7 +33,7 @@ export default function NotificationItem({
   onMarkedRead,
 }: Props) {
   const navigate = useNavigate();
- const{t, language}=useLanguage();
+ const{t, language,localize}=useLanguage();
   const isRead = notification.isRead;
 
   const [handled, setHandled] = useState(false);
@@ -144,14 +144,10 @@ export default function NotificationItem({
     notification as unknown as Record<string, unknown>,
     language
   );
+//  console.log(JSON.stringify(notification));
+  const rawMessage = localize(notification.message);
 
-  const message = formatNotificationText(
-    notification.message,
-    notificationsTranslations.defaultMessage,
-    notification as unknown as Record<string, unknown>,
-    language
-  );
-
+const message =rawMessage;
   const formattedDate = formatNotificationDate(
     notification.createdAt
   );
